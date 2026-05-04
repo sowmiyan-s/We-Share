@@ -1,10 +1,28 @@
 # 🚀 We Share
 
-[![.NET 8.0](https://img.shields.io/badge/.NET-8.0-blue.svg)](https://dotnet.microsoft.com/download/dotnet/8.0)
-[![Avalonia UI](https://img.shields.io/badge/UI-Avalonia-orange.svg)](https://avaloniaui.net/)
-[![Platform](https://img.shields.io/badge/Platform-Windows%20|%20Android-green.svg)](https://github.com/sowmiyan-s/We-Share)
-
 **We Share** is a high-performance, cross-platform offline file transfer suite. Inspired by classic sharing utilities, it enables seamless, ultra-fast file transfers between **PCs** and **Android phones** over local Wi-Fi, with zero internet dependency.
+
+---
+
+## 📥 Direct Download
+
+Get the latest version of We Share for your device:
+
+- 💻 **[Download for Windows (.exe)](https://github.com/sowmiyan-s/We-Share/raw/main/dist/ShareIt.UI.exe)**
+- 📱 **[Download for Android (.apk)](https://github.com/sowmiyan-s/We-Share/raw/main/src/WeShare.Android/bin/Release/net8.0-android/com.weshare.app-Signed.apk)**
+
+---
+
+## 🌟 Use Cases
+
+We Share is designed to make your digital life easier in various scenarios:
+
+- **📸 Instant Photo Transfer**: Move hundreds of photos from your phone to your PC for editing or backup in seconds, without needing a USB cable.
+- **🎥 Large Media Sharing**: Transfer 4K videos, movies, or large game files between devices at speeds that far exceed Bluetooth or cloud-based solutions.
+- **💼 Offline Workspace**: Share documents, PDFs, and presentations with colleagues in an office or classroom environment where internet access might be restricted or slow.
+- **📦 Quick App Sharing**: Send Android APKs directly to your friends' phones without using data.
+- **💾 Effortless Backup**: Quickly sync important folders from your mobile device to your desktop storage.
+- **📡 No Internet? No Problem**: Perfect for travel, remote locations, or saving on data costs—We Share works entirely on a local Wi-Fi hotspot.
 
 ---
 
@@ -19,66 +37,15 @@
 
 ---
 
-## 📥 Download
+## 🛠️ Technical Information
 
-Get the latest stable version for your device:
-
-- 💻 **[Download for Windows (Portable)](https://github.com/sowmiyan-s/We-Share/releases/latest)**
-- 📱 **[Download for Android (APK)](https://github.com/sowmiyan-s/We-Share/releases/latest)**
-
-*Or download directly from the repository:*
-- [Direct APK Download (LFS)](https://github.com/sowmiyan-s/We-Share/raw/main/src/WeShare.Android/bin/Release/net8.0-android/com.weshare.app-Signed.apk)
-- [Direct EXE Download (LFS)](https://github.com/sowmiyan-s/We-Share/raw/main/dist/ShareIt.UI.exe)
+For developers and technical details regarding the architecture, framework, and build process, please refer to:
+👉 **[TECH_STACK.md](./TECH_STACK.md)**
 
 ---
-
-## 🏗️ Architecture
-
-The project is built using a platform-agnostic architecture:
-
-- **WeShare.Core**: The heart of the engine (TCP/UDP logic, Crypto, Data).
-- **WeShare.UI (Shared)**: All UI components and views (Avalonia).
-- **WeShare.Desktop**: The Windows host for desktop deployment.
-- **WeShare.Android**: The mobile host for Android deployment.
-
-```text
-📁 We Share
-├── 📁 src
-│   ├── 📁 WeShare.Core        (Engine & Protocols)
-│   ├── 📁 WeShare.UI          (Shared UI Library)
-│   ├── 📁 WeShare.Desktop     (Windows App)
-│   └── 📁 WeShare.Android     (Android App)
-```
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- Android SDK (for mobile build)
-
-### 💻 Running on Windows
-```powershell
-dotnet run --project src/WeShare.Desktop/WeShare.Desktop.csproj
-```
-
-### 📱 Building for Android
-```powershell
-dotnet build src/WeShare.Android/WeShare.Android.csproj -c Release
-```
-> [!NOTE]
-> The generated APK will be located at: `src/WeShare.Android/bin/Release/net8.0-android/com.weshare.app-Signed.apk`
-
----
-
-## 🛠️ Tech Stack
-- **Framework**: .NET 8, Avalonia UI
-- **Networking**: TCP Sockets, UDP Broadcast
-- **Database**: SQLite (History & State)
-- **Design**: Fluent/Modern Dark Mode
 
 ## 📜 License
+
 This project is licensed under the MIT License - see the LICENSE file for details.
 
 ---
