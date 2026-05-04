@@ -32,6 +32,8 @@ android-sdk/
 jdk-*/
 
 # User-specific
+dist/
+*.exe
 shareit.db
 build_output.txt
 logoo.png
