@@ -2,7 +2,7 @@
 
 [![.NET 8.0](https://img.shields.io/badge/.NET-8.0-blue.svg)](https://dotnet.microsoft.com/download/dotnet/8.0)
 [![Avalonia UI](https://img.shields.io/badge/UI-Avalonia-orange.svg)](https://avaloniaui.net/)
-[![Platform](https://img.shields.io/badge/Platform-Windows%20|%20Android-green.svg)](https://github.com/sowmiyan-s/SHARE-IT)
+[![Platform](https://img.shields.io/badge/Platform-Windows%20|%20Android-green.svg)](https://github.com/sowmiyan-s/We-Share)
 
 **We Share** is a high-performance, cross-platform offline file transfer suite. Inspired by classic sharing utilities, it enables seamless, ultra-fast file transfers between **PCs** and **Android phones** over local Wi-Fi, with zero internet dependency.
 
@@ -23,8 +23,12 @@
 
 Get the latest stable version for your device:
 
-- 💻 **[Download for Windows (Portable)](https://github.com/sowmiyan-s/SHARE-IT/releases/latest)**
-- 📱 **[Download for Android (APK)](https://github.com/sowmiyan-s/SHARE-IT/releases/latest)**
+- 💻 **[Download for Windows (Portable)](https://github.com/sowmiyan-s/We-Share/releases/latest)**
+- 📱 **[Download for Android (APK)](https://github.com/sowmiyan-s/We-Share/releases/latest)**
+
+*Or download directly from the repository:*
+- [Direct APK Download (LFS)](https://github.com/sowmiyan-s/We-Share/raw/main/src/WeShare.Android/bin/Release/net8.0-android/com.weshare.app-Signed.apk)
+- [Direct EXE Download (LFS)](https://github.com/sowmiyan-s/We-Share/raw/main/dist/ShareIt.UI.exe)
 
 ---
 
