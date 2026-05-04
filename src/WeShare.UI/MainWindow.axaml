@@ -1,0 +1,16 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="using:WeShare.UI.Views"
+        x:Class="WeShare.UI.MainWindow"
+        Title="We Share"
+        Width="1200" Height="800"
+        MinWidth="1000" MinHeight="700"
+        Background="Transparent"
+        TransparencyLevelHint="Mica"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="PreferSystemChrome"
+        ExtendClientAreaTitleBarHeightHint="-1"
+        Icon="/Assets/logo.png">
+
+  <views:MainView x:Name="MainContent"/>
+</Window>

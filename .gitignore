@@ -1,0 +1,37 @@
+# .NET Core
+[Bb]in/
+[Oo]bj/
+*.swp
+*~
+*.user
+*.userosscache
+*.sln.docstates
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.opensdf
+*.sdf
+*.cache
+*.opendb
+
+# VS Code
+.vscode/
+
+# Rider
+.idea/
+
+# Android
+*.apk
+*.aab
+*.dex
+android-sdk/
+jdk-*/
+
+# User-specific
+shareit.db
+build_output.txt
+logoo.png
