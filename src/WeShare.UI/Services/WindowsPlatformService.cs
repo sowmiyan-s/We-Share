@@ -46,10 +46,19 @@ namespace WeShare.UI.Services
             try { Process.Start(new ProcessStartInfo(path) { UseShellExecute = true }); } catch { }
         }
 
+        public void OpenUrl(string url)
+        {
+            try { Process.Start(new ProcessStartInfo(url) { UseShellExecute = true }); } catch { }
+        }
+
         public void CopyToClipboard(string text)
         {
-            // Avalonia handles clipboard via TopLevel, so this might be redundant 
-            // but provided for general use.
+            // Avalonia handles clipboard via TopLevel
+        }
+
+        public void ShareFile(string path)
+        {
+            try { Process.Start(new ProcessStartInfo("explorer.exe", $"/select,\"{path}\"") { UseShellExecute = true }); } catch { }
         }
 
         private static string DetectHotspotIp()

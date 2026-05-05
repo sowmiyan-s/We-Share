@@ -19,6 +19,8 @@ namespace WeShare.Core.Services
         
         // System Actions
         void OpenFile(string path);
+        void OpenUrl(string url);
+        void ShareFile(string path);
         void CopyToClipboard(string text);
     }
 }

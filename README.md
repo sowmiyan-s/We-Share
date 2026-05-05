@@ -37,6 +37,14 @@ We Share is designed to make your digital life easier in various scenarios:
 
 ---
 
+## 👥 About Us
+
+**We Share** is an open-source project dedicated to making local file sharing as fast and simple as possible. We believe in privacy, speed, and cross-platform accessibility without the need for cloud intermediaries.
+
+🔗 **GitHub Repository**: [sowmiyan-s/We-Share](https://github.com/sowmiyan-s/We-Share)
+
+---
+
 ## 🛠️ Technical Information
 
 For developers and technical details regarding the architecture, framework, and build process, please refer to:

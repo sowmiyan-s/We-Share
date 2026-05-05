@@ -26,7 +26,17 @@ namespace WeShare.Core.Transfer
         private Func<IReadOnlyList<DeviceModel>>? _getPeers;
         private TcpListener? _listener;
         private CancellationTokenSource? _cts;
+        private readonly List<SharedFile> _sharedFiles = new();
+        private readonly SemaphoreSlim _filesLock = new(1, 1);
         public int Port { get; } = 8080;
+
+        public class SharedFile
+        {
+            public string Id { get; set; } = Guid.NewGuid().ToString("n");
+            public string Name { get; set; } = "";
+            public string Path { get; set; } = "";
+            public long Size { get; set; }
+        }
 
         public WebDashboardService(string saveDirectory, DeviceModel localDevice)
         {
@@ -36,6 +46,26 @@ namespace WeShare.Core.Transfer
 
         /// <summary>Supply a live snapshot of discovered devices.</summary>
         public void SetPeersProvider(Func<IReadOnlyList<DeviceModel>> provider) => _getPeers = provider;
+
+        public void ShareForWeb(string filePath)
+        {
+            var info = new FileInfo(filePath);
+            if (!info.Exists) return;
+            _filesLock.Wait();
+            try
+            {
+                if (_sharedFiles.Any(f => f.Path == filePath)) return;
+                _sharedFiles.Add(new SharedFile { Name = info.Name, Path = filePath, Size = info.Length });
+            }
+            finally { _filesLock.Release(); }
+        }
+
+        public void ClearSharedFiles() 
+        { 
+            _filesLock.Wait();
+            try { _sharedFiles.Clear(); }
+            finally { _filesLock.Release(); }
+        }
 
         public void Start()
         {
@@ -113,6 +143,41 @@ namespace WeShare.Core.Transfer
                     {
                         var peers = _getPeers?.Invoke() ?? Array.Empty<DeviceModel>();
                         await SendJson(stream, peers);
+                    }
+
+                    else if (method == "GET" && path == "/api/files")
+                    {
+                        await _filesLock.WaitAsync();
+                        try { await SendJson(stream, _sharedFiles); }
+                        finally { _filesLock.Release(); }
+                    }
+
+                    else if (method == "GET" && path == "/download")
+                    {
+                        // Parse query string for id
+                        var query = parts[1].Contains('?') ? parts[1].Split('?')[1] : "";
+                        var id = query.Split('&').FirstOrDefault(p => p.StartsWith("id="))?.Split('=')[1];
+                        
+                        SharedFile? file = null;
+                        await _filesLock.WaitAsync();
+                        try { file = _sharedFiles.FirstOrDefault(f => f.Id == id); }
+                        finally { _filesLock.Release(); }
+
+                        if (file != null && File.Exists(file.Path))
+                        {
+                            var info = new FileInfo(file.Path);
+                            var header = $"HTTP/1.1 200 OK\r\n" +
+                                         $"Content-Type: application/octet-stream\r\n" +
+                                         $"Content-Disposition: attachment; filename=\"{Uri.EscapeDataString(file.Name)}\"\r\n" +
+                                         $"Content-Length: {info.Length}\r\n" +
+                                         "Connection: close\r\n" +
+                                         "\r\n";
+                            await stream.WriteAsync(Encoding.ASCII.GetBytes(header));
+                            using var fs = new FileStream(file.Path, FileMode.Open, FileAccess.Read, FileShare.Read);
+                            await fs.CopyToAsync(stream);
+                        }
+                        else
+                            await SendResponse(stream, 404, "text/plain", "File Not Found");
                     }
 
                     else if (method == "POST" && path == "/upload")
@@ -235,6 +300,15 @@ namespace WeShare.Core.Transfer
     .prog-fill{height:100%;width:0;background:linear-gradient(90deg,#0EA5E9,#6366F1);border-radius:3px;transition:width .1s;}
     .prog-label{font-size:12px;color:var(--muted);margin-top:6px;display:flex;justify-content:space-between;}
 
+    /* Shared Files List */
+    .file-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px;margin-bottom:8px;text-decoration:none;}
+    .file-card:active{background:#162030;}
+    .file-icon{font-size:20px;}
+    .file-info{flex:1;min-width:0;}
+    .file-name{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .file-size{font-size:11px;color:var(--muted);}
+    .btn-dl{background:#0F2744;color:var(--accent);padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;border:none;}
+
     /* Toast */
     .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#112134;border:1px solid var(--border);border-radius:12px;padding:12px 20px;font-size:13px;font-weight:600;transition:transform .3s;z-index:100;white-space:nowrap;}
     .toast.show{transform:translateX(-50%) translateY(0);}
@@ -267,6 +341,12 @@ namespace WeShare.Core.Transfer
     <div class='devices-grid' id='devicesGrid'>
       <div class='empty'><span class='icon'>📡</span><p>Scanning your network…</p></div>
     </div>
+  </div>
+
+  <!-- Shared from PC -->
+  <div id='sharedSection' style='display:none;'>
+    <div class='section-title'>RECEIVE FROM PC</div>
+    <div id='filesGrid'></div>
   </div>
 
   <!-- Send -->
@@ -313,6 +393,37 @@ async function loadDevices(){
     const devices = await r.json();
     renderDevices(devices);
   }catch(e){ console.log('fetch /api/devices:', e); }
+  loadFiles();
+}
+
+async function loadFiles(){
+  try{
+    const r = await fetch('/api/files');
+    const files = await r.json();
+    const section = document.getElementById('sharedSection');
+    const grid = document.getElementById('filesGrid');
+    if(files && files.length > 0){
+      section.style.display = 'block';
+      grid.innerHTML = files.map(f => `
+        <a href='/download?id=${f.id}' class='file-card' download='${f.name}'>
+          <span class='file-icon'>📄</span>
+          <div class='file-info'>
+            <div class='file-name'>${esc(f.name)}</div>
+            <div class='file-size'>${formatBytes(f.size)}</div>
+          </div>
+          <button class='btn-dl'>Download</button>
+        </a>
+      `).join('');
+    } else {
+      section.style.display = 'none';
+    }
+  }catch(e){}
+}
+
+function formatBytes(b){
+  if(b<1024)return b+' B';
+  if(b<1048576)return (b/1024).toFixed(1)+' KB';
+  return (b/1048576).toFixed(1)+' MB';
 }
 
 function renderDevices(list){

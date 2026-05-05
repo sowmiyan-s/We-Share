@@ -20,9 +20,11 @@ namespace WeShare.Android.Services
 
         public string GetDefaultSavePath()
         {
-            // Use External storage (Downloads)
-            var path = Path.Combine(global::Android.OS.Environment.ExternalStorageDirectory?.AbsolutePath ?? "/sdcard", "Download", "WeShare");
-            Directory.CreateDirectory(path);
+            // Use Public Downloads folder
+            string root = global::Android.OS.Environment.GetExternalStoragePublicDirectory(global::Android.OS.Environment.DirectoryDownloads)?.AbsolutePath 
+                        ?? "/sdcard/Download";
+            var path = Path.Combine(root, "WeShare");
+            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
             return path;
         }
 
@@ -71,8 +73,19 @@ namespace WeShare.Android.Services
             {
                 var file = new Java.IO.File(path);
                 var intent = new Intent(Intent.ActionView);
-                var uri = global::Android.Net.Uri.FromFile(file);
+                var uri = global::AndroidX.Core.Content.FileProvider.GetUriForFile(global::Android.App.Application.Context, global::Android.App.Application.Context.PackageName + ".fileprovider", file);
                 intent.SetDataAndType(uri, "*/*");
+                intent.SetFlags(ActivityFlags.NewTask | ActivityFlags.GrantReadUriPermission);
+                global::Android.App.Application.Context.StartActivity(intent);
+            }
+            catch { }
+        }
+
+        public void OpenUrl(string url)
+        {
+            try
+            {
+                var intent = new Intent(Intent.ActionView, global::Android.Net.Uri.Parse(url));
                 intent.SetFlags(ActivityFlags.NewTask);
                 global::Android.App.Application.Context.StartActivity(intent);
             }
@@ -83,7 +96,28 @@ namespace WeShare.Android.Services
         {
             var context = global::Android.App.Application.Context;
             var clipboard = (ClipboardManager)context.GetSystemService(Context.ClipboardService)!;
-            clipboard.PrimaryClip = ClipData.NewPlainText("WeShare", text);
+            var clip = ClipData.NewPlainText("WeShare", text);
+            clipboard.PrimaryClip = clip;
+        }
+
+        public void ShareFile(string path)
+        {
+            try
+            {
+                var context = global::Android.App.Application.Context;
+                var file = new Java.IO.File(path);
+                var uri = global::AndroidX.Core.Content.FileProvider.GetUriForFile(context, context.PackageName + ".fileprovider", file);
+                
+                var intent = new Intent(Intent.ActionSend);
+                intent.SetType("*/*");
+                intent.PutExtra(Intent.ExtraStream, uri);
+                intent.AddFlags(ActivityFlags.GrantReadUriPermission);
+                
+                var chooser = Intent.CreateChooser(intent, "Share File");
+                chooser.AddFlags(ActivityFlags.NewTask);
+                context.StartActivity(chooser);
+            }
+            catch { }
         }
     }
 }

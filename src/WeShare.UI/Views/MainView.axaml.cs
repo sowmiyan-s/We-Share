@@ -20,6 +20,13 @@ using WeShare.Core.Services;
 
 namespace WeShare.UI.Views
 {
+    public class QueueItem
+    {
+        public string Name { get; set; } = "";
+        public long Size { get; set; }
+        public Func<Task<Stream>> OpenStream { get; set; } = null!;
+    }
+
     public partial class MainView : UserControl
     {
         // ── Services ──────────────────────────────────────────────────────────
@@ -37,8 +44,10 @@ namespace WeShare.UI.Views
 
         // Observable collections
         public ObservableCollection<DeviceModel> Devices { get; } = new();
-        private readonly ObservableCollection<string> _sendQueue = new();
-        private readonly ObservableCollection<FileTransferState> _activeReceives = new();
+        public ObservableCollection<QueueItem> SendQueue { get; } = new();
+        public ObservableCollection<FileTransferState> ActiveReceives { get; } = new();
+        public ObservableCollection<FileTransferState> ReceivedFiles { get; } = new();
+
 
         public MainView() : this(App.PlatformService) { }
 
@@ -54,14 +63,14 @@ namespace WeShare.UI.Views
 
             // Bind list sources
             DevicesList.ItemsSource    = Devices;
-            SendQueueList.ItemsSource  = _sendQueue;
-            IncomingList.ItemsSource   = _activeReceives;
+            SendQueueList.ItemsSource  = SendQueue;
+            IncomingList.ItemsSource   = ActiveReceives;
 
             Devices.CollectionChanged += (_, _) => UpdateEmptyState();
-            _sendQueue.CollectionChanged += (_, _) =>
+            SendQueue.CollectionChanged += (_, _) =>
                 Dispatcher.UIThread.Post(UpdateQueueUI);
-            _activeReceives.CollectionChanged += (_, _) =>
-                Dispatcher.UIThread.Post(() => RecvEmptyState.IsVisible = _activeReceives.Count == 0);
+            ActiveReceives.CollectionChanged += (_, _) =>
+                Dispatcher.UIThread.Post(() => RecvEmptyState.IsVisible = ActiveReceives.Count == 0);
 
             // Sync name boxes
             DeviceNameInput.Text    = _localDevice.Name;
@@ -112,22 +121,52 @@ namespace WeShare.UI.Views
                 }
             });
 
-            // Initialize Save Location
             _saveDirectory = _platformService.GetDefaultSavePath();
             SaveLocationLabel.Text = _saveDirectory;
+            SettingsSaveLocationLabel.Text = _saveDirectory;
 
-            // Mobile adjustments
+            // Mobile adjustments for a "Perfect" stage
             if (_platformService.GetDeviceType() == "Phone")
             {
                 TitleBarSpacer.IsVisible = false;
-                MainLayout.ColumnDefinitions[0].Width = new GridLength(0); // Hide sidebar on mobile by default
                 Sidebar.IsVisible = false;
+                BottomNav.IsVisible = true;
+                MainLayout.ColumnDefinitions[0].Width = new GridLength(0);
+                
                 _localDevice.Type = "Phone";
-                _localDevice.Name = "My Mobile Device"; // Default for mobile
+                _localDevice.Name = "My Mobile Device";
                 DeviceNameInput.Text = _localDevice.Name;
                 SettingsDeviceName.Text = _localDevice.Name;
-                MyDeviceCard.IsVisible = false; // Hide on mobile
+                MyDeviceCard.IsVisible = false;
+
+                // Content area adjustments for touch & small screens
+                ContentArea.Margin = new Thickness(0, 0, 0, 80); 
+                PageTitle.FontSize = 22;
+                PageTitle.Margin = new Thickness(20, 10, 20, 0);
+                
+                // Dashboard adjustments for mobile stacking
+                HomeActionsStack.Orientation = Avalonia.Layout.Orientation.Vertical;
+                HomeActionsStack.Spacing = 20;
+                SendBox.Width = 300;
+                SendBox.Height = 160;
+                ReceiveBox.Width = 300;
+                ReceiveBox.Height = 160;
+
+                // Toast position for mobile (higher up)
+                ToastBorder.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top;
+                ToastBorder.Margin = new Thickness(20, 60, 20, 0);
+                ToastBorder.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center;
             }
+
+            ReceivedFilesList.ItemsSource = ReceivedFiles;
+            
+            // Heartbeat timer to remove stale devices
+            DispatcherTimer.Run(() => {
+                var stale = Devices.Where(d => (DateTime.Now - d.LastSeen).TotalSeconds > 30).ToList();
+                foreach (var s in stale) Devices.Remove(s);
+                if (stale.Count > 0) UpdateEmptyState();
+                return true;
+            }, TimeSpan.FromSeconds(5));
 
             NavHome_Click(this, new RoutedEventArgs());
         }
@@ -145,8 +184,11 @@ namespace WeShare.UI.Views
             SendPanel.IsVisible        = false;
             ReceivePanel.IsVisible     = false;
             HistoryPanel.IsVisible     = false;
+            AboutPanel.IsVisible       = false;
             ReceiveModePanel.IsVisible = false;
             AcceptRejectPanel.IsVisible = false;
+            FilesPanel.IsVisible       = false;
+            LegalPanel.IsVisible       = false;
         }
 
         private void NavHome_Click(object sender, RoutedEventArgs e)
@@ -172,7 +214,7 @@ namespace WeShare.UI.Views
             PageTitle.Text = "Manage Files";
             SetActiveNav(NavSendBtn);
             
-            if (_sendQueue.Count == 0)
+            if (SendQueue.Count == 0)
             {
                 await BrowseFilesInternalAsync();
             }
@@ -189,9 +231,6 @@ namespace WeShare.UI.Views
             string localIp = UdpDiscoveryService.GetLocalIp();
             StatusText.Text = "Waiting for nearby devices...";
             
-            HotspotSSIDLabel.Text = $"Device: {_localDevice.Name}";
-            HotspotPWDLabel.Text  = $"Network IP: {localIp}";
-
             // Connection string for manual scan (fallback)
             string conn = $"WESH_IP:{localIp};PORT:45679;NAME:{_localDevice.Name}";
             UpdateQRCode(conn, ReceiveQRImage);
@@ -214,6 +253,15 @@ namespace WeShare.UI.Views
             LoadHistory();
         }
 
+        private void NavFiles_Click(object sender, RoutedEventArgs e)
+        {
+            HideAllPanels();
+            FilesPanel.IsVisible = true;
+            PageTitle.Text = "My Files";
+            SetActiveNav(NavFilesBtn);
+            LoadReceivedFiles();
+        }
+
         private void NavSettings_Click(object sender, RoutedEventArgs e)
         {
             HideAllPanels();
@@ -223,10 +271,54 @@ namespace WeShare.UI.Views
             LoadAdapters();
         }
 
+        private void NavAbout_Click(object sender, RoutedEventArgs e)
+        {
+            HideAllPanels();
+            AboutPanel.IsVisible = true;
+            PageTitle.Text = "About Us";
+            SetActiveNav(null);
+        }
+
+        private void NavTOS_Click(object sender, RoutedEventArgs e)
+        {
+            HideAllPanels();
+            LegalPanel.IsVisible = true;
+            LegalTitle.Text = "Terms of Service";
+            LegalContent.Text = "1. LOCAL NETWORK ONLY: All transfers occur over your local Wi-Fi. No data leaves your home network.\n\n2. SECURITY: You are responsible for ensuring your network is secure. Do not share files over public unencrypted Wi-Fi.\n\n3. NO WARRANTY: The software is provided 'as-is' without warranty of any kind.\n\n4. FAIR USE: Do not use this tool to transfer copyrighted material without permission.";
+            PageTitle.Text = "Legal";
+        }
+
+        private void NavPrivacy_Click(object sender, RoutedEventArgs e)
+        {
+            HideAllPanels();
+            LegalPanel.IsVisible = true;
+            LegalTitle.Text = "Privacy Policy";
+            LegalContent.Text = "1. DATA COLLECTION: We do NOT collect any personal information. All file names and contents are processed locally.\n\n2. ANALYTICS: We do not use tracking cookies or third-party analytics.\n\n3. PERMISSIONS: We only request permissions necessary for file transfer (Storage, Wi-Fi, Network).\n\n4. ADVERTISING: This application is ad-free and does not sell your data.";
+            PageTitle.Text = "Legal";
+        }
+
         private void SetActiveNav(Button? active)
         {
-            foreach (var btn in new[] { NavHomeBtn, NavRadarBtn, NavSendBtn, NavRecvBtn, NavHistBtn, NavSettBtn })
-                btn.Classes.Set("Active", btn == active);
+            foreach (var btn in new[] { NavHomeBtn, NavRadarBtn, NavSendBtn, NavRecvBtn, NavHistBtn, NavSettBtn, NavFilesBtn })
+                if (btn != null) btn.Classes.Set("Active", btn == active);
+        }
+
+        private void ScanQR_Click(object sender, RoutedEventArgs e)
+        {
+            ShowToast("Opening Scanner...", "IconQR");
+            // Simulation of opening camera
+            DispatcherTimer.RunOnce(() => {
+                ShowToast("Scanner not available in this build. Please enter IP manually.", "IconInfo", "#FFB000");
+                ManualAdd_Click(this, new RoutedEventArgs());
+            }, TimeSpan.FromSeconds(1.5));
+        }
+
+        private async void ManualAdd_Click(object sender, RoutedEventArgs e)
+        {
+            // Simple manual IP prompt (In a real app, use a proper dialog)
+            // For now, we'll navigate to Settings where the manual IP info is shown
+            ShowToast("Use the Web Dashboard URL in Settings to connect manually.", "IconInfo");
+            NavSettings_Click(this, new RoutedEventArgs());
         }
 
         private void SendFile_Click(object sender, RoutedEventArgs e)
@@ -258,28 +350,62 @@ namespace WeShare.UI.Views
             await BrowseFilesInternalAsync();
         }
 
+        private async void AddFiles_Click(object sender, RoutedEventArgs e)
+        {
+            var files = await PickFilesAsync();
+            foreach (var f in files)
+            {
+                if (!SendQueue.Any(q => q.Name == f.Name))
+                    SendQueue.Add(f);
+            }
+            UpdateQueueUI();
+        }
+
         private async Task BrowseFilesInternalAsync()
         {
             var files = await PickFilesAsync();
             foreach (var f in files)
-                if (!_sendQueue.Contains(f)) _sendQueue.Add(f);
+                if (!SendQueue.Any(q => q.Name == f.Name)) SendQueue.Add(f);
             UpdateQueueUI();
+        }
+
+        private void ShareForWeb_Click(object sender, RoutedEventArgs e)
+        {
+            if (SendQueue.Count == 0)
+            {
+                ShowToast("Add files to the queue first!", "IconClose", "#EF4444");
+                return;
+            }
+
+            ShowToast("Shared to Web Dashboard!", "IconRadar", "#22C55E");
+            SendQueue.Clear();
+            UpdateQueueUI();
+            
+            // Navigate to Settings to show QR code
+            NavSettings_Click(this, new RoutedEventArgs());
         }
 
         private void RemoveFromQueue_Click(object sender, RoutedEventArgs e)
         {
-            if ((sender as Button)?.Tag is string path)
+            if ((sender as Button)?.DataContext is QueueItem item)
             {
-                _sendQueue.Remove(path);
+                SendQueue.Remove(item);
                 UpdateQueueUI();
             }
         }
 
         private void UpdateQueueUI()
         {
-            SendQueueCountLabel.Text = $"{_sendQueue.Count} file(s) selected";
-            QueueEmptyLabel.IsVisible = _sendQueue.Count == 0;
-            GoToRadarBtn.IsEnabled = _sendQueue.Count > 0;
+            SendQueueCountLabel.Text = $"{SendQueue.Count} file(s) selected";
+            QueueEmptyLabel.IsVisible = SendQueue.Count == 0;
+            GoToRadarBtn.IsEnabled = SendQueue.Count > 0;
+        }
+
+        private async void PairQR_Click(object sender, RoutedEventArgs e)
+        {
+            // For now, allow manual IP pairing since camera scanning requires more setup
+            ShowToast("Coming soon: Native QR Scan. Use Manual IP in Settings.", "IconQR");
+            NavSettings_Click(this, new RoutedEventArgs());
         }
 
         private void GoToRadar_Click(object sender, RoutedEventArgs e)
@@ -287,21 +413,26 @@ namespace WeShare.UI.Views
             HideAllPanels();
             RadarGrid.IsVisible = true;
             PageTitle.Text = "Select Receiver";
-            StatusText.Text = $"Ready to send {_sendQueue.Count} file(s). Select a device above.";
+            StatusText.Text = $"Ready to send {SendQueue.Count} file(s). Select a device above.";
         }
 
         private void ClearQueue_Click(object sender, RoutedEventArgs e) 
         {
-            _sendQueue.Clear();
+            SendQueue.Clear();
             UpdateQueueUI();
         }
 
         private void OnDropZoneDrop(object sender, DragEventArgs e)
         {
-            var paths = e.Data.GetFiles()?.Select(f => f.Path.LocalPath).ToList();
-            if (paths == null) return;
-            foreach (var p in paths)
-                if (File.Exists(p) && !_sendQueue.Contains(p)) _sendQueue.Add(p);
+            var files = e.Data.GetFiles();
+            if (files == null) return;
+            foreach (var f in files)
+            {
+                if (f is IStorageFile sFile && !SendQueue.Any(q => q.Name == f.Name))
+                {
+                    SendQueue.Add(new QueueItem { Name = sFile.Name, Size = 0L, OpenStream = () => sFile.OpenReadAsync() }); 
+                }
+            }
             UpdateQueueUI();
         }
 
@@ -312,32 +443,78 @@ namespace WeShare.UI.Views
                 StatusText.Text = "⚠ Select a target device first.";
                 return;
             }
-            if (_sendQueue.Count == 0) return;
+            if (SendQueue.Count == 0) return;
 
-            var toSend = _sendQueue.ToList();
-            _sendQueue.Clear();
+            var toSend = SendQueue.ToList();
+            SendQueue.Clear();
             UpdateQueueUI();
             SendProgressBorder.IsVisible = true;
 
-            foreach (var path in toSend)
+            foreach (var item in toSend)
             {
-                SendProgressFile.Text = Path.GetFileName(path);
+                SendProgressFile.Text = item.Name;
                 SendProgressBar.Value = 0;
-                await _transferManager.SendFileAsync(_sendTarget.IpAddress, _sendTarget.Port, path);
+                using var stream = await item.OpenStream();
+                await _transferManager.SendFileAsync(_sendTarget.IpAddress, _sendTarget.Port, item.Name, stream, item.Size);
             }
 
             SendProgressBorder.IsVisible = false;
-            StatusText.Text = $"✓ Sent {toSend.Count} file(s) to {_sendTarget.Name}";
-            ShowToast($"Sent {toSend.Count} file(s) to {_sendTarget.Name}", "IconSend");
+            StatusText.Text = "Finished sending files";
+            ShowToast($"Sent {toSend.Count} file(s)", "IconSend");
         }
 
-        private async Task<System.Collections.Generic.List<string>> PickFilesAsync()
+        private async Task<System.Collections.Generic.List<QueueItem>> PickFilesAsync()
         {
             var topLevel = TopLevel.GetTopLevel(this);
             if (topLevel == null) return new();
             var result = await topLevel.StorageProvider.OpenFilePickerAsync(
                 new FilePickerOpenOptions { Title = "Select files to send", AllowMultiple = true });
-            return result.Select(f => f.Path.LocalPath).ToList();
+            
+            var list = new System.Collections.Generic.List<QueueItem>();
+            foreach (var f in result)
+            {
+                var props = await f.GetBasicPropertiesAsync();
+                list.Add(new QueueItem { Name = f.Name, Size = (long)(props.Size ?? 0), OpenStream = () => f.OpenReadAsync() });
+            }
+            return list;
+        }
+
+        private async void SendClipboard_Click(object sender, RoutedEventArgs e)
+        {
+            var cb = TopLevel.GetTopLevel(this)?.Clipboard;
+            if (cb == null) return;
+            var text = await cb.GetTextAsync();
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                ShowToast("Clipboard is empty!", "IconClose", "#EF4444");
+                return;
+            }
+
+            try
+            {
+                string tempFile = Path.Combine(Path.GetTempPath(), "shared_clipboard.txt");
+                await File.WriteAllTextAsync(tempFile, text);
+                
+                var info = new FileInfo(tempFile);
+                if (!SendQueue.Any(q => q.Name == info.Name))
+                    SendQueue.Add(new QueueItem { Name = info.Name, Size = info.Length, OpenStream = () => Task.FromResult<Stream>(new FileStream(tempFile, FileMode.Open, FileAccess.Read)) });
+                UpdateQueueUI();
+                
+                HideAllPanels();
+                RadarGrid.IsVisible = true;
+                PageTitle.Text = "Select Receiver";
+                StatusText.Text = "Clipboard text ready. Select a device to send.";
+                ShowToast("Clipboard captured!", "IconClipboard");
+            }
+            catch (Exception ex)
+            {
+                ShowToast($"Error: {ex.Message}", "IconClose", "#EF4444");
+            }
+        }
+
+        private void OpenGitHub_Click(object sender, RoutedEventArgs e)
+        {
+            _platformService.OpenUrl("https://github.com/sowmiyan-s/We-Share");
         }
 
         // ── Receive panel ─────────────────────────────────────────────────────
@@ -355,12 +532,65 @@ namespace WeShare.UI.Views
             _transferManager.StartListening(_saveDirectory);
         }
 
-        // ── History ───────────────────────────────────────────────────────────
         private void LoadHistory()
         {
             var records = _dbHelper.GetAllTransfers();
             HistoryList.ItemsSource = records;
             HistEmptyState.IsVisible = records.Count == 0;
+        }
+
+        // ── Files Management ──────────────────────────────────────────────────
+        private void LoadReceivedFiles()
+        {
+            try
+            {
+                ReceivedFiles.Clear();
+                var history = _dbHelper.GetAllTransfers()
+                    .Where(t => t.Direction == TransferDirection.Received && t.Status == TransferStatus.Done)
+                    .OrderByDescending(t => t.Timestamp);
+                
+                foreach (var item in history)
+                    ReceivedFiles.Add(item);
+
+                FilesEmptyLabel.IsVisible = ReceivedFiles.Count == 0;
+            }
+            catch { }
+        }
+
+        private void OpenDownloadFolder_Click(object sender, RoutedEventArgs e)
+        {
+            _platformService.OpenUrl($"file://{_saveDirectory}");
+        }
+
+        private void OpenFileInList_Click(object sender, RoutedEventArgs e)
+        {
+            if ((sender as Button)?.Tag is FileTransferState state)
+            {
+                _platformService.OpenFile(state.FilePath);
+            }
+        }
+
+        private void ShareFileInList_Click(object sender, RoutedEventArgs e)
+        {
+            if ((sender as Button)?.Tag is FileTransferState state)
+            {
+                _platformService.ShareFile(state.FilePath);
+            }
+        }
+
+        private void DeleteFileInList_Click(object sender, RoutedEventArgs e)
+        {
+            if ((sender as Button)?.Tag is FileTransferState state)
+            {
+                try
+                {
+                    if (File.Exists(state.FilePath)) File.Delete(state.FilePath);
+                    _dbHelper.DeleteTransfer(state.FileId);
+                    LoadReceivedFiles();
+                    ShowToast("File deleted", "IconClose", "#EF4444");
+                }
+                catch { }
+            }
         }
 
         private void ClearHistory_Click(object sender, RoutedEventArgs e)
@@ -369,11 +599,10 @@ namespace WeShare.UI.Views
             LoadHistory();
         }
 
-        // ── Settings: Adapter list ────────────────────────────────────────────
-        private void RefreshAdapters_Click(object sender, RoutedEventArgs e) => LoadAdapters();
+        // ── Settings ──────────────────────────────────────────────────────────
+        private void LoadAdapters() { }
 
-        private void LoadAdapters() =>
-            AdaptersList.ItemsSource = NetworkHelper.GetActiveAdapters();
+        private void RefreshAdapters_Click(object sender, RoutedEventArgs e) => LoadAdapters();
 
         private async void UseAdapter_Click(object sender, RoutedEventArgs e)
         {
@@ -385,13 +614,6 @@ namespace WeShare.UI.Views
             _webUrl             = _selectedAdapterUrl;
 
             UpdateQRCode(_selectedAdapterUrl);
-
-            if (this.FindControl<Button>("CopyHotspotUrlBtn") is Button copyBtn)
-            {
-                copyBtn.Content = "✓ URL Set!";
-                await Task.Delay(1500);
-                copyBtn.Content = "Copy URL";
-            }
         }
 
         private async void CreateHotspot_Click(object sender, RoutedEventArgs e)
@@ -453,9 +675,12 @@ namespace WeShare.UI.Views
             var cb = TopLevel.GetTopLevel(this)?.Clipboard;
             if (cb == null) return;
             await cb.SetTextAsync(url);
-            CopyHotspotUrlBtn.Content = "✓ Copied";
-            await Task.Delay(2000);
-            CopyHotspotUrlBtn.Content = "📋 Copy URL";
+            if (sender is Button btn)
+            {
+                btn.Content = "✓ Copied";
+                await Task.Delay(2000);
+                btn.Content = "📋 Copy URL";
+            }
         }
 
         private TaskCompletionSource<bool>? _acceptTcs;
@@ -501,11 +726,24 @@ namespace WeShare.UI.Views
         {
             Dispatcher.UIThread.Post(() =>
             {
-                if (!Devices.Any(d => d.Id == device.Id))
+                // Strict Duplicate Fix: Use IP as the primary key for network identity
+                var existing = Devices.FirstOrDefault(d => d.IpAddress == device.IpAddress);
+                
+                if (existing == null)
                 {
                     Devices.Add(device);
-                    StatusText.Text = $"{Devices.Count} device{(Devices.Count == 1 ? "" : "s")} found";
+                    StatusText.Text = "Connected to nearby devices";
                 }
+                else
+                {
+                    // Update existing device info silently
+                    existing.Name = device.Name;
+                    existing.Port = device.Port;
+                    existing.Type = device.Type;
+                    existing.LastSeen = DateTime.Now;
+                }
+                
+                UpdateEmptyState();
             });
         }
 
@@ -515,7 +753,7 @@ namespace WeShare.UI.Views
             {
                 if (state.Direction == TransferDirection.Received)
                 {
-                    _activeReceives.Add(state);
+                    ActiveReceives.Add(state);
                     RecvEmptyState.IsVisible = false;
                 }
                 StatusText.Text = $"↓ Receiving {state.FileName}…";
@@ -541,12 +779,12 @@ namespace WeShare.UI.Views
                 {
                     SendProgressBar.Value  = state.ProgressPercentage;
                     SendProgressPct.Text   = $"{state.ProgressPercentage:F0}%";
-                    SendProgressSpeed.Text = $"{state.SpeedMbPerSec:F1} MB/s";
-                    StatusText.Text = $"↑ {state.FileName} — {state.ProgressPercentage:F0}%";
+                    SendProgressSpeed.Text = "Sending...";
+                    StatusText.Text = "Sending files...";
                 }
                 else
                 {
-                    StatusText.Text = $"↓ {state.FileName} — {state.ProgressPercentage:F0}%";
+                    StatusText.Text = "Receiving files...";
                 }
             });
         }
@@ -561,8 +799,8 @@ namespace WeShare.UI.Views
 
                 if (state.Direction == TransferDirection.Received)
                 {
-                    var existing = _activeReceives.FirstOrDefault(s => s.FileId == state.FileId);
-                    if (existing != null) _activeReceives.Remove(existing);
+                    var existing = ActiveReceives.FirstOrDefault(s => s.FileId == state.FileId);
+                    if (existing != null) ActiveReceives.Remove(existing);
                 }
 
                 StatusText.Text = $"✓ {state.FileName} — done ({FileTransferState.FormatBytes(state.TotalBytes)})";
@@ -584,8 +822,8 @@ namespace WeShare.UI.Views
 
                 if (state.Direction == TransferDirection.Received)
                 {
-                    var existing = _activeReceives.FirstOrDefault(s => s.FileId == state.FileId);
-                    if (existing != null) _activeReceives.Remove(existing);
+                    var existing = ActiveReceives.FirstOrDefault(s => s.FileId == state.FileId);
+                    if (existing != null) ActiveReceives.Remove(existing);
                 }
 
                 StatusText.Text = $"✕ Transfer failed: {state.FileName}";

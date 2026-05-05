@@ -162,17 +162,13 @@ namespace WeShare.Core.Transfer
         }
 
         // ── Send ───────────────────────────────────────────────────────────────
-        public async Task SendFileAsync(string targetIp, int targetPort, string filePath,
+        public async Task SendFileAsync(string targetIp, int targetPort, string fileName, Stream fileStream, long totalBytes,
                                         CancellationToken cancellationToken = default)
         {
-            var fileInfo = new FileInfo(filePath);
-            if (!fileInfo.Exists) throw new FileNotFoundException("File not found", filePath);
-
             var state = new FileTransferState
             {
-                FileName   = fileInfo.Name,
-                FilePath   = filePath,
-                TotalBytes = fileInfo.Length,
+                FileName   = fileName,
+                TotalBytes = totalBytes,
                 Status     = TransferStatus.Sending,
                 Direction  = TransferDirection.Sent,
                 SenderName = LocalName,
@@ -209,7 +205,6 @@ namespace WeShare.Core.Transfer
                 }
 
                 // 3. File data
-                using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, 81920, true);
                 byte[] buffer = new byte[81920];
                 int read;
                 long totalSent = 0;
@@ -217,7 +212,7 @@ namespace WeShare.Core.Transfer
                 DateTime lastReportTime = DateTime.UtcNow;
                 var sw = System.Diagnostics.Stopwatch.StartNew();
 
-                while ((read = await fs.ReadAsync(buffer, 0, buffer.Length, cancellationToken)) > 0)
+                while ((read = await fileStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken)) > 0)
                 {
                     await stream.WriteAsync(buffer, 0, read, cancellationToken);
                     totalSent += read;
