@@ -8,7 +8,7 @@ namespace WeShare.UI
         [STAThread]
         public static void Main(string[] args)
         {
-            App.PlatformService = new Services.WindowsPlatformService();
+            App.PlatformService = new WeShare.Desktop.Services.WindowsPlatformService();
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         }
 

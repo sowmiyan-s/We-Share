@@ -6,6 +6,7 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
+using Avalonia.Controls.Shapes;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -58,7 +59,7 @@ namespace WeShare.UI.Views
             _saveDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
             _dbHelper = new DatabaseHelper();
-            _platformService = platformService ?? new Services.WindowsPlatformService(); // Fallback for designer
+            _platformService = platformService ?? new Services.StubPlatformService(); // Fallback for designer
             _localDevice = new DeviceModel { Port = 45679, Name = Environment.MachineName, Type = _platformService.GetDeviceType() };
 
             // Bind list sources
@@ -82,6 +83,10 @@ namespace WeShare.UI.Views
             _discoveryService.DeviceDiscovered += OnDeviceDiscovered;
             _discoveryService.StartListening();
 
+            // Bluetooth Discovery & Advertising
+            _platformService.StartBluetoothAdvertising(_localDevice);
+            _platformService.StartBluetoothDiscovery(OnDeviceDiscovered);
+
             // Transfer
             _transferManager = new TcpTransferManager(45679);
             _transferManager.LocalName = _localDevice.Name; // Sync name
@@ -101,7 +106,6 @@ namespace WeShare.UI.Views
             _webUrl           = $"http://{localIp}:8080";
             if (this.FindControl<TextBlock>("WebAccessUrl") is TextBlock wUrl) wUrl.Text = _webUrl;
             if (this.FindControl<TextBlock>("ConnectUrl") is TextBlock cUrl) cUrl.Text = _webUrl;
-            UpdateQRCode(_webUrl);
 
             DispatcherTimer.RunOnce(() =>
             {
@@ -117,6 +121,8 @@ namespace WeShare.UI.Views
                 while (true)
                 {
                     await _discoveryService.BroadcastPresenceAsync();
+                    // Also refresh BT advertising if IP changed
+                    _platformService.StartBluetoothAdvertising(_localDevice); 
                     await Task.Delay(5000);
                 }
             });
@@ -143,14 +149,6 @@ namespace WeShare.UI.Views
                 ContentArea.Margin = new Thickness(0, 0, 0, 80); 
                 PageTitle.FontSize = 22;
                 PageTitle.Margin = new Thickness(20, 10, 20, 0);
-                
-                // Dashboard adjustments for mobile stacking
-                HomeActionsStack.Orientation = Avalonia.Layout.Orientation.Vertical;
-                HomeActionsStack.Spacing = 20;
-                SendBox.Width = 300;
-                SendBox.Height = 160;
-                ReceiveBox.Width = 300;
-                ReceiveBox.Height = 160;
 
                 // Toast position for mobile (higher up)
                 ToastBorder.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top;
@@ -196,7 +194,7 @@ namespace WeShare.UI.Views
             HideAllPanels();
             HomePanel.IsVisible = true;
             PageTitle.Text = "Home";
-            SetActiveNav(null); // No active nav button for home
+            SetActiveNav(null); 
         }
 
         private void NavRadar_Click(object sender, RoutedEventArgs e)
@@ -205,6 +203,9 @@ namespace WeShare.UI.Views
             RadarGrid.IsVisible = true;
             PageTitle.Text = "Nearby Devices";
             SetActiveNav(NavRadarBtn);
+            
+            StatusText.Text = "Searching for devices via Bluetooth & Wi-Fi...";
+            _platformService.StartBluetoothDiscovery(OnDeviceDiscovered);
         }
 
         private async void NavSend_Click(object sender, RoutedEventArgs e)
@@ -221,19 +222,30 @@ namespace WeShare.UI.Views
             UpdateQueueUI();
         }
 
-        private void NavReceiveMode_Click(object sender, RoutedEventArgs e)
+        private async void NavReceiveMode_Click(object sender, RoutedEventArgs e)
         {
             HideAllPanels();
             ReceiveModePanel.IsVisible = true;
             PageTitle.Text = "Receive Mode";
             SetActiveNav(NavRecvBtn);
 
-            string localIp = UdpDiscoveryService.GetLocalIp();
-            StatusText.Text = "Waiting for nearby devices...";
+            StatusText.Text = "Setting up connection...";
             
-            // Connection string for manual scan (fallback)
-            string conn = $"WESH_IP:{localIp};PORT:45679;NAME:{_localDevice.Name}";
-            UpdateQRCode(conn, ReceiveQRImage);
+            // Auto-start hotspot for seamless offline connection
+            if (!_platformService.IsHotspotRunning)
+            {
+                var (success, msg) = await _platformService.StartHotspotAsync("WeShare-" + new Random().Next(1000, 9999), "weshare123");
+                if (success) {
+                    _localDevice.IpAddress = _platformService.HotspotIp;
+                }
+            }
+
+            string localIp = _platformService.IsHotspotRunning ? _platformService.HotspotIp : UdpDiscoveryService.GetLocalIp();
+            
+            // Connection string for manual scan (removed)
+            // Ensure we are advertising via BT (now includes Hotspot details if running)
+            _platformService.StartBluetoothAdvertising(_localDevice);
+            UpdateStatusText();
         }
 
         private void NavReceive_Click(object sender, RoutedEventArgs e)
@@ -303,15 +315,6 @@ namespace WeShare.UI.Views
                 if (btn != null) btn.Classes.Set("Active", btn == active);
         }
 
-        private void ScanQR_Click(object sender, RoutedEventArgs e)
-        {
-            ShowToast("Opening Scanner...", "IconQR");
-            // Simulation of opening camera
-            DispatcherTimer.RunOnce(() => {
-                ShowToast("Scanner not available in this build. Please enter IP manually.", "IconInfo", "#FFB000");
-                ManualAdd_Click(this, new RoutedEventArgs());
-            }, TimeSpan.FromSeconds(1.5));
-        }
 
         private async void ManualAdd_Click(object sender, RoutedEventArgs e)
         {
@@ -381,7 +384,7 @@ namespace WeShare.UI.Views
             SendQueue.Clear();
             UpdateQueueUI();
             
-            // Navigate to Settings to show QR code
+            // Navigate to Settings
             NavSettings_Click(this, new RoutedEventArgs());
         }
 
@@ -401,12 +404,6 @@ namespace WeShare.UI.Views
             GoToRadarBtn.IsEnabled = SendQueue.Count > 0;
         }
 
-        private async void PairQR_Click(object sender, RoutedEventArgs e)
-        {
-            // For now, allow manual IP pairing since camera scanning requires more setup
-            ShowToast("Coming soon: Native QR Scan. Use Manual IP in Settings.", "IconQR");
-            NavSettings_Click(this, new RoutedEventArgs());
-        }
 
         private void GoToRadar_Click(object sender, RoutedEventArgs e)
         {
@@ -444,6 +441,18 @@ namespace WeShare.UI.Views
                 return;
             }
             if (SendQueue.Count == 0) return;
+
+            // Auto-connect to receiver's hotspot if provided via BLE
+            if (!string.IsNullOrEmpty(_sendTarget.Ssid))
+            {
+                StatusText.Text = "Connecting to device network...";
+                bool connected = await _platformService.ConnectToWifiAsync(_sendTarget.Ssid, _sendTarget.Password ?? "");
+                if (connected)
+                {
+                    ShowToast("Connected directly to device!", "IconRadar", "#22C55E");
+                    await Task.Delay(2000); // Wait for IP to settle
+                }
+            }
 
             var toSend = SendQueue.ToList();
             SendQueue.Clear();
@@ -492,7 +501,7 @@ namespace WeShare.UI.Views
 
             try
             {
-                string tempFile = Path.Combine(Path.GetTempPath(), "shared_clipboard.txt");
+                string tempFile = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "shared_clipboard.txt");
                 await File.WriteAllTextAsync(tempFile, text);
                 
                 var info = new FileInfo(tempFile);
@@ -612,8 +621,6 @@ namespace WeShare.UI.Views
             if (this.FindControl<TextBlock>("ConnectUrl") is TextBlock cUrl) cUrl.Text = _selectedAdapterUrl;
             if (this.FindControl<TextBlock>("WebAccessUrl") is TextBlock wUrl) wUrl.Text = _selectedAdapterUrl;
             _webUrl             = _selectedAdapterUrl;
-
-            UpdateQRCode(_selectedAdapterUrl);
         }
 
         private async void CreateHotspot_Click(object sender, RoutedEventArgs e)
@@ -624,7 +631,7 @@ namespace WeShare.UI.Views
                 await _platformService.StopHotspotAsync();
                 ShowToast("Hotspot stopped.");
                 if (btn != null) btn.Content = "Create Mobile Hotspot";
-                UpdateQRCode(_webUrl); // Revert to web url
+                UpdateStatusText();
                 return;
             }
 
@@ -632,16 +639,11 @@ namespace WeShare.UI.Views
             var (success, msg) = await _platformService.StartHotspotAsync("WeShare-WiFi", "weshare123");
             if (success)
             {
-                ShowToast("Hotspot created! SSID: 'WeShare-WiFi'");
+                ShowToast("Hotspot created!");
                 if (btn != null) btn.Content = "Stop Hotspot";
                 
-                // Set Dashboard URL to the Hotspot IP
                 _selectedAdapterUrl = $"http://{_platformService.HotspotIp}:8080";
-                if (this.FindControl<TextBlock>("ConnectUrl") is TextBlock cUrl) cUrl.Text = _selectedAdapterUrl;
-                if (this.FindControl<TextBlock>("WebAccessUrl") is TextBlock wUrl) wUrl.Text = _selectedAdapterUrl;
-                
-                // Show Wi-Fi Connection QR code for easy connection
-                UpdateQRCode($"WIFI:S:WeShare-WiFi;T:WPA;P:weshare123;;");
+                UpdateStatusText();
             }
             else
             {
@@ -649,25 +651,23 @@ namespace WeShare.UI.Views
             }
         }
 
-        private void UpdateQRCode(string data, Image? targetOverride = null)
+        private void UpdateStatusText()
         {
-            try
-            {
-                byte[] png = QRCodeHelper.GeneratePng(data, 10);
-                using var ms = new MemoryStream(png);
-                var bitmap = new Bitmap(ms);
-
-                if (targetOverride != null)
+            Dispatcher.UIThread.Post(() => {
+                var dot = this.FindControl<Ellipse>("StatusDot");
+                if (_platformService.IsHotspotRunning)
                 {
-                    targetOverride.Source = bitmap;
+                    StatusText.Text = "Hotspot: WeShare-WiFi | Pass: weshare123";
+                    if (dot != null) dot.Fill = SolidColorBrush.Parse("#10B981");
                 }
-                else if (this.FindControl<Image>("QRCodeImage") is Image qrImg)
+                else
                 {
-                    qrImg.Source = bitmap;
+                    StatusText.Text = "Searching for devices via Bluetooth & Wi-Fi...";
+                    if (dot != null) dot.Fill = SolidColorBrush.Parse("#6366F1");
                 }
-            }
-            catch { }
+            });
         }
+
 
         private async void CopyHotspotUrl_Click(object sender, RoutedEventArgs e)
         {
@@ -897,6 +897,8 @@ namespace WeShare.UI.Views
             _discoveryService.StopListening();
             _transferManager.StopListening();
             _webDashboard.Stop();
+            _platformService.StopBluetoothDiscovery();
+            _platformService.StopBluetoothAdvertising();
             if (_platformService.IsHotspotRunning)
             {
                 _platformService.StopHotspotAsync().Wait();

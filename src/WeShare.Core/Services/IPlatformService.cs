@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using WeShare.Core.Models;
 
 namespace WeShare.Core.Services
 {
@@ -13,6 +14,15 @@ namespace WeShare.Core.Services
         Task StopHotspotAsync();
         bool IsHotspotRunning { get; }
         string HotspotIp { get; }
+
+        // Bluetooth Discovery
+        void StartBluetoothDiscovery(Action<DeviceModel> onDeviceFound);
+        void StopBluetoothDiscovery();
+        void StartBluetoothAdvertising(DeviceModel localDevice);
+        void StopBluetoothAdvertising();
+
+        // Wi-Fi Management
+        Task<bool> ConnectToWifiAsync(string ssid, string password);
 
         // Permissions (Mainly for Mobile)
         Task<bool> RequestPermissionsAsync();

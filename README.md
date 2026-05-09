@@ -29,7 +29,7 @@ We Share is designed to make your digital life easier in various scenarios:
 ## ✨ Key Features
 
 - 📱 **Cross-Platform**: Transfer files between PC-to-PC, Phone-to-Phone, and PC-to-Phone.
-- 📡 **Instant Discovery**: High-speed UDP radar automatically finds nearby devices.
+- 📡 **Smart Discovery**: Dual-mode scanning using Bluetooth LE & UDP radar to find devices instantly.
 - 🔗 **QR Handshake**: Scan to connect fallback for cross-network or hotspot transfers.
 - 📂 **Multi-File Queue**: Append, remove, and manage entire batches of files before sending.
 - ⚡ **Turbo Transfers**: Multi-threaded TCP socket engine with real-time progress tracking.

@@ -23,7 +23,7 @@ The project is built using a platform-agnostic architecture:
 ## 🛠️ Tech Stack
 
 - **Framework**: [.NET 8.0](https://dotnet.microsoft.com/download/dotnet/8.0), [Avalonia UI](https://avaloniaui.net/)
-- **Networking**: TCP Sockets (Data Transfer), UDP Broadcast (Discovery)
+- **Networking**: TCP Sockets (Data), UDP Radar (Discovery), Bluetooth LE (Nearby Identity)
 - **Database**: SQLite (History & State Management)
 - **Design**: Fluent Design System, Modern Dark Mode
 - **Platform Support**: Windows (Desktop), Android (Mobile)

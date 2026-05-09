@@ -12,15 +12,5 @@
   <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
   <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
   <application android:label="We Share" android:icon="@drawable/icon" android:theme="@style/MainTheme">
-    <activity android:name=".MainActivity" 
-              android:label="We Share" 
-              android:configChanges="orientation|screenSize" 
-              android:windowSoftInputMode="adjustResize" 
-              android:exported="true">
-      <intent-filter>
-        <action android:name="android.intent.action.MAIN" />
-        <category android:name="android.intent.category.LAUNCHER" />
-      </intent-filter>
-    </activity>
   </application>
 </manifest>
