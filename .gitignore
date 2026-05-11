@@ -1,14 +1,11 @@
-# .NET Core
+# .NET build artifacts
 [Bb]in/
 [Oo]bj/
-*.swp
-*~
-*.user
-*.userosscache
-*.sln.docstates
 
-# Visual Studio
+# Visual Studio / Rider / VS Code
 .vs/
+.idea/
+.vscode/
 *.suo
 *.user
 *.userosscache
@@ -17,23 +14,43 @@
 *.sdf
 *.cache
 *.opendb
+*.swp
+*~
 
-# VS Code
-.vscode/
+# NuGet
+*.nupkg
+*.snupkg
+project.lock.json
+project.fragment.lock.json
+artifacts/
 
-# Rider
-.idea/
+# Publish output
+publish/
+dist/
+build/
 
-# Android
+# Logs & crash dumps
+*.log
+*.tmp
+shareit.db
+weshare.db
+
+# OS-specific
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Android (legacy — no longer part of project)
 *.apk
 *.aab
 *.dex
 android-sdk/
 jdk-*/
 
-# User-specific
-dist/
-*.exe
-shareit.db
-build_output.txt
-logoo.png
+# Secrets / environment
+*.env
+*.pfx
+*.p12
+
+# Internal skill files (development tools, not part of project)
+SKILL.md

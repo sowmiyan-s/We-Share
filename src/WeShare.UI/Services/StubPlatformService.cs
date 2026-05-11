@@ -18,6 +18,8 @@ namespace WeShare.UI.Services
 
         public Task StopHotspotAsync() => Task.CompletedTask;
 
+        public Task<(bool Success, string Message)> RunElevatedAsync(string fileName, string arguments) => Task.FromResult((true, "Stub Success"));
+
         public void StartBluetoothDiscovery(Action<DeviceModel> onDeviceFound) { }
         public void StopBluetoothDiscovery() { }
         public void StartBluetoothAdvertising(DeviceModel localDevice) { }
@@ -31,5 +33,6 @@ namespace WeShare.UI.Services
         public void OpenUrl(string url) { }
         public void ShareFile(string path) { }
         public void CopyToClipboard(string text) { }
+        public void ShowSystemToast(string title, string message, string? url = null) { }
     }
 }

@@ -12,6 +12,7 @@ namespace WeShare.Core.Services
         // Hotspot Management
         Task<(bool Success, string Message)> StartHotspotAsync(string ssid, string password);
         Task StopHotspotAsync();
+        Task<(bool Success, string Message)> RunElevatedAsync(string fileName, string arguments);
         bool IsHotspotRunning { get; }
         string HotspotIp { get; }
 
@@ -32,5 +33,6 @@ namespace WeShare.Core.Services
         void OpenUrl(string url);
         void ShareFile(string path);
         void CopyToClipboard(string text);
+        void ShowSystemToast(string title, string message, string? url = null);
     }
 }

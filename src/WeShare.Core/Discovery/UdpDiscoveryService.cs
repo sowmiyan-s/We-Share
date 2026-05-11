@@ -175,14 +175,20 @@ namespace WeShare.Core.Discovery
         /// <summary>Get the best local IPv4 address to include in our broadcast payload.</summary>
         public static string GetLocalIp()
         {
-            foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
+            var interfaces = NetworkInterface.GetAllNetworkInterfaces()
+                .Where(ni => ni.OperationalStatus == OperationalStatus.Up && 
+                             ni.NetworkInterfaceType != NetworkInterfaceType.Loopback &&
+                             !ni.Description.Contains("Virtual", StringComparison.OrdinalIgnoreCase) &&
+                             !ni.Description.Contains("Pseudo", StringComparison.OrdinalIgnoreCase))
+                .OrderByDescending(ni => ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211)
+                .ThenByDescending(ni => ni.Description.Contains("Hotspot", StringComparison.OrdinalIgnoreCase))
+                .ThenByDescending(ni => ni.NetworkInterfaceType == NetworkInterfaceType.Ethernet);
+
+            foreach (var ni in interfaces)
             {
-                if (ni.OperationalStatus != OperationalStatus.Up) continue;
-                if (ni.NetworkInterfaceType == NetworkInterfaceType.Loopback) continue;
                 foreach (var ua in ni.GetIPProperties().UnicastAddresses)
                 {
-                    if (ua.Address.AddressFamily == AddressFamily.InterNetwork &&
-                        !IPAddress.IsLoopback(ua.Address))
+                    if (ua.Address.AddressFamily == AddressFamily.InterNetwork && !IPAddress.IsLoopback(ua.Address))
                         return ua.Address.ToString();
                 }
             }

@@ -258,21 +258,40 @@ namespace WeShare.Desktop.Services
         // ── Other ────────────────────────────────────────────────────────────
         public Task<bool> RequestPermissionsAsync() => Task.FromResult(true);
 
-        public void OpenFile(string path)
-        {
-            try { Process.Start(new ProcessStartInfo(path) { UseShellExecute = true }); } catch { }
-        }
-
         public void OpenUrl(string url)
         {
-            try { Process.Start(new ProcessStartInfo(url) { UseShellExecute = true }); } catch { }
+            try { Process.Start(new ProcessStartInfo(url) { UseShellExecute = true }); }
+            catch { }
         }
 
-        public void CopyToClipboard(string text) { }
+        public void OpenFile(string path)
+        {
+            try { Process.Start(new ProcessStartInfo("explorer.exe", $"/select,\"{path}\"") { UseShellExecute = true }); }
+            catch { }
+        }
 
         public void ShareFile(string path)
         {
-            try { Process.Start(new ProcessStartInfo("explorer.exe", $"/select,\"{path}\"") { UseShellExecute = true }); } catch { }
+            // Windows native share is complex, so we'll just open the folder for now
+            OpenFile(path);
+        }
+
+        public void CopyToClipboard(string text)
+        {
+            // This will be handled in UI layer via Avalonia
+        }
+
+        public void ShowSystemToast(string title, string message, string? url = null)
+        {
+            string script = $"[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null; " +
+                            $"[Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, ContentType = WindowsRuntime] | Out-Null; " +
+                            $"$xml = [Windows.Data.Xml.Dom.XmlDocument]::new(); " +
+                            $"$template = '<toast><visual><binding template=\"ToastGeneric\"><text>{title}</text><text>{message}</text></binding></visual></toast>'; " +
+                            $"$xml.LoadXml($template); " +
+                            $"$toast = [Windows.UI.Notifications.ToastNotification]::new($xml); " +
+                            $"[Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier(\"We Share\").Show($toast);";
+
+            _ = RunElevatedAsync("powershell.exe", $"-Command \"{script}\"");
         }
 
         private static string DetectHotspotIp()
@@ -291,16 +310,16 @@ namespace WeShare.Desktop.Services
             return "192.168.137.1";
         }
 
-        private static Task<(bool Launched, string Error)> RunElevatedAsync(string exe, string args)
+        public async Task<(bool Success, string Message)> RunElevatedAsync(string fileName, string arguments)
         {
             try
             {
-                var psi = new ProcessStartInfo(exe, args) { UseShellExecute = true, Verb = "runas", WindowStyle = ProcessWindowStyle.Hidden };
+                var psi = new ProcessStartInfo(fileName, arguments) { UseShellExecute = true, Verb = "runas", WindowStyle = ProcessWindowStyle.Hidden };
                 using var proc = Process.Start(psi)!;
-                proc.WaitForExit();
-                return Task.FromResult((true, ""));
+                await proc.WaitForExitAsync();
+                return (true, "");
             }
-            catch (Exception ex) { return Task.FromResult((false, ex.Message)); }
+            catch (Exception ex) { return (false, ex.Message); }
         }
     }
 }

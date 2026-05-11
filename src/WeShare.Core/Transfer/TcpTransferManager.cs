@@ -111,8 +111,11 @@ namespace WeShare.Core.Transfer
                 TransferStarted?.Invoke(state);
 
                 // 3. Save file
-                Directory.CreateDirectory(saveDirectory);
-                string dest = GetUniqueFilePath(saveDirectory, state.FileName);
+                string category = GetCategoryFolder(Path.GetExtension(state.FileName));
+                string targetDir = Path.Combine(saveDirectory, category);
+                Directory.CreateDirectory(targetDir);
+                
+                string dest = GetUniqueFilePath(targetDir, state.FileName);
                 state.FilePath = dest;
 
                 using var fs = new FileStream(dest, FileMode.Create, FileAccess.Write, FileShare.None, 81920, true);
@@ -256,6 +259,28 @@ namespace WeShare.Core.Transfer
         }
 
         // ── Helpers ───────────────────────────────────────────────────────────
+        private static string GetCategoryFolder(string ext)
+        {
+            ext = ext.ToLower().TrimStart('.');
+            switch (ext)
+            {
+                case "jpg": case "jpeg": case "png": case "gif": case "bmp": case "webp": case "svg":
+                    return "Images";
+                case "mp4": case "mkv": case "mov": case "avi": case "wmv": case "flv":
+                    return "Videos";
+                case "mp3": case "wav": case "flac": case "m4a": case "ogg":
+                    return "Music";
+                case "pdf": case "doc": case "docx": case "txt": case "rtf": case "xls": case "xlsx": case "ppt": case "pptx":
+                    return "Documents";
+                case "zip": case "rar": case "7z": case "tar": case "gz":
+                    return "Archives";
+                case "exe": case "msi": case "apk":
+                    return "Apps";
+                default:
+                    return "Others";
+            }
+        }
+
         private static string GetUniqueFilePath(string dir, string filename)
         {
             string dest = Path.Combine(dir, filename);

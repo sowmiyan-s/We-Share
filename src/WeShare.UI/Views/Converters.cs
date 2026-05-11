@@ -45,4 +45,33 @@ namespace WeShare.UI.Views
             throw new NotImplementedException();
         }
     }
+
+    public class RadarPositionConverter : IMultiValueConverter
+    {
+        public object? Convert(System.Collections.Generic.IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
+        {
+            if (values.Count < 3 || values[0] is not WeShare.Core.Models.DeviceModel device || values[1] is not System.Collections.ObjectModel.ObservableCollection<WeShare.Core.Models.DeviceModel> devices || values[2] is not string type) 
+                return 0.0;
+            
+            int index = devices.IndexOf(device);
+            if (index < 0) return 0.0;
+
+            // Put them on different rings based on index (match XAML rings: 90, 210, 260)
+            double[] rings = { 110, 190, 240 }; 
+            double radius = rings[index % rings.Length];
+            
+            // Offset angles so they don't overlap (spread them out)
+            double angle = (index * 60 + (index / 3) * 20) * (Math.PI / 180.0);
+            
+            // Canvas Center (520x520 radar panel -> 260x260 center)
+            double centerX = 260;
+            double centerY = 260;
+
+            // Icon size offset (64x64 icon -> subtract 32)
+            if (type == "X") return centerX + Math.Cos(angle) * radius - 32;
+            return centerY + Math.Sin(angle) * radius - 32;
+        }
+
+        public object?[] ConvertBack(object? value, Type[] targetTypes, object? parameter, CultureInfo culture) => throw new NotImplementedException();
+    }
 }
