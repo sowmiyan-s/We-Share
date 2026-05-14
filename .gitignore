@@ -24,10 +24,12 @@ project.lock.json
 project.fragment.lock.json
 artifacts/
 
-# Publish output
+# Publish and Installer output
 publish/
 dist/
 build/
+setup/
+*.exe
 
 # Logs & crash dumps
 *.log

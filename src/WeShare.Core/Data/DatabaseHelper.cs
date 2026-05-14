@@ -11,133 +11,158 @@ namespace WeShare.Core.Data
 
         public DatabaseHelper(string? dbPath = null)
         {
-            // Default to app directory; caller can override for testability
-            _dbPath = dbPath ?? System.IO.Path.Combine(
-                AppContext.BaseDirectory, "WeShare.db");
+            if (dbPath == null)
+            {
+                string appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                string folder = System.IO.Path.Combine(appData, "WeShare");
+                if (!System.IO.Directory.Exists(folder)) System.IO.Directory.CreateDirectory(folder);
+                _dbPath = System.IO.Path.Combine(folder, "WeShare.db");
+            }
+            else
+            {
+                _dbPath = dbPath;
+            }
             InitializeDatabase();
         }
 
-        private SqliteConnection OpenConnection()
+        private async Task<SqliteConnection> OpenConnectionAsync()
         {
             var conn = new SqliteConnection($"Data Source={_dbPath}");
-            conn.Open();
+            await conn.OpenAsync();
             return conn;
         }
 
-        private void InitializeDatabase()
+        private async void InitializeDatabase()
         {
-            using var conn = OpenConnection();
-            using var cmd = conn.CreateCommand();
-            cmd.CommandText = @"
-                CREATE TABLE IF NOT EXISTS Transfers (
-                    FileId           TEXT PRIMARY KEY,
-                    SessionId        TEXT,
-                    FileName         TEXT,
-                    FilePath         TEXT,
-                    PeerName         TEXT DEFAULT '',
-                    TotalBytes       INTEGER,
-                    TransferredBytes INTEGER,
-                    Status           INTEGER,
-                    Direction        INTEGER DEFAULT 0,
-                    Timestamp        TEXT DEFAULT ''
-                );
+            try
+            {
+                using var conn = await OpenConnectionAsync();
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = @"
+                    CREATE TABLE IF NOT EXISTS Transfers (
+                        FileId           TEXT PRIMARY KEY,
+                        SessionId        TEXT,
+                        FileName         TEXT,
+                        FilePath         TEXT,
+                        PeerName         TEXT DEFAULT '',
+                        TotalBytes       INTEGER,
+                        TransferredBytes INTEGER,
+                        Status           INTEGER,
+                        Direction        INTEGER DEFAULT 0,
+                        Timestamp        TEXT DEFAULT ''
+                    );
+                ";
+                await cmd.ExecuteNonQueryAsync();
 
-                -- Add columns that may be missing in older DB files
-                -- (SQLite ignores ALTER TABLE ADD COLUMN if the column already exists via error; we use separate statements)
-            ";
-            cmd.ExecuteNonQuery();
-
-            // Ensure new columns exist in older databases (safe migration)
-            TryAddColumn(conn, "Transfers", "PeerName",  "TEXT DEFAULT ''");
-            TryAddColumn(conn, "Transfers", "Direction", "INTEGER DEFAULT 0");
-            TryAddColumn(conn, "Transfers", "Timestamp", "TEXT DEFAULT ''");
+                // Ensure new columns exist in older databases (safe migration)
+                await TryAddColumnAsync(conn, "Transfers", "PeerName",  "TEXT DEFAULT ''");
+                await TryAddColumnAsync(conn, "Transfers", "Direction", "INTEGER DEFAULT 0");
+                await TryAddColumnAsync(conn, "Transfers", "Timestamp", "TEXT DEFAULT ''");
+            }
+            catch (Exception ex) { Console.WriteLine($"[DB] Init failed: {ex.Message}"); }
         }
 
-        private static void TryAddColumn(SqliteConnection conn, string table, string column, string definition)
+        private static async Task TryAddColumnAsync(SqliteConnection conn, string table, string column, string definition)
         {
             try
             {
                 using var cmd = conn.CreateCommand();
                 cmd.CommandText = $"ALTER TABLE {table} ADD COLUMN {column} {definition}";
-                cmd.ExecuteNonQuery();
+                await cmd.ExecuteNonQueryAsync();
             }
             catch { /* column already exists */ }
         }
 
         // ── Write ──────────────────────────────────────────────────────────────
-        public void SaveTransfer(FileTransferState state)
+        public async Task SaveTransferAsync(FileTransferState state)
         {
-            using var conn = OpenConnection();
-            using var cmd = conn.CreateCommand();
-            cmd.CommandText = @"
-                INSERT OR REPLACE INTO Transfers
-                (FileId, SessionId, FileName, FilePath, PeerName,
-                 TotalBytes, TransferredBytes, Status, Direction, Timestamp)
-                VALUES
-                ($id, $sessionId, $name, $path, $peer,
-                 $total, $transferred, $status, $dir, $ts)
-            ";
-            cmd.Parameters.AddWithValue("$id",          state.FileId);
-            cmd.Parameters.AddWithValue("$sessionId",   state.SessionId ?? string.Empty);
-            cmd.Parameters.AddWithValue("$name",        state.FileName);
-            cmd.Parameters.AddWithValue("$path",        state.FilePath);
-            cmd.Parameters.AddWithValue("$peer",        state.PeerName ?? string.Empty);
-            cmd.Parameters.AddWithValue("$total",       state.TotalBytes);
-            cmd.Parameters.AddWithValue("$transferred", state.TransferredBytes);
-            cmd.Parameters.AddWithValue("$status",      (int)state.Status);
-            cmd.Parameters.AddWithValue("$dir",         (int)state.Direction);
-            cmd.Parameters.AddWithValue("$ts",          state.Timestamp.ToString("o"));
-            cmd.ExecuteNonQuery();
+            try
+            {
+                using var conn = await OpenConnectionAsync();
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = @"
+                    INSERT OR REPLACE INTO Transfers
+                    (FileId, SessionId, FileName, FilePath, PeerName,
+                     TotalBytes, TransferredBytes, Status, Direction, Timestamp)
+                    VALUES
+                    ($id, $sessionId, $name, $path, $peer,
+                     $total, $transferred, $status, $dir, $ts)
+                ";
+                cmd.Parameters.AddWithValue("$id",          state.FileId);
+                cmd.Parameters.AddWithValue("$sessionId",   state.SessionId ?? string.Empty);
+                cmd.Parameters.AddWithValue("$name",        state.FileName);
+                cmd.Parameters.AddWithValue("$path",        state.FilePath);
+                cmd.Parameters.AddWithValue("$peer",        state.PeerName ?? string.Empty);
+                cmd.Parameters.AddWithValue("$total",       state.TotalBytes);
+                cmd.Parameters.AddWithValue("$transferred", state.TransferredBytes);
+                cmd.Parameters.AddWithValue("$status",      (int)state.Status);
+                cmd.Parameters.AddWithValue("$dir",         (int)state.Direction);
+                cmd.Parameters.AddWithValue("$ts",          state.Timestamp.ToString("o"));
+                await cmd.ExecuteNonQueryAsync();
+            }
+            catch (Exception ex) { Console.WriteLine($"[DB] Save failed: {ex.Message}"); }
         }
 
         // ── Read ───────────────────────────────────────────────────────────────
-        public List<FileTransferState> GetAllTransfers()
+        public async Task<List<FileTransferState>> GetAllTransfersAsync()
         {
             var list = new List<FileTransferState>();
-            using var conn = OpenConnection();
-            using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT FileId, SessionId, FileName, FilePath, PeerName, " +
-                              "TotalBytes, TransferredBytes, Status, Direction, Timestamp " +
-                              "FROM Transfers ORDER BY Timestamp DESC";
-
-            using var reader = cmd.ExecuteReader();
-            while (reader.Read())
+            try
             {
-                var ts = reader.IsDBNull(9) ? DateTime.MinValue
-                         : DateTime.TryParse(reader.GetString(9), out var dt) ? dt : DateTime.MinValue;
+                using var conn = await OpenConnectionAsync();
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = "SELECT FileId, SessionId, FileName, FilePath, PeerName, " +
+                                  "TotalBytes, TransferredBytes, Status, Direction, Timestamp " +
+                                  "FROM Transfers ORDER BY Timestamp DESC";
 
-                list.Add(new FileTransferState
+                using var reader = await cmd.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
                 {
-                    FileId           = reader.GetString(0),
-                    SessionId        = reader.IsDBNull(1) ? "" : reader.GetString(1),
-                    FileName         = reader.GetString(2),
-                    FilePath         = reader.IsDBNull(3) ? "" : reader.GetString(3),
-                    PeerName         = reader.IsDBNull(4) ? "" : reader.GetString(4),
-                    TotalBytes       = reader.GetInt64(5),
-                    TransferredBytes = reader.GetInt64(6),
-                    Status           = (TransferStatus)reader.GetInt32(7),
-                    Direction        = reader.IsDBNull(8) ? TransferDirection.Received : (TransferDirection)reader.GetInt32(8),
-                    Timestamp        = ts
-                });
+                    var ts = reader.IsDBNull(9) ? DateTime.MinValue
+                             : DateTime.TryParse(reader.GetString(9), out var dt) ? dt : DateTime.MinValue;
+
+                    list.Add(new FileTransferState
+                    {
+                        FileId           = reader.GetString(0),
+                        SessionId        = reader.IsDBNull(1) ? "" : reader.GetString(1),
+                        FileName         = reader.GetString(2),
+                        FilePath         = reader.IsDBNull(3) ? "" : reader.GetString(3),
+                        PeerName         = reader.IsDBNull(4) ? "" : reader.GetString(4),
+                        TotalBytes       = reader.GetInt64(5),
+                        TransferredBytes = reader.GetInt64(6),
+                        Status           = (TransferStatus)reader.GetInt32(7),
+                        Direction        = reader.IsDBNull(8) ? TransferDirection.Received : (TransferDirection)reader.GetInt32(8),
+                        Timestamp        = ts
+                    });
+                }
             }
+            catch (Exception ex) { Console.WriteLine($"[DB] Read failed: {ex.Message}"); }
             return list;
         }
 
-        public void DeleteTransfer(string fileId)
+        public async Task DeleteTransferAsync(string fileId)
         {
-            using var conn = OpenConnection();
-            using var cmd = conn.CreateCommand();
-            cmd.CommandText = "DELETE FROM Transfers WHERE FileId = $id";
-            cmd.Parameters.AddWithValue("$id", fileId);
-            cmd.ExecuteNonQuery();
+            try
+            {
+                using var conn = await OpenConnectionAsync();
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = "DELETE FROM Transfers WHERE FileId = $id";
+                cmd.Parameters.AddWithValue("$id", fileId);
+                await cmd.ExecuteNonQueryAsync();
+            }
+            catch (Exception ex) { Console.WriteLine($"[DB] Delete failed: {ex.Message}"); }
         }
 
-        public void ClearHistory()
+        public async Task ClearHistoryAsync()
         {
-            using var conn = OpenConnection();
-            using var cmd = conn.CreateCommand();
-            cmd.CommandText = "DELETE FROM Transfers";
-            cmd.ExecuteNonQuery();
+            try
+            {
+                using var conn = await OpenConnectionAsync();
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = "DELETE FROM Transfers";
+                await cmd.ExecuteNonQueryAsync();
+            }
+            catch (Exception ex) { Console.WriteLine($"[DB] Clear failed: {ex.Message}"); }
         }
     }
 }

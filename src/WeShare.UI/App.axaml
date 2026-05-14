@@ -6,44 +6,44 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.ThemeDictionaries>
-                <!-- DARK THEME -->
+                <!-- DARK THEME — Purple/Violet brand palette -->
                 <ResourceDictionary x:Key="Dark">
-                    <Color x:Key="DeepSlate">#0f0f15</Color>
-                    <Color x:Key="ElectricIndigo">#6366f1</Color>
-                    <Color x:Key="ElectricIndigoDim">#4338ca</Color>
-                    <Color x:Key="TealAccent">#4fdbc8</Color>
-                    <Color x:Key="GlassFill">#0AFFFFFF</Color>
-                    <Color x:Key="GlassStroke">#15FFFFFF</Color>
-                    <Color x:Key="TextPrimary">#F8FAFC</Color>
-                    <Color x:Key="TextSecondary">#94A3B8</Color>
-                    <SolidColorBrush x:Key="BaseBackgroundBrush"  Color="#0f0f15"/>
-                    <SolidColorBrush x:Key="GlassBorderBrush"     Color="#15FFFFFF"/>
-                    <SolidColorBrush x:Key="GlassBackgroundBrush" Color="#0AFFFFFF"/>
-                    <SolidColorBrush x:Key="CardBackgroundBrush"  Color="#16161e"/>
-                    <SolidColorBrush x:Key="RadarRingBrush"        Color="#156366f1"/>
+                    <Color x:Key="DeepSlate">#0E0618</Color>
+                    <Color x:Key="ElectricIndigo">#9333EA</Color>
+                    <Color x:Key="ElectricIndigoDim">#7C3AED</Color>
+                    <Color x:Key="TealAccent">#C084FC</Color>
+                    <Color x:Key="GlassFill">#120822</Color>
+                    <Color x:Key="GlassStroke">#2A1050</Color>
+                    <Color x:Key="TextPrimary">#FAF5FF</Color>
+                    <Color x:Key="TextSecondary">#B09CC8</Color>
+                    <SolidColorBrush x:Key="BaseBackgroundBrush"  Color="#0E0618"/>
+                    <SolidColorBrush x:Key="GlassBorderBrush"     Color="#2A1050"/>
+                    <SolidColorBrush x:Key="GlassBackgroundBrush" Color="#18092E"/>
+                    <SolidColorBrush x:Key="CardBackgroundBrush"  Color="#160828"/>
+                    <SolidColorBrush x:Key="RadarRingBrush"        Color="#309333EA"/>
                 </ResourceDictionary>
 
-                <!-- LIGHT THEME -->
+                <!-- LIGHT THEME — soft lavender/lilac -->
                 <ResourceDictionary x:Key="Light">
-                    <Color x:Key="DeepSlate">#f8fafc</Color>
-                    <Color x:Key="ElectricIndigo">#4f46e5</Color>
-                    <Color x:Key="ElectricIndigoDim">#3730a3</Color>
-                    <Color x:Key="TealAccent">#0d9488</Color>
-                    <Color x:Key="GlassFill">#FFFFFF</Color>
-                    <Color x:Key="GlassStroke">#E2E8F0</Color>
-                    <Color x:Key="TextPrimary">#0F172A</Color>
-                    <Color x:Key="TextSecondary">#64748B</Color>
-                    <SolidColorBrush x:Key="BaseBackgroundBrush"  Color="#f8fafc"/>
-                    <SolidColorBrush x:Key="GlassBorderBrush"     Color="#CBD5E1"/>
-                    <SolidColorBrush x:Key="GlassBackgroundBrush" Color="#FFFFFF"/>
-                    <SolidColorBrush x:Key="CardBackgroundBrush"  Color="#f1f5f9"/>
-                    <SolidColorBrush x:Key="RadarRingBrush"        Color="#154f46e5"/>
+                    <Color x:Key="DeepSlate">#FAF5FF</Color>
+                    <Color x:Key="ElectricIndigo">#7C3AED</Color>
+                    <Color x:Key="ElectricIndigoDim">#6D28D9</Color>
+                    <Color x:Key="TealAccent">#A855F7</Color>
+                    <Color x:Key="GlassFill">#F3E8FF</Color>
+                    <Color x:Key="GlassStroke">#DDD6FE</Color>
+                    <Color x:Key="TextPrimary">#1E0A3C</Color>
+                    <Color x:Key="TextSecondary">#6B4FA0</Color>
+                    <SolidColorBrush x:Key="BaseBackgroundBrush"  Color="#FAF5FF"/>
+                    <SolidColorBrush x:Key="GlassBorderBrush"     Color="#DDD6FE"/>
+                    <SolidColorBrush x:Key="GlassBackgroundBrush" Color="#F3E8FF"/>
+                    <SolidColorBrush x:Key="CardBackgroundBrush"  Color="#EDE9FE"/>
+                    <SolidColorBrush x:Key="RadarRingBrush"        Color="#307C3AED"/>
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
 
-            <Color x:Key="ElectricIndigo">#6366f1</Color>
-            <Color x:Key="ElectricIndigoDim">#4338ca</Color>
-            <Color x:Key="TealAccent">#4fdbc8</Color>
+            <Color x:Key="ElectricIndigo">#9333EA</Color>
+            <Color x:Key="ElectricIndigoDim">#7C3AED</Color>
+            <Color x:Key="TealAccent">#C084FC</Color>
             
             <SolidColorBrush x:Key="ElectricIndigoBrush" Color="{DynamicResource ElectricIndigo}"/>
             <SolidColorBrush x:Key="ElectricIndigoDimBrush" Color="{DynamicResource ElectricIndigoDim}"/>
@@ -93,7 +93,7 @@
             <Setter Property="Width" Value="150"/>
             <Setter Property="Height" Value="150"/>
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="CornerRadius" Value="75"/>
+            <Setter Property="CornerRadius" Value="0"/>
             <Setter Property="BorderBrush" Value="#333"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="RenderTransformOrigin" Value="50%,50%"/>

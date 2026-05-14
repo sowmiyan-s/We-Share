@@ -7,6 +7,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using WeShare.Core.Models;
+using WeShare.Core.Security;
 
 namespace WeShare.Core.Transfer
 {
@@ -16,6 +17,7 @@ namespace WeShare.Core.Transfer
         private TcpListener? _listener;
         private CancellationTokenSource? _listenerCts;
 
+        public int BoundPort { get; private set; }
         public string LocalName { get; set; } = Environment.MachineName;
 
         public event Action<FileTransferState>? TransferStarted;
@@ -40,6 +42,10 @@ namespace WeShare.Core.Transfer
             _listenerCts = new CancellationTokenSource();
             _listener = new TcpListener(IPAddress.Any, _listenPort);
             _listener.Start();
+            
+            // Capture the actual port (useful if _listenPort was 0)
+            BoundPort = ((IPEndPoint)_listener.LocalEndpoint).Port;
+
             _ = Task.Run(() => AcceptClientsAsync(saveDirectory, _listenerCts.Token));
         }
 
@@ -72,15 +78,33 @@ namespace WeShare.Core.Transfer
         private async Task HandleIncomingTransferAsync(TcpClient client, string saveDirectory)
         {
             using var clientOwner = client;
-            using var stream = client.GetStream();
-            using var reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true);
+            using var rawStream = client.GetStream();
 
             FileTransferState? state = null;
             try
             {
-                // 1. Read metadata
-                int metaLength = reader.ReadInt32();
-                byte[] metaBytes = reader.ReadBytes(metaLength);
+                // 1. Decrypt metadata
+                using var cryptoReader = EncryptionHelper.CreateDecryptionStream(rawStream, leaveOpen: true);
+                
+                byte[] lenBuffer = new byte[4];
+                int read = 0;
+                while (read < 4)
+                {
+                    int r = await cryptoReader.ReadAsync(lenBuffer, read, 4 - read).ConfigureAwait(false);
+                    if (r == 0) return;
+                    read += r;
+                }
+                int metaLength = BitConverter.ToInt32(lenBuffer, 0);
+
+                byte[] metaBytes = new byte[metaLength];
+                read = 0;
+                while (read < metaLength)
+                {
+                    int r = await cryptoReader.ReadAsync(metaBytes, read, metaLength - read).ConfigureAwait(false);
+                    if (r == 0) return;
+                    read += r;
+                }
+
                 var json = Encoding.UTF8.GetString(metaBytes);
                 state = JsonSerializer.Deserialize<FileTransferState>(json,
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
@@ -94,19 +118,16 @@ namespace WeShare.Core.Transfer
                 state.Timestamp = DateTime.UtcNow;
 
                 // 2. Ask for permission
-                using var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true);
+                bool accepted = true;
                 if (TransferRequestCallback != null)
                 {
-                    bool accepted = await TransferRequestCallback(state);
-                    writer.Write(accepted ? (byte)1 : (byte)0);
-                    writer.Flush();
-                    if (!accepted) return;
+                    accepted = await TransferRequestCallback(state).ConfigureAwait(false);
                 }
-                else
-                {
-                    writer.Write((byte)1); // Auto-accept
-                    writer.Flush();
-                }
+                
+                await rawStream.WriteAsync(new byte[] { accepted ? (byte)1 : (byte)0 }, 0, 1).ConfigureAwait(false);
+                await rawStream.FlushAsync().ConfigureAwait(false);
+                
+                if (!accepted) return;
 
                 TransferStarted?.Invoke(state);
 
@@ -119,30 +140,29 @@ namespace WeShare.Core.Transfer
                 state.FilePath = dest;
 
                 using var fs = new FileStream(dest, FileMode.Create, FileAccess.Write, FileShare.None, 81920, true);
+                
+                // 4. Decrypt file data
+                using var fileCryptoReader = EncryptionHelper.CreateDecryptionStream(rawStream);
 
                 byte[] buffer = new byte[81920];
                 long totalRead = 0;
-                var sw = System.Diagnostics.Stopwatch.StartNew();
                 long lastReportedBytes = 0;
                 DateTime lastReportTime = DateTime.UtcNow;
 
-                int read;
-                while ((read = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                while ((read = await fileCryptoReader.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false)) > 0)
                 {
-                    await fs.WriteAsync(buffer, 0, read);
+                    await fs.WriteAsync(buffer, 0, read).ConfigureAwait(false);
                     totalRead += read;
                     state.TransferredBytes = totalRead;
 
                     var now = DateTime.UtcNow;
                     var elapsed = (now - lastReportTime).TotalSeconds;
-                    if (elapsed >= 0.25) // update UI ~4x/sec
+                    if (elapsed >= 0.25)
                     {
                         long bytesSinceLast = totalRead - lastReportedBytes;
                         state.SpeedMbPerSec = bytesSinceLast / elapsed / 1_000_000.0;
                         if (state.SpeedMbPerSec > 0 && state.TotalBytes > totalRead)
                             state.ETA = TimeSpan.FromSeconds((state.TotalBytes - totalRead) / (state.SpeedMbPerSec * 1_000_000.0));
-                        else
-                            state.ETA = TimeSpan.Zero;
 
                         lastReportedBytes = totalRead;
                         lastReportTime = now;
@@ -151,8 +171,6 @@ namespace WeShare.Core.Transfer
                 }
 
                 state.TransferredBytes = totalRead;
-                state.SpeedMbPerSec = totalRead / Math.Max(sw.Elapsed.TotalSeconds, 0.001) / 1_000_000.0;
-                state.ETA = TimeSpan.Zero;
                 state.Status = TransferStatus.Done;
                 TransferCompleted?.Invoke(state);
             }
@@ -185,76 +203,78 @@ namespace WeShare.Core.Transfer
                 using var client = new TcpClient();
                 client.SendBufferSize    = 81920;
                 client.ReceiveBufferSize = 81920;
-                await client.ConnectAsync(targetIp, targetPort, cancellationToken);
 
-                using var stream = client.GetStream();
-                using var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true);
+                using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                cts.CancelAfter(TimeSpan.FromSeconds(10));
 
-                // 1. Metadata
-                var json = JsonSerializer.Serialize(state);
-                var metaBytes = Encoding.UTF8.GetBytes(json);
-                writer.Write(metaBytes.Length);
-                writer.Write(metaBytes);
-                writer.Flush();
+                await client.ConnectAsync(targetIp, targetPort, cts.Token).ConfigureAwait(false);
 
-                // 2. Read response
-                using var reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true);
-                byte response = reader.ReadByte();
-                if (response == 0)
+                using var rawStream = client.GetStream();
+
+                // 1. Encrypt and send metadata
+                using (var cryptoWriter = EncryptionHelper.CreateEncryptionStream(rawStream, leaveOpen: true))
+                {
+                    var json = JsonSerializer.Serialize(state);
+                    var metaBytes = Encoding.UTF8.GetBytes(json);
+                    byte[] lenBytes = BitConverter.GetBytes(metaBytes.Length);
+
+                    await cryptoWriter.WriteAsync(lenBytes, 0, 4, cancellationToken).ConfigureAwait(false);
+                    await cryptoWriter.WriteAsync(metaBytes, 0, metaBytes.Length, cancellationToken).ConfigureAwait(false);
+                    await cryptoWriter.FlushAsync(cancellationToken).ConfigureAwait(false);
+                }
+
+                // 2. Read response (unencrypted handshake response)
+                byte[] respBuffer = new byte[1];
+                int r = await rawStream.ReadAsync(respBuffer, 0, 1, cancellationToken).ConfigureAwait(false);
+                if (r == 0 || respBuffer[0] == 0)
                 {
                     state.Status = TransferStatus.Failed;
                     TransferFailed?.Invoke(state);
-                    return; // Rejected by peer
+                    return;
                 }
 
-                // 3. File data
-                byte[] buffer = new byte[81920];
-                int read;
-                long totalSent = 0;
-                long lastReportedBytes = 0;
-                DateTime lastReportTime = DateTime.UtcNow;
-                var sw = System.Diagnostics.Stopwatch.StartNew();
-
-                while ((read = await fileStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken)) > 0)
+                // 3. Encrypt and send file data
+                using (var fileCryptoWriter = EncryptionHelper.CreateEncryptionStream(rawStream))
                 {
-                    await stream.WriteAsync(buffer, 0, read, cancellationToken);
-                    totalSent += read;
-                    state.TransferredBytes = totalSent;
+                    byte[] buffer = new byte[81920];
+                    int read;
+                    long totalSent = 0;
+                    long lastReportedBytes = 0;
+                    DateTime lastReportTime = DateTime.UtcNow;
 
-                    var now = DateTime.UtcNow;
-                    var elapsed = (now - lastReportTime).TotalSeconds;
-                    if (elapsed >= 0.25)
+                    while ((read = await fileStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false)) > 0)
                     {
-                        long bytesSinceLast = totalSent - lastReportedBytes;
-                        state.SpeedMbPerSec = bytesSinceLast / elapsed / 1_000_000.0;
-                        if (state.SpeedMbPerSec > 0 && state.TotalBytes > totalSent)
-                            state.ETA = TimeSpan.FromSeconds((state.TotalBytes - totalSent) / (state.SpeedMbPerSec * 1_000_000.0));
-                        else
-                            state.ETA = TimeSpan.Zero;
+                        await fileCryptoWriter.WriteAsync(buffer, 0, read, cancellationToken).ConfigureAwait(false);
+                        totalSent += read;
+                        state.TransferredBytes = totalSent;
 
-                        lastReportedBytes = totalSent;
-                        lastReportTime = now;
-                        TransferProgress?.Invoke(state);
+                        var now = DateTime.UtcNow;
+                        var elapsed = (now - lastReportTime).TotalSeconds;
+                        if (elapsed >= 0.25)
+                        {
+                            long bytesSinceLast = totalSent - lastReportedBytes;
+                            state.SpeedMbPerSec = bytesSinceLast / elapsed / 1_000_000.0;
+                            if (state.SpeedMbPerSec > 0 && state.TotalBytes > totalSent)
+                                state.ETA = TimeSpan.FromSeconds((state.TotalBytes - totalSent) / (state.SpeedMbPerSec * 1_000_000.0));
+
+                            lastReportedBytes = totalSent;
+                            lastReportTime = now;
+                            TransferProgress?.Invoke(state);
+                        }
                     }
+                    await fileCryptoWriter.FlushAsync(cancellationToken).ConfigureAwait(false);
                 }
 
-                state.TransferredBytes = totalSent;
-                state.SpeedMbPerSec = totalSent / Math.Max(sw.Elapsed.TotalSeconds, 0.001) / 1_000_000.0;
-                state.ETA = TimeSpan.Zero;
+                state.TransferredBytes = totalBytes;
                 state.Status = TransferStatus.Done;
                 TransferCompleted?.Invoke(state);
-            }
-            catch (OperationCanceledException)
-            {
-                state.Status = TransferStatus.Failed;
-                TransferFailed?.Invoke(state);
-                throw;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"[Transfer] Outgoing failed: {ex.Message}");
                 state.Status = TransferStatus.Failed;
                 TransferFailed?.Invoke(state);
+                if (ex is OperationCanceledException) throw;
             }
         }
 
@@ -281,16 +301,20 @@ namespace WeShare.Core.Transfer
             }
         }
 
+        private static readonly object _pathLock = new();
         private static string GetUniqueFilePath(string dir, string filename)
         {
-            string dest = Path.Combine(dir, filename);
-            if (!File.Exists(dest)) return dest;
-            string name = Path.GetFileNameWithoutExtension(filename);
-            string ext  = Path.GetExtension(filename);
-            int i = 1;
-            while (File.Exists(dest))
-                dest = Path.Combine(dir, $"{name} ({i++}){ext}");
-            return dest;
+            lock (_pathLock)
+            {
+                string dest = Path.Combine(dir, filename);
+                if (!File.Exists(dest)) return dest;
+                string name = Path.GetFileNameWithoutExtension(filename);
+                string ext  = Path.GetExtension(filename);
+                int i = 1;
+                while (File.Exists(dest))
+                    dest = Path.Combine(dir, $"{name} ({i++}){ext}");
+                return dest;
+            }
         }
     }
 }

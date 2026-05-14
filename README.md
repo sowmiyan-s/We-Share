@@ -23,7 +23,7 @@
 
 ## 🚀 What is We Share?
 
-**We Share** is a premium, open-source desktop utility for instant, cable-free file transfers over local Wi-Fi. It uses a high-performance multi-threaded TCP engine and a lightweight built-in web server, allowing any device on your network — phone, tablet, or another PC — to send and receive files through a browser. 
+**We Share** is a premium, open-source desktop utility for instant, cable-free file transfers over local Wi-Fi. It uses a high-performance multi-threaded TCP engine allowing any PC on your network to securely send and receive files.
 
 **Zero configuration. Zero data charges. Maximum privacy.**
 
@@ -34,7 +34,6 @@
 | Feature | Details |
 |---|---|
 | ⚡ **Turbo Transfer** | Multi-threaded TCP socket engine optimized for high-speed local transfers. |
-| 🌐 **Mobile Portal** | Built-in web dashboard — scan a QR code on your phone and start sharing instantly. |
 | 🔍 **Auto Discovery** | Zero-config peer detection using UDP broadcast—no manual IP entry needed. |
 | 🎨 **Premium UI** | A stunning, modern interface powered by Avalonia UI with an Indigo/Slate aesthetic. |
 | 🔒 **Local Only** | End-to-end encryption of your workflow—your data never leaves your local network. |
@@ -47,7 +46,6 @@
 - **UI Framework**: [Avalonia UI 11](https://avaloniaui.net/)
 - **Runtime**: .NET 9.0 (C#)
 - **Networking**: Custom TCP Sockets & UDP Broadcast
-- **Web Layer**: Lightweight, dependency-free HTTP Server for Mobile Portal
 - **Database**: SQLite / LiteDB for transfer history and settings
 
 ---
@@ -75,11 +73,7 @@ dotnet publish src/WeShare.Desktop/WeShare.Desktop.csproj \
 
 ## 📱 How to Use
 
-### Desktop → Mobile
-1. Launch **We Share** on your PC.
-2. Select **Mobile Portal** in the sidebar — a unique QR code will appear.
-3. Scan the QR code with your phone's camera.
-4. Your mobile browser will open the portal — you can now upload to or download from your PC.
+
 
 ### PC → PC
 1. Ensure both PCs are on the same Wi-Fi network and running **We Share**.

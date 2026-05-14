@@ -27,7 +27,7 @@
       <Setter Property="Background"          Value="Transparent"/>
       <Setter Property="Padding"             Value="20,14"/>
       <Setter Property="Margin"              Value="0,2"/>
-      <Setter Property="CornerRadius"        Value="8"/>
+      <Setter Property="CornerRadius"        Value="0"/>
       <Setter Property="HorizontalAlignment" Value="Stretch"/>
       <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
       <Setter Property="Transitions">
@@ -41,7 +41,7 @@
       <Setter Property="Background" Value="#0AFFFFFF"/>
     </Style>
     <Style Selector="Button.SidebarItem.Active /template/ ContentPresenter">
-      <Setter Property="Background"     Value="#156366f1"/>
+      <Setter Property="Background"     Value="#159333EA"/>
       <Setter Property="BorderBrush"    Value="{StaticResource ElectricIndigoBrush}"/>
       <Setter Property="BorderThickness" Value="4,0,0,0"/>
     </Style>
@@ -68,7 +68,7 @@
         <Setter Property="Background" Value="{DynamicResource GlassBackgroundBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource GlassBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="16"/>
+        <Setter Property="CornerRadius" Value="0"/>
         <Setter Property="ClipToBounds" Value="False"/>
         <Setter Property="BoxShadow" Value="0 8 24 0 #0A000000"/>
     </Style>
@@ -78,7 +78,7 @@
        <Setter Property="Background" Value="{StaticResource ElectricIndigoBrush}"/>
        <Setter Property="Foreground" Value="White"/>
        <Setter Property="Padding" Value="20,14"/>
-       <Setter Property="CornerRadius" Value="12"/>
+       <Setter Property="CornerRadius" Value="0"/>
        <Setter Property="FontWeight" Value="SemiBold"/>
        <Setter Property="FontSize" Value="13"/>
        <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
@@ -118,11 +118,11 @@
                    CornerRadius="{TemplateBinding CornerRadius}"
                    ClipToBounds="True">
              <ContentPresenter x:Name="PART_ContentPresenter"
-                               Content="{TemplateBinding Content}"
-                               ContentTemplate="{TemplateBinding ContentTemplate}"
-                               Padding="{TemplateBinding Padding}"
-                               HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
-                               VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+                                Content="{TemplateBinding Content}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                                Padding="{TemplateBinding Padding}"
+                                HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
            </Border>
          </ControlTemplate>
        </Setter>
@@ -135,7 +135,7 @@
     </Style>
 
     <Style Selector="Button.CircleAction:pointerover">
-       <Setter Property="Background" Value="#156366f1"/>
+       <Setter Property="Background" Value="#159333EA"/>
        <Setter Property="RenderTransform" Value="scale(1.1)"/>
     </Style>
     <Style Selector="Button.CircleAction:pressed">
@@ -204,16 +204,6 @@
                 <TextBlock Text="LIBRARY"/>
               </StackPanel>
             </Button>
-            <Button Classes="SidebarItem" x:Name="NavWebBtn" Click="NavMobile_Click">
-              <StackPanel Orientation="Horizontal" Spacing="16">
-                <Rectangle Classes="IconTint" Width="18" Height="18">
-                   <Rectangle.OpacityMask>
-                      <ImageBrush Source="/Assets/Icons/WEBSITE.png"/>
-                   </Rectangle.OpacityMask>
-                </Rectangle>
-                <TextBlock Text="WEB SHARING"/>
-              </StackPanel>
-            </Button>
           </StackPanel>
 
           <!-- Bottom Status -->
@@ -225,10 +215,25 @@
                       <ImageBrush Source="/Assets/Icons/SETTINGS.png"/>
                    </Rectangle.OpacityMask>
                 </Rectangle>
-                <TextBlock Text="SETTINGS" FontSize="11"/>
+                <TextBlock Text="SETTINGS"/>
               </StackPanel>
             </Button>
-            <Border Background="{DynamicResource GlassBackgroundBrush}" BorderBrush="{DynamicResource GlassBorderBrush}" BorderThickness="1" Padding="16,14" CornerRadius="12">
+            <Button Classes="SidebarItem" x:Name="NavAboutBtn" Click="NavAbout_Click">
+              <StackPanel Orientation="Horizontal" Spacing="16">
+                <TextBlock Text="ABOUT APP" Margin="34,0,0,0"/>
+              </StackPanel>
+            </Button>
+            <Button Classes="SidebarItem" Click="NavDisconnect_Click">
+               <StackPanel Orientation="Horizontal" Spacing="16">
+                  <Rectangle Classes="IconTint" Width="18" Height="18">
+                     <Rectangle.OpacityMask>
+                        <ImageBrush Source="/Assets/Icons/SETTINGS.png"/>
+                     </Rectangle.OpacityMask>
+                  </Rectangle>
+                  <TextBlock Text="GO OFFLINE" Foreground="#FF5555"/>
+               </StackPanel>
+            </Button>
+            <Border Background="{DynamicResource GlassBackgroundBrush}" BorderBrush="{DynamicResource GlassBorderBrush}" BorderThickness="1" Padding="16,14" CornerRadius="0">
                <StackPanel Spacing="6">
                   <TextBlock Text="DEVICE IDENTITY" FontSize="9" FontWeight="Bold" Foreground="{DynamicResource TextSecondary}"
                              LetterSpacing="2"/>
@@ -259,20 +264,6 @@
            </Grid>
         </Border>
 
-        <!-- Drag Overlay -->
-        <Border x:Name="DragOverlay" IsVisible="False" Background="{DynamicResource BaseBackgroundBrush}" Opacity="0.9" ZIndex="5000">
-           <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="32">
-              <Border Width="160" Height="160" BorderBrush="{StaticResource ElectricIndigoBrush}" BorderThickness="2" CornerRadius="24">
-                 <Rectangle Width="80" Height="80" Fill="{DynamicResource TextPrimary}">
-                    <Rectangle.OpacityMask>
-                       <ImageBrush Source="/Assets/Icons/SEND FILE.png"/>
-                    </Rectangle.OpacityMask>
-                 </Rectangle>
-              </Border>
-              <TextBlock Text="DROP TO SEND" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Center"/>
-           </StackPanel>
-        </Border>
-
         <!-- Dynamic Content -->
         <Grid Grid.Row="1">
             
@@ -288,7 +279,6 @@
           <!-- HOME PANEL -->
           <Grid x:Name="HomePanel" Classes="SignalPanel" VerticalAlignment="Center" ClipToBounds="False">
              <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="80" ClipToBounds="False">
-                <!-- Send File Circle -->
                 <StackPanel Spacing="32" ClipToBounds="False">
                     <Button Classes="CircleAction" Click="HomeSend_Click"
                             HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
@@ -300,8 +290,6 @@
                     </Button>
                    <TextBlock Text="SEND FILE" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Center" LetterSpacing="2"/>
                 </StackPanel>
-
-                <!-- Receive File Circle -->
                 <StackPanel Spacing="32" ClipToBounds="False">
                    <Button Classes="CircleAction" Click="HomeReceive_Click"
                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
@@ -320,7 +308,6 @@
           <Grid x:Name="ReceiveModePanel" IsVisible="False" Classes="SignalPanel">
              <Grid>
                 <Panel VerticalAlignment="Center" HorizontalAlignment="Center" Width="520" Height="520">
-                   <!-- Ambient Glow -->
                    <Ellipse Width="400" Height="400">
                       <Ellipse.Fill>
                          <RadialGradientBrush Center="50%,50%" Radius="0.5">
@@ -330,152 +317,14 @@
                       </Ellipse.Fill>
                       <Ellipse.Opacity>0.1</Ellipse.Opacity>
                    </Ellipse>
-                   
-                   <!-- Outer Ring -->
                    <Ellipse Width="520" Height="520" Stroke="{DynamicResource RadarRingBrush}" StrokeThickness="1" Opacity="0.5"/>
-                   
-                   <!-- Dashed Rings -->
                    <Ellipse Width="420" Height="420" Stroke="{DynamicResource GlassBorderBrush}" StrokeThickness="1" StrokeDashArray="4,4" Opacity="0.3"/>
                    <Ellipse Width="180" Height="180" Stroke="{DynamicResource GlassBorderBrush}" StrokeThickness="1" StrokeDashArray="4,4" Opacity="0.3"/>
-                   
-                   <!-- Sweep -->
                    <Border Width="520" Height="520" CornerRadius="260" Classes="RadarScan">
                       <Border.RenderTransform><RotateTransform/></Border.RenderTransform>
                       <Panel Width="520" Height="520">
                          <Path Data="M 0,0 L 260,0 A 260,260 0 0 0 212.9,-149.1 Z"
-                               Fill="{StaticResource ElectricIndigoBrush}" Opacity="0.2">
-                            <Path.RenderTransform>
-                               <TranslateTransform X="260" Y="260"/>
-                            </Path.RenderTransform>
-                         </Path>
-                         <Rectangle Width="260" Height="1" Fill="White" Opacity="0.5" 
-                                    HorizontalAlignment="Right" VerticalAlignment="Center"
-                                    StrokeDashArray="4,4"/>
-                      </Panel>
-                   </Border>
-
-                   <!-- Center Hub with Pulse -->
-                   <Ellipse Classes="RadarPulse" Width="100" Height="100" Fill="{StaticResource ElectricIndigoBrush}"/>
-                   <Border Width="100" Height="100" Background="{StaticResource ElectricIndigoBrush}" CornerRadius="50" BoxShadow="0 0 50 0 #606366f1">
-                      <Rectangle Width="44" Height="44" Fill="White">
-                         <Rectangle.OpacityMask>
-                            <ImageBrush Source="/Assets/Icons/SCAN.png"/>
-                         </Rectangle.OpacityMask>
-                      </Rectangle>
-                   </Border>
-                </Panel>
-
-                <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,48" Spacing="24">
-                   <TextBlock Text="READY TO RECEIVE" FontSize="14" FontWeight="Bold"
-                               Foreground="{DynamicResource TextPrimary}" LetterSpacing="4" HorizontalAlignment="Center"/>
-                   <TextBlock Text="Visible to devices on your network" FontSize="11" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" Opacity="0.7"/>
-                   <Button Classes="PrimaryBtn" Content="CANCEL BROADCAST" Click="NavHome_Click" Width="200" Margin="0,16,0,0"/>
-                </StackPanel>
-             </Grid>
-          </Grid>
-
-          <!-- SEND STEP 1: Files -->
-          <Grid x:Name="SendFilesPanel" IsVisible="False" Classes="SignalPanel" RowDefinitions="*, Auto" DragDrop.AllowDrop="True">
-             <ScrollViewer Grid.Row="0">
-               <StackPanel Spacing="32">
-                  <Grid ColumnDefinitions="*, Auto">
-                     <TextBlock Text="QUEUE" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondary}" LetterSpacing="2"/>
-                     <Button Grid.Column="1" Classes="PrimaryBtn" Content="+ ADD FILES" Click="BrowseFiles_Click"/>
-                  </Grid>
-
-                  <!-- File List -->
-                  <Border Classes="GlassCard" MinHeight="340">
-                     <Grid>
-                        <ItemsControl x:Name="SendQueueList">
-                           <ItemsControl.ItemTemplate>
-                              <DataTemplate x:DataType="views:QueueItem">
-                                 <Border BorderBrush="{DynamicResource GlassBorderBrush}" BorderThickness="0,0,0,1" Padding="24,18">
-                                    <Grid ColumnDefinitions="Auto, *, Auto">
-                                       <Rectangle Classes="IconTint" Width="18" Height="18" Margin="0,0,20,0">
-                                          <Rectangle.OpacityMask>
-                                             <ImageBrush Source="/Assets/Icons/LIBRARY.png"/>
-                                          </Rectangle.OpacityMask>
-                                       </Rectangle>
-                                       <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                          <TextBlock Text="{Binding Name}" FontWeight="SemiBold"
-                                                      FontSize="14" Foreground="{DynamicResource TextPrimary}"/>
-                                          <TextBlock Text="{Binding Size, Converter={StaticResource FileSizeConverter}}"
-                                                      FontSize="11" Foreground="{DynamicResource TextSecondary}" Margin="0,2,0,0"/>
-                                       </StackPanel>
-                                       <Button Grid.Column="2" Content="X" Click="RemoveFromQueue_Click"
-                                               Background="Transparent" Foreground="{DynamicResource TextSecondary}" FontSize="14"/>
-                                    </Grid>
-                                 </Border>
-                              </DataTemplate>
-                           </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                        <StackPanel x:Name="QueueEmptyLabel" VerticalAlignment="Center"
-                                    HorizontalAlignment="Center" Opacity="0.4" Spacing="16">
-                           <Rectangle Classes="IconTint" Width="48" Height="48" Opacity="0.3">
-                              <Rectangle.OpacityMask>
-                                 <ImageBrush Source="/Assets/Icons/LIBRARY.png"/>
-                              </Rectangle.OpacityMask>
-                           </Rectangle>
-                           <TextBlock Text="SELECT FILES TO BEGIN" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextSecondary}" LetterSpacing="2"/>
-                        </StackPanel>
-                     </Grid>
-                  </Border>
-
-                  <!-- Mini Progress -->
-                  <Border x:Name="SendProgressBorder" IsVisible="False" Classes="GlassCard" Background="#206366f1" Padding="28">
-                     <StackPanel Spacing="16">
-                        <Grid ColumnDefinitions="*, Auto">
-                           <TextBlock x:Name="SendProgressFile" Text="Processing..." FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" FontSize="14"/>
-                           <TextBlock Grid.Column="1" x:Name="SendProgressPct" Text="0%" FontWeight="Bold" Foreground="{StaticResource ElectricIndigoBrush}"/>
-                        </Grid>
-                        <ProgressBar x:Name="SendProgressBar" Height="6" CornerRadius="3"
-                                     Foreground="{StaticResource ElectricIndigoBrush}" Background="#20FFFFFF"/>
-                        <TextBlock x:Name="SendProgressSpeed" Text="0 MB/s" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
-                     </StackPanel>
-                  </Border>
-               </StackPanel>
-             </ScrollViewer>
-
-             <!-- Footer -->
-             <Border Grid.Row="1" Margin="0,24,0,0" x:Name="SendFooter" IsVisible="False"
-                     Classes="GlassCard" Background="{DynamicResource CardBackgroundBrush}" Padding="24,20">
-                <Grid ColumnDefinitions="*, Auto">
-                   <StackPanel VerticalAlignment="Center">
-                      <TextBlock x:Name="SendSummaryText" Text="0 files selected" Foreground="{DynamicResource TextPrimary}" FontWeight="Bold" FontSize="14"/>
-                      <TextBlock Text="Ready for next step" Foreground="{DynamicResource TextSecondary}" FontSize="11"/>
-                   </StackPanel>
-                   <Button Grid.Column="1" Classes="PrimaryBtn" Content="CHOOSE RECEIVER ->"
-                           Width="220" Click="NavSendDiscovery_Click"/>
-                </Grid>
-             </Border>
-          </Grid>
-
-          <!-- SEND STEP 2: Discovery (Immersive Radar) -->
-          <Grid x:Name="SendDiscoveryPanel" IsVisible="False" Classes="SignalPanel">
-             <Grid>
-                <Panel VerticalAlignment="Center" HorizontalAlignment="Center" Width="520" Height="520" ClipToBounds="False">
-                   <!-- Ambient Glow -->
-                   <Ellipse Width="400" Height="400">
-                      <Ellipse.Fill>
-                         <RadialGradientBrush Center="50%,50%" Radius="0.5">
-                            <GradientStop Offset="0" Color="{StaticResource ElectricIndigo}"/>
-                            <GradientStop Offset="1" Color="Transparent"/>
-                         </RadialGradientBrush>
-                      </Ellipse.Fill>
-                      <Ellipse.Opacity>0.1</Ellipse.Opacity>
-                   </Ellipse>
-
-                   <!-- Rings -->
-                   <Ellipse Width="520" Height="520" Stroke="{DynamicResource RadarRingBrush}" StrokeThickness="1" Opacity="0.5"/>
-                   <Ellipse Width="420" Height="420" Stroke="{DynamicResource GlassBorderBrush}" StrokeThickness="1" StrokeDashArray="4,4" Opacity="0.3"/>
-                   <Ellipse Width="180" Height="180" Stroke="{DynamicResource GlassBorderBrush}" StrokeThickness="1" StrokeDashArray="4,4" Opacity="0.3"/>
-                   
-                   <!-- Sweep -->
-                   <Border Width="520" Height="520" CornerRadius="260" Classes="RadarScan">
-                      <Border.RenderTransform><RotateTransform/></Border.RenderTransform>
-                      <Panel Width="520" Height="520">
-                         <Path Data="M 0,0 L 260,0 A 260,260 0 0 0 212.9,-149.1 Z"
-                               Fill="{StaticResource ElectricIndigoBrush}" Opacity="0.2">
+                                Fill="{StaticResource ElectricIndigoBrush}" Opacity="0.2">
                             <Path.RenderTransform>
                                <TranslateTransform X="260" Y="260"/>
                             </Path.RenderTransform>
@@ -487,22 +336,15 @@
                    </Border>
 
                    <!-- Center Hub -->
-                   <Ellipse Classes="RadarPulse" Width="90" Height="90" Fill="{StaticResource ElectricIndigoBrush}"/>
-                   <Border Width="90" Height="90" Background="{StaticResource ElectricIndigoBrush}" CornerRadius="45" BoxShadow="0 0 50 0 #606366f1">
-                      <Rectangle Width="36" Height="36" Fill="White">
+                   <Ellipse Classes="RadarPulse" Width="100" Height="100" Fill="{StaticResource ElectricIndigoBrush}"/>
+                   <Border Width="100" Height="100" Background="{StaticResource ElectricIndigoBrush}" CornerRadius="50" BoxShadow="0 0 50 0 #609333EA">
+                      <Rectangle Width="44" Height="44" Fill="White">
                          <Rectangle.OpacityMask>
                             <ImageBrush Source="/Assets/Icons/SCAN.png"/>
                          </Rectangle.OpacityMask>
                       </Rectangle>
                    </Border>
 
-                    <!-- Empty State Hint -->
-                    <StackPanel x:Name="RadarEmptyHint" VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="16" Opacity="0.5">
-                       <TextBlock Text="LOOKING FOR DEVICES..." FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondary}" LetterSpacing="4" HorizontalAlignment="Center"/>
-                       <TextBlock Text="Ensure other devices are on the same WiFi" FontSize="9" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center"/>
-                    </StackPanel>
-
-                   <!-- Discovered Devices on Radar Rings -->
                    <ItemsControl ItemsSource="{Binding Devices, RelativeSource={RelativeSource AncestorType=views:MainView}}">
                       <ItemsControl.ItemsPanel>
                          <ItemsPanelTemplate>
@@ -511,7 +353,7 @@
                       </ItemsControl.ItemsPanel>
                       <ItemsControl.ItemTemplate>
                          <DataTemplate x:DataType="models:DeviceModel">
-                            <Button Click="SendFile_Click" Background="Transparent" Padding="0" BorderThickness="0" ClipToBounds="False">
+                            <Button Click="ReceiveFromDevice_Click" Background="Transparent" Padding="0" BorderThickness="0" ClipToBounds="False">
                                <Button.Styles>
                                   <Style Selector="Button:pointerover /template/ ContentPresenter">
                                      <Setter Property="Background" Value="Transparent"/>
@@ -521,7 +363,7 @@
                                   <Border Classes="DeviceMarker" Width="64" Height="64" Background="{DynamicResource GlassBackgroundBrush}" BorderBrush="{StaticResource ElectricIndigoBrush}" BorderThickness="2" CornerRadius="32" BoxShadow="0 8 25 0 #30000000">
                                      <Rectangle Width="28" Height="28" Fill="{StaticResource ElectricIndigoBrush}">
                                         <Rectangle.OpacityMask>
-                                           <ImageBrush Source="/Assets/Icons/SEND FILE.png"/>
+                                           <ImageBrush Source="/Assets/Icons/RECEIVE FILE.png"/>
                                         </Rectangle.OpacityMask>
                                      </Rectangle>
                                   </Border>
@@ -550,15 +392,198 @@
                                <Transitions>
                                   <DoubleTransition Property="Canvas.Left" Duration="0:0:1.5" Easing="QuarticEaseOut"/>
                                   <DoubleTransition Property="Canvas.Top" Duration="0:0:1.5" Easing="QuarticEaseOut"/>
-                               </Transitions>
+                                </Transitions>
                             </Setter>
                          </Style>
                       </ItemsControl.Styles>
                    </ItemsControl>
+
+                   <Button Click="ManualConnect_Click" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="20" Padding="12" Background="{DynamicResource GlassBackgroundBrush}" BorderBrush="{StaticResource ElectricIndigoBrush}" BorderThickness="1" CornerRadius="20" ToolTip.Tip="Connect via IP Address">
+                      <Rectangle Width="20" Height="20" Fill="{StaticResource ElectricIndigoBrush}">
+                         <Rectangle.OpacityMask>
+                            <ImageBrush Source="/Assets/Icons/PLUS.png"/>
+                         </Rectangle.OpacityMask>
+                      </Rectangle>
+                   </Button>
                 </Panel>
 
-                <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,32" Spacing="24">
-                   <TextBlock Text="SCANNING FOR DEVICES" FontSize="12" FontWeight="Bold" Foreground="{StaticResource ElectricIndigoBrush}" LetterSpacing="6" HorizontalAlignment="Center" Opacity="0.9"/>
+                <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,48" Spacing="24">
+                   <TextBlock Text="READY TO RECEIVE" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" LetterSpacing="4" HorizontalAlignment="Center"/>
+                   <TextBlock Text="Visible to devices on your network" FontSize="11" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" Opacity="0.7"/>
+                   <Button Classes="PrimaryBtn" Content="CANCEL BROADCAST" Click="NavHome_Click" Width="200" Margin="0,16,0,0"/>
+                </StackPanel>
+             </Grid>
+          </Grid>
+
+          <!-- RECEIVING LIST (Active Transfers) -->
+          <Grid x:Name="ReceivePanel" IsVisible="False" Classes="SignalPanel">
+              <ScrollViewer>
+                  <StackPanel Spacing="24">
+                      <TextBlock Text="ACTIVE TRANSFERS" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondary}" LetterSpacing="2"/>
+                      <Border Classes="GlassCard" MinHeight="200">
+                          <Grid>
+                              <ItemsControl x:Name="IncomingList">
+                                  <ItemsControl.ItemTemplate>
+                                      <DataTemplate x:DataType="models:FileTransferState">
+                                          <Border BorderBrush="{DynamicResource GlassBorderBrush}" BorderThickness="0,0,0,1" Padding="24">
+                                              <StackPanel Spacing="12">
+                                                  <Grid ColumnDefinitions="*, Auto">
+                                                      <TextBlock Text="{Binding FileName}" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
+                                                      <TextBlock Grid.Column="1" Text="{Binding ProgressPercentage, StringFormat=\{0:F0\}%}" Foreground="{StaticResource ElectricIndigoBrush}" FontWeight="Bold"/>
+                                                  </Grid>
+                                                  <ProgressBar Height="4" Value="{Binding ProgressPercentage}" Foreground="{StaticResource ElectricIndigoBrush}" Background="#10FFFFFF" CornerRadius="0"/>
+                                                  <Grid ColumnDefinitions="*, Auto">
+                                                      <TextBlock Text="{Binding PeerName}" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
+                                                      <TextBlock Grid.Column="1" Text="{Binding SpeedMbPerSec, StringFormat=\{0:F2\} MB/s}" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
+                                                  </Grid>
+                                              </StackPanel>
+                                          </Border>
+                                      </DataTemplate>
+                                  </ItemsControl.ItemTemplate>
+                              </ItemsControl>
+                              <TextBlock x:Name="RecvEmptyState" Text="NO ACTIVE TRANSFERS" VerticalAlignment="Center" HorizontalAlignment="Center" Opacity="0.3" FontSize="12" FontWeight="Bold" LetterSpacing="2"/>
+                          </Grid>
+                      </Border>
+                      <Button Classes="PrimaryBtn" Content="GO TO LIBRARY" Click="NavFiles_Click" HorizontalAlignment="Center"/>
+                  </StackPanel>
+              </ScrollViewer>
+          </Grid>
+
+          <!-- SEND STEP 1: Files -->
+          <Grid x:Name="SendFilesPanel" IsVisible="False" Classes="SignalPanel" RowDefinitions="*, Auto" DragDrop.AllowDrop="True">
+             <ScrollViewer Grid.Row="0">
+                <StackPanel Spacing="32">
+                   <Grid ColumnDefinitions="*, Auto">
+                      <TextBlock Text="QUEUE" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondary}" LetterSpacing="2"/>
+                      <Button Grid.Column="1" Classes="PrimaryBtn" Content="+ ADD FILES" Click="BrowseFiles_Click"/>
+                   </Grid>
+                   <Border Classes="GlassCard" MinHeight="340" CornerRadius="0">
+                      <Grid>
+                         <ItemsControl x:Name="SendQueueList">
+                            <ItemsControl.ItemTemplate>
+                               <DataTemplate x:DataType="views:QueueItem">
+                                  <Border BorderBrush="{DynamicResource GlassBorderBrush}" BorderThickness="0,0,0,1" Padding="24,18">
+                                     <Grid ColumnDefinitions="Auto, *, Auto">
+                                         <Grid Margin="0,0,20,0" Width="40" Height="40">
+                                             <Rectangle Classes="IconTint" Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                 <Rectangle.OpacityMask>
+                                                     <ImageBrush Source="/Assets/Icons/LIBRARY.png"/>
+                                                 </Rectangle.OpacityMask>
+                                             </Rectangle>
+                                             <Border CornerRadius="6" ClipToBounds="True">
+                                                 <Image Source="{Binding Thumbnail}" Stretch="UniformToFill"/>
+                                             </Border>
+                                         </Grid>
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                           <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextPrimary}"/>
+                                           <TextBlock Text="{Binding Size, Converter={StaticResource FileSizeConverter}}" FontSize="11" Foreground="{DynamicResource TextSecondary}" Margin="0,2,0,0"/>
+                                        </StackPanel>
+                                        <Button Grid.Column="2" Content="X" Click="RemoveFromQueue_Click" Background="Transparent" Foreground="{DynamicResource TextSecondary}" FontSize="14"/>
+                                     </Grid>
+                                  </Border>
+                               </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                         </ItemsControl>
+                         <StackPanel x:Name="QueueEmptyLabel" VerticalAlignment="Center" HorizontalAlignment="Center" Opacity="0.4" Spacing="16">
+                            <Rectangle Classes="IconTint" Width="48" Height="48" Opacity="0.3">
+                               <Rectangle.OpacityMask>
+                                  <ImageBrush Source="/Assets/Icons/LIBRARY.png"/>
+                               </Rectangle.OpacityMask>
+                            </Rectangle>
+                            <TextBlock Text="SELECT FILES TO BEGIN" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextSecondary}" LetterSpacing="2"/>
+                         </StackPanel>
+                      </Grid>
+                   </Border>
+                   <Border x:Name="SendProgressBorder" IsVisible="False" Classes="GlassCard" Background="#209333EA" Padding="28">
+                      <StackPanel Spacing="16">
+                         <Grid ColumnDefinitions="*, Auto">
+                            <TextBlock x:Name="SendProgressFile" Text="Processing..." FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" FontSize="14"/>
+                            <TextBlock Grid.Column="1" x:Name="SendProgressPct" Text="0%" FontWeight="Bold" Foreground="{StaticResource ElectricIndigoBrush}"/>
+                         </Grid>
+                         <ProgressBar x:Name="SendProgressBar" Height="6" CornerRadius="0" Foreground="{StaticResource ElectricIndigoBrush}" Background="#20FFFFFF"/>
+                         <TextBlock x:Name="SendProgressSpeed" Text="0 MB/s" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
+                      </StackPanel>
+                   </Border>
+                </StackPanel>
+             </ScrollViewer>
+             <Border Grid.Row="1" Margin="0,24,0,0" x:Name="SendFooter" IsVisible="False" Classes="GlassCard" Background="{DynamicResource CardBackgroundBrush}" Padding="24,20">
+                <Grid ColumnDefinitions="*, Auto">
+                   <StackPanel VerticalAlignment="Center">
+                      <TextBlock x:Name="SendSummaryText" Text="0 files selected" Foreground="{DynamicResource TextPrimary}" FontWeight="Bold" FontSize="14"/>
+                      <TextBlock Text="Ready for next step" Foreground="{DynamicResource TextSecondary}" FontSize="11"/>
+                   </StackPanel>
+                   <Button Grid.Column="1" Classes="PrimaryBtn" Content="CHOOSE RECEIVER ->" Width="220" Click="NavSendDiscovery_Click"/>
+                </Grid>
+             </Border>
+          </Grid>
+
+          <!-- SEND STEP 2: Discovery -->
+          <Grid x:Name="SendDiscoveryPanel" IsVisible="False" Classes="SignalPanel">
+             <Grid>
+                <Panel VerticalAlignment="Center" HorizontalAlignment="Center" Width="520" Height="520" ClipToBounds="False">
+                   <Ellipse Width="400" Height="400">
+                      <Ellipse.Fill>
+                         <RadialGradientBrush Center="50%,50%" Radius="0.5">
+                            <GradientStop Offset="0" Color="{StaticResource ElectricIndigo}"/>
+                            <GradientStop Offset="1" Color="Transparent"/>
+                         </RadialGradientBrush>
+                      </Ellipse.Fill>
+                      <Ellipse.Opacity>0.1</Ellipse.Opacity>
+                   </Ellipse>
+                   <Ellipse Width="520" Height="520" Stroke="{DynamicResource RadarRingBrush}" StrokeThickness="1" Opacity="0.5"/>
+                   <Ellipse Width="420" Height="420" Stroke="{DynamicResource GlassBorderBrush}" StrokeThickness="1" StrokeDashArray="4,4" Opacity="0.3"/>
+                   <Ellipse Width="180" Height="180" Stroke="{DynamicResource GlassBorderBrush}" StrokeThickness="1" StrokeDashArray="4,4" Opacity="0.3"/>
+                   <Border Width="520" Height="520" CornerRadius="260" Classes="RadarScan">
+                      <Border.RenderTransform><RotateTransform/></Border.RenderTransform>
+                      <Panel Width="520" Height="520">
+                         <Path Data="M 0,0 L 260,0 A 260,260 0 0 0 212.9,-149.1 Z" Fill="{StaticResource ElectricIndigoBrush}" Opacity="0.2">
+                            <Path.RenderTransform><TranslateTransform X="260" Y="260"/></Path.RenderTransform>
+                         </Path>
+                         <Rectangle Width="260" Height="1" Fill="White" Opacity="0.5" HorizontalAlignment="Right" VerticalAlignment="Center" StrokeDashArray="4,4"/>
+                      </Panel>
+                   </Border>
+                   <Ellipse Classes="RadarPulse" Width="90" Height="90" Fill="{StaticResource ElectricIndigoBrush}"/>
+                   <Border Width="90" Height="90" Background="{StaticResource ElectricIndigoBrush}" CornerRadius="45" BoxShadow="0 0 50 0 #609333EA">
+                      <Rectangle Width="36" Height="36" Fill="White">
+                         <Rectangle.OpacityMask><ImageBrush Source="/Assets/Icons/SCAN.png"/></Rectangle.OpacityMask>
+                      </Rectangle>
+                   </Border>
+                   <StackPanel x:Name="RadarEmptyHint" VerticalAlignment="Top" HorizontalAlignment="Center" Spacing="16" Opacity="0.6" Margin="0, 40, 0, 0">
+                      <TextBlock Text="LOOKING FOR DEVICES..." FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondary}" LetterSpacing="4" HorizontalAlignment="Center"/>
+                      <TextBlock Text="Ensure other devices are on the same WiFi" FontSize="10" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center"/>
+                   </StackPanel>
+                   <ItemsControl ItemsSource="{Binding Devices, RelativeSource={RelativeSource AncestorType=views:MainView}}">
+                      <ItemsControl.ItemsPanel><ItemsPanelTemplate><Canvas Width="520" Height="520" Background="Transparent"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                      <ItemsControl.ItemTemplate>
+                         <DataTemplate x:DataType="models:DeviceModel">
+                            <Button Click="SendFile_Click" Background="Transparent" Padding="0" BorderThickness="0" ClipToBounds="False">
+                               <Button.Styles><Style Selector="Button:pointerover /template/ ContentPresenter"><Setter Property="Background" Value="Transparent"/></Style></Button.Styles>
+                               <StackPanel Spacing="10" HorizontalAlignment="Center" ClipToBounds="False">
+                                  <Border Classes="DeviceMarker" Width="64" Height="64" Background="{DynamicResource GlassBackgroundBrush}" BorderBrush="{StaticResource ElectricIndigoBrush}" BorderThickness="2" CornerRadius="32" BoxShadow="0 8 25 0 #30000000">
+                                     <Rectangle Width="28" Height="28" Fill="{StaticResource ElectricIndigoBrush}">
+                                        <Rectangle.OpacityMask><ImageBrush Source="/Assets/Icons/SEND FILE.png"/></Rectangle.OpacityMask>
+                                     </Rectangle>
+                                  </Border>
+                                  <TextBlock Text="{Binding Name}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Center" TextAlignment="Center" MaxWidth="100" TextTrimming="CharacterEllipsis"/>
+                               </StackPanel>
+                            </Button>
+                         </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                      <ItemsControl.Styles>
+                         <Style Selector="ContentPresenter">
+                            <Setter Property="Canvas.Left">
+                               <MultiBinding Converter="{StaticResource RadarPos}"><Binding /><Binding Path="Devices" RelativeSource="{RelativeSource AncestorType=views:MainView}"/><Binding Source="X"/></MultiBinding>
+                            </Setter>
+                            <Setter Property="Canvas.Top">
+                               <MultiBinding Converter="{StaticResource RadarPos}"><Binding /><Binding Path="Devices" RelativeSource="{RelativeSource AncestorType=views:MainView}"/><Binding Source="Y"/></MultiBinding>
+                            </Setter>
+                            <Setter Property="Transitions"><Transitions><DoubleTransition Property="Canvas.Left" Duration="0:0:1.5" Easing="QuarticEaseOut"/><DoubleTransition Property="Canvas.Top" Duration="0:0:1.5" Easing="QuarticEaseOut"/></Transitions></Setter>
+                         </Style>
+                      </ItemsControl.Styles>
+                   </ItemsControl>
+                </Panel>
+                <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,32" Spacing="20">
+                   <TextBlock Text="SCANNING FOR DEVICES..." FontSize="10" FontWeight="Bold" Foreground="{StaticResource ElectricIndigoBrush}" LetterSpacing="4" HorizontalAlignment="Center" Opacity="0.8"/>
                    <Button Content="BACK TO QUEUE" Click="HomeSend_Click" Background="Transparent" Foreground="{DynamicResource TextSecondary}" FontSize="11" HorizontalAlignment="Center" Padding="16"/>
                 </StackPanel>
              </Grid>
@@ -567,87 +592,71 @@
           <!-- LIBRARY PANEL -->
           <Grid x:Name="FilesPanel" IsVisible="False" Classes="SignalPanel">
              <ScrollViewer>
-               <StackPanel Spacing="24">
-                  <Grid ColumnDefinitions="*, Auto, Auto">
-                     <TextBlock Text="RECEIVED FILES" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondary}" LetterSpacing="2" VerticalAlignment="Center"/>
-                     <TextBox Grid.Column="1" Width="200" x:Name="FileSearchBox" 
-                                Watermark="Filter..." Background="{DynamicResource GlassBackgroundBrush}" BorderThickness="1" BorderBrush="{DynamicResource GlassBorderBrush}"
-                                Padding="12,8" FontSize="12" Margin="16,0" CornerRadius="8"
-                                TextChanged="FileSearch_TextChanged"/>
-                     <Button Grid.Column="2" Classes="PrimaryBtn" Content="OPEN FOLDER" Click="OpenDownloadFolder_Click"/>
-                  </Grid>
-
-                  <ItemsControl x:Name="ReceivedFilesList"
-                                ItemsSource="{Binding ReceivedFiles, RelativeSource={RelativeSource AncestorType=views:MainView}}">
-                     <ItemsControl.ItemTemplate>
-                        <DataTemplate x:DataType="models:FileTransferState">
-                           <Border Classes="GlassCard" Padding="20" Margin="0,0,0,12">
-                              <Grid ColumnDefinitions="Auto, *, Auto">
-                                 <Border Width="44" Height="44" Background="{DynamicResource GlassBackgroundBrush}" CornerRadius="10">
-                                    <Rectangle Classes="IconTint" Width="20" Height="20">
-                                       <Rectangle.OpacityMask>
-                                          <ImageBrush Source="/Assets/Icons/LIBRARY.png"/>
-                                       </Rectangle.OpacityMask>
-                                    </Rectangle>
-                                 </Border>
-                                 <StackPanel Grid.Column="1" Margin="20,0">
-                                    <TextBlock Text="{Binding FileName}" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" FontSize="14"/>
-                                    <TextBlock Text="{Binding FileSizeDisplay}" FontSize="11" Foreground="{DynamicResource TextSecondary}" Margin="0,2,0,0"/>
-                                 </StackPanel>
-                                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="12">
-                                    <Button Content="VIEW" Click="OpenFileInList_Click" Tag="{Binding}"
-                                            Background="{DynamicResource GlassBackgroundBrush}" BorderBrush="{DynamicResource GlassBorderBrush}" BorderThickness="1" FontSize="11" Padding="16,8" CornerRadius="6"/>
-                                    <Button Content="DEL" Click="DeleteFileInList_Click" Tag="{Binding}"
-                                            Background="Transparent" Foreground="#FF5555" FontSize="11"/>
-                                 </StackPanel>
-                              </Grid>
-                           </Border>
-                        </DataTemplate>
-                     </ItemsControl.ItemTemplate>
-                  </ItemsControl>
-               </StackPanel>
+                <StackPanel Spacing="24">
+                   <Grid ColumnDefinitions="*, Auto, Auto">
+                      <TextBlock Text="RECEIVED FILES" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondary}" LetterSpacing="2" VerticalAlignment="Center"/>
+                      <TextBox Grid.Column="1" Width="200" x:Name="FileSearchBox" Watermark="Filter..." Background="{DynamicResource GlassBackgroundBrush}" BorderThickness="1" BorderBrush="{DynamicResource GlassBorderBrush}" Padding="12,8" FontSize="12" Margin="16,0" CornerRadius="0" TextChanged="FileSearch_TextChanged"/>
+                      <Button Grid.Column="2" Classes="PrimaryBtn" Content="OPEN FOLDER" Click="OpenDownloadFolder_Click"/>
+                   </Grid>
+                   <Grid>
+                       <ItemsControl x:Name="ReceivedFilesList" ItemsSource="{Binding ReceivedFiles, RelativeSource={RelativeSource AncestorType=views:MainView}}">
+                          <ItemsControl.ItemTemplate>
+                             <DataTemplate x:DataType="models:FileTransferState">
+                                <Border Classes="GlassCard" Padding="20" Margin="0,0,0,12">
+                                   <Grid ColumnDefinitions="Auto, *, Auto">
+                                      <Border Width="44" Height="44" Background="{DynamicResource GlassBackgroundBrush}" CornerRadius="0">
+                                         <Rectangle Classes="IconTint" Width="20" Height="20"><Rectangle.OpacityMask><ImageBrush Source="/Assets/Icons/LIBRARY.png"/></Rectangle.OpacityMask></Rectangle>
+                                      </Border>
+                                      <StackPanel Grid.Column="1" Margin="20,0">
+                                         <TextBlock Text="{Binding FileName}" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" FontSize="14"/>
+                                         <TextBlock Text="{Binding FileSizeDisplay}" FontSize="11" Foreground="{DynamicResource TextSecondary}" Margin="0,2,0,0"/>
+                                      </StackPanel>
+                                      <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="12">
+                                         <Button Content="VIEW" Click="OpenFileInList_Click" Tag="{Binding}" Background="{DynamicResource GlassBackgroundBrush}" BorderBrush="{DynamicResource GlassBorderBrush}" BorderThickness="1" FontSize="11" Padding="16,8" CornerRadius="0"/>
+                                         <Button Content="DEL" Click="DeleteFileInList_Click" Tag="{Binding}" Background="Transparent" Foreground="#FF5555" FontSize="11"/>
+                                      </StackPanel>
+                                   </Grid>
+                                </Border>
+                             </DataTemplate>
+                          </ItemsControl.ItemTemplate>
+                       </ItemsControl>
+                       <TextBlock x:Name="HistoryEmptyState" Text="NO FILES RECEIVED YET" VerticalAlignment="Center" HorizontalAlignment="Center" Opacity="0.3" FontSize="12" FontWeight="Bold" LetterSpacing="2" Margin="0,100,0,0"/>
+                   </Grid>
+                </StackPanel>
              </ScrollViewer>
           </Grid>
 
-          <!-- ACTIVE RECEIVE PANEL -->
-          <Grid x:Name="ReceivePanel" IsVisible="False" Classes="SignalPanel">
-             <StackPanel Spacing="24">
-                <TextBlock Text="ACTIVE TRANSFERS" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondary}" LetterSpacing="2"/>
-                
-                <Border Classes="GlassCard" MinHeight="200">
-                   <Grid>
-                      <ListBox x:Name="IncomingList" Background="Transparent" BorderThickness="0">
-                         <ListBox.ItemTemplate>
-                            <DataTemplate x:DataType="models:FileTransferState">
-                               <Border BorderBrush="{DynamicResource GlassBorderBrush}" BorderThickness="0,0,0,1" Padding="24,18">
-                                  <Grid ColumnDefinitions="Auto, *, Auto" RowDefinitions="Auto, Auto">
-                                     <Border Grid.RowSpan="2" Width="40" Height="40" Background="{DynamicResource GlassBackgroundBrush}" CornerRadius="8" Margin="0,0,20,0">
-                                        <Rectangle Classes="IconTint" Width="18" Height="18">
-                                           <Rectangle.OpacityMask>
-                                              <ImageBrush Source="/Assets/Icons/RECEIVE FILE.png"/>
-                                           </Rectangle.OpacityMask>
-                                        </Rectangle>
-                                     </Border>
-                                     <TextBlock Grid.Column="1" Text="{Binding FileName}" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" FontSize="14"/>
-                                     <TextBlock Grid.Column="2" Text="{Binding ProgressPercentage, StringFormat=\{0:F0\}%}" Foreground="{StaticResource ElectricIndigoBrush}" FontWeight="Bold"/>
-                                     
-                                     <ProgressBar Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Height="4" Margin="0,12,0,0"
-                                                  Value="{Binding ProgressPercentage}" Foreground="{StaticResource ElectricIndigoBrush}" Background="#10FFFFFF" CornerRadius="2"/>
-                                  </Grid>
-                               </Border>
-                            </DataTemplate>
-                         </ListBox.ItemTemplate>
-                      </ListBox>
-                      
-                      <StackPanel x:Name="RecvEmptyState" VerticalAlignment="Center" HorizontalAlignment="Center" Opacity="0.4" Spacing="16">
-                         <Rectangle Classes="IconTint" Width="48" Height="48" Opacity="0.3">
-                            <Rectangle.OpacityMask>
-                               <ImageBrush Source="/Assets/Icons/RECEIVE FILE.png"/>
-                            </Rectangle.OpacityMask>
-                         </Rectangle>
-                         <TextBlock Text="NO ACTIVE TRANSFERS" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextSecondary}" LetterSpacing="2"/>
+          <!-- ABOUT PANEL -->
+          <Grid x:Name="AboutPanel" IsVisible="False" Classes="SignalPanel">
+             <StackPanel Spacing="32" MaxWidth="600" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="40">
+                <Border Width="80" Height="80" HorizontalAlignment="Left" CornerRadius="0">
+                    <Image Source="/Assets/app-icon.png"/>
+                </Border>
+                <StackPanel Spacing="8">
+                   <TextBlock Text="We Share" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
+                   <TextBlock Text="Version 1.1.0" FontSize="14" Foreground="{DynamicResource TextSecondary}"/>
+                </StackPanel>
+                <TextBlock Text="A modern, high-speed file transfer utility built for seamless network-based sharing. All transfers are now AES-256 encrypted." TextWrapping="Wrap" FontSize="14" Foreground="{DynamicResource TextSecondary}" LineHeight="24"/>
+                <Border Background="{DynamicResource CardBackgroundBrush}" CornerRadius="0" Padding="24">
+                   <ScrollViewer MaxHeight="300">
+                      <StackPanel Spacing="20">
+                         <StackPanel Spacing="8">
+                            <TextBlock Text="DEVELOPER INFO" FontSize="10" FontWeight="Bold" LetterSpacing="2" Foreground="{DynamicResource TextSecondary}"/>
+                            <TextBlock Text="Sowmiyan S" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                            <Button Content="GITHUB REPOSITORY" Click="OpenGitHub_Click" Background="{StaticResource ElectricIndigoBrush}" Foreground="White" CornerRadius="0" Padding="16,12" Margin="0,16,0,0" HorizontalAlignment="Left"/>
+                         </StackPanel>
+                         <Rectangle Height="1" Fill="{DynamicResource GlassBorderBrush}"/>
+                         <StackPanel Spacing="8">
+                            <TextBlock Text="PRIVACY &amp; SECURITY" FontSize="10" FontWeight="Bold" LetterSpacing="2" Foreground="{DynamicResource TextSecondary}"/>
+                            <TextBlock Text="We Share uses AES-256 encryption for all transport streams. No data is collected or sent to external servers." TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource TextSecondary}" LineHeight="20"/>
+                         </StackPanel>
+                         <Rectangle Height="1" Fill="{DynamicResource GlassBorderBrush}"/>
+                         <StackPanel Spacing="8">
+                            <TextBlock Text="TERMS OF SERVICE" FontSize="10" FontWeight="Bold" LetterSpacing="2" Foreground="{DynamicResource TextSecondary}"/>
+                            <TextBlock Text="By using We Share, you agree that you are solely responsible for the content you transfer. We Share is a tool for personal use only." TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource TextSecondary}" LineHeight="20"/>
+                         </StackPanel>
                       </StackPanel>
-                   </Grid>
+                   </ScrollViewer>
                 </Border>
              </StackPanel>
           </Grid>
@@ -659,11 +668,8 @@
                    <StackPanel Spacing="32">
                       <StackPanel Spacing="12">
                          <TextBlock Text="NAME ON NETWORK" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondary}" LetterSpacing="2"/>
-                         <TextBox x:Name="SettingsDeviceName" Background="{DynamicResource GlassBackgroundBrush}"
-                                  BorderThickness="1" BorderBrush="{DynamicResource GlassBorderBrush}" Padding="16"
-                                  CornerRadius="12" Foreground="{DynamicResource TextPrimary}" FontSize="14"/>
+                         <TextBox x:Name="SettingsDeviceName" Background="{DynamicResource GlassBackgroundBrush}" BorderThickness="1" BorderBrush="{DynamicResource GlassBorderBrush}" Padding="16" CornerRadius="0" Foreground="{DynamicResource TextPrimary}" FontSize="14"/>
                       </StackPanel>
-
                       <StackPanel Spacing="12">
                          <TextBlock Text="APPEARANCE" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondary}" LetterSpacing="2"/>
                          <Grid ColumnDefinitions="*, Auto">
@@ -671,114 +677,71 @@
                             <ToggleSwitch Grid.Column="1" x:Name="ThemeToggle" IsChecked="True" OffContent="" OnContent="" IsCheckedChanged="ThemeSwitch_Changed"/>
                          </Grid>
                       </StackPanel>
-                      
                       <StackPanel Spacing="12">
                          <TextBlock Text="DOWNLOAD DIRECTORY" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondary}" LetterSpacing="2"/>
                          <Grid ColumnDefinitions="*, Auto">
-                            <TextBlock x:Name="SettingsSaveLocationLabel" Text="..."
-                                       VerticalAlignment="Center" Foreground="{DynamicResource TextPrimary}" FontSize="13"/>
-                            <Button Grid.Column="1" Content="BROWSE" Click="ChangeSaveLocation_Click"
-                                    Background="{DynamicResource GlassBackgroundBrush}" BorderBrush="{DynamicResource GlassBorderBrush}" BorderThickness="1" Padding="16,10" CornerRadius="8" Margin="16,0,0,0"/>
+                            <TextBlock x:Name="SettingsSaveLocationLabel" Text="..." VerticalAlignment="Center" Foreground="{DynamicResource TextPrimary}" FontSize="13"/>
+                            <Button Grid.Column="1" Content="BROWSE" Click="ChangeSaveLocation_Click" Background="{DynamicResource GlassBackgroundBrush}" BorderBrush="{DynamicResource GlassBorderBrush}" BorderThickness="1" Padding="16,10" CornerRadius="0" Margin="16,0,0,0"/>
                          </Grid>
                       </StackPanel>
-
-                      <StackPanel Spacing="12">
-                         <TextBlock Text="WIFI HOTSPOT NAME" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondary}" LetterSpacing="2"/>
-                         <TextBox x:Name="HotspotNameInput" Text="WeShare-Direct" Background="{DynamicResource GlassBackgroundBrush}"
-                                  BorderThickness="1" BorderBrush="{DynamicResource GlassBorderBrush}" Padding="16"
-                                  CornerRadius="12" Foreground="{DynamicResource TextPrimary}" FontSize="14"/>
-                      </StackPanel>
                    </StackPanel>
                 </Border>
              </StackPanel>
-          </Grid>
-
-          <!-- WEB SHARING PANEL -->
-          <Grid x:Name="MobileConnectPanel" IsVisible="False" Classes="SignalPanel" ColumnDefinitions="*, 400">
-             <StackPanel Grid.Column="0" Spacing="40" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <TextBlock Text="FAST SYNC" FontSize="12" FontWeight="Bold" LetterSpacing="4"
-                           Foreground="{StaticResource ElectricIndigoBrush}" HorizontalAlignment="Center"/>
-                
-                <Border Width="260" Height="260" Background="White" Padding="16" CornerRadius="20" BoxShadow="0 10 40 0 #40000000">
-                   <Image x:Name="BigQrCode" Stretch="Uniform"/>
-                </Border>
-
-                <StackPanel Spacing="12" HorizontalAlignment="Center">
-                   <TextBlock x:Name="ConnectUrlText" Text="http://weshare.local:8080" FontSize="20" FontWeight="Bold" 
-                              Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Center"/>
-                   <TextBlock x:Name="ConnectIpText" Text="..." FontSize="12" 
-                              Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center"/>
-                </StackPanel>
-                
-                <Button Classes="PrimaryBtn" Content="COPY ACCESS LINK" Click="CopyUrl_Click" Width="200" HorizontalAlignment="Center"/>
-             </StackPanel>
-
-             <!-- Secondary Actions -->
-             <Border Grid.Column="1" Classes="GlassCard" Background="{DynamicResource CardBackgroundBrush}" Margin="24,0,0,0" Padding="32">
-                <StackPanel Spacing="32">
-                   <TextBlock Text="WIFI HOTSPOT" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondary}" LetterSpacing="2"/>
-                   
-                   <Button Classes="PrimaryBtn" Content="CREATE HOTSPOT" Click="StartHotspot_Click" HorizontalAlignment="Stretch"/>
-
-                   <Border x:Name="HotspotInfoPanel" IsVisible="False" Background="{DynamicResource GlassBackgroundBrush}" CornerRadius="12" Padding="20">
-                      <StackPanel Spacing="16">
-                         <StackPanel Spacing="4">
-                            <TextBlock Text="NETWORK" FontSize="9" Foreground="{DynamicResource TextSecondary}"/>
-                            <TextBlock x:Name="HotspotNameText" Text="..." FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
-                         </StackPanel>
-                         <StackPanel Spacing="4">
-                            <TextBlock Text="PASSWORD" FontSize="9" Foreground="{DynamicResource TextSecondary}"/>
-                            <TextBlock x:Name="HotspotPassText" Text="..." FontSize="14" FontWeight="Bold" Foreground="{StaticResource ElectricIndigoBrush}"/>
-                         </StackPanel>
-                      </StackPanel>
-                   </Border>
-
-                   <Rectangle Height="1" Fill="{DynamicResource GlassBorderBrush}"/>
-                   
-                   <StackPanel Spacing="16">
-                      <TextBlock Text="NETWORK FIX" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondary}" LetterSpacing="2"/>
-                      <TextBlock Text="Grant firewall access if phone cannot connect." 
-                                 FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextPrimary}" Opacity="0.8"/>
-                      <Button Content="PATCH FIREWALL (ADMIN)" Click="FixFirewall_Click" 
-                              Background="{DynamicResource GlassBackgroundBrush}" BorderBrush="{DynamicResource GlassBorderBrush}" BorderThickness="1" HorizontalAlignment="Stretch" Padding="12" FontSize="10" CornerRadius="8"/>
-                   </StackPanel>
-                </StackPanel>
-             </Border>
           </Grid>
         </Grid>
       </Grid>
     </Grid>
 
-    <!-- MOBILE NAVIGATION -->
-    <Border Height="80" VerticalAlignment="Bottom" x:Name="BottomNav" IsVisible="False" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource GlassBorderBrush}" BorderThickness="0,1,0,0">
-       <Grid ColumnDefinitions="*, *, *">
-          <Button Grid.Column="0" Click="NavHome_Click" Background="Transparent" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-             <Rectangle Classes="IconTint" Width="24" Height="24" HorizontalAlignment="Center">
-                <Rectangle.OpacityMask>
-                   <ImageBrush Source="/Assets/Icons/HOME.png"/>
-                </Rectangle.OpacityMask>
-             </Rectangle>
-          </Button>
-          <Button Grid.Column="1" Click="HomeReceive_Click" Background="Transparent" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-             <Border Width="48" Height="48" CornerRadius="24" Background="{StaticResource ElectricIndigoBrush}">
-                <Rectangle Width="24" Height="24" Fill="White" HorizontalAlignment="Center" VerticalAlignment="Center">
-                   <Rectangle.OpacityMask>
-                      <ImageBrush Source="/Assets/Icons/RECEIVE FILE.png"/>
-                   </Rectangle.OpacityMask>
+    <!-- MOBILE NAVIGATION (Hidden by default, shown in code for Phone) -->
+    <Border x:Name="BottomNav" Grid.ColumnSpan="2" VerticalAlignment="Bottom" Height="80" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource GlassBorderBrush}" BorderThickness="0,1,0,0" IsVisible="False">
+        <Grid ColumnDefinitions="*, *, *, *">
+            <Button Grid.Column="0" Classes="SidebarItem" Click="NavHome_Click" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <Rectangle Width="20" Height="20" Fill="{DynamicResource TextPrimary}" Opacity="0.6">
+                    <Rectangle.OpacityMask><ImageBrush Source="/Assets/Icons/HOME.png"/></Rectangle.OpacityMask>
                 </Rectangle>
-             </Border>
-          </Button>
-          <Button Grid.Column="2" Click="NavFiles_Click" Background="Transparent" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-             <Rectangle Classes="IconTint" Width="24" Height="24" HorizontalAlignment="Center">
-                <Rectangle.OpacityMask>
-                   <ImageBrush Source="/Assets/Icons/LIBRARY.png"/>
-                </Rectangle.OpacityMask>
-             </Rectangle>
-          </Button>
-       </Grid>
+            </Button>
+            <Button Grid.Column="1" Classes="SidebarItem" Click="NavFiles_Click" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <Rectangle Width="20" Height="20" Fill="{DynamicResource TextPrimary}" Opacity="0.6">
+                    <Rectangle.OpacityMask><ImageBrush Source="/Assets/Icons/LIBRARY.png"/></Rectangle.OpacityMask>
+                </Rectangle>
+            </Button>
+            <Button Grid.Column="2" Classes="SidebarItem" Click="NavSettings_Click" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <Rectangle Width="20" Height="20" Fill="{DynamicResource TextPrimary}" Opacity="0.6">
+                    <Rectangle.OpacityMask><ImageBrush Source="/Assets/Icons/SETTINGS.png"/></Rectangle.OpacityMask>
+                </Rectangle>
+            </Button>
+            <Button Grid.Column="3" Classes="SidebarItem" Click="NavAbout_Click" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <Rectangle Width="20" Height="20" Fill="{DynamicResource TextPrimary}" Opacity="0.6">
+                    <Rectangle.OpacityMask><ImageBrush Source="/Assets/Icons/SETTINGS.png"/></Rectangle.OpacityMask>
+                </Rectangle>
+            </Button>
+        </Grid>
     </Border>
 
-    <!-- SPLASH -->
+    <!-- Overlays -->
+    <Panel x:Name="DragOverlay" IsVisible="False" Background="#A09333EA" ZIndex="4000">
+       <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="32">
+          <Border Width="160" Height="160" BorderBrush="White" BorderThickness="2" CornerRadius="0">
+             <Rectangle Width="80" Height="80" Fill="White"><Rectangle.OpacityMask><ImageBrush Source="/Assets/Icons/SEND FILE.png"/></Rectangle.OpacityMask></Rectangle>
+          </Border>
+          <TextBlock Text="DROP TO SEND" FontSize="24" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
+       </StackPanel>
+    </Panel>
+
+    <Panel x:Name="ManualIPDialog" IsVisible="False" Background="#A0000000" ZIndex="4999">
+       <Border Background="{DynamicResource GlassBackgroundBrush}" BorderBrush="{DynamicResource GlassBorderBrush}" BorderThickness="1" CornerRadius="0" Width="350" Padding="30" VerticalAlignment="Center" HorizontalAlignment="Center" BoxShadow="0 20 60 0 #40000000">
+          <StackPanel Spacing="24">
+             <TextBlock Text="CONNECT VIA IP" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center"/>
+             <TextBlock Text="Enter the IP address of the device you want to connect to." FontSize="12" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap" TextAlignment="Center"/>
+             <TextBox x:Name="ManualIPInput" Watermark="e.g. 192.168.1.5" Height="45" VerticalContentAlignment="Center" BorderThickness="1" BorderBrush="{DynamicResource GlassBorderBrush}" Background="#10FFFFFF" CornerRadius="0"/>
+             <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Stretch">
+                <Button Content="CANCEL" Click="CloseManualIP_Click" HorizontalAlignment="Stretch" Width="139" Height="40" CornerRadius="0"/>
+                <Button Content="CONNECT" Click="ManualIPConnect_Click" Classes="PrimaryBtn" HorizontalAlignment="Stretch" Width="139" Height="40" CornerRadius="0"/>
+             </StackPanel>
+          </StackPanel>
+       </Border>
+    </Panel>
+
     <Grid x:Name="SplashGrid" Background="{DynamicResource BaseBackgroundBrush}" ZIndex="5000">
        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="32">
           <Image Source="/Assets/logo.png" Width="80" Height="80" Stretch="Uniform"/>
@@ -787,16 +750,10 @@
        </StackPanel>
     </Grid>
 
-    <!-- REQUEST OVERLAY -->
-    <Border x:Name="AcceptRejectPanel" IsVisible="False" ZIndex="6000"
-            VerticalAlignment="Center" HorizontalAlignment="Center" 
-            Width="420" Padding="32" CornerRadius="24"
-            Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{StaticResource ElectricIndigoBrush}" BorderThickness="2"
-            BoxShadow="0 20 60 0 #80000000">
+    <Border x:Name="AcceptRejectPanel" IsVisible="False" ZIndex="6000" VerticalAlignment="Center" HorizontalAlignment="Center" Width="420" Padding="32" CornerRadius="0" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{StaticResource ElectricIndigoBrush}" BorderThickness="2" BoxShadow="0 20 60 0 #80000000">
        <Grid RowDefinitions="Auto, Auto">
           <StackPanel Spacing="24">
-             <TextBlock Text="INCOMING REQUEST" FontSize="11" FontWeight="Bold" LetterSpacing="3" 
-                        Foreground="{StaticResource ElectricIndigoBrush}"/>
+             <TextBlock Text="INCOMING REQUEST" FontSize="11" FontWeight="Bold" LetterSpacing="3" Foreground="{StaticResource ElectricIndigoBrush}"/>
              <StackPanel Spacing="6">
                 <TextBlock x:Name="IncomingFileName" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" TextTrimming="CharacterEllipsis"/>
                 <TextBlock x:Name="IncomingPeerName" FontSize="13" Foreground="{DynamicResource TextSecondary}"/>
@@ -804,22 +761,17 @@
              </StackPanel>
           </StackPanel>
           <Grid Grid.Row="1" ColumnDefinitions="*, 16, *" Margin="0,40,0,0">
-             <Button Grid.Column="0" Content="REJECT" Click="RejectTransfer_Click" 
-                     HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="16"
-                     Background="Transparent" BorderBrush="{DynamicResource GlassBorderBrush}" BorderThickness="1" Foreground="{DynamicResource TextSecondary}" CornerRadius="12"/>
-             <Button Grid.Column="2" Classes="PrimaryBtn" Content="ACCEPT" Click="AcceptTransfer_Click" 
-                     HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="16"/>
+             <Button Grid.Column="0" Content="REJECT" Click="RejectTransfer_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="16" Background="Transparent" BorderBrush="{DynamicResource GlassBorderBrush}" BorderThickness="1" Foreground="{DynamicResource TextSecondary}" CornerRadius="0"/>
+             <Button Grid.Column="2" Classes="PrimaryBtn" Content="ACCEPT" Click="AcceptTransfer_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="16"/>
           </Grid>
        </Grid>
     </Border>
 
-     <!-- TOAST -->
-     <Border x:Name="ToastBorder" IsVisible="False" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="48" Padding="16,10" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{StaticResource ElectricIndigoBrush}" BorderThickness="1" CornerRadius="16" BoxShadow="0 8 24 0 #40000000">
+     <Border x:Name="ToastBorder" IsVisible="False" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="48" Padding="16,10" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{StaticResource ElectricIndigoBrush}" BorderThickness="1" CornerRadius="0" BoxShadow="0 8 24 0 #40000000">
         <Grid ColumnDefinitions="Auto, *">
-             <Border Width="4" Height="20" Background="{StaticResource ElectricIndigoBrush}" CornerRadius="2" VerticalAlignment="Center"/>
+             <Border Width="4" Height="20" Background="{StaticResource ElectricIndigoBrush}" CornerRadius="0" VerticalAlignment="Center"/>
             <TextBlock x:Name="ToastMessage" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" FontSize="12" Margin="8,0,0,0"/>
         </Grid>
      </Border>
-
   </Grid>
 </UserControl>

@@ -74,9 +74,8 @@ namespace WeShare.Core.Discovery
 
                 if (device == null) return;
 
-                // Ignore packets from ourselves (match by Id OR by source IP being our own)
+                // Ignore packets from ourselves (match by Id)
                 if (device.Id == _localDevice.Id) return;
-                if (IsOwnAddress(result.RemoteEndPoint.Address)) return;
 
                 // Always set IP from the packet's real source address
                 device.IpAddress = result.RemoteEndPoint.Address.ToString();
