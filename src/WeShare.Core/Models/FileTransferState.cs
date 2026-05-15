@@ -32,6 +32,7 @@ namespace WeShare.Core.Models
         public TransferStatus Status { get; set; } = TransferStatus.Waiting;
         public TransferDirection Direction { get; set; } = TransferDirection.Received;
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+        public string? ErrorMessage { get; set; }
 
         // Progress metadata (computed)
         public double ProgressPercentage => TotalBytes == 0 ? 0 : (double)TransferredBytes / TotalBytes * 100;

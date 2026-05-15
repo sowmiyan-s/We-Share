@@ -83,29 +83,20 @@ namespace WeShare.Core.Transfer
             FileTransferState? state = null;
             try
             {
-                // 1. Decrypt metadata
-                using var cryptoReader = EncryptionHelper.CreateDecryptionStream(rawStream, leaveOpen: true);
-                
+
+                // 1. Read encrypted metadata length
                 byte[] lenBuffer = new byte[4];
-                int read = 0;
-                while (read < 4)
-                {
-                    int r = await cryptoReader.ReadAsync(lenBuffer, read, 4 - read).ConfigureAwait(false);
-                    if (r == 0) return;
-                    read += r;
-                }
-                int metaLength = BitConverter.ToInt32(lenBuffer, 0);
+                if (!await ReadExactAsync(rawStream, lenBuffer, 4)) return;
+                int encryptedMetaLength = BitConverter.ToInt32(lenBuffer, 0);
 
-                byte[] metaBytes = new byte[metaLength];
-                read = 0;
-                while (read < metaLength)
-                {
-                    int r = await cryptoReader.ReadAsync(metaBytes, read, metaLength - read).ConfigureAwait(false);
-                    if (r == 0) return;
-                    read += r;
-                }
+                // 2. Read encrypted metadata bytes
+                byte[] encryptedMeta = new byte[encryptedMetaLength];
+                if (!await ReadExactAsync(rawStream, encryptedMeta, encryptedMetaLength)) return;
 
+                // 3. Decrypt metadata
+                byte[] metaBytes = EncryptionHelper.Decrypt(encryptedMeta);
                 var json = Encoding.UTF8.GetString(metaBytes);
+                
                 state = JsonSerializer.Deserialize<FileTransferState>(json,
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
@@ -148,6 +139,7 @@ namespace WeShare.Core.Transfer
                 long totalRead = 0;
                 long lastReportedBytes = 0;
                 DateTime lastReportTime = DateTime.UtcNow;
+                int read;
 
                 while ((read = await fileCryptoReader.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false)) > 0)
                 {
@@ -177,8 +169,12 @@ namespace WeShare.Core.Transfer
             catch (Exception ex)
             {
                 Console.WriteLine($"[Transfer] Incoming failed: {ex.Message}");
-                if (state != null) state.Status = TransferStatus.Failed;
-                TransferFailed?.Invoke(state ?? new FileTransferState { Status = TransferStatus.Failed });
+                if (state != null) 
+                {
+                    state.Status = TransferStatus.Failed;
+                    state.ErrorMessage = ex.Message;
+                }
+                TransferFailed?.Invoke(state ?? new FileTransferState { Status = TransferStatus.Failed, ErrorMessage = ex.Message });
             }
         }
 
@@ -205,23 +201,21 @@ namespace WeShare.Core.Transfer
                 client.ReceiveBufferSize = 81920;
 
                 using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                cts.CancelAfter(TimeSpan.FromSeconds(10));
+                cts.CancelAfter(TimeSpan.FromSeconds(30));
 
                 await client.ConnectAsync(targetIp, targetPort, cts.Token).ConfigureAwait(false);
 
                 using var rawStream = client.GetStream();
 
                 // 1. Encrypt and send metadata
-                using (var cryptoWriter = EncryptionHelper.CreateEncryptionStream(rawStream, leaveOpen: true))
-                {
-                    var json = JsonSerializer.Serialize(state);
-                    var metaBytes = Encoding.UTF8.GetBytes(json);
-                    byte[] lenBytes = BitConverter.GetBytes(metaBytes.Length);
-
-                    await cryptoWriter.WriteAsync(lenBytes, 0, 4, cancellationToken).ConfigureAwait(false);
-                    await cryptoWriter.WriteAsync(metaBytes, 0, metaBytes.Length, cancellationToken).ConfigureAwait(false);
-                    await cryptoWriter.FlushAsync(cancellationToken).ConfigureAwait(false);
-                }
+                var json = JsonSerializer.Serialize(state);
+                var metaBytes = Encoding.UTF8.GetBytes(json);
+                var encryptedMeta = EncryptionHelper.Encrypt(metaBytes);
+                
+                byte[] lenBytes = BitConverter.GetBytes(encryptedMeta.Length);
+                await rawStream.WriteAsync(lenBytes, 0, 4, cancellationToken).ConfigureAwait(false);
+                await rawStream.WriteAsync(encryptedMeta, 0, encryptedMeta.Length, cancellationToken).ConfigureAwait(false);
+                await rawStream.FlushAsync(cancellationToken).ConfigureAwait(false);
 
                 // 2. Read response (unencrypted handshake response)
                 byte[] respBuffer = new byte[1];
@@ -273,6 +267,7 @@ namespace WeShare.Core.Transfer
             {
                 Console.WriteLine($"[Transfer] Outgoing failed: {ex.Message}");
                 state.Status = TransferStatus.Failed;
+                state.ErrorMessage = ex.Message;
                 TransferFailed?.Invoke(state);
                 if (ex is OperationCanceledException) throw;
             }
@@ -299,6 +294,18 @@ namespace WeShare.Core.Transfer
                 default:
                     return "Others";
             }
+        }
+
+        private static async Task<bool> ReadExactAsync(Stream stream, byte[] buffer, int count)
+        {
+            int totalRead = 0;
+            while (totalRead < count)
+            {
+                int read = await stream.ReadAsync(buffer, totalRead, count - totalRead).ConfigureAwait(false);
+                if (read == 0) return false;
+                totalRead += read;
+            }
+            return true;
         }
 
         private static readonly object _pathLock = new();

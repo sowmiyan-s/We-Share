@@ -178,7 +178,12 @@ namespace WeShare.Core.Discovery
                 .Where(ni => ni.OperationalStatus == OperationalStatus.Up && 
                              ni.NetworkInterfaceType != NetworkInterfaceType.Loopback &&
                              !ni.Description.Contains("Virtual", StringComparison.OrdinalIgnoreCase) &&
-                             !ni.Description.Contains("Pseudo", StringComparison.OrdinalIgnoreCase))
+                             !ni.Description.Contains("Pseudo", StringComparison.OrdinalIgnoreCase) &&
+                             !ni.Description.Contains("VPN", StringComparison.OrdinalIgnoreCase) &&
+                             !ni.Description.Contains("VMware", StringComparison.OrdinalIgnoreCase) &&
+                             !ni.Description.Contains("Hyper-V", StringComparison.OrdinalIgnoreCase) &&
+                             !ni.Description.Contains("Host-Only", StringComparison.OrdinalIgnoreCase) &&
+                             !ni.Name.Contains("vEthernet", StringComparison.OrdinalIgnoreCase))
                 .OrderByDescending(ni => ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211)
                 .ThenByDescending(ni => ni.Description.Contains("Hotspot", StringComparison.OrdinalIgnoreCase))
                 .ThenByDescending(ni => ni.NetworkInterfaceType == NetworkInterfaceType.Ethernet);
