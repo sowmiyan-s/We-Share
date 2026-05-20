@@ -28,8 +28,11 @@ artifacts/
 publish/
 dist/
 build/
-setup/
 *.exe
+
+# Allow tracking of the installer for direct repository downloads
+!setup/
+!setup/WeShare_Setup.exe
 
 # Logs & crash dumps
 *.log

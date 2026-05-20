@@ -19,6 +19,12 @@
   <img src="https://img.shields.io/badge/Avalonia-11-blue.svg" alt="Avalonia UI">
 </p>
 
+<p align="center">
+  <a href="https://github.com/sowmiyan-s/We-Share/raw/main/setup/WeShare_Setup.exe">
+    <img src="https://img.shields.io/badge/Download-We__Share__Setup.exe-purple?style=for-the-badge&logo=windows&logoColor=white" alt="Download Windows Installer" height="40">
+  </a>
+</p>
+
 ---
 
 ## 🚀 What is We Share?
