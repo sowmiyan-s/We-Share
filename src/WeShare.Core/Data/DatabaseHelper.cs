@@ -32,11 +32,12 @@ namespace WeShare.Core.Data
             return conn;
         }
 
-        private async void InitializeDatabase()
+        private void InitializeDatabase()
         {
             try
             {
-                using var conn = await OpenConnectionAsync();
+                using var conn = new SqliteConnection($"Data Source={_dbPath}");
+                conn.Open();
                 using var cmd = conn.CreateCommand();
                 cmd.CommandText = @"
                     CREATE TABLE IF NOT EXISTS Transfers (
@@ -52,23 +53,23 @@ namespace WeShare.Core.Data
                         Timestamp        TEXT DEFAULT ''
                     );
                 ";
-                await cmd.ExecuteNonQueryAsync();
+                cmd.ExecuteNonQuery();
 
                 // Ensure new columns exist in older databases (safe migration)
-                await TryAddColumnAsync(conn, "Transfers", "PeerName",  "TEXT DEFAULT ''");
-                await TryAddColumnAsync(conn, "Transfers", "Direction", "INTEGER DEFAULT 0");
-                await TryAddColumnAsync(conn, "Transfers", "Timestamp", "TEXT DEFAULT ''");
+                TryAddColumn(conn, "Transfers", "PeerName",  "TEXT DEFAULT ''");
+                TryAddColumn(conn, "Transfers", "Direction", "INTEGER DEFAULT 0");
+                TryAddColumn(conn, "Transfers", "Timestamp", "TEXT DEFAULT ''");
             }
             catch (Exception ex) { Console.WriteLine($"[DB] Init failed: {ex.Message}"); }
         }
 
-        private static async Task TryAddColumnAsync(SqliteConnection conn, string table, string column, string definition)
+        private static void TryAddColumn(SqliteConnection conn, string table, string column, string definition)
         {
             try
             {
                 using var cmd = conn.CreateCommand();
                 cmd.CommandText = $"ALTER TABLE {table} ADD COLUMN {column} {definition}";
-                await cmd.ExecuteNonQueryAsync();
+                cmd.ExecuteNonQuery();
             }
             catch { /* column already exists */ }
         }

@@ -1,6 +1,9 @@
-$pngPath = "d:\PROJECTS\WE SHARE\design_assets\app_icon_gradient.png"
-$icoPath = "d:\PROJECTS\WE SHARE\src\WeShare.UI\Assets\logo.ico"
-$logoPngPath = "d:\PROJECTS\WE SHARE\src\WeShare.UI\Assets\logo.png"
+$DesignDir = "$PSScriptRoot\.."
+$AssetsDir = "$PSScriptRoot\..\.."
+
+$pngPath = "$DesignDir\app_icon_gradient.png"
+$icoPath = "$AssetsDir\logo.ico"
+$logoPngPath = "$AssetsDir\logo.png"
 
 # Copy PNG to logo.png
 Copy-Item $pngPath $logoPngPath -Force
@@ -22,7 +25,7 @@ $icoFile = $icoHeader + $icoDirEntry + $sizeBytes + $offsetBytes + $pngBytes
 # Update BMP for installer UI
 Add-Type -AssemblyName System.Drawing
 $img = [System.Drawing.Image]::FromFile($pngPath)
-$img.Save("d:\PROJECTS\WE SHARE\src\WeShare.UI\Assets\logo.bmp", [System.Drawing.Imaging.ImageFormat]::Bmp)
+$img.Save("$AssetsDir\logo.bmp", [System.Drawing.Imaging.ImageFormat]::Bmp)
 $img.Dispose()
 Write-Host "Updated logo.bmp"
 

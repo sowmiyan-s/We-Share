@@ -36,6 +36,7 @@ namespace WeShare.UI.Views
         private TcpTransferManager _transferManager;
         private DatabaseHelper _dbHelper;
         private IPlatformService _platformService;
+        private WebDashboardService? _webDashboardService;
 
         private string _saveDirectory;
         private DeviceModel? _sendTarget;
@@ -107,23 +108,47 @@ namespace WeShare.UI.Views
             try
             {
                 _transferManager = new TcpTransferManager(45679);
-                _transferManager.LocalName = _localDevice.Name;
-                _transferManager.TransferStarted   += OnTransferStarted;
-                _transferManager.TransferProgress  += OnTransferProgress;
-                _transferManager.TransferCompleted += OnTransferCompleted;
-                _transferManager.TransferFailed    += OnTransferFailed;
-                _transferManager.TransferRequestCallback = OnTransferRequested;
-                
+                ConfigureTransferManager(_transferManager);
                 _transferManager.StartListening(_saveDirectory);
                 _localDevice.Port = _transferManager.BoundPort;
             }
             catch (Exception ex)
             {
                 _transferManager = new TcpTransferManager(0); // Use random port if default fails
+                ConfigureTransferManager(_transferManager);
                 _transferManager.StartListening(_saveDirectory);
                 _localDevice.Port = _transferManager.BoundPort;
                 ShowToast($"Transfer service error: {ex.Message}");
             }
+
+            // Web Dashboard – start port 8080 web server
+            try
+            {
+                _webDashboardService = new WebDashboardService(_saveDirectory, _localDevice);
+                _webDashboardService.SetPeersProvider(() => Devices.ToList());
+                _webDashboardService.WebFileReceived += OnWebFileReceived;
+                _webDashboardService.WebClientConnected += OnWebClientConnected;
+                _webDashboardService.Start();
+            }
+            catch (Exception ex)
+            {
+                ShowToast($"Web Portal start failed: {ex.Message}");
+            }
+
+            // Synchronize the SendQueue with the Web Portal shared files
+            SendQueue.CollectionChanged += (s, e) => {
+                if (_webDashboardService != null)
+                {
+                    _webDashboardService.ClearSharedFiles();
+                    foreach (var item in SendQueue)
+                    {
+                        if (!string.IsNullOrEmpty(item.Path))
+                        {
+                            _webDashboardService.ShareForWeb(item.Path);
+                        }
+                    }
+                }
+            };
 
             // Broadcast our presence so receivers can see us
             _ = Task.Run(async () =>
@@ -189,6 +214,7 @@ namespace WeShare.UI.Views
             var ip = UdpDiscoveryService.GetLocalIp();
             SidebarNetworkInfo.Text = $"{ip}:{_localDevice.Port}";
             HomeNetworkInfoText.Text = SidebarNetworkInfo.Text;
+            HomeWebPortalText.Text  = $"http://{ip}:8080";
             
             if (ip == "127.0.0.1")
             {
@@ -621,6 +647,7 @@ namespace WeShare.UI.Views
             var ip = UdpDiscoveryService.GetLocalIp();
             SidebarNetworkInfo.Text = $"{ip}:{_localDevice.Port}";
             HomeNetworkInfoText.Text = SidebarNetworkInfo.Text;
+            HomeWebPortalText.Text  = $"http://{ip}:8080";
         }
 
         private void ManualConnect_Click(object sender, RoutedEventArgs e)
@@ -775,19 +802,72 @@ namespace WeShare.UI.Views
                     ReceivedFiles.Insert(0, state);
                     ShowToast($"Received: {state.FileName}");
                 }
+                else
+                {
+                    await _dbHelper.SaveTransferAsync(state);
+                }
             });
         }
 
         private void OnTransferFailed(FileTransferState state) 
         {
-            string reason = !string.IsNullOrEmpty(state.ErrorMessage) ? state.ErrorMessage : "Connection failed or rejected";
-            ShowToast($"Transfer failed: {reason}");
+            Dispatcher.UIThread.Post(async () => {
+                SendProgressBorder.IsVisible   = false;
+                GlobalActivityBorder.IsVisible = false;
+                if (state.Direction == TransferDirection.Received)
+                {
+                    var ex = ActiveReceives.FirstOrDefault(s => s.FileId == state.FileId);
+                    if (ex != null) ActiveReceives.Remove(ex);
+                }
+                await _dbHelper.SaveTransferAsync(state);
+                string reason = !string.IsNullOrEmpty(state.ErrorMessage) ? state.ErrorMessage : "Connection failed or rejected";
+                ShowToast($"Transfer failed: {reason}");
+            });
+        }
+
+        private void ConfigureTransferManager(TcpTransferManager manager)
+        {
+            manager.LocalName = _localDevice.Name;
+            manager.TransferStarted   += OnTransferStarted;
+            manager.TransferProgress  += OnTransferProgress;
+            manager.TransferCompleted += OnTransferCompleted;
+            manager.TransferFailed    += OnTransferFailed;
+            manager.TransferRequestCallback = OnTransferRequested;
+        }
+
+        private void OnWebFileReceived(string peerName, string filePath, long size)
+        {
+            var state = new FileTransferState
+            {
+                FileName = Path.GetFileName(filePath),
+                FilePath = filePath,
+                TotalBytes = size,
+                TransferredBytes = size,
+                Status = TransferStatus.Done,
+                Direction = TransferDirection.Received,
+                PeerName = peerName,
+                Timestamp = DateTime.UtcNow
+            };
+            Dispatcher.UIThread.Post(async () => {
+                await _dbHelper.SaveTransferAsync(state);
+                ReceivedFiles.Insert(0, state);
+                ShowToast($"Received via Web Portal: {state.FileName}");
+                UpdateEmptyState();
+            });
+        }
+
+        private void OnWebClientConnected(string type, string remoteIp)
+        {
+            Dispatcher.UIThread.Post(() => {
+                ShowToast($"Web client connected from {remoteIp}");
+            });
         }
 
         public void Shutdown()
         {
             _discoveryService?.StopListening();
             _transferManager?.StopListening();
+            _webDashboardService?.Stop();
         }
 
         private void ShowToast(string message)

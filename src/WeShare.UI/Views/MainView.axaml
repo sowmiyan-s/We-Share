@@ -436,6 +436,16 @@
                             </Border>
                          </StackPanel>
 
+                         <StackPanel Spacing="8">
+                            <TextBlock Text="Web Portal (Mobile Share)" FontSize="10" Foreground="{DynamicResource TextSecondary}"/>
+                            <Border Background="#10FFFFFF" CornerRadius="8" Padding="12,10" HorizontalAlignment="Stretch">
+                               <Grid ColumnDefinitions="Auto, *">
+                                  <Border Classes="WebPortalPulse" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                  <TextBlock Grid.Column="1" x:Name="HomeWebPortalText" Text="http://0.0.0.0:8080" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                               </Grid>
+                            </Border>
+                         </StackPanel>
+
                          <Rectangle Height="1" Fill="{DynamicResource GlassBorderBrush}"/>
                          
                          <Button Classes="PrimaryBtn" Content="CONNECT VIA IP" Click="ManualConnect_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>

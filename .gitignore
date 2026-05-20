@@ -30,15 +30,19 @@ dist/
 build/
 *.exe
 
-# Allow tracking of the installer for direct repository downloads
-!setup/
+# Ignore setup folder contents except for the setup installer executable
+setup/*
 !setup/WeShare_Setup.exe
 
 # Logs & crash dumps
 *.log
 *.tmp
-shareit.db
-weshare.db
+
+# SQLite database files and WAL logs
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
 
 # OS-specific
 .DS_Store

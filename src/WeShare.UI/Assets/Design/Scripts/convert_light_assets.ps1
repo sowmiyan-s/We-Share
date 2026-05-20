@@ -35,14 +35,16 @@ function Convert-ToBmp {
 }
 
 # Paths
-$baseDir = "d:\PROJECTS\WE SHARE"
-$bannerSource = "$baseDir\We Share.png"
-$logoSource = "$baseDir\src\WeShare.UI\Assets\logo.png"
+$DesignDir = "$PSScriptRoot\.."
+$AssetsDir = "$PSScriptRoot\..\.."
+
+$bannerSource = "$DesignDir\We Share.png"
+$logoSource = "$AssetsDir\logo.png"
 
 # Convert Banner (WizardImageFile - usually 164x314 or similar, but Stretch=yes helps)
-Convert-ToBmp -source $bannerSource -dest "$baseDir\design_assets\installer_banner_light.bmp" -width 164 -height 314
+Convert-ToBmp -source $bannerSource -dest "$DesignDir\installer_banner_light.bmp" -width 164 -height 314
 
 # Convert Logo (WizardSmallImageFile - 55x55)
-Convert-ToBmp -source $logoSource -dest "$baseDir\src\WeShare.UI\Assets\logo_light.bmp" -width 55 -height 55
+Convert-ToBmp -source $logoSource -dest "$AssetsDir\logo_light.bmp" -width 55 -height 55
 
 Write-Host "Light theme assets generated successfully."

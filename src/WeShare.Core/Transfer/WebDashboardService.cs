@@ -140,7 +140,7 @@ namespace WeShare.Core.Transfer
             {
                 try
                 {
-                    var stream = client.GetStream();
+                    using var stream = new BufferedStream(client.GetStream(), 65536);
                     
                     // --- Parse Request Headers (Avoid StreamReader buffering issues) ---
                     byte[] headerBuffer = new byte[8192];
@@ -218,6 +218,7 @@ namespace WeShare.Core.Transfer
                                      "Access-Control-Allow-Origin: *\r\n" +
                                      "\r\n";
                         await stream.WriteAsync(Encoding.ASCII.GetBytes(header));
+                        await stream.FlushAsync();
                         
                         var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true };
                         await _clientsLock.WaitAsync();
@@ -264,6 +265,7 @@ namespace WeShare.Core.Transfer
                             await stream.WriteAsync(Encoding.ASCII.GetBytes(header));
                             using var fs = new FileStream(file.Path, FileMode.Open, FileAccess.Read, FileShare.Read);
                             await fs.CopyToAsync(stream);
+                            await stream.FlushAsync();
                         }
                         else
                             await SendResponse(stream, 404, "text/plain", "File Not Found");
@@ -317,6 +319,7 @@ namespace WeShare.Core.Transfer
                          "\r\n";
             await stream.WriteAsync(Encoding.ASCII.GetBytes(header));
             await stream.WriteAsync(bodyBytes);
+            await stream.FlushAsync();
         }
 
         private static Task SendJson(Stream stream, object obj)
