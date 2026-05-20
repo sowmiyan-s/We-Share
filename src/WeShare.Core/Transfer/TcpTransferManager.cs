@@ -200,10 +200,13 @@ namespace WeShare.Core.Transfer
                 client.SendBufferSize    = 81920;
                 client.ReceiveBufferSize = 81920;
 
-                using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                cts.CancelAfter(TimeSpan.FromSeconds(30));
-
-                await client.ConnectAsync(targetIp, targetPort, cts.Token).ConfigureAwait(false);
+                // Apply a 30-second timeout ONLY for the connection handshake.
+                // Do NOT apply it to the entire transfer — large files would always time out.
+                using (var connectCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken))
+                {
+                    connectCts.CancelAfter(TimeSpan.FromSeconds(30));
+                    await client.ConnectAsync(targetIp, targetPort, connectCts.Token).ConfigureAwait(false);
+                }
 
                 using var rawStream = client.GetStream();
 

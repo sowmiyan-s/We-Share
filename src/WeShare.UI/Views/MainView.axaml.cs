@@ -10,6 +10,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using WeShare.Core.Data;
 using WeShare.Core.Discovery;
@@ -407,32 +408,33 @@ namespace WeShare.UI.Views
             {
                 while (true)
                 {
+                    // Dequeue the next item on the UI thread (ObservableCollection is not thread-safe)
                     QueueItem? item = null;
-                    lock (SendQueue)
+                    await Dispatcher.UIThread.InvokeAsync(() =>
                     {
                         if (SendQueue.Count > 0)
                         {
                             item = SendQueue[0];
                             SendQueue.RemoveAt(0);
                         }
-                    }
+                    });
 
                     if (item == null)
                     {
-                        // Queue empty, wait a bit for more files or exit
+                        // Queue empty — wait briefly then check once more before exiting
                         await Task.Delay(1000);
-                        lock (SendQueue)
+                        bool hasMore = false;
+                        await Dispatcher.UIThread.InvokeAsync(() => hasMore = SendQueue.Count > 0);
+                        if (!hasMore)
                         {
-                            if (SendQueue.Count == 0)
-                            {
-                                _isSending = false;
-                                break;
-                            }
-                            continue;
+                            _isSending = false;
+                            break;
                         }
+                        continue;
                     }
 
-                    Dispatcher.UIThread.Post(() => {
+                    Dispatcher.UIThread.Post(() =>
+                    {
                         SendProgressFile.Text = item.Name;
                         SendProgressBar.Value = 0;
                         UpdateQueueUI();
@@ -451,7 +453,8 @@ namespace WeShare.UI.Views
             }
             finally
             {
-                Dispatcher.UIThread.Post(() => {
+                Dispatcher.UIThread.Post(() =>
+                {
                     SendProgressBorder.IsVisible = false;
                     NavHome_Click(this, new RoutedEventArgs());
                 });
@@ -870,13 +873,26 @@ namespace WeShare.UI.Views
             _webDashboardService?.Stop();
         }
 
+        // CTS to cancel the previous toast's hide-delay when a new toast fires
+        private CancellationTokenSource? _toastCts;
+
         private void ShowToast(string message)
         {
-            Dispatcher.UIThread.Post(async () => {
+            Dispatcher.UIThread.Post(async () =>
+            {
+                // Cancel any currently-visible toast so it doesn't hide the new one
+                _toastCts?.Cancel();
+                _toastCts = new CancellationTokenSource();
+                var token = _toastCts.Token;
+
                 ToastMessage.Text     = message;
                 ToastBorder.IsVisible = true;
-                await Task.Delay(3000);
-                ToastBorder.IsVisible = false;
+                try
+                {
+                    await Task.Delay(3000, token);
+                    ToastBorder.IsVisible = false;
+                }
+                catch (TaskCanceledException) { /* a newer toast took over — do nothing */ }
             });
         }
     }

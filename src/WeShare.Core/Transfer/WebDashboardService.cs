@@ -310,8 +310,21 @@ namespace WeShare.Core.Transfer
         // â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         private static async Task SendResponse(Stream stream, int status, string contentType, string body)
         {
+            var statusText = status switch
+            {
+                200 => "OK",
+                201 => "Created",
+                204 => "No Content",
+                400 => "Bad Request",
+                401 => "Unauthorized",
+                403 => "Forbidden",
+                404 => "Not Found",
+                405 => "Method Not Allowed",
+                500 => "Internal Server Error",
+                _   => "OK"
+            };
             var bodyBytes = Encoding.UTF8.GetBytes(body);
-            var header = $"HTTP/1.1 {status} OK\r\n" +
+            var header = $"HTTP/1.1 {status} {statusText}\r\n" +
                          $"Content-Type: {contentType}\r\n" +
                          $"Content-Length: {bodyBytes.Length}\r\n" +
                          "Connection: close\r\n" +

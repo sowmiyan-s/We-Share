@@ -49,19 +49,26 @@ namespace WeShare.Core.Security
 
         public static CryptoStream CreateEncryptionStream(Stream baseStream, bool leaveOpen = false)
         {
-            using var aes = Aes.Create();
+            // NOTE: Do NOT use 'using var aes' here — the AES instance must stay alive
+            // as long as the returned CryptoStream is in use. The encryptor holds a
+            // reference to the AES object internally, so disposing AES before the
+            // CryptoStream finishes would corrupt all in-flight transfers.
+            var aes = Aes.Create();
             aes.Key = SystemKey;
             aes.GenerateIV();
             
-            // Write IV to the stream first
+            // Write IV to the stream first so the receiver can decrypt
             baseStream.Write(aes.IV, 0, aes.IV.Length);
             
-            return new CryptoStream(baseStream, aes.CreateEncryptor(), CryptoStreamMode.Write, leaveOpen);
+            var encryptor = aes.CreateEncryptor();
+            return new CryptoStream(baseStream, encryptor, CryptoStreamMode.Write, leaveOpen);
         }
 
         public static CryptoStream CreateDecryptionStream(Stream baseStream, bool leaveOpen = false)
         {
-            using var aes = Aes.Create();
+            // NOTE: Do NOT use 'using var aes' here — same reason as CreateEncryptionStream.
+            // The AES instance must outlive the returned CryptoStream.
+            var aes = Aes.Create();
             aes.Key = SystemKey;
             
             byte[] iv = new byte[aes.BlockSize / 8];
@@ -73,7 +80,8 @@ namespace WeShare.Core.Security
                 read += r;
             }
             
-            return new CryptoStream(baseStream, aes.CreateDecryptor(aes.Key, iv), CryptoStreamMode.Read, leaveOpen);
+            var decryptor = aes.CreateDecryptor(aes.Key, iv);
+            return new CryptoStream(baseStream, decryptor, CryptoStreamMode.Read, leaveOpen);
         }
     }
 }
