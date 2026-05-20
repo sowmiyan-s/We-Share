@@ -83,6 +83,7 @@ namespace WeShare.UI.Views
 
             // Sync name boxes
             SidebarDeviceName.Text  = _localDevice.Name;
+            HomeDeviceNameText.Text = _localDevice.Name;
             SettingsDeviceName.Text = _localDevice.Name;
             SettingsSaveLocationLabel.Text = _saveDirectory;
 
@@ -151,6 +152,7 @@ namespace WeShare.UI.Views
                 _localDevice.Type = "Phone";
                 _localDevice.Name = "My Mobile Device";
                 SidebarDeviceName.Text  = _localDevice.Name;
+                HomeDeviceNameText.Text = _localDevice.Name;
                 SettingsDeviceName.Text = _localDevice.Name;
 
                 ContentArea.Margin = new Thickness(0, 0, 0, 80);
@@ -186,6 +188,7 @@ namespace WeShare.UI.Views
             // Network check
             var ip = UdpDiscoveryService.GetLocalIp();
             SidebarNetworkInfo.Text = $"{ip}:{_localDevice.Port}";
+            HomeNetworkInfoText.Text = SidebarNetworkInfo.Text;
             
             if (ip == "127.0.0.1")
             {
@@ -250,7 +253,7 @@ namespace WeShare.UI.Views
         {
             ShowPanel(SendFilesPanel, "SEND FILES", null);
             SendStepWizard.IsVisible = true;
-            Step1Indicator.Foreground = SolidColorBrush.Parse("#9333EA");
+            Step1Indicator.Foreground = SolidColorBrush.Parse("#6366F1");
             Step2Indicator.Foreground = SolidColorBrush.Parse("#40FFFFFF");
             UpdateQueueUI();
         }
@@ -265,7 +268,7 @@ namespace WeShare.UI.Views
             ShowPanel(SendDiscoveryPanel, "SEND FILES", null);
             SendStepWizard.IsVisible = true;
             Step1Indicator.Foreground = SolidColorBrush.Parse("#40FFFFFF");
-            Step2Indicator.Foreground = SolidColorBrush.Parse("#9333EA");
+            Step2Indicator.Foreground = SolidColorBrush.Parse("#6366F1");
         }
 
         private void NavReceiveMode_Click(object sender, RoutedEventArgs e)
@@ -305,6 +308,7 @@ namespace WeShare.UI.Views
                     ReceivedFiles.Add(h);
             }
             HistoryEmptyState.IsVisible = ReceivedFiles.Count == 0;
+            HomeEmptyHistoryLabel.IsVisible = ReceivedFiles.Count == 0;
         }
 
         private async void ClearHistory_Click(object sender, RoutedEventArgs e)
@@ -602,6 +606,7 @@ namespace WeShare.UI.Views
             await _dbHelper.ClearHistoryAsync();
             ReceivedFiles.Clear();
             HistoryEmptyState.IsVisible = true;
+            HomeEmptyHistoryLabel.IsVisible = true;
             ShowToast("Transfer history cleared");
         }
 
@@ -615,6 +620,7 @@ namespace WeShare.UI.Views
             // Update IP in case it changed
             var ip = UdpDiscoveryService.GetLocalIp();
             SidebarNetworkInfo.Text = $"{ip}:{_localDevice.Port}";
+            HomeNetworkInfoText.Text = SidebarNetworkInfo.Text;
         }
 
         private void ManualConnect_Click(object sender, RoutedEventArgs e)
@@ -723,6 +729,7 @@ namespace WeShare.UI.Views
             {
                 _localDevice.Name = SettingsDeviceName.Text;
                 SidebarDeviceName.Text = _localDevice.Name;
+                HomeDeviceNameText.Text = _localDevice.Name;
             }
         }
 

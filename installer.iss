@@ -73,7 +73,7 @@ begin
   HeaderColor := $FAFAFA; // Very light grey for header depth
   TextColor := $1A1A1A;   // Near black
   SubTextColor := $666666; // Grey
-  AccentColor := $9333EA;  // Brand Purple
+  AccentColor := $F16663;  // Brand Indigo
 
   // Global Backgrounds
   WizardForm.Color := BaseColor;
