@@ -2,11 +2,32 @@ Add-Type -AssemblyName System.Drawing
 
 function Convert-ToBmp {
     param([string]$source, [string]$dest, [int]$width, [int]$height)
-    $img = [System.Drawing.Image]::FromFile($source)
+    $img = New-Object System.Drawing.Bitmap($source)
     $bmp = New-Object System.Drawing.Bitmap($width, $height)
     $g = [System.Drawing.Graphics]::FromImage($bmp)
-    $g.Clear([System.Drawing.Color]::White)
-    $g.DrawImage($img, 0, 0, $width, $height)
+    
+    # Auto-detect background color from the top-left pixel
+    $bgColor = $img.GetPixel(0, 0)
+    $g.Clear($bgColor)
+    
+    # High quality settings
+    $g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
+    $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::HighQuality
+    $g.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
+    
+    # Preserve aspect ratio
+    $ratioX = $width / $img.Width
+    $ratioY = $height / $img.Height
+    $ratio = [System.Math]::Min($ratioX, $ratioY)
+    
+    $newWidth = [int]($img.Width * $ratio)
+    $newHeight = [int]($img.Height * $ratio)
+    
+    $posX = [int](($width - $newWidth) / 2)
+    $posY = [int](($height - $newHeight) / 2)
+    
+    $g.DrawImage($img, $posX, $posY, $newWidth, $newHeight)
+    
     $bmp.Save($dest, [System.Drawing.Imaging.ImageFormat]::Bmp)
     $g.Dispose()
     $bmp.Dispose()
@@ -15,7 +36,7 @@ function Convert-ToBmp {
 
 # Paths
 $baseDir = "d:\PROJECTS\WE SHARE"
-$bannerSource = "C:\Users\Asus\.gemini\antigravity\brain\087331c3-6772-49e8-bc25-88d53fb9d9a2\installer_banner_light_1778679001355.png"
+$bannerSource = "$baseDir\We Share.png"
 $logoSource = "$baseDir\src\WeShare.UI\Assets\logo.png"
 
 # Convert Banner (WizardImageFile - usually 164x314 or similar, but Stretch=yes helps)

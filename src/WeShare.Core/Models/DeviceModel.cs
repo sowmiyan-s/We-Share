@@ -14,6 +14,7 @@ namespace WeShare.Core.Models
         private string? _ssid;
         private string? _password;
         private DateTime _lastSeen = DateTime.Now;
+        private bool _isReceiver = false;
 
         public string Id
         {
@@ -61,6 +62,12 @@ namespace WeShare.Core.Models
         {
             get => _lastSeen;
             set => SetProperty(ref _lastSeen, value);
+        }
+
+        public bool IsReceiver
+        {
+            get => _isReceiver;
+            set => SetProperty(ref _isReceiver, value);
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

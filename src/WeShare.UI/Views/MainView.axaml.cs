@@ -193,12 +193,18 @@ namespace WeShare.UI.Views
             }
         }
 
+        private void TitleBar_PointerPressed(object sender, PointerPressedEventArgs e)
+        {
+            if (this.VisualRoot is Window window)
+            {
+                window.BeginMoveDrag(e);
+            }
+        }
+
         // ── Empty state ───────────────────────────────────────────────────────
         private void UpdateEmptyState()
         {
-            Dispatcher.UIThread.Post(() => {
-                if (RadarEmptyHint != null) RadarEmptyHint.IsVisible = Devices.Count == 0;
-            });
+            // Empty state handled visually or not needed
         }
 
         private void ShowPanel(Control panel, string title, Button? navBtn = null)
@@ -213,9 +219,17 @@ namespace WeShare.UI.Views
             TransfersPanel.IsVisible = false;
             SendStepWizard.IsVisible = false;
 
+            bool wasReceiver = _localDevice.IsReceiver;
+            _localDevice.IsReceiver = (panel == ReceiveModePanel);
+
             panel.IsVisible = true;
             PageTitle.Text = title;
             SetActiveNav(navBtn);
+
+            if (wasReceiver != _localDevice.IsReceiver && _discoveryService != null)
+            {
+                _ = _discoveryService.BroadcastPresenceAsync();
+            }
         }
 
         private void NavHome_Click(object? sender, RoutedEventArgs e) => ShowPanel(HomePanel, "HOME", NavHomeBtn);
@@ -258,6 +272,14 @@ namespace WeShare.UI.Views
         {
             ShowPanel(ReceiveModePanel, "RECEIVE FILE", null);
             ShowToast("Visible to senders on your network");
+        }
+
+        private void CancelSending_Click(object sender, RoutedEventArgs e)
+        {
+            SendQueue.Clear();
+            _sendTarget = null;
+            _isSending = false;
+            NavHome_Click(sender, e);
         }
 
 
@@ -672,8 +694,16 @@ namespace WeShare.UI.Views
         private void OnDeviceDiscovered(DeviceModel device)
         {
             Dispatcher.UIThread.Post(() => {
-                // Ensure we don't show the same device multiple times (match by unique ID)
                 var existing = Devices.FirstOrDefault(d => d.Id == device.Id);
+
+                if (!device.IsReceiver)
+                {
+                    if (existing != null)
+                        Devices.Remove(existing);
+                    return;
+                }
+
+                // Ensure we don't show the same device multiple times (match by unique ID)
                 if (existing == null) 
                 {
                     Devices.Add(device);
