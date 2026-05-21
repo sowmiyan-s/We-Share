@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="We Share — Send files between PCs instantly over Wi-Fi. No internet, no cloud, no cable. Just tap and transfer.">
+<meta name="theme-color" content="#080808">
+<title>We Share — Files Fly. No Cloud Required.</title>
+<link rel="icon" href="../src/WeShare.UI/Assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Epilogue:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap" rel="stylesheet">
+
+<style>
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TOKENS & RESET
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:     #0A0E17;
+  --bg1:    #111827;
+  --bg2:    #1F2937;
+  --wire:   #2D3E51;
+  --dim:    #374151;
+  --muted:  #6B7280;
+  --ghost:  #9CA3AF;
+  --chalk:  #D1D5DB;
+  --white:  #F9FAFB;
+  --primary: #6366F1;
+  --primary-dim: #4F46E5;
+  --accent: #10B981;
+  --error:  #EF4444;
+  --success: #10B981;
+  --info:   #6366F1;
+  --display: 'Syne', sans-serif;
+  --body:    'Epilogue', sans-serif;
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--body);
+  background: var(--bg);
+  color: var(--chalk);
+  overflow-x: hidden;
+  cursor: none;
+  line-height: 1.6;
+}
+a { text-decoration: none; color: inherit; }
+img { display: block; }
+::selection { background: var(--primary); color: var(--bg); }
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-thumb { background: var(--primary); }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CURSOR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#crs {
+  position: fixed; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--primary); z-index: 9999; pointer-events: none;
+  transform: translate(-50%,-50%);
+  transition: width .15s, height .15s, background .15s;
+}
+#crs-o {
+  position: fixed; width: 32px; height: 32px; border-radius: 50%;
+  border: 1px solid rgba(99,102,241,.4); z-index: 9998; pointer-events: none;
+  transform: translate(-50%,-50%); transition: width .25s, height .25s;
+}
+body.hov #crs { width: 14px; height: 14px; background: var(--info); }
+body.hov #crs-o { width: 46px; height: 46px; border-color: rgba(99,102,241,.3); }
+@media(hover:none){ #crs,#crs-o{display:none} body{cursor:auto} }
+
+/* noise grain */
+body::after {
+  content: ''; position: fixed; inset: 0; z-index: 1000; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: .025;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   NAV
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 800;
+  height: 60px; padding: 0 48px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(8,8,8,.85); backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--wire);
+  transition: background .3s;
+}
+nav.s { background: rgba(8,8,8,.97); }
+.n-logo { display: flex; align-items: center; gap: 11px; }
+.n-logo img { width: 30px; height: 30px; border-radius: 7px; }
+.n-logo-t {
+  font-family: var(--display); font-size: .95rem; font-weight: 800;
+  letter-spacing: .05em; color: var(--white);
+}
+.n-logo-t em { font-style: normal; color: var(--primary); }
+.n-links { display: flex; list-style: none; gap: 0; }
+.n-links a {
+  display: block; padding: 0 16px; height: 60px; line-height: 60px;
+  font-family: var(--display); font-size: .75rem; font-weight: 600;
+  letter-spacing: .04em; color: var(--muted);
+  transition: color .18s;
+}
+.n-links a:hover { color: var(--white); }
+.n-dl {
+  background: var(--primary); color: var(--bg);
+  padding: 0 20px; height: 36px; line-height: 36px; border-radius: 3px;
+  font-family: var(--display); font-size: .78rem; font-weight: 800;
+  letter-spacing: .04em;
+  transition: background .15s, transform .1s;
+}
+.n-dl:hover { background: var(--primary-dim); transform: translateY(-1px); }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SHARED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.wrap { max-width: 1180px; margin: 0 auto; padding: 0 48px; }
+
+.eyebrow {
+  font-family: var(--display); font-size: .7rem; font-weight: 700;
+  letter-spacing: .2em; text-transform: uppercase; color: var(--primary);
+  margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
+}
+.eyebrow::before { content: ''; width: 22px; height: 1px; background: var(--primary); }
+
+.rv { opacity: 0; transform: translateY(22px); transition: opacity .55s ease, transform .55s ease; }
+.rv.in { opacity: 1; transform: none; }
+.d1{transition-delay:.06s} .d2{transition-delay:.12s} .d3{transition-delay:.18s}
+.d4{transition-delay:.24s} .d5{transition-delay:.30s} .d6{transition-delay:.36s}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   HERO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#hero {
+  position: relative; min-height: 100vh;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 60px 48px;
+  overflow: hidden;
+}
+
+/* ambient glow */
+#hero::before {
+  content: ''; position: absolute;
+  top: -20%; right: -10%; width: 700px; height: 700px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(99,102,241,.07) 0%, transparent 65%);
+  pointer-events: none;
+}
+#hero::after {
+  content: ''; position: absolute;
+  bottom: -10%; left: -10%; width: 500px; height: 500px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(99,102,241,.04) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+.hero-inner {
+  position: relative; z-index: 1;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 80px; align-items: center;
+  max-width: 1180px; margin: 0 auto;
+}
+
+/* left copy */
+.hero-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--display); font-size: .68rem; font-weight: 700;
+  letter-spacing: .18em; text-transform: uppercase;
+  color: var(--primary); border: 1px solid rgba(99,102,241,.25);
+  padding: 6px 14px; border-radius: 2px;
+  margin-bottom: 28px;
+  opacity: 0; animation: up .6s .05s ease forwards;
+}
+.h-live { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); animation: bl 2s ease infinite; }
+@keyframes bl { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+h1 {
+  font-family: var(--display);
+  font-size: clamp(3.4rem, 6.5vw, 7.5rem);
+  font-weight: 800; line-height: .92; letter-spacing: -.02em;
+  color: var(--white); margin-bottom: 28px;
+  opacity: 0; animation: up .7s .15s ease forwards;
+}
+h1 .a { color: var(--primary); }
+h1 .u {
+  position: relative; display: inline-block;
+  background: linear-gradient(90deg, var(--primary), var(--primary-dim));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+
+.hero-sub {
+  font-size: 1.08rem; color: var(--ghost); line-height: 1.8;
+  max-width: 420px; margin-bottom: 40px;
+  opacity: 0; animation: up .7s .25s ease forwards;
+}
+.hero-sub strong { color: var(--white); font-weight: 600; }
+
+.hero-ctas {
+  display: flex; gap: 14px; flex-wrap: wrap;
+  opacity: 0; animation: up .7s .35s ease forwards;
+}
+.btn-hero {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--primary); color: var(--bg);
+  padding: 15px 30px; border-radius: 3px;
+  font-family: var(--display); font-size: .88rem; font-weight: 800;
+  letter-spacing: .04em;
+  box-shadow: 0 8px 30px rgba(99,102,241,.35);
+  transition: background .15s, transform .12s, box-shadow .15s;
+}
+.btn-hero:hover { background: var(--primary-dim); transform: translateY(-3px); box-shadow: 0 14px 40px rgba(99,102,241,.4); }
+.btn-ghost {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: transparent; color: var(--ghost);
+  padding: 15px 30px; border-radius: 3px;
+  border: 1px solid var(--dim);
+  font-family: var(--display); font-size: .88rem; font-weight: 700;
+  letter-spacing: .04em;
+  transition: border-color .18s, color .18s, transform .12s;
+}
+.btn-ghost:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-3px); }
+
+/* hero trust pills */
+.hero-trust {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-top: 28px;
+  opacity: 0; animation: up .7s .45s ease forwards;
+}
+.trust-p {
+  font-family: var(--display); font-size: .64rem; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted); padding: 5px 12px;
+  border: 1px solid var(--wire); border-radius: 2px;
+  display: flex; align-items: center; gap: 6px;
+}
+.trust-p::before { content: '✓'; color: var(--accent); }
+
+/* right — visual mockup */
+.hero-visual {
+  opacity: 0; animation: up .9s .4s ease forwards;
+}
+.mockup {
+  background: var(--bg1); border: 1px solid var(--dim);
+  border-radius: 14px; overflow: hidden;
+  box-shadow: 0 50px 100px rgba(0,0,0,.7), 0 0 60px rgba(99,102,241,.06);
+}
+.mockup-bar {
+  background: var(--bg2); padding: 13px 18px;
+  display: flex; align-items: center; gap: 7px;
+  border-bottom: 1px solid var(--wire);
+}
+.wd { width: 10px; height: 10px; border-radius: 50%; }
+.wd-r{background:#ff5f57} .wd-y{background:#febc2e} .wd-g{background:#28c840}
+.mockup-title {
+  flex: 1; text-align: center;
+  font-family: var(--display); font-size: .66rem; font-weight: 600;
+  color: var(--muted); letter-spacing: .06em;
+}
+.mockup-body { padding: 28px 24px; }
+.m-status {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px;
+}
+.m-status-left {
+  font-family: var(--display); font-size: .62rem; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+  display: flex; align-items: center; gap: 8px;
+}
+.radar-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 9px var(--accent); animation: bl 1.4s ease infinite; }
+.m-status-right { font-family: var(--display); font-size: .62rem; color: var(--primary); font-weight: 700; }
+
+.dev {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px; border-radius: 8px;
+  background: rgba(255,255,255,.03); border: 1px solid var(--wire);
+  margin-bottom: 8px; transition: border-color .2s;
+}
+.dev:hover { border-color: var(--dim); }
+.dev-l { display: flex; align-items: center; gap: 11px; }
+.dev-ic {
+  width: 36px; height: 36px; border-radius: 8px;
+  background: rgba(99,102,241,.1); border: 1px solid rgba(99,102,241,.15);
+  display: flex; align-items: center; justify-content: center; font-size: 1rem;
+}
+.dev-n { font-family: var(--display); font-size: .84rem; font-weight: 700; color: var(--white); }
+.dev-ip { font-family: 'Courier New', monospace; font-size: .62rem; color: var(--muted); margin-top: 1px; }
+.dev-badge {
+  font-family: var(--display); font-size: .58rem; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase;
+  padding: 3px 9px; border-radius: 2px;
+  background: rgba(16,185,129,.1); color: var(--accent); border: 1px solid rgba(16,185,129,.2);
+}
+
+.xfer-panel { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--wire); }
+.xfer-top {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px;
+}
+.xfer-file { font-family: var(--display); font-size: .78rem; font-weight: 700; color: var(--white); }
+.xfer-size { font-family: var(--display); font-size: .65rem; color: var(--muted); }
+.xfer-speed {
+  font-family: var(--display); font-size: .82rem; font-weight: 800; color: var(--primary);
+}
+.pbar { height: 4px; background: var(--wire); border-radius: 99px; overflow: hidden; margin-bottom: 8px; }
+.pbar-fill {
+  height: 100%; background: linear-gradient(90deg, var(--primary), var(--primary-dim));
+  border-radius: 99px; animation: prog 4s ease-in-out infinite;
+}
+@keyframes prog { 0%{width:6%} 65%{width:88%} 100%{width:6%} }
+.xfer-bot {
+  display: flex; justify-content: space-between;
+  font-family: var(--display); font-size: .62rem; color: var(--muted);
+}
+.xfer-eta { color: var(--info); font-weight: 700; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TICKER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.ticker {
+  overflow: hidden; border-top: 1px solid var(--wire); border-bottom: 1px solid var(--wire);
+  background: var(--bg1); padding: 12px 0;
+}
+.ticker-t {
+  display: flex; width: max-content; white-space: nowrap;
+  animation: tk 28s linear infinite;
+}
+.ti {
+  padding: 0 36px;
+  font-family: var(--display); font-size: .66rem; font-weight: 600;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--dim);
+  border-right: 1px solid var(--wire);
+  display: flex; align-items: center; gap: 10px;
+}
+.ti::before { content: '◆'; font-size: .3rem; color: var(--primary); }
+@keyframes tk { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   PROBLEM SECTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#problem {
+  padding: 120px 0;
+  background: var(--bg1);
+}
+.problem-inner {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
+}
+.problem-left {}
+.problem-h {
+  font-family: var(--display); font-size: clamp(2.4rem, 4vw, 4rem);
+  font-weight: 800; line-height: 1.05; letter-spacing: -.025em;
+  color: var(--white); margin-bottom: 22px;
+}
+.problem-h .strike {
+  position: relative; color: var(--muted); display: inline-block;
+}
+.problem-h .strike::after {
+  content: ''; position: absolute; left: -2px; right: -2px;
+  top: 50%; height: 2px; background: var(--red);
+  transform: rotate(-2deg);
+}
+.problem-sub { font-size: .98rem; color: var(--ghost); line-height: 1.8; max-width: 440px; }
+.problem-sub strong { color: var(--white); }
+
+.problem-cards { display: flex; flex-direction: column; gap: 14px; }
+.pain-card {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 20px 22px; border: 1px solid var(--wire); border-radius: 6px;
+  background: var(--bg); position: relative; overflow: hidden;
+  transition: border-color .2s;
+}
+.pain-card:hover { border-color: var(--dim); }
+.pain-x {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; flex-shrink: 0; font-weight: 300; opacity: 0.85;
+}
+.pain-t { font-family: var(--display); font-size: .88rem; font-weight: 700; color: var(--white); margin-bottom: 4px; }
+.pain-d { font-size: .82rem; color: var(--muted); line-height: 1.55; }
+.pain-bg {
+  position: absolute; right: -10px; bottom: -10px;
+  font-family: var(--display); font-size: 3.5rem; font-weight: 800;
+  color: rgba(239,68,68,.04); pointer-events: none; user-select: none;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   BENEFITS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#benefits { padding: 120px 0; }
+.benefits-top { margin-bottom: 72px; }
+.benefits-intro {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: end;
+}
+.b-sub { font-size: .98rem; color: var(--ghost); line-height: 1.8; }
+
+/* big number row */
+.numbers-row {
+  display: grid; grid-template-columns: repeat(4,1fr); gap: 0;
+  border: 1px solid var(--wire); margin-bottom: 60px;
+}
+.num-card {
+  padding: 44px 32px;
+  border-right: 1px solid var(--wire);
+  text-align: center; position: relative; overflow: hidden;
+  transition: background .2s;
+}
+.num-card:last-child { border-right: none; }
+.num-card:hover { background: rgba(99,102,241,.03); }
+.num-big {
+  font-family: var(--display); font-size: clamp(3rem, 4.5vw, 5.5rem);
+  font-weight: 800; line-height: .9; letter-spacing: -.03em; color: var(--primary);
+  margin-bottom: 8px; display: block;
+}
+.num-unit { color: var(--ghost); font-size: .6em; }
+.num-label {
+  font-family: var(--display); font-size: .68rem; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+}
+
+/* benefit cards */
+.benefit-grid {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 20px;
+}
+.bc {
+  padding: 36px 30px; border: 1px solid var(--wire); border-radius: 6px;
+  background: var(--bg1); position: relative; overflow: hidden;
+  transition: border-color .25s, transform .2s, box-shadow .25s;
+}
+.bc:hover { border-color: var(--dim); transform: translateY(-5px); box-shadow: 0 24px 60px rgba(0,0,0,.5); }
+.bc::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: var(--primary); transform: scaleX(0); transform-origin: left;
+  transition: transform .3s ease;
+}
+.bc:hover::before { transform: scaleX(1); }
+.bc-emoji { font-size: 2.2rem; margin-bottom: 18px; font-weight: 300; opacity: 0.9; }
+.bc-title {
+  font-family: var(--display); font-size: 1.05rem; font-weight: 800;
+  color: var(--white); margin-bottom: 11px; letter-spacing: -.01em;
+}
+.bc-text { font-size: .9rem; color: var(--ghost); line-height: 1.75; }
+.bc-text strong { color: var(--chalk); font-weight: 600; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   USE CASES — cinematic
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#usecases {
+  padding: 120px 0;
+  background: var(--bg1);
+}
+.uc-header { margin-bottom: 72px; }
+.uc-grid {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 0;
+  border: 1px solid var(--wire);
+}
+.uc-card {
+  padding: 0; border-right: 1px solid var(--wire); border-bottom: 1px solid var(--wire);
+  overflow: hidden; transition: background .2s;
+}
+.uc-card:nth-child(3n){ border-right: none; }
+.uc-card:nth-child(4),.uc-card:nth-child(5),.uc-card:nth-child(6){ border-bottom: none; }
+.uc-card:hover { background: rgba(99,102,241,.025); }
+.uc-top { padding: 36px 32px 20px; }
+.uc-emoji-wrap {
+  width: 52px; height: 52px; border-radius: 10px;
+  background: rgba(99,102,241,.08); border: 1px solid rgba(99,102,241,.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem; margin-bottom: 18px; font-weight: 300; opacity: 0.85;
+}
+.uc-title {
+  font-family: var(--display); font-size: 1.1rem; font-weight: 800;
+  color: var(--white); margin-bottom: 10px; letter-spacing: -.01em;
+}
+.uc-body { font-size: .88rem; color: var(--ghost); line-height: 1.75; }
+.uc-scenario {
+  padding: 14px 32px; border-top: 1px solid var(--wire);
+  background: rgba(0,0,0,.3);
+  font-family: var(--display); font-size: .64rem; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--primary);
+  display: flex; align-items: center; gap: 8px;
+}
+.uc-scenario::before { content: '→'; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   COMPARISON — vs. the alternatives
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#compare { padding: 120px 0; }
+.cmp-header { margin-bottom: 60px; }
+.cmp-table { border: 1px solid var(--wire); }
+.cmp-row {
+  display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  border-bottom: 1px solid var(--wire);
+}
+.cmp-row:last-child { border-bottom: none; }
+.cmp-row.head { background: var(--bg1); }
+.cmp-cell {
+  padding: 18px 22px; border-right: 1px solid var(--wire);
+  font-size: .86rem; color: var(--ghost);
+  display: flex; align-items: center;
+}
+.cmp-cell:last-child { border-right: none; }
+.cmp-row.head .cmp-cell {
+  font-family: var(--display); font-size: .7rem; font-weight: 800;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+}
+.cmp-row.head .cmp-cell:nth-child(2) { color: var(--primary); }
+.cmp-feature { color: var(--chalk); font-weight: 600; font-size: .9rem; }
+.yes { color: var(--accent); font-size: 1.1rem; }
+.no  { color: var(--error); font-size: 1rem; }
+.partial { color: var(--primary); font-size: .8rem; }
+.highlight-col { background: rgba(99,102,241,.03); }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   DOWNLOAD CTA — hero-sized
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#download {
+  padding: 0;
+  background: var(--bg1);
+  border-top: 1px solid var(--wire);
+  border-bottom: 1px solid var(--wire);
+  position: relative; overflow: hidden;
+}
+#download::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse at 50% 50%, rgba(99,102,241,.055) 0%, transparent 60%);
+}
+.dl-inner {
+  padding: 120px 48px;
+  text-align: center; position: relative; z-index: 1;
+}
+.dl-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--display); font-size: .68rem; font-weight: 700;
+  letter-spacing: .16em; text-transform: uppercase; color: var(--primary);
+  padding: 6px 14px; border: 1px solid rgba(99,102,241,.25); border-radius: 2px;
+  margin-bottom: 28px;
+}
+.dl-h {
+  font-family: var(--display);
+  font-size: clamp(3.5rem, 7vw, 8rem);
+  font-weight: 800; line-height: .9; letter-spacing: -.03em;
+  color: var(--white); margin-bottom: 20px;
+}
+.dl-h span { color: var(--primary); }
+.dl-sub { font-size: 1.05rem; color: var(--ghost); max-width: 480px; margin: 0 auto 48px; line-height: 1.75; }
+.dl-sub strong { color: var(--chalk); }
+
+.dl-btn-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.dl-main {
+  display: inline-flex; align-items: center; gap: 14px;
+  background: var(--primary); color: var(--bg);
+  padding: 20px 44px; border-radius: 3px;
+  font-family: var(--display); font-size: 1.05rem; font-weight: 800;
+  letter-spacing: .04em;
+  box-shadow: 0 12px 48px rgba(99,102,241,.4);
+  transition: background .15s, transform .12s, box-shadow .15s;
+}
+.dl-main:hover { background: var(--primary-dim); transform: translateY(-4px); box-shadow: 0 20px 60px rgba(99,102,241,.45); }
+.dl-main-icon { font-size: 1.2rem; }
+.dl-note {
+  font-family: var(--display); font-size: .68rem; font-weight: 600;
+  letter-spacing: .08em; color: var(--muted);
+}
+.dl-note span { color: var(--accent); }
+.dl-badges {
+  display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 32px;
+}
+.dl-badge {
+  font-family: var(--display); font-size: .64rem; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted); padding: 6px 14px;
+  border: 1px solid var(--wire); border-radius: 2px;
+  display: flex; align-items: center; gap: 6px;
+}
+.dl-badge::before { content: '✓'; color: var(--accent); }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   PATCH NOTES (simplified)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#patchnotes { padding: 100px 0; }
+.pn-layout { display: grid; grid-template-columns: 280px 1fr; gap: 48px; border: 1px solid var(--wire); margin-top: 56px; }
+.pn-sidebar { border-right: 1px solid var(--wire); }
+.pn-ver {
+  padding: 20px 24px; border-bottom: 1px solid var(--wire);
+  cursor: pointer; transition: background .18s;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.pn-ver:hover { background: rgba(245,166,35,.04); }
+.pn-ver.act { background: rgba(99,102,241,.07); border-left: 3px solid var(--primary); }
+.pn-vnum { font-family: var(--display); font-size: .9rem; font-weight: 800; color: var(--white); }
+.pn-vdate { font-family: var(--display); font-size: .62rem; color: var(--muted); margin-top: 2px; }
+.pn-badge {
+  font-family: var(--display); font-size: .6rem; font-weight: 800;
+  letter-spacing: .1em; text-transform: uppercase;
+  padding: 2px 8px; border-radius: 2px;
+}
+.pb-new { background: rgba(0,230,118,.1); color: var(--green); border: 1px solid rgba(0,230,118,.2); }
+
+.pn-content { display: none; padding: 36px 40px; }
+.pn-content.act { display: block; }
+.pn-ch { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 24px; border-bottom: 1px solid var(--wire); margin-bottom: 32px; }
+.pn-ver-big { font-family: var(--display); font-size: 3rem; font-weight: 800; line-height: 1; color: var(--white); }
+.pn-rel { font-family: var(--display); font-size: .65rem; color: var(--muted); margin-top: 4px; font-weight: 600; letter-spacing: .06em; }
+.pn-dl-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  border: 1px solid var(--primary); color: var(--primary);
+  padding: 10px 20px; border-radius: 2px;
+  font-family: var(--display); font-size: .78rem; font-weight: 800;
+  letter-spacing: .04em; transition: background .15s, color .15s;
+}
+.pn-dl-btn:hover { background: var(--primary); color: var(--bg); }
+
+.pn-section { margin-bottom: 28px; }
+.pn-section-t {
+  font-family: var(--display); font-size: .66rem; font-weight: 800;
+  letter-spacing: .14em; text-transform: uppercase;
+  padding: 10px 0; border-bottom: 1px solid var(--wire); margin-bottom: 4px;
+}
+.pns-new{color:var(--accent)} .pns-fix{color:var(--primary)} .pns-note{color:var(--error)}
+.pn-item {
+  display: flex; gap: 14px; align-items: flex-start;
+  padding: 11px 0; border-bottom: 1px solid var(--wire);
+  font-size: .88rem; color: var(--ghost); line-height: 1.65;
+}
+.pn-item:last-child { border-bottom: none; }
+.pn-dot { width: 5px; height: 5px; border-radius: 50%; margin-top: 8px; flex-shrink: 0; }
+.pd-n{background:var(--accent)} .pd-f{background:var(--primary)} .pd-x{background:var(--error)}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   FOOTER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+footer {
+  border-top: 1px solid var(--wire); padding: 40px 48px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--bg);
+}
+.f-brand { display: flex; align-items: center; gap: 12px; }
+.f-logo { width: 30px; height: 30px; border-radius: 6px; }
+.f-name { font-family: var(--display); font-size: .9rem; font-weight: 800; color: var(--white); }
+.f-copy { font-family: var(--display); font-size: .62rem; color: var(--muted); margin-top: 2px; }
+.f-links { display: flex; gap: 28px; list-style: none; }
+.f-links a {
+  font-family: var(--display); font-size: .72rem; font-weight: 600;
+  letter-spacing: .06em; color: var(--muted); transition: color .16s;
+}
+.f-links a:hover { color: var(--amber); }
+.f-gh {
+  display: inline-flex; align-items: center; gap: 7px;
+  border: 1px solid var(--wire); padding: 8px 18px; border-radius: 2px;
+  font-family: var(--display); font-size: .7rem; font-weight: 700;
+  color: var(--muted); transition: border-color .16s, color .16s;
+}
+.f-gh:hover { border-color: var(--amber); color: var(--amber); }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   KEYFRAMES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@keyframes up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   RESPONSIVE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@media(max-width:1080px){
+  .hero-inner { grid-template-columns: 1fr; gap: 48px; }
+  .hero-visual { display: none; }
+  .problem-inner { grid-template-columns: 1fr; gap: 48px; }
+  .benefits-intro { grid-template-columns: 1fr; gap: 24px; }
+  .numbers-row { grid-template-columns: 1fr 1fr; }
+  .num-card:nth-child(2){ border-right: none; }
+  .num-card:nth-child(1),.num-card:nth-child(2){ border-bottom: 1px solid var(--wire); }
+  .benefit-grid { grid-template-columns: 1fr 1fr; }
+  .uc-grid { grid-template-columns: 1fr 1fr; }
+  .uc-card:nth-child(2n){ border-right: none; }
+  .uc-card:nth-child(5){ border-bottom: 1px solid var(--wire); }
+  .cmp-row { grid-template-columns: 2fr 1fr 1fr; }
+  .cmp-cell:nth-child(4),.cmp-cell:nth-child(5){ display: none; }
+  .pn-layout { grid-template-columns: 1fr; }
+  .pn-sidebar { border-right: none; border-bottom: 1px solid var(--wire); }
+  nav { padding: 0 20px; } .n-links { display: none; }
+  .wrap, #hero, #download .dl-inner { padding-left: 20px; padding-right: 20px; }
+  footer { flex-direction: column; gap: 22px; padding: 28px 20px; text-align: center; } .f-links{display:none;}
+}
+@media(max-width:640px){
+  .numbers-row { grid-template-columns: 1fr 1fr; }
+  .benefit-grid { grid-template-columns: 1fr; }
+  .uc-grid { grid-template-columns: 1fr; }
+  .uc-card { border-right: none; }
+  .cmp-row { grid-template-columns: 2fr 1fr; }
+  .cmp-cell:nth-child(3),.cmp-cell:nth-child(4),.cmp-cell:nth-child(5){ display: none; }
+  h1 { font-size: 3.2rem; }
+  .dl-h { font-size: 3rem; }
+  #hero { padding: 60px 20px 48px; }
+  .dl-inner { padding: 80px 20px; }
+  .pn-content { padding: 24px 20px; }
+}
+</style>
+</head>
+<body>
+
+<div id="crs"></div>
+<div id="crs-o"></div>
+
+<!-- ══════════ NAV ══════════ -->
+<nav id="nav">
+  <a href="#" class="n-logo" id="nav-logo">
+    <img src="../src/WeShare.UI/Assets/logo.png" alt="We Share">
+    <span class="n-logo-t">WE<em>SHARE</em></span>
+  </a>
+  <ul class="n-links">
+    <li><a href="#benefits">Why We Share</a></li>
+    <li><a href="#usecases">Use Cases</a></li>
+    <li><a href="#compare">Compare</a></li>
+    <li><a href="#patchnotes">What's New</a></li>
+  </ul>
+  <a href="#download" class="n-dl" id="nav-dl">↓ Free Download</a>
+</nav>
+
+<!-- ══════════ HERO ══════════ -->
+<section id="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-tag"><span class="h-live"></span>Launch Day — Get It Free</div>
+      <h1>Send Files<br>at LAN Speed.<br><span class="a">Zero Waiting.</span></h1>
+      <p class="hero-sub">
+        Forget cloud uploads and USB cables. We Share moves any file between your PCs in seconds <strong>over local Wi-Fi.</strong>
+        150+ MB/s. No internet needed. No accounts. No compromises.
+      </p>
+      <div class="hero-ctas">
+        <a href="#download" class="btn-hero" id="hero-main-btn">↓ &ensp;Download Free Now</a>
+        <a href="#usecases" class="btn-ghost" id="hero-learn-btn">See It In Action →</a>
+      </div>
+      <div class="hero-trust">
+        <div class="trust-p">100% Free Forever</div>
+        <div class="trust-p">No Signup Required</div>
+        <div class="trust-p">Private (Never Uploads)</div>
+        <div class="trust-p">150+ MB/s Speed</div>
+        <div class="trust-p">Works Offline</div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="mockup">
+        <div class="mockup-bar">
+          <div class="wd wd-r"></div><div class="wd wd-y"></div><div class="wd wd-g"></div>
+          <div class="mockup-title">We Share — Active Transfer</div>
+        </div>
+        <div class="mockup-body">
+          <div class="m-status">
+            <div class="m-status-left"><span class="radar-dot"></span>Devices Found (2)</div>
+            <div class="m-status-right">● LIVE</div>
+          </div>
+          <div class="dev">
+            <div class="dev-l">
+              <div class="dev-ic">▭</div>
+              <div><div class="dev-n">DESKTOP-HOME</div><div class="dev-ip">192.168.1.102</div></div>
+            </div>
+            <span class="dev-badge">ONLINE</span>
+          </div>
+          <div class="dev">
+            <div class="dev-l">
+              <div class="dev-ic">▲</div>
+              <div><div class="dev-n">LAPTOP-WORK</div><div class="dev-ip">192.168.1.107</div></div>
+            </div>
+            <span class="dev-badge">ONLINE</span>
+          </div>
+          <div class="xfer-panel">
+            <div class="xfer-top">
+              <div>
+                <div class="xfer-file">project_footage.zip</div>
+                <div class="xfer-size">3.8 GB</div>
+              </div>
+              <div class="xfer-speed">● 153 MB/s</div>
+            </div>
+            <div class="pbar"><div class="pbar-fill"></div></div>
+            <div class="xfer-bot">
+              <span>Transferring over Wi-Fi</span>
+              <span class="xfer-eta">ETA ~22s</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-t">
+    <div class="ti">Zero Internet Required</div>
+    <div class="ti">No Cloud Storage</div>
+    <div class="ti">No File Size Limit</div>
+    <div class="ti">Instant Device Discovery</div>
+    <div class="ti">Transfer at 150+ MB/s</div>
+    <div class="ti">100% Free · MIT Licensed</div>
+    <div class="ti">No Account Needed</div>
+    <div class="ti">Works on Any Wi-Fi</div>
+    <div class="ti">Your Files Stay Local</div>
+    <div class="ti">Windows PC to PC</div>
+    <div class="ti">Zero Internet Required</div>
+    <div class="ti">No Cloud Storage</div>
+    <div class="ti">No File Size Limit</div>
+    <div class="ti">Instant Device Discovery</div>
+    <div class="ti">Transfer at 150+ MB/s</div>
+    <div class="ti">100% Free · MIT Licensed</div>
+    <div class="ti">No Account Needed</div>
+    <div class="ti">Works on Any Wi-Fi</div>
+    <div class="ti">Your Files Stay Local</div>
+    <div class="ti">Windows PC to PC</div>
+  </div>
+</div>
+
+<!-- ══════════ PROBLEM ══════════ -->
+<section id="problem">
+  <div class="wrap">
+    <div class="problem-inner">
+      <div class="rv">
+        <div class="eyebrow">The Problem</div>
+        <h2 class="problem-h">Moving files between PCs <span class="strike">shouldn't be this hard</span></h2>
+        <p class="problem-sub">Your PCs are 3 feet apart on your desk. Your files are the same size as always. Yet somehow, getting them from one screen to the other has become a 20-minute exercise in frustration. <strong>There's got to be a better way.</strong></p>
+      </div>
+      <div class="problem-cards rv">
+        <div class="pain-card">
+          <div class="pain-x">☁</div>
+          <div>
+            <div class="pain-t">Cloud uploads are painfully slow</div>
+            <p class="pain-d">Upload 4 GB to Google Drive, wait 20 minutes, then download again. Every byte travels across the internet and back — for a file that's 3 feet away.</p>
+          </div>
+          <div class="pain-bg">01</div>
+        </div>
+        <div class="pain-card">
+          <div class="pain-x">⊞</div>
+          <div>
+            <div class="pain-t">USB cables are messy and limited</div>
+            <p class="pain-d">Find the right cable. Plug in. Wait for Windows to recognise the drive. Hope the file fits. Unplug. Repeat. It's 2026 — we shouldn't need cables.</p>
+          </div>
+          <div class="pain-bg">02</div>
+        </div>
+        <div class="pain-card">
+          <div class="pain-x">◇</div>
+          <div>
+            <div class="pain-t">Email and messaging apps cap file sizes</div>
+            <p class="pain-d">25 MB attachment limit. Compressed to death. Split into parts. WhatsApp destroys photo quality. Telegram is 2 GB max. Nothing cuts it for large files.</p>
+          </div>
+          <div class="pain-bg">03</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ BENEFITS ══════════ -->
+<section id="benefits">
+  <div class="wrap">
+    <div class="benefits-top rv">
+      <div class="benefits-intro">
+        <div>
+          <div class="eyebrow">The Solution</div>
+          <h2 style="font-family:var(--display);font-size:clamp(2.5rem,4.5vw,4.5rem);font-weight:800;line-height:1;letter-spacing:-.03em;color:var(--white);margin-bottom:14px">
+            Local transfer<br>perfected.
+          </h2>
+        </div>
+        <p class="b-sub">We Share uses your Wi-Fi to move files directly between PCs at full local network speed. Faster than any cloud. Simpler than USB cables. Instantly. No accounts. No waiting. Just works.</p>
+      </div>
+    </div>
+
+    <div class="numbers-row rv">
+      <div class="num-card">
+        <span class="num-big">150<span class="num-unit">+</span></span>
+        <div class="num-label">MB/s Transfer Speed</div>
+      </div>
+      <div class="num-card">
+        <span class="num-big">0</span>
+        <div class="num-label">Internet Required</div>
+      </div>
+      <div class="num-card">
+        <span class="num-big">∞</span>
+        <div class="num-label">File Size Limit</div>
+      </div>
+      <div class="num-card">
+        <span class="num-big">0</span>
+        <div class="num-label">Cost. Ever.</div>
+      </div>
+    </div>
+
+    <div class="benefit-grid">
+      <div class="bc rv d1">
+        <div class="bc-emoji">▶</div>
+        <div class="bc-title">Blazing Fast Transfers</div>
+        <p class="bc-text">We Share moves files at the full speed of your local network — <strong>up to 150 MB/s</strong>. That 4 GB video? Done in under 30 seconds. No upload bar. No waiting on a server.</p>
+      </div>
+      <div class="bc rv d2">
+        <div class="bc-emoji">◐</div>
+        <div class="bc-title">Your Files Stay Private</div>
+        <p class="bc-text">Files travel directly from one PC to another. <strong>They never leave your network.</strong> No cloud, no server ever sees your data. Total privacy by design, not just policy.</p>
+      </div>
+      <div class="bc rv d3">
+        <div class="bc-emoji">⊗</div>
+        <div class="bc-title">Finds Devices Automatically</div>
+        <p class="bc-text">Open the app — your other PCs appear instantly. <strong>No typing IP addresses.</strong> No configuration. No pairing codes. Just tap the device you want and start sending.</p>
+      </div>
+      <div class="bc rv d4">
+        <div class="bc-emoji">⊕</div>
+        <div class="bc-title">Works Without Internet</div>
+        <p class="bc-text">In a hotel? Offline at a job site? On an airplane? <strong>Doesn't matter.</strong> We Share only needs your local Wi-Fi — not the internet. Any network, anywhere on earth.</p>
+      </div>
+      <div class="bc rv d5">
+        <div class="bc-emoji">▭</div>
+        <div class="bc-title">No File Size Restrictions</div>
+        <p class="bc-text">Send a 1 KB text file or a 500 GB archive — <strong>We Share doesn't care.</strong> No splitting. No compression. No "file too large" errors. Your files, unmodified, instantly.</p>
+      </div>
+      <div class="bc rv d6">
+        <div class="bc-emoji">✦</div>
+        <div class="bc-title">Completely Free. Always.</div>
+        <p class="bc-text">We Share is <strong>100% free and open source</strong> under the MIT license. No subscription. No "Pro plan". No ads. No data collection. Free today, free tomorrow, free forever.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ USE CASES ══════════ -->
+<section id="usecases">
+  <div class="wrap">
+    <div class="uc-header rv">
+      <div class="eyebrow">Real Scenarios</div>
+      <h2 style="font-family:var(--display);font-size:clamp(2.5rem,4.5vw,4.5rem);font-weight:800;line-height:1;letter-spacing:-.03em;color:var(--white)">
+        People use<br>We Share for…
+      </h2>
+    </div>
+    <div class="uc-grid rv">
+      <div class="uc-card">
+        <div class="uc-top">
+          <div class="uc-emoji-wrap">◈</div>
+          <div class="uc-title">Photographers & Creators</div>
+          <p class="uc-body">Shoot hundreds of RAW photos on location, come home, and move them all to your editing PC in seconds. No memory cards to juggle. No cloud uploads burning your upload quota.</p>
+        </div>
+        <div class="uc-scenario">Hundreds of RAW files in seconds</div>
+      </div>
+      <div class="uc-card">
+        <div class="uc-top">
+          <div class="uc-emoji-wrap">▶</div>
+          <div class="uc-title">Video Editors</div>
+          <p class="uc-body">4K and 8K footage is enormous. We Share moves it across your local network faster than copying from an external drive — no cables, no waiting, no quality loss.</p>
+        </div>
+        <div class="uc-scenario">Multi-GB footage at full LAN speed</div>
+      </div>
+      <div class="uc-card">
+        <div class="uc-top">
+          <div class="uc-emoji-wrap">▭</div>
+          <div class="uc-title">Office & Teams</div>
+          <p class="uc-body">Share presentations, spreadsheets, and project files with teammates in the same office — without emailing yourself, without a shared drive, without any internet at all.</p>
+        </div>
+        <div class="uc-scenario">Offline collaboration, zero friction</div>
+      </div>
+      <div class="uc-card">
+        <div class="uc-top">
+          <div class="uc-emoji-wrap">◯</div>
+          <div class="uc-title">Gamers</div>
+          <p class="uc-body">Move game installs, mods, and save files between your gaming PC and laptop in minutes instead of re-downloading everything. Your local network is faster than any download server.</p>
+        </div>
+        <div class="uc-scenario">Game libraries without re-downloading</div>
+      </div>
+      <div class="uc-card">
+        <div class="uc-top">
+          <div class="uc-emoji-wrap">⊚</div>
+          <div class="uc-title">Students</div>
+          <p class="uc-body">Share projects, notes, and large files with classmates — even in a room with no internet. A hotspot is all you need. No email size limits, no cloud accounts required.</p>
+        </div>
+        <div class="uc-scenario">Works in classrooms with no internet</div>
+      </div>
+      <div class="uc-card">
+        <div class="uc-top">
+          <div class="uc-emoji-wrap">⌂</div>
+          <div class="uc-title">Home Users</div>
+          <p class="uc-body">Got two PCs at home? Move anything between them without plugging in a USB drive or uploading to the cloud. Your home Wi-Fi is all the infrastructure you need.</p>
+        </div>
+        <div class="uc-scenario">Home network file management</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ COMPARISON ══════════ -->
+<section id="compare">
+  <div class="wrap">
+    <div class="cmp-header rv">
+      <div class="eyebrow">How It Stacks Up</div>
+      <h2 style="font-family:var(--display);font-size:clamp(2.4rem,4vw,4rem);font-weight:800;line-height:1.05;letter-spacing:-.03em;color:var(--white);margin-bottom:12px">
+        We Share vs.<br>the alternatives
+      </h2>
+      <p style="color:var(--ghost);font-size:.96rem;max-width:480px;line-height:1.75">
+        Every option has trade-offs. Here's an honest look at how We Share compares to what you might be using today.
+      </p>
+    </div>
+
+    <div class="cmp-table rv">
+      <div class="cmp-row head">
+        <div class="cmp-cell"></div>
+        <div class="cmp-cell highlight-col" style="color:var(--amber)!important">We Share</div>
+        <div class="cmp-cell">Google Drive</div>
+        <div class="cmp-cell">USB Drive</div>
+        <div class="cmp-cell">Bluetooth</div>
+      </div>
+      <div class="cmp-row">
+        <div class="cmp-cell cmp-feature">Transfer Speed</div>
+        <div class="cmp-cell highlight-col"><span class="yes">✦</span>&nbsp; 150+ MB/s</div>
+        <div class="cmp-cell"><span class="no">✕</span>&nbsp; Limited by internet</div>
+        <div class="cmp-cell"><span class="partial">~</span>&nbsp; ~40 MB/s USB 3</div>
+        <div class="cmp-cell"><span class="no">✕</span>&nbsp; ~3 MB/s</div>
+      </div>
+      <div class="cmp-row">
+        <div class="cmp-cell cmp-feature">Works Without Internet</div>
+        <div class="cmp-cell highlight-col"><span class="yes">✓</span></div>
+        <div class="cmp-cell"><span class="no">✕</span></div>
+        <div class="cmp-cell"><span class="yes">✓</span></div>
+        <div class="cmp-cell"><span class="yes">✓</span></div>
+      </div>
+      <div class="cmp-row">
+        <div class="cmp-cell cmp-feature">No File Size Limit</div>
+        <div class="cmp-cell highlight-col"><span class="yes">✓</span></div>
+        <div class="cmp-cell"><span class="no">✕</span>&nbsp; 15 GB free</div>
+        <div class="cmp-cell"><span class="yes">✓</span></div>
+        <div class="cmp-cell"><span class="no">✕</span>&nbsp; Slow for large files</div>
+      </div>
+      <div class="cmp-row">
+        <div class="cmp-cell cmp-feature">No Hardware Required</div>
+        <div class="cmp-cell highlight-col"><span class="yes">✓</span></div>
+        <div class="cmp-cell"><span class="yes">✓</span></div>
+        <div class="cmp-cell"><span class="no">✕</span>&nbsp; Need USB drive</div>
+        <div class="cmp-cell"><span class="yes">✓</span></div>
+      </div>
+      <div class="cmp-row">
+        <div class="cmp-cell cmp-feature">Files Stay Private (Local Only)</div>
+        <div class="cmp-cell highlight-col"><span class="yes">✓</span></div>
+        <div class="cmp-cell"><span class="no">✕</span>&nbsp; Uploaded to servers</div>
+        <div class="cmp-cell"><span class="yes">✓</span></div>
+        <div class="cmp-cell"><span class="yes">✓</span></div>
+      </div>
+      <div class="cmp-row">
+        <div class="cmp-cell cmp-feature">No Account / Sign-in</div>
+        <div class="cmp-cell highlight-col"><span class="yes">✓</span></div>
+        <div class="cmp-cell"><span class="no">✕</span>&nbsp; Google account required</div>
+        <div class="cmp-cell"><span class="yes">✓</span></div>
+        <div class="cmp-cell"><span class="yes">✓</span></div>
+      </div>
+      <div class="cmp-row">
+        <div class="cmp-cell cmp-feature">Completely Free</div>
+        <div class="cmp-cell highlight-col"><span class="yes">✓</span>&nbsp; Always</div>
+        <div class="cmp-cell"><span class="partial">~</span>&nbsp; Free tier limited</div>
+        <div class="cmp-cell"><span class="partial">~</span>&nbsp; Hardware cost</div>
+        <div class="cmp-cell"><span class="yes">✓</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ DOWNLOAD ══════════ -->
+<section id="download">
+  <div class="dl-inner rv">
+    <div class="dl-tag"><span class="h-live"></span>Ready Right Now</div>
+    <h2 class="dl-h">Get<br><span>We Share</span> Free</h2>
+    <p class="dl-sub">
+      <strong>100% free.</strong> No sign-up. No credit card. No strings attached.<br>
+      Download, install in 30 seconds, and start transferring at light speed.
+    </p>
+    <div class="dl-btn-wrap">
+      <a class="dl-main" id="dl-btn-main"
+         href="https://github.com/sowmiyan-s/We-Share/raw/main/setup/WeShare_Setup.exe">
+        <span class="dl-main-icon">↓</span>
+        Download for Windows — Free
+      </a>
+      <div class="dl-note"><span>No signup</span> &nbsp;·&nbsp; <span>No internet to use</span> &nbsp;·&nbsp; One-click install</div>
+    </div>
+    <div class="dl-badges">
+      <div class="dl-badge">100% Free</div>
+      <div class="dl-badge">Forever</div>
+      <div class="dl-badge">No Tracking</div>
+      <div class="dl-badge">Open Source</div>
+      <div class="dl-badge">Windows Ready</div>
+      <div class="dl-badge">30 Second Setup</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ PATCH NOTES ══════════ -->
+<section id="patchnotes">
+  <div class="wrap">
+    <div class="rv">
+      <div class="eyebrow">Latest</div>
+      <h2 style="font-family:var(--display);font-size:clamp(2.4rem,4vw,4rem);font-weight:800;line-height:1;letter-spacing:-.03em;color:var(--white);margin-bottom:12px">What You Get</h2>
+      <p style="color:var(--ghost);font-size:.95rem;max-width:460px;line-height:1.75">Version 1.0.0 is fully featured and ready for your everyday file transfers. Everything you need, nothing you don't.</p>
+    </div>
+
+    <div class="pn-layout rv">
+      <div class="pn-sidebar" id="pn-nav">
+        <div class="pn-ver act" data-pn="v100" onclick="pnSwitch(this)">
+          <div>
+            <div class="pn-vnum">v1.0.0</div>
+            <div class="pn-vdate">May 2026 · Initial Release</div>
+          </div>
+          <span class="pn-badge pb-new">LATEST</span>
+        </div>
+      </div>
+
+      <div id="pn-panels">
+        <div class="pn-content act" id="pn-v100">
+          <div class="pn-ch">
+            <div>
+              <div class="pn-ver-big">v1.0.0</div>
+              <div class="pn-rel">Released May 2026 &nbsp;·&nbsp; First Public Release</div>
+            </div>
+            <a class="pn-dl-btn" id="pn-dl-v1"
+               href="https://github.com/sowmiyan-s/We-Share/raw/main/setup/WeShare_Setup.exe">
+               ↓ &ensp;Get v1.0.0
+            </a>
+          </div>
+
+          <div class="pn-section">
+            <div class="pn-section-t pns-new">✦ &ensp;Included in v1.0.0</div>
+            <div class="pn-item"><div class="pn-dot pd-n"></div><div><strong>Ultra-Fast Transfers</strong> — Send files at 150+ MB/s. That 4 GB video? Done in under 30 seconds. No cloud servers slowing you down.</div></div>
+            <div class="pn-item"><div class="pn-dot pd-n"></div><div><strong>One-Click Sharing</strong> — Other PCs appear instantly. No IP addresses to remember, no setup needed. Click and send.</div></div>
+            <div class="pn-item"><div class="pn-dot pd-n"></div><div><strong>Works Completely Offline</strong> — Need internet? Not anymore. We Share works on any local network, anywhere, even without wifi internet connection.</div></div>
+            <div class="pn-item"><div class="pn-dot pd-n"></div><div><strong>Send Anything, Any Size</strong> — 1 MB or 1 TB. We Share doesn't care. No file size limits, no compression, no hassle.</div></div>
+            <div class="pn-item"><div class="pn-dot pd-n"></div><div><strong>Your Privacy Protected</strong> — Files never leave your network. No cloud, no servers, no third parties. Total privacy by default.</div></div>
+            <div class="pn-item"><div class="pn-dot pd-n"></div><div><strong>Beautiful & Simple</strong> — A modern app that's elegant to use and gets out of your way. No bloat, just fast file transfers.</div></div>
+            <div class="pn-item"><div class="pn-dot pd-n"></div><div><strong>Zero Friction Setup</strong> — Download, install, go. Firewall is configured automatically. You're transferring files in under a minute.</div></div>
+          </div>
+
+          <div class="pn-section">
+            <div class="pn-section-t pns-fix">⬥ &ensp;Key Highlights</div>
+            <div class="pn-item"><div class="pn-dot pd-f"></div><div><strong>Requires Wi-Fi or Ethernet connection</strong> — Both PCs need to be on the same local network. That's it. No internet required.</div></div>
+            <div class="pn-item"><div class="pn-dot pd-f"></div><div><strong>Windows SmartScreen warning?</strong> — Totally normal for new apps. Click "More info → Run anyway". The app is safe and fully transparent.</div></div>
+            <div class="pn-item"><div class="pn-dot pd-f"></div><div><strong>Windows Firewall friendly</strong> — Firewall rules are set up automatically during install. No manual configuration needed.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ FOOTER ══════════ -->
+<footer>
+  <div class="f-brand">
+    <img src="../src/WeShare.UI/Assets/logo.png" alt="We Share" class="f-logo">
+    <div>
+      <div class="f-name">WE SHARE</div>
+      <div class="f-copy">MIT License · Free Forever · Built for local sharing</div>
+    </div>
+  </div>
+  <ul class="f-links">
+    <li><a href="#benefits">Why We Share</a></li>
+    <li><a href="#usecases">Use Cases</a></li>
+    <li><a href="#compare">Compare</a></li>
+    <li><a href="#download">Download</a></li>
+    <li><a href="#patchnotes">What's New</a></li>
+  </ul>
+  <a href="https://github.com/sowmiyan-s/We-Share" target="_blank" rel="noopener" class="f-gh" id="footer-gh">★ &ensp;Open Source on GitHub</a>
+</footer>
+
+<script>
+/* CURSOR */
+const dot = document.getElementById('crs');
+const out = document.getElementById('crs-o');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove', e=>{mx=e.clientX;my=e.clientY;});
+document.querySelectorAll('a,button,.pain-card,.bc,.uc-card,.cmp-row,.pn-ver,.dev').forEach(el=>{
+  el.addEventListener('mouseenter',()=>document.body.classList.add('hov'));
+  el.addEventListener('mouseleave',()=>document.body.classList.remove('hov'));
+});
+(function loop(){
+  dot.style.left=mx+'px';dot.style.top=my+'px';
+  rx+=(mx-rx)*.1;ry+=(my-ry)*.1;
+  out.style.left=rx+'px';out.style.top=ry+'px';
+  requestAnimationFrame(loop);
+})();
+
+/* NAV */
+const nav=document.getElementById('nav');
+window.addEventListener('scroll',()=>nav.classList.toggle('s',scrollY>30));
+
+/* REVEAL */
+const obs=new IntersectionObserver(es=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');obs.unobserve(e.target);}});
+},{threshold:.06});
+document.querySelectorAll('.rv').forEach(el=>obs.observe(el));
+
+/* PATCH NOTES SWITCHER */
+function pnSwitch(el){
+  document.querySelectorAll('.pn-ver').forEach(v=>v.classList.remove('act'));
+  document.querySelectorAll('.pn-content').forEach(p=>p.classList.remove('act'));
+  el.classList.add('act');
+  const p=document.getElementById('pn-'+el.dataset.pn);
+  if(p)p.classList.add('act');
+}
+
+/* SMOOTH SCROLL */
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    const t=document.querySelector(a.getAttribute('href'));
+    if(t){e.preventDefault();window.scrollTo({top:t.offsetTop-62,behavior:'smooth'});}
+  });
+});
+</script>
+</body>
+</html>

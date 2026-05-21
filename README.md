@@ -4,7 +4,8 @@
 </h1>
 
 <p align="center">
-  <strong>Fast · Local · Secure file transfers — no internet, no cloud, no limits.</strong>
+  <strong>Fast · Local · Secure file transfers — no internet, no cloud, no limits.</strong><br>
+  <em>Works on any network — or even with <strong>no network at all</strong>.</em>
 </p>
 
 <p align="center">
@@ -15,7 +16,7 @@
     <img src="https://img.shields.io/badge/license-MIT-indigo.svg" alt="MIT License">
   </a>
   <img src="https://img.shields.io/badge/platform-Windows-0C0C0C.svg" alt="Platform">
-  <img src="https://img.shields.io/badge/.NET-9.0-FF4B00.svg" alt=".NET 9">
+  <img src="https://img.shields.io/badge/.NET-8.0-FF4B00.svg" alt=".NET 8">
   <img src="https://img.shields.io/badge/Avalonia-11-blue.svg" alt="Avalonia UI">
 </p>
 
@@ -29,9 +30,11 @@
 
 ## 🚀 What is We Share?
 
-**We Share** is a premium, open-source desktop utility for instant, cable-free file transfers over local Wi-Fi. It uses a high-performance multi-threaded TCP engine allowing any PC on your network to securely send and receive files.
+**We Share** is a premium, open-source desktop utility for instant, cable-free file transfers — with or without a Wi-Fi router. It uses a high-performance multi-threaded TCP engine allowing any PC on your network to securely send and receive files.
 
 **Zero configuration. Zero data charges. Maximum privacy.**
+
+> **No router? No problem.** We Share automatically creates a Wi-Fi hotspot on one PC and silently connects the other — no passwords to type, no settings to change.
 
 ---
 
@@ -40,26 +43,58 @@
 | Feature | Details |
 |---|---|
 | ⚡ **Turbo Transfer** | Multi-threaded TCP socket engine optimized for high-speed local transfers. |
-| 🔍 **Auto Discovery** | Zero-config peer detection using UDP broadcast—no manual IP entry needed. |
+| 🔍 **Auto Discovery** | Zero-config peer detection using UDP broadcast — no manual IP entry needed. |
+| 🏜️ **Desert Mode** | No router? App auto-creates a hotspot and connects the other PC silently. |
+| ✅ **Accept / Reject** | Receiver gets a transfer request notification — full control over incoming files. |
 | 🎨 **Premium UI** | A stunning, modern interface powered by Avalonia UI with an Indigo/Slate aesthetic. |
-| 🔒 **Local Only** | End-to-end encryption of your workflow—your data never leaves your local network. |
+| 🔒 **Local Only** | End-to-end local — your data never leaves your local network. |
 | 🧙 **Transfer Wizard** | A streamlined, step-by-step process for sending and receiving files. |
+| 🌐 **Web Portal** | Any phone or tablet on the same network can share files via browser at `http://<ip>:8080`. |
+
+---
+
+## 🏜️ No Wi-Fi? No Problem — Desert Mode
+
+We Share works **even when there's no router or Wi-Fi access point**. Here's exactly what happens automatically:
+
+```
+PC A opens We Share (no network detected)
+  → Silently starts a Wi-Fi hotspot named "WeShare"
+
+PC B opens We Share (no network detected)
+  → Detects "WeShare" hotspot
+  → Auto-connects (no password prompt, no manual entry)
+  → Discovers PC A on the radar automatically
+
+PC B: Selects PC A → clicks Send
+PC A: Gets ACCEPT / REJECT notification
+  → Clicks ACCEPT → Transfer begins ✅
+```
+
+**The entire flow is automatic.** No passwords to type, no settings to configure, no extra software.
 
 ---
 
 ## 🛠️ Tech Stack
 
 - **UI Framework**: [Avalonia UI 11](https://avaloniaui.net/)
-- **Runtime**: .NET 9.0 (C#)
+- **Runtime**: .NET 8.0 (C#)
 - **Networking**: Custom TCP Sockets & UDP Broadcast
-- **Database**: SQLite / LiteDB for transfer history and settings
+- **Auto Hotspot**: WinRT `NetworkOperatorTetheringManager` (Windows Mobile Hotspot API)
+- **Auto Wi-Fi Connect**: Native `wlanapi.dll` P/Invoke (zero elevation, zero prompts)
+- **Database**: SQLite for transfer history and settings
 
 ---
 
 ## 📖 Getting Started
 
 ### Prerequisites
-- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+- Windows 10 or Windows 11
+- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) (for building from source)
+
+### Download & Install (Recommended)
+
+Download the latest installer from the badge above — no .NET runtime required, self-contained.
 
 ### Run from Source
 ```bash
@@ -68,24 +103,27 @@ cd We-Share
 dotnet run --project src/WeShare.Desktop/WeShare.Desktop.csproj
 ```
 
-### Build a Release Binary
-```bash
-dotnet publish src/WeShare.Desktop/WeShare.Desktop.csproj \
-  -c Release -r win-x64 --self-contained true \
-  -p:PublishSingleFile=true -o ./publish
+### Build Release Installer
+```powershell
+# Requires Inno Setup 6 at C:\Program Files (x86)\Inno Setup 6\ISCC.exe
+.\publish.ps1
+# Output: setup\WeShare_Setup.exe
 ```
 
 ---
 
 ## 📱 How to Use
 
+### Normal Mode (Both PCs on Same Wi-Fi)
+1. Open **We Share** on both PCs — they auto-discover each other.
+2. On the **sender**: drag & drop files → select the receiver from the radar → click **Send**.
+3. On the **receiver**: tap **ACCEPT** when the notification appears.
+4. Transfer completes at full local network speed. ✅
 
-
-### PC → PC
-1. Ensure both PCs are on the same Wi-Fi network and running **We Share**.
-2. Drag and drop files into the **Send** area.
-3. Select the target device from the discovered list and click **Send**.
-4. The receiving PC will automatically notify and save the incoming files.
+### Desert Mode (No Router / No Wi-Fi)
+1. Open **We Share** on both PCs — no setup needed.
+2. The app handles everything automatically (hotspot + auto-connect).
+3. Proceed exactly as normal mode above. ✅
 
 ---
 

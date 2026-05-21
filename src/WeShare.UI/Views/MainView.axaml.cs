@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using WeShare.Core.Data;
 using WeShare.Core.Discovery;
 using WeShare.Core.Models;
+using WeShare.Core.Network;
 using WeShare.Core.Transfer;
 using WeShare.Core.Services;
 
@@ -38,6 +39,8 @@ namespace WeShare.UI.Views
         private DatabaseHelper _dbHelper;
         private IPlatformService _platformService;
         private WebDashboardService? _webDashboardService;
+        private HotspotService? _hotspotService;
+        private WifiConnectorService? _wifiConnector;
 
         private string _saveDirectory;
         private DeviceModel? _sendTarget;
@@ -211,15 +214,16 @@ namespace WeShare.UI.Views
             UpdateEmptyState();
             NavHome_Click(this, new RoutedEventArgs());
 
-            // Network check
+            // Network check — auto-start hotspot or auto-join if no network
             var ip = UdpDiscoveryService.GetLocalIp();
-            SidebarNetworkInfo.Text = $"{ip}:{_localDevice.Port}";
+            SidebarNetworkInfo.Text  = $"{ip}:{_localDevice.Port}";
             HomeNetworkInfoText.Text = SidebarNetworkInfo.Text;
-            HomeWebPortalText.Text  = $"http://{ip}:8080";
-            
+            HomeWebPortalText.Text   = $"http://{ip}:8080";
+
             if (ip == "127.0.0.1")
             {
-                DispatcherTimer.RunOnce(() => ShowToast("No active network found. Please connect to WiFi."), TimeSpan.FromSeconds(5));
+                // No network detected — run auto-network logic in background
+                _ = Task.Run(TryAutoNetworkAsync);
             }
         }
 
@@ -645,12 +649,79 @@ namespace WeShare.UI.Views
             ShowToast("Refreshing radar...");
             Devices.Clear();
             await _discoveryService.BroadcastPresenceAsync();
-            
-            // Update IP in case it changed
-            var ip = UdpDiscoveryService.GetLocalIp();
-            SidebarNetworkInfo.Text = $"{ip}:{_localDevice.Port}";
-            HomeNetworkInfoText.Text = SidebarNetworkInfo.Text;
-            HomeWebPortalText.Text  = $"http://{ip}:8080";
+            UpdateNetworkLabels();
+        }
+
+        // ── Auto-Network (Desert Mode) ─────────────────────────────────────────
+        private async Task TryAutoNetworkAsync()
+        {
+            try
+            {
+                _wifiConnector = new WifiConnectorService();
+
+                // Step 1 — Try to JOIN an existing WeShare hotspot (client role)
+                ShowToast("No network — scanning for WeShare hotspot...");
+                bool found = await _wifiConnector.IsWeShareHotspotVisibleAsync();
+
+                if (found)
+                {
+                    ShowToast("WeShare hotspot found! Connecting automatically...");
+                    var (ok, _) = await _wifiConnector.AutoConnectToWeShareAsync();
+                    if (ok)
+                    {
+                        await Task.Delay(1500); // let DHCP settle
+                        UpdateNetworkLabels();
+                        ShowToast("Connected! Scanning for devices...");
+
+                        // Burst-broadcast so the host sees us immediately
+                        for (int i = 0; i < 4; i++)
+                        {
+                            await _discoveryService.BroadcastPresenceAsync();
+                            await Task.Delay(800);
+                        }
+                        return;
+                    }
+                }
+
+                // Step 2 — No existing hotspot found — become the HOST
+                _hotspotService = new HotspotService();
+                if (!await _hotspotService.IsSupportedAsync())
+                {
+                    ShowToast("No network. Use \"CONNECT VIA IP\" to connect manually.");
+                    return;
+                }
+
+                ShowToast("Starting WeShare hotspot...");
+                var (started, _) = await _hotspotService.StartAsync();
+                if (started)
+                {
+                    await Task.Delay(1000);
+                    UpdateNetworkLabels();
+                    ShowToast($"Hotspot active — other PC will auto-connect to \"{HotspotService.TargetSsid}\"");
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowToast($"Auto-network error: {ex.Message}");
+            }
+        }
+
+        /// <summary>Updates the existing network info labels in-place (no new UI elements).</summary>
+        private void UpdateNetworkLabels()
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                var ip = UdpDiscoveryService.GetLocalIp();
+                bool hasRealIp = ip != "127.0.0.1";
+
+                string info = hasRealIp
+                    ? $"{ip}:{_localDevice.Port}"
+                    : $"📶 {HotspotService.TargetSsid} / {HotspotService.TargetPassword}";
+
+                SidebarNetworkInfo.Text  = info;
+                HomeNetworkInfoText.Text = info;
+                HomeWebPortalText.Text   = hasRealIp ? $"http://{ip}:8080" : "http://192.168.137.1:8080";
+            });
         }
 
         private void ManualConnect_Click(object sender, RoutedEventArgs e)
@@ -871,6 +942,9 @@ namespace WeShare.UI.Views
             _discoveryService?.StopListening();
             _transferManager?.StopListening();
             _webDashboardService?.Stop();
+            _hotspotService?.StopAsync();
+            _wifiConnector?.Cleanup();
+            _wifiConnector?.Dispose();
         }
 
         // CTS to cancel the previous toast's hide-delay when a new toast fires

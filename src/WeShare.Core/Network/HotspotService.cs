@@ -1,121 +1,191 @@
 using System;
-using System.Diagnostics;
-using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
+#if WINDOWS
+using Windows.Networking.NetworkOperators;
+#endif
+
 namespace WeShare.Core.Network
 {
     /// <summary>
-    /// Creates a Windows Wi-Fi hosted network (hotspot) using netsh.
-    /// Requires the PC to have a Wi-Fi adapter that supports hosted networks.
+    /// Creates a Windows Mobile Hotspot using the WinRT NetworkOperatorTetheringManager.
+    /// This is the same engine as Settings → Network → Mobile Hotspot.
+    /// Requires zero elevation, works on all Windows 10/11 PCs without adapter errors.
     /// </summary>
     public class HotspotService
     {
-        public string Ssid { get; set; } = "WeShare-WiFi";
-        public string Password { get; set; } = "weshare123";
-        public bool IsRunning { get; private set; }
+        public const string TargetSsid     = "WeShare";
+        public const string TargetPassword = "weshare1";   // ≥8 chars
 
-        /// <summary>IP of the hotspot adapter (usually 192.168.137.1 on Windows).</summary>
-        public string HotspotIp { get; private set; } = "192.168.137.1";
+        public bool   IsRunning  { get; private set; }
+        public string HotspotIp  { get; private set; } = "192.168.137.1";
+
+        // ── Capability check ─────────────────────────────────────────────────
+
+        /// <summary>Returns true if this device supports the Mobile Hotspot feature.</summary>
+        public Task<bool> IsSupportedAsync()
+        {
+#if WINDOWS
+            try
+            {
+                var mgr = NetworkOperatorTetheringManager.CreateFromConnectionProfile(
+                    Windows.Networking.Connectivity.NetworkInformation
+                           .GetInternetConnectionProfile()
+                    ?? GetAnyConnectionProfile());
+
+                return Task.FromResult(mgr != null);
+            }
+            catch
+            {
+                return Task.FromResult(false);
+            }
+#else
+            return Task.FromResult(false);
+#endif
+        }
+
+        // ── Start ─────────────────────────────────────────────────────────────
 
         public async Task<(bool Success, string Message)> StartAsync()
         {
-            if (Password.Length < 8)
-                return (false, "Password must be at least 8 characters.");
-
-            // Chain both commands in one elevated cmd window
-            string script = $"netsh wlan set hostednetwork mode=allow ssid=\"{Ssid}\" key=\"{Password}\" & netsh wlan start hostednetwork";
-
-            var (launched, launchErr) = await RunElevatedAsync("cmd.exe", $"/c \"{script}\"");
-            if (!launched)
-                return (false, $"UAC cancelled or error: {launchErr}");
-
-            // Give Windows a moment to configure the adapter
-            await Task.Delay(2000);
-
-            // Verify with a non-elevated status check
-            string status = await RunReadAsync("netsh", "wlan show hostednetwork");
-            bool running = status.Contains("Started", StringComparison.OrdinalIgnoreCase);
-
-            if (running)
+#if WINDOWS
+            try
             {
-                IsRunning = true;
-                HotspotIp = DetectHotspotIp();
-                return (true, $"Hotspot started! IP: {HotspotIp}");
-            }
+                var mgr = GetTetheringManager();
+                if (mgr == null)
+                    return (false, "Hotspot not supported on this device.");
 
-            return (false, "Hotspot did not start. Check your Wi-Fi adapter supports hosted networks.");
+                // Already running?
+                if (mgr.TetheringOperationalState ==
+                    TetheringOperationalState.On)
+                {
+                    IsRunning = true;
+                    HotspotIp = DetectHotspotIp();
+                    return (true, HotspotIp);
+                }
+
+                // Configure SSID + password
+                var cfg = mgr.GetCurrentAccessPointConfiguration();
+                if (cfg.Ssid != TargetSsid || cfg.Passphrase != TargetPassword)
+                {
+                    var newCfg = new NetworkOperatorTetheringAccessPointConfiguration
+                    {
+                        Ssid       = TargetSsid,
+                        Passphrase = TargetPassword
+                    };
+                    await mgr.ConfigureAccessPointAsync(newCfg);
+                }
+
+                // Start the hotspot
+                var result = await mgr.StartTetheringAsync();
+                if (result.Status == TetheringOperationStatus.Success ||
+                    result.Status == TetheringOperationStatus.Unknown)
+                {
+                    IsRunning = true;
+
+                    // Wait for the adapter to get an IP (up to 6 seconds)
+                    for (int i = 0; i < 12; i++)
+                    {
+                        await Task.Delay(500);
+                        string ip = DetectHotspotIp();
+                        if (ip != "192.168.137.1" || i >= 4)
+                        {
+                            HotspotIp = ip;
+                            return (true, ip);
+                        }
+                    }
+
+                    HotspotIp = "192.168.137.1";
+                    return (true, HotspotIp);
+                }
+
+                return (false, $"Hotspot start failed: {result.Status}");
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+#else
+            await Task.CompletedTask;
+            return (false, "Windows-only feature.");
+#endif
         }
+
+        // ── Stop ─────────────────────────────────────────────────────────────
 
         public async Task<(bool Success, string Message)> StopAsync()
         {
-            var (launched, err) = await RunElevatedAsync("cmd.exe", "/c \"netsh wlan stop hostednetwork\"");
+#if WINDOWS
+            try
+            {
+                var mgr = GetTetheringManager();
+                if (mgr != null)
+                    await mgr.StopTetheringAsync();
+                IsRunning = false;
+                return (true, "Hotspot stopped.");
+            }
+            catch (Exception ex)
+            {
+                IsRunning = false;
+                return (false, ex.Message);
+            }
+#else
+            await Task.CompletedTask;
             IsRunning = false;
             return (true, "Hotspot stopped.");
+#endif
         }
 
-        public Task<string> GetStatusAsync() => RunReadAsync("netsh", "wlan show hostednetwork");
+        // ── Helpers ──────────────────────────────────────────────────────────
 
+#if WINDOWS
+        private static NetworkOperatorTetheringManager? GetTetheringManager()
+        {
+            try
+            {
+                var profile = Windows.Networking.Connectivity.NetworkInformation
+                                     .GetInternetConnectionProfile()
+                              ?? GetAnyConnectionProfile();
+                if (profile == null) return null;
+                return NetworkOperatorTetheringManager
+                       .CreateFromConnectionProfile(profile);
+            }
+            catch { return null; }
+        }
+
+        private static Windows.Networking.Connectivity.ConnectionProfile? GetAnyConnectionProfile()
+        {
+            var profiles = Windows.Networking.Connectivity.NetworkInformation
+                                  .GetConnectionProfiles();
+            foreach (var p in profiles)
+                if (p != null) return p;
+            return null;
+        }
+#endif
+
+        /// <summary>Detects the IP address of the hotspot adapter (Microsoft Hosted Network).</summary>
         private static string DetectHotspotIp()
         {
             foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
             {
                 if (ni.OperationalStatus != OperationalStatus.Up) continue;
-                var desc = ni.Name + ni.Description;
-                if (desc.Contains("Virtual", StringComparison.OrdinalIgnoreCase) ||
-                    desc.Contains("Hosted",  StringComparison.OrdinalIgnoreCase) ||
-                    desc.Contains("Microsoft Wi-Fi Direct", StringComparison.OrdinalIgnoreCase))
+                var name = ni.Name + " " + ni.Description;
+                if (name.Contains("Local Area Connection* ", StringComparison.OrdinalIgnoreCase) ||
+                    name.Contains("Microsoft Wi-Fi Direct", StringComparison.OrdinalIgnoreCase) ||
+                    name.Contains("Hosted Network",         StringComparison.OrdinalIgnoreCase) ||
+                    name.Contains("Virtual",                StringComparison.OrdinalIgnoreCase))
                 {
                     foreach (var addr in ni.GetIPProperties().UnicastAddresses)
-                        if (addr.Address.AddressFamily == AddressFamily.InterNetwork)
+                    {
+                        if (addr.Address.AddressFamily == AddressFamily.InterNetwork &&
+                            !System.Net.IPAddress.IsLoopback(addr.Address))
                             return addr.Address.ToString();
+                    }
                 }
             }
             return "192.168.137.1";
         }
-
-        /// <summary>Run elevated via UAC (no output capture — required for runas).</summary>
-        private static Task<(bool Launched, string Error)> RunElevatedAsync(string exe, string args)
-        {
-            try
-            {
-                var psi = new ProcessStartInfo(exe, args)
-                {
-                    UseShellExecute = true,
-                    Verb            = "runas",          // triggers UAC prompt
-                    WindowStyle     = ProcessWindowStyle.Hidden
-                };
-                using var proc = Process.Start(psi)!;
-                proc.WaitForExit();
-                return Task.FromResult<(bool, string)>((true, string.Empty));
-            }
-            catch (Exception ex)
-            {
-                // User clicked No on UAC, or no admin rights
-                return Task.FromResult<(bool, string)>((false, ex.Message));
-            }
-        }
-
-        /// <summary>Read-only netsh call — no elevation needed.</summary>
-        private static async Task<string> RunReadAsync(string exe, string args)
-        {
-            try
-            {
-                var psi = new ProcessStartInfo(exe, args)
-                {
-                    RedirectStandardOutput = true,
-                    UseShellExecute        = false,
-                    CreateNoWindow         = true
-                };
-                using var proc = Process.Start(psi)!;
-                string output = await proc.StandardOutput.ReadToEndAsync();
-                await proc.WaitForExitAsync();
-                return output;
-            }
-            catch (Exception ex) { return ex.Message; }
-        }
-
     }
 }
