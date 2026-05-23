@@ -16,9 +16,22 @@ namespace WeShare.Core.Transfer
         private readonly int _listenPort;
         private TcpListener? _listener;
         private CancellationTokenSource? _listenerCts;
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<string, TcpClient> _activeClients = new();
 
         public int BoundPort { get; private set; }
         public string LocalName { get; set; } = Environment.MachineName;
+
+        public void CancelTransfer(string fileId)
+        {
+            if (_activeClients.TryRemove(fileId, out var client))
+            {
+                try
+                {
+                    client.Close();
+                }
+                catch { }
+            }
+        }
 
         public event Action<FileTransferState>? TransferStarted;
         public event Action<FileTransferState>? TransferProgress;
@@ -108,6 +121,8 @@ namespace WeShare.Core.Transfer
                 state.Direction = TransferDirection.Received;
                 state.Timestamp = DateTime.UtcNow;
 
+                _activeClients[state.FileId] = client;
+
                 // 2. Ask for permission
                 bool accepted = true;
                 if (TransferRequestCallback != null)
@@ -176,6 +191,13 @@ namespace WeShare.Core.Transfer
                 }
                 TransferFailed?.Invoke(state ?? new FileTransferState { Status = TransferStatus.Failed, ErrorMessage = ex.Message });
             }
+            finally
+            {
+                if (state != null)
+                {
+                    _activeClients.TryRemove(state.FileId, out _);
+                }
+            }
         }
 
         // ── Send ───────────────────────────────────────────────────────────────
@@ -197,6 +219,7 @@ namespace WeShare.Core.Transfer
             try
             {
                 using var client = new TcpClient();
+                _activeClients[state.FileId] = client;
                 client.SendBufferSize    = 81920;
                 client.ReceiveBufferSize = 81920;
 
@@ -273,6 +296,10 @@ namespace WeShare.Core.Transfer
                 state.ErrorMessage = ex.Message;
                 TransferFailed?.Invoke(state);
                 if (ex is OperationCanceledException) throw;
+            }
+            finally
+            {
+                _activeClients.TryRemove(state.FileId, out _);
             }
         }
 

@@ -113,8 +113,19 @@ namespace WeShare.Core.Models
         public TransferStatus Status 
         { 
             get => _status; 
-            set { if (_status != value) { _status = value; OnPropertyChanged(); OnPropertyChanged(nameof(StatusIcon)); } } 
+            set 
+            { 
+                if (_status != value) 
+                { 
+                    _status = value; 
+                    OnPropertyChanged(); 
+                    OnPropertyChanged(nameof(StatusIcon)); 
+                    OnPropertyChanged(nameof(IsCompleted));
+                } 
+            } 
         }
+
+        public bool IsCompleted => Status == TransferStatus.Done;
 
         private TransferDirection _direction = TransferDirection.Received;
         public TransferDirection Direction 

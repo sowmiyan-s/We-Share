@@ -214,7 +214,8 @@ namespace WeShare.Desktop.Services
                             LastSeen = DateTime.Now,
                             Port     = 45679,
                             Ssid     = ssid,
-                            Password = pwd
+                            Password = pwd,
+                            IsReceiver = true
                         });
                     }
                 };

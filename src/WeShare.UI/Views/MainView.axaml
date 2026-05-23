@@ -197,10 +197,39 @@
     </Style>
 
     <!-- Generic List Item Hover Effects -->
-    <Style Selector="ItemsControl Border.GlassCard:pointerover">
-       <Setter Property="BorderBrush" Value="{DynamicResource ElectricIndigoBrush}"/>
-       <Setter Property="Background" Value="#0AFFFFFF"/>
-    </Style>
+     <Style Selector="ItemsControl Border.GlassCard:pointerover">
+        <Setter Property="BorderBrush" Value="{DynamicResource ElectricIndigoBrush}"/>
+        <Setter Property="Background" Value="#0AFFFFFF"/>
+     </Style>
+     
+     <!-- Filter Chips -->
+     <Style Selector="Button.FilterChip">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource GlassBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="14,6"/>
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="CornerRadius" Value="14"/>
+        <Setter Property="Transitions">
+           <Transitions>
+              <BrushTransition Property="Background" Duration="0:0:0.15"/>
+              <BrushTransition Property="Foreground" Duration="0:0:0.15"/>
+              <BrushTransition Property="BorderBrush" Duration="0:0:0.15"/>
+           </Transitions>
+        </Setter>
+     </Style>
+     <Style Selector="Button.FilterChip:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#10FFFFFF"/>
+        <Setter Property="BorderBrush" Value="#40FFFFFF"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+     </Style>
+     <Style Selector="Button.FilterChip.ActiveChip /template/ ContentPresenter">
+        <Setter Property="Background" Value="#156366F1"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="BorderBrush" Value="{StaticResource ElectricIndigoBrush}"/>
+     </Style>
   </UserControl.Styles>
 
   <Grid>
@@ -337,6 +366,12 @@
                    <TextBlock Text="Welcome back," FontSize="14" Foreground="{DynamicResource TextSecondary}"/>
                    <TextBlock Text="Ready to share files locally" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
                 </StackPanel>
+                <!-- Live speed badge -->
+                <Border Grid.Column="1" Background="#186366F1" BorderBrush="{StaticResource ElectricIndigoBrush}" BorderThickness="1"
+                        CornerRadius="20" Padding="14,6" VerticalAlignment="Center">
+                   <TextBlock x:Name="HomeSpeedBadge" IsVisible="False" Text="↑ 0.0 MB/s"
+                              FontSize="11" FontWeight="Bold" Foreground="{StaticResource ElectricIndigoBrush}"/>
+                </Border>
              </Grid>
 
              <!-- Dashboard Grid -->
@@ -437,14 +472,38 @@
                          </StackPanel>
 
                          <StackPanel Spacing="8">
-                            <TextBlock Text="Web Portal (Mobile Share)" FontSize="10" Foreground="{DynamicResource TextSecondary}"/>
-                            <Border Background="#10FFFFFF" CornerRadius="8" Padding="12,10" HorizontalAlignment="Stretch">
-                               <Grid ColumnDefinitions="Auto, *">
-                                  <Border Classes="WebPortalPulse" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                                  <TextBlock Grid.Column="1" x:Name="HomeWebPortalText" Text="http://0.0.0.0:8080" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
-                               </Grid>
-                            </Border>
-                         </StackPanel>
+                          <StackPanel Spacing="8">
+                             <TextBlock Text="Web Portal (Mobile Share)" FontSize="10" Foreground="{DynamicResource TextSecondary}"/>
+                             <Border Background="#10FFFFFF" CornerRadius="8" Padding="12,10" HorizontalAlignment="Stretch">
+                                <Grid ColumnDefinitions="Auto, *, Auto">
+                                   <Border Classes="WebPortalPulse" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                   <TextBlock Grid.Column="1" x:Name="HomeWebPortalText" Text="http://0.0.0.0:8080" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center"/>
+                                   <Button Grid.Column="2" x:Name="CopyWebLinkBtn" Click="CopyWebLink_Click"
+                                           Background="#186366F1" BorderBrush="{StaticResource ElectricIndigoBrush}" BorderThickness="1"
+                                           CornerRadius="6" Padding="8,4" Margin="8,0,0,0" VerticalAlignment="Center"
+                                           ToolTip.Tip="Copy link to clipboard">
+                                      <StackPanel Orientation="Horizontal" Spacing="5">
+                                         <Rectangle Width="12" Height="12" Fill="{StaticResource ElectricIndigoBrush}">
+                                            <Rectangle.OpacityMask><ImageBrush Source="/Assets/Icons/WEBSITE.png"/></Rectangle.OpacityMask>
+                                         </Rectangle>
+                                         <TextBlock Text="COPY" FontSize="9" FontWeight="Bold" Foreground="{StaticResource ElectricIndigoBrush}"/>
+                                      </StackPanel>
+                                   </Button>
+                                </Grid>
+                             </Border>
+                          </StackPanel></StackPanel>
+
+                          <!-- QR Code panel -->
+                          <Border Background="#08FFFFFF" CornerRadius="10" Padding="12" HorizontalAlignment="Stretch">
+                             <StackPanel Spacing="8" HorizontalAlignment="Center">
+                                <TextBlock Text="SCAN TO OPEN PORTAL" FontSize="9" FontWeight="Bold" LetterSpacing="2"
+                                           Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center"/>
+                                <Border Width="120" Height="120" CornerRadius="8" ClipToBounds="True"
+                                        Background="White" Padding="6">
+                                   <Image x:Name="HomeQrImage" Stretch="Uniform"/>
+                                </Border>
+                             </StackPanel>
+                          </Border>
 
                          <Rectangle Height="1" Fill="{DynamicResource GlassBorderBrush}"/>
                          
@@ -589,7 +648,10 @@
                       <!-- Active Sends -->
                       <Border x:Name="SendProgressBorder" IsVisible="False" Classes="GlassCard" Background="#156366F1" Padding="28" CornerRadius="12">
                           <StackPanel Spacing="16">
-                             <TextBlock Text="SENDING" FontSize="10" FontWeight="Bold" Foreground="{StaticResource ElectricIndigoBrush}" LetterSpacing="2"/>
+                             <Grid ColumnDefinitions="*, Auto">
+                                <TextBlock Text="SENDING" FontSize="10" FontWeight="Bold" Foreground="{StaticResource ElectricIndigoBrush}" LetterSpacing="2"/>
+                                <Button Grid.Column="1" Content="✕ CANCEL" Click="CancelActiveSend_Click" Background="Transparent" Foreground="#FF5555" FontSize="10" FontWeight="Bold" Padding="4"/>
+                             </Grid>
                              <Grid ColumnDefinitions="*, Auto">
                                 <TextBlock x:Name="SendProgressFile" Text="Processing..." FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" FontSize="14"/>
                                 <TextBlock Grid.Column="1" x:Name="SendProgressPct" Text="0%" FontWeight="Bold" Foreground="{StaticResource ElectricIndigoBrush}"/>
@@ -607,7 +669,10 @@
                                       <DataTemplate x:DataType="models:FileTransferState">
                                           <Border BorderBrush="{DynamicResource GlassBorderBrush}" BorderThickness="0,0,0,1" Padding="20">
                                               <StackPanel Spacing="12">
-                                                  <TextBlock Text="RECEIVING" FontSize="10" FontWeight="Bold" Foreground="{StaticResource ElectricIndigoBrush}" LetterSpacing="2"/>
+                                                  <Grid ColumnDefinitions="*, Auto">
+                                                      <TextBlock Text="RECEIVING" FontSize="10" FontWeight="Bold" Foreground="{StaticResource ElectricIndigoBrush}" LetterSpacing="2"/>
+                                                      <Button Grid.Column="1" Content="✕ CANCEL" Click="CancelIncoming_Click" Background="Transparent" Foreground="#FF5555" FontSize="10" FontWeight="Bold" Padding="4"/>
+                                                  </Grid>
                                                   <Grid ColumnDefinitions="*, Auto">
                                                       <TextBlock Text="{Binding FileName}" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
                                                       <TextBlock Grid.Column="1" Text="{Binding ProgressPercentage, StringFormat=\{0:F0\}%}" Foreground="{StaticResource ElectricIndigoBrush}" FontWeight="Bold"/>
@@ -783,7 +848,7 @@
                    <TextBlock Text="SCANNING FOR DEVICES..." FontSize="10" FontWeight="Bold" Foreground="{StaticResource ElectricIndigoBrush}" LetterSpacing="4" HorizontalAlignment="Center" Opacity="0.8"/>
                    <StackPanel Orientation="Horizontal" Spacing="24" HorizontalAlignment="Center">
                        <Button Content="CANCEL SENDING" Click="CancelSending_Click" Background="Transparent" Foreground="{DynamicResource TextSecondary}" FontSize="11" Padding="16"/>
-                       <Button Content="REFRESH RADAR" Click="RefreshDiscovery_Click" Background="Transparent" Foreground="{StaticResource ElectricIndigoBrush}" FontSize="11" FontWeight="Bold" Padding="16"/>
+                       <Button Content="REFRESH RADAR" Click="RefreshDiscovery_Click" Background="Transparent" Foreground="{DynamicResource ElectricIndigoBrush}" FontSize="11" FontWeight="Bold" Padding="16"/>
                    </StackPanel>
                 </StackPanel>
              </Grid>
@@ -799,29 +864,66 @@
                       <TextBox Grid.Column="1" Width="220" x:Name="FileSearchBox" Watermark="Filter files..." Padding="12,8" FontSize="12" Margin="16,0" TextChanged="FileSearch_TextChanged"/>
                       <Button Grid.Column="2" Classes="PrimaryBtn" Content="OPEN FOLDER" Click="OpenDownloadFolder_Click"/>
                    </Grid>
+                    
+                    <!-- Stats & Date Filters Row -->
+                    <Grid ColumnDefinitions="*, Auto" Margin="0,4,0,12">
+                       <!-- Stats Display -->
+                       <Border Grid.Column="0" Background="#10FFFFFF" BorderBrush="{DynamicResource GlassBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="14,10" VerticalAlignment="Center">
+                          <TextBlock x:Name="LibraryStatsText" Text="📊 Total Received: 0 files (0 B)" FontSize="12" Foreground="{DynamicResource TextPrimary}" FontWeight="SemiBold"/>
+                       </Border>
+                       
+                       <!-- Filter Chips -->
+                       <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" Margin="16,0,0,0" VerticalAlignment="Center">
+                          <Button x:Name="FilterAllBtn" Content="ALL" Click="FilterDate_Click" Tag="All" Classes="FilterChip ActiveChip"/>
+                          <Button x:Name="FilterTodayBtn" Content="TODAY" Click="FilterDate_Click" Tag="Today" Classes="FilterChip"/>
+                          <Button x:Name="FilterWeekBtn" Content="THIS WEEK" Click="FilterDate_Click" Tag="Week" Classes="FilterChip"/>
+                       </StackPanel>
+                    </Grid>
                    
                    <Grid>
-                        <ItemsControl x:Name="ReceivedFilesList" ItemsSource="{Binding ReceivedFiles, RelativeSource={RelativeSource AncestorType=views:MainView}}">
-                           <ItemsControl.ItemTemplate>
-                              <DataTemplate x:DataType="models:FileTransferState">
-                                 <Border Classes="GlassCard" Padding="18,16" Margin="0,0,0,10" CornerRadius="10">
-                                    <Grid ColumnDefinitions="Auto, *, Auto">
-                                       <Border Width="44" Height="44" Background="#10FFFFFF" CornerRadius="8">
-                                          <Rectangle Classes="IconTint" Width="18" Height="18"><Rectangle.OpacityMask><ImageBrush Source="/Assets/Icons/LIBRARY.png"/></Rectangle.OpacityMask></Rectangle>
-                                       </Border>
-                                       <StackPanel Grid.Column="1" Margin="18,0" VerticalAlignment="Center">
-                                          <TextBlock Text="{Binding FileName}" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" FontSize="14" TextTrimming="CharacterEllipsis"/>
-                                          <TextBlock Text="{Binding FileSizeDisplay}" FontSize="11" Foreground="{DynamicResource TextSecondary}" Margin="0,2,0,0"/>
-                                       </StackPanel>
-                                       <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                          <Button Content="VIEW" Click="OpenFileInList_Click" Tag="{Binding}" Background="{DynamicResource GlassBackgroundBrush}" BorderBrush="{DynamicResource GlassBorderBrush}" BorderThickness="1" FontSize="11" Padding="14,8" CornerRadius="6"/>
-                                          <Button Content="✕" Click="DeleteFileInList_Click" Tag="{Binding}" Background="Transparent" Foreground="#FF5555" FontSize="12" Padding="10"/>
-                                       </StackPanel>
-                                    </Grid>
-                                 </Border>
-                              </DataTemplate>
-                           </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                        <ItemsControl x:Name="ReceivedFilesList">
+                            <ItemsControl.ItemTemplate>
+                               <DataTemplate x:DataType="models:FileTransferState">
+                                  <Border Classes="GlassCard" Padding="18,16" Margin="0,0,0,10" CornerRadius="10">
+                                     <Grid ColumnDefinitions="Auto, *, Auto">
+                                        <Border Width="44" Height="44" Background="#10FFFFFF" CornerRadius="8">
+                                           <Rectangle Classes="IconTint" Width="18" Height="18"><Rectangle.OpacityMask><ImageBrush Source="/Assets/Icons/LIBRARY.png"/></Rectangle.OpacityMask></Rectangle>
+                                        </Border>
+                                        
+                                        <!-- Completed file info -->
+                                        <StackPanel Grid.Column="1" Margin="18,0" VerticalAlignment="Center" IsVisible="{Binding IsCompleted}">
+                                           <TextBlock Text="{Binding FileName}" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" FontSize="14" TextTrimming="CharacterEllipsis"/>
+                                           <TextBlock Text="{Binding FileSizeDisplay}" FontSize="11" Foreground="{DynamicResource TextSecondary}" Margin="0,2,0,0"/>
+                                        </StackPanel>
+
+                                        <!-- In-progress receive info -->
+                                        <StackPanel Grid.Column="1" Margin="18,0" Spacing="6" VerticalAlignment="Center" IsVisible="{Binding !IsCompleted}">
+                                           <Grid ColumnDefinitions="*, Auto">
+                                              <TextBlock Text="{Binding FileName}" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" FontSize="14" TextTrimming="CharacterEllipsis"/>
+                                              <TextBlock Grid.Column="1" Text="{Binding ProgressPercentage, StringFormat=\{0:F0\}%}" Foreground="{DynamicResource ElectricIndigoBrush}" FontWeight="Bold" FontSize="12"/>
+                                           </Grid>
+                                           <ProgressBar Height="6" Value="{Binding ProgressPercentage}" Foreground="{DynamicResource ElectricIndigoBrush}" Background="#10FFFFFF" CornerRadius="3"/>
+                                           <Grid ColumnDefinitions="*, Auto">
+                                              <TextBlock Text="{Binding PeerName, StringFormat='From: \{0\}'}" FontSize="10" Foreground="{DynamicResource TextSecondary}"/>
+                                              <TextBlock Grid.Column="1" Text="{Binding SpeedMbPerSec, StringFormat=\{0:F1\} MB/s}" FontSize="10" Foreground="{DynamicResource TextSecondary}"/>
+                                           </Grid>
+                                        </StackPanel>
+
+                                        <!-- Actions -->
+                                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" IsVisible="{Binding IsCompleted}">
+                                           <Button Content="VIEW" Click="OpenFileInList_Click" Tag="{Binding}" Background="{DynamicResource GlassBackgroundBrush}" BorderBrush="{DynamicResource GlassBorderBrush}" BorderThickness="1" FontSize="11" Padding="14,8" CornerRadius="6"/>
+                                           <Button Content="✕" Click="DeleteFileInList_Click" Tag="{Binding}" Background="Transparent" Foreground="#FF5555" FontSize="12" Padding="10"/>
+                                        </StackPanel>
+
+                                        <!-- Cancel for active transfers -->
+                                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" IsVisible="{Binding !IsCompleted}">
+                                           <Button Content="CANCEL" Click="CancelIncoming_Click" Background="Transparent" Foreground="#FF5555" BorderBrush="#FF5555" BorderThickness="1" FontSize="11" Padding="14,8" CornerRadius="6"/>
+                                        </StackPanel>
+                                     </Grid>
+                                  </Border>
+                               </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                         </ItemsControl>
                         
                         <!-- Empty library label -->
                         <TextBlock x:Name="HistoryEmptyState" Text="NO FILES RECEIVED YET" VerticalAlignment="Center" HorizontalAlignment="Center" Opacity="0.3" FontSize="12" FontWeight="Bold" LetterSpacing="2" Margin="0,100,0,0"/>
@@ -832,38 +934,171 @@
 
           <!-- ABOUT PANEL -->
           <Grid x:Name="AboutPanel" IsVisible="False" Classes="SignalPanel">
-             <StackPanel Spacing="32" MaxWidth="600" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="40">
-                <Border Width="80" Height="80" HorizontalAlignment="Left" CornerRadius="16" ClipToBounds="True" BoxShadow="0 4 15 0 #30000000">
-                    <Image Source="/Assets/logo.png"/>
-                </Border>
-                <StackPanel Spacing="8">
-                   <TextBlock Text="We Share" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
-                   <TextBlock Text="Version 1.1.0" FontSize="14" Foreground="{DynamicResource TextSecondary}"/>
-                </StackPanel>
-                <TextBlock Text="A modern, high-speed file transfer utility built for seamless network-based sharing. All transfers are protected locally over your Wi-Fi interface." TextWrapping="Wrap" FontSize="14" Foreground="{DynamicResource TextSecondary}" LineHeight="24"/>
-                
-                <Border Classes="GlassCard" Padding="24" CornerRadius="12">
-                   <ScrollViewer MaxHeight="300">
-                      <StackPanel Spacing="20">
-                         <StackPanel Spacing="8">
-                            <TextBlock Text="DEVELOPER INFO" FontSize="10" FontWeight="Bold" LetterSpacing="2" Foreground="{DynamicResource TextSecondary}"/>
-                            <TextBlock Text="Sowmiyan S" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
-                            <Button Content="GITHUB REPOSITORY" Click="OpenGitHub_Click" Classes="PrimaryBtn" Margin="0,12,0,0" HorizontalAlignment="Left"/>
+             <ScrollViewer>
+               <Grid ColumnDefinitions="*, 48, 340" Margin="40,0">
+
+                 <!-- Left: Identity hero -->
+                 <StackPanel Grid.Column="0" Spacing="0" VerticalAlignment="Top">
+
+                   <!-- App Identity Block -->
+                   <StackPanel Orientation="Horizontal" Spacing="24" Margin="0,0,0,32">
+                     <Border Classes="SplashLogoPulse" Width="72" Height="72" CornerRadius="18"
+                             ClipToBounds="True" BoxShadow="0 8 32 0 #50000000">
+                       <Image Source="/Assets/logo.png" Stretch="Uniform"/>
+                     </Border>
+                     <StackPanel VerticalAlignment="Center" Spacing="4">
+                       <TextBlock Text="We Share" FontSize="30" FontWeight="Bold"
+                                  Foreground="{DynamicResource TextPrimary}" LetterSpacing="-0.5"/>
+                       <StackPanel Orientation="Horizontal" Spacing="8">
+                         <Border Background="#186366F1" BorderBrush="{StaticResource ElectricIndigoBrush}"
+                                 BorderThickness="1" CornerRadius="4" Padding="8,3">
+                           <TextBlock Text="v1.1.0" FontSize="10" FontWeight="Bold"
+                                      Foreground="{StaticResource ElectricIndigoBrush}"/>
+                         </Border>
+                         <Border Background="#1510B981" BorderBrush="{StaticResource TealSuccessBrush}"
+                                 BorderThickness="1" CornerRadius="4" Padding="8,3">
+                           <TextBlock Text="STABLE" FontSize="10" FontWeight="Bold"
+                                      Foreground="{StaticResource TealSuccessBrush}"/>
+                         </Border>
+                       </StackPanel>
+                     </StackPanel>
+                   </StackPanel>
+
+                   <!-- Tagline -->
+                   <TextBlock Text="Lightning-fast local file sharing — no cloud, no accounts, no limits."
+                              FontSize="16" FontWeight="SemiBold"
+                              Foreground="{DynamicResource TextPrimary}" TextWrapping="Wrap"
+                              LineHeight="26" Margin="0,0,0,12"/>
+                   <TextBlock Text="We Share operates entirely over your Wi-Fi network. Your files never touch the internet."
+                              FontSize="13" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"
+                              LineHeight="22" Margin="0,0,0,40"/>
+
+                   <!-- Feature pills -->
+                   <TextBlock Text="CAPABILITIES" FontSize="9" FontWeight="Bold" LetterSpacing="2"
+                              Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,16"/>
+                   <WrapPanel Orientation="Horizontal">
+                     <Border Background="{DynamicResource GlassBackgroundBrush}" BorderBrush="{DynamicResource GlassBorderBrush}"
+                             BorderThickness="1" CornerRadius="8" Padding="14,8" Margin="0,0,8,8">
+                       <TextBlock Text="⚡  High-speed TCP transfers" FontSize="12" Foreground="{DynamicResource TextPrimary}"/>
+                     </Border>
+                     <Border Background="{DynamicResource GlassBackgroundBrush}" BorderBrush="{DynamicResource GlassBorderBrush}"
+                             BorderThickness="1" CornerRadius="8" Padding="14,8" Margin="0,0,8,8">
+                       <TextBlock Text="📡  UDP peer discovery" FontSize="12" Foreground="{DynamicResource TextPrimary}"/>
+                     </Border>
+                     <Border Background="{DynamicResource GlassBackgroundBrush}" BorderBrush="{DynamicResource GlassBorderBrush}"
+                             BorderThickness="1" CornerRadius="8" Padding="14,8" Margin="0,0,8,8">
+                       <TextBlock Text="🌐  Web portal for mobile" FontSize="12" Foreground="{DynamicResource TextPrimary}"/>
+                     </Border>
+                     <Border Background="{DynamicResource GlassBackgroundBrush}" BorderBrush="{DynamicResource GlassBorderBrush}"
+                             BorderThickness="1" CornerRadius="8" Padding="14,8" Margin="0,0,8,8">
+                       <TextBlock Text="🔒  LAN-only, zero cloud" FontSize="12" Foreground="{DynamicResource TextPrimary}"/>
+                     </Border>
+                     <Border Background="{DynamicResource GlassBackgroundBrush}" BorderBrush="{DynamicResource GlassBorderBrush}"
+                             BorderThickness="1" CornerRadius="8" Padding="14,8" Margin="0,0,8,8">
+                       <TextBlock Text="📶  Auto Wi-Fi hotspot" FontSize="12" Foreground="{DynamicResource TextPrimary}"/>
+                     </Border>
+                     <Border Background="{DynamicResource GlassBackgroundBrush}" BorderBrush="{DynamicResource GlassBorderBrush}"
+                             BorderThickness="1" CornerRadius="8" Padding="14,8" Margin="0,0,8,8">
+                       <TextBlock Text="🖥️  .NET 8 self-contained" FontSize="12" Foreground="{DynamicResource TextPrimary}"/>
+                     </Border>
+                   </WrapPanel>
+
+                   <!-- Github CTA -->
+                   <Button Click="OpenGitHub_Click" Classes="PrimaryBtn"
+                           HorizontalAlignment="Left" Margin="0,32,0,0">
+                     <StackPanel Orientation="Horizontal" Spacing="10">
+                       <Rectangle Width="14" Height="14" Fill="White">
+                         <Rectangle.OpacityMask><ImageBrush Source="/Assets/Icons/WEBSITE.png"/></Rectangle.OpacityMask>
+                       </Rectangle>
+                       <TextBlock Text="VIEW ON GITHUB"/>
+                     </StackPanel>
+                   </Button>
+                 </StackPanel>
+
+                 <!-- Right: Info cards -->
+                 <StackPanel Grid.Column="2" Spacing="16" VerticalAlignment="Top">
+
+                   <!-- Developer card -->
+                   <Border Classes="GlassCard" Padding="24" CornerRadius="14">
+                     <StackPanel Spacing="16">
+                       <TextBlock Text="DEVELOPER" FontSize="9" FontWeight="Bold" LetterSpacing="2"
+                                  Foreground="{DynamicResource TextSecondary}"/>
+                       <StackPanel Orientation="Horizontal" Spacing="14">
+                         <Border Width="44" Height="44" Background="#186366F1" CornerRadius="10"
+                                 BorderBrush="{StaticResource ElectricIndigoBrush}" BorderThickness="1">
+                           <TextBlock Text="S" FontSize="20" FontWeight="Bold"
+                                      Foreground="{StaticResource ElectricIndigoBrush}"
+                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                         </Border>
+                         <StackPanel VerticalAlignment="Center" Spacing="2">
+                           <TextBlock Text="Sowmiyan S" FontSize="15" FontWeight="Bold"
+                                      Foreground="{DynamicResource TextPrimary}"/>
+                           <TextBlock Text="Open-source developer" FontSize="11"
+                                      Foreground="{DynamicResource TextSecondary}"/>
                          </StackPanel>
-                         <Rectangle Height="1" Fill="{DynamicResource GlassBorderBrush}"/>
-                         <StackPanel Spacing="8">
-                            <TextBlock Text="PRIVACY &amp; SECURITY" FontSize="10" FontWeight="Bold" LetterSpacing="2" Foreground="{DynamicResource TextSecondary}"/>
-                            <TextBlock Text="We Share works entirely over the local network. No files or metadata are sent to external cloud servers." TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource TextSecondary}" LineHeight="20"/>
-                         </StackPanel>
-                         <Rectangle Height="1" Fill="{DynamicResource GlassBorderBrush}"/>
-                         <StackPanel Spacing="8">
-                            <TextBlock Text="TERMS OF SERVICE" FontSize="10" FontWeight="Bold" LetterSpacing="2" Foreground="{DynamicResource TextSecondary}"/>
-                            <TextBlock Text="By using We Share, you agree that you are solely responsible for the content you transfer. We Share is a tool for personal use only." TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource TextSecondary}" LineHeight="20"/>
-                         </StackPanel>
-                      </StackPanel>
-                   </ScrollViewer>
-                </Border>
-             </StackPanel>
+                       </StackPanel>
+                     </StackPanel>
+                   </Border>
+
+                   <!-- Privacy card -->
+                   <Border Classes="GlassCard" Padding="24" CornerRadius="14">
+                     <StackPanel Spacing="12">
+                       <StackPanel Orientation="Horizontal" Spacing="10">
+                         <Border Width="32" Height="32" Background="#1010B981" CornerRadius="8">
+                           <TextBlock Text="🔒" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                         </Border>
+                         <TextBlock Text="PRIVACY &amp; SECURITY" FontSize="9" FontWeight="Bold" LetterSpacing="2"
+                                    Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center"/>
+                       </StackPanel>
+                       <TextBlock Text="We Share works entirely over the local network. No files or metadata are ever sent to external servers."
+                                  TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource TextSecondary}" LineHeight="20"/>
+                     </StackPanel>
+                   </Border>
+
+                   <!-- License card -->
+                   <Border Classes="GlassCard" Padding="24" CornerRadius="14">
+                     <StackPanel Spacing="12">
+                       <StackPanel Orientation="Horizontal" Spacing="10">
+                         <Border Width="32" Height="32" Background="#18F59E0B" CornerRadius="8">
+                           <TextBlock Text="📄" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                         </Border>
+                         <TextBlock Text="LICENSE" FontSize="9" FontWeight="Bold" LetterSpacing="2"
+                                    Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center"/>
+                       </StackPanel>
+                       <TextBlock Text="MIT License — free to use, modify, and distribute with attribution."
+                                  TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource TextSecondary}" LineHeight="20"/>
+                     </StackPanel>
+                   </Border>
+
+                   <!-- Built with card -->
+                   <Border Classes="GlassCard" Padding="24" CornerRadius="14">
+                     <StackPanel Spacing="12">
+                       <TextBlock Text="BUILT WITH" FontSize="9" FontWeight="Bold" LetterSpacing="2"
+                                  Foreground="{DynamicResource TextSecondary}"/>
+                       <StackPanel Spacing="10">
+                         <Grid ColumnDefinitions="Auto, *">
+                           <Border Width="6" Height="6" Background="{StaticResource ElectricIndigoBrush}" CornerRadius="3" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                           <TextBlock Grid.Column="1" Text=".NET 8 — Self-contained runtime" FontSize="12" Foreground="{DynamicResource TextPrimary}"/>
+                         </Grid>
+                         <Grid ColumnDefinitions="Auto, *">
+                           <Border Width="6" Height="6" Background="{StaticResource ElectricIndigoBrush}" CornerRadius="3" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                           <TextBlock Grid.Column="1" Text="AvaloniaUI — Cross-platform UI" FontSize="12" Foreground="{DynamicResource TextPrimary}"/>
+                         </Grid>
+                         <Grid ColumnDefinitions="Auto, *">
+                           <Border Width="6" Height="6" Background="{StaticResource ElectricIndigoBrush}" CornerRadius="3" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                           <TextBlock Grid.Column="1" Text="SQLite — Local transfer history" FontSize="12" Foreground="{DynamicResource TextPrimary}"/>
+                         </Grid>
+                       </StackPanel>
+                     </StackPanel>
+                   </Border>
+
+                   <!-- Copyright -->
+                   <TextBlock Text="© 2026 Sowmiyan S. All rights reserved." FontSize="10"
+                              Foreground="{DynamicResource TextSecondary}" Opacity="0.5"
+                              HorizontalAlignment="Center"/>
+                 </StackPanel>
+               </Grid>
+             </ScrollViewer>
           </Grid>
 
           <!-- SETTINGS PANEL -->
@@ -964,10 +1199,38 @@
 
     <!-- Splash Grid loader -->
     <Grid x:Name="SplashGrid" Background="{DynamicResource BaseBackgroundBrush}" ZIndex="5000">
-       <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="32">
-          <Image Source="/Assets/logo.png" Width="80" Height="80" Stretch="Uniform"/>
-          <TextBlock Text="WE SHARE" FontSize="22" FontWeight="Bold" LetterSpacing="6" Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Center"/>
-          <ProgressBar IsIndeterminate="True" Width="140" Height="2" Foreground="{StaticResource ElectricIndigoBrush}" Background="{DynamicResource GlassBackgroundBrush}" BorderThickness="0"/>
+       <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="28">
+
+         <!-- Orbital ring animation -->
+         <Panel Width="120" Height="120" HorizontalAlignment="Center">
+
+           <!-- Outer orbit ring -->
+           <Ellipse Classes="SplashOrbit1" Width="120" Height="120"
+                    Stroke="{StaticResource ElectricIndigoBrush}" StrokeThickness="2"
+                    StrokeDashArray="6,18" Opacity="0.6"/>
+
+           <!-- Inner orbit ring (counter-rotate) -->
+           <Ellipse Classes="SplashOrbit2" Width="88" Height="88"
+                    Stroke="{StaticResource ElectricIndigoBrush}" StrokeThickness="1.5"
+                    StrokeDashArray="4,12" Opacity="0.4"/>
+
+           <!-- Pulsing logo hub -->
+           <Border Classes="SplashLogoPulse" Width="64" Height="64" CornerRadius="16"
+                   ClipToBounds="True"
+                   Background="{DynamicResource GlassBackgroundBrush}"
+                   BorderBrush="{StaticResource ElectricIndigoBrush}" BorderThickness="1.5"
+                   BoxShadow="0 0 30 0 #806366F1">
+             <Image Source="/Assets/logo.png" Stretch="Uniform" Margin="10"/>
+           </Border>
+         </Panel>
+
+         <!-- Brand text -->
+         <StackPanel Spacing="6" HorizontalAlignment="Center">
+           <TextBlock Text="WE SHARE" FontSize="20" FontWeight="Bold" LetterSpacing="6"
+                      Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Center"/>
+           <TextBlock Text="Starting services…" FontSize="11"
+                      Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" Opacity="0.6"/>
+         </StackPanel>
        </StackPanel>
     </Grid>
 
@@ -990,10 +1253,16 @@
     </Border>
 
      <!-- Floating Toast alert -->
-     <Border x:Name="ToastBorder" IsVisible="False" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="48" Padding="18,12" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{StaticResource ElectricIndigoBrush}" BorderThickness="1" CornerRadius="20" BoxShadow="0 8 32 0 #30000000">
+     <Border x:Name="ToastBorder" IsVisible="False" VerticalAlignment="Top" HorizontalAlignment="Center"
+             Margin="48,80,48,0" Padding="16,11" Opacity="0"
+             Background="{DynamicResource CardBackgroundBrush}"
+             BorderBrush="{StaticResource ElectricIndigoBrush}" BorderThickness="1"
+             CornerRadius="20" BoxShadow="0 8 32 0 #40000000"
+             RenderTransformOrigin="50%,50%">
         <Grid ColumnDefinitions="Auto, *">
              <Border Width="4" Height="18" Background="{StaticResource ElectricIndigoBrush}" CornerRadius="2" VerticalAlignment="Center"/>
-             <TextBlock x:Name="ToastMessage" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" FontSize="12" Margin="10,0,0,0"/>
+             <TextBlock x:Name="ToastMessage" VerticalAlignment="Center" FontWeight="SemiBold"
+                        Foreground="{DynamicResource TextPrimary}" FontSize="12" Margin="10,0,0,0"/>
         </Grid>
      </Border>
   </Grid>

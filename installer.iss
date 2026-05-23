@@ -151,14 +151,13 @@ end;
 { message here in case Inno Setup itself is compiled with an older target.    }
 function InitializeSetup: Boolean;
 var
-  Major, Minor, Build: Cardinal;
+  WinVer: TWindowsVersion;
 begin
   Result := True;
 
-  if not GetWindowsVersionEx(Major, Minor, Build) then
-    Exit;
+  GetWindowsVersionEx(WinVer);
 
-  if (Major < 10) or ((Major = 10) and (Build < 19041)) then
+  if (WinVer.Major < 10) or ((WinVer.Major = 10) and (WinVer.Build < 19041)) then
   begin
     MsgBox(
       'We Share requires Windows 10 version 2004 (build 19041) or later.' + #13#10 +
