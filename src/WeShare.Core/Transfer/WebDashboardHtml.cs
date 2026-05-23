@@ -19,6 +19,15 @@ namespace WeShare.Core.Transfer
   --text: #ffffff;
   --text-dim: #908fa0;
 }
+html[data-theme='light'] {
+  --bg: #f8fafc;
+  --card: rgba(15, 23, 42, 0.04);
+  --border: rgba(15, 23, 42, 0.08);
+  --primary: #4f46e5;
+  --primary-dim: #4338ca;
+  --text: #0f172a;
+  --text-dim: #64748b;
+}
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body {
   background: var(--bg);
@@ -225,7 +234,19 @@ header {
     <div class='section-title'>Files from PC</div>
     <div class='file-list' id='fileList'></div>
   </section>
+
+  <section id='shareSection'>
+    <div class='section-title'>Share Portal</div>
+    <div class='file-card' style='display: flex; flex-direction: column; align-items: center; text-align: center; gap: 16px; padding: 24px;'>
+      <img src='/api/qr' style='width: 140px; height: 140px; border-radius: 12px; border: 1px solid var(--border); background: white; padding: 8px;' alt='Portal QR Code'/>
+      <div>
+        <div style='font-weight: 700; font-size: 14px;'>Scan to connect</div>
+        <div style='font-size: 12px; color: var(--text-dim); margin-top: 4px;'>Let others scan this QR to open the portal instantly</div>
+      </div>
+    </div>
+  </section>
 </div>
+<button id='themeToggle' style='position: absolute; top: 20px; right: 20px; background: var(--card); border: 1px solid var(--border); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text); font-size: 18px; z-index: 2000;'>☀️</button>
 
 <div class='overlay' id='overlay'>
   <div class='progress-container'>
@@ -326,6 +347,18 @@ const dz = document.getElementById('dropZone');
 dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag');});
 dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));
 dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag');handleFiles(e.dataTransfer.files);});
+
+const toggleBtn = document.getElementById('themeToggle');
+toggleBtn.addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme');
+  if (current === 'light') {
+    document.documentElement.removeAttribute('data-theme');
+    toggleBtn.textContent = '☀️';
+  } else {
+    document.documentElement.setAttribute('data-theme', 'light');
+    toggleBtn.textContent = '🌙';
+  }
+});
 
 init();
 </script>

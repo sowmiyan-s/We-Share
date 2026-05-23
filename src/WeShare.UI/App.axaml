@@ -232,7 +232,7 @@
         </Style>
 
         <!-- Splash orbital dot animations -->
-        <Style Selector="Ellipse.SplashOrbit1">
+        <Style Selector="Panel.SplashOrbit1">
             <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
             <Style.Animations>
                 <Animation Duration="0:0:1.8" IterationCount="Infinite" Easing="LinearEasing">
@@ -245,7 +245,7 @@
                 </Animation>
             </Style.Animations>
         </Style>
-        <Style Selector="Ellipse.SplashOrbit2">
+        <Style Selector="Panel.SplashOrbit2">
             <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
             <Style.Animations>
                 <Animation Duration="0:0:2.8" IterationCount="Infinite" Easing="LinearEasing">

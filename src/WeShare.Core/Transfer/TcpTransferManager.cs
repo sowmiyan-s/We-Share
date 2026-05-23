@@ -92,19 +92,24 @@ namespace WeShare.Core.Transfer
         {
             using var clientOwner = client;
             using var rawStream = client.GetStream();
+            using var sslStream = new System.Net.Security.SslStream(
+                rawStream,
+                false,
+                new System.Net.Security.RemoteCertificateValidationCallback((sender, certificate, chain, sslPolicyErrors) => true));
 
             FileTransferState? state = null;
             try
             {
+                await sslStream.AuthenticateAsServerAsync(Security.CertificateHelper.GetSelfSignedCertificate()).ConfigureAwait(false);
 
                 // 1. Read encrypted metadata length
                 byte[] lenBuffer = new byte[4];
-                if (!await ReadExactAsync(rawStream, lenBuffer, 4)) return;
+                if (!await ReadExactAsync(sslStream, lenBuffer, 4)) return;
                 int encryptedMetaLength = BitConverter.ToInt32(lenBuffer, 0);
 
                 // 2. Read encrypted metadata bytes
                 byte[] encryptedMeta = new byte[encryptedMetaLength];
-                if (!await ReadExactAsync(rawStream, encryptedMeta, encryptedMetaLength)) return;
+                if (!await ReadExactAsync(sslStream, encryptedMeta, encryptedMetaLength)) return;
 
                 // 3. Decrypt metadata
                 byte[] metaBytes = EncryptionHelper.Decrypt(encryptedMeta);
@@ -130,8 +135,8 @@ namespace WeShare.Core.Transfer
                     accepted = await TransferRequestCallback(state).ConfigureAwait(false);
                 }
                 
-                await rawStream.WriteAsync(new byte[] { accepted ? (byte)1 : (byte)0 }, 0, 1).ConfigureAwait(false);
-                await rawStream.FlushAsync().ConfigureAwait(false);
+                await sslStream.WriteAsync(new byte[] { accepted ? (byte)1 : (byte)0 }, 0, 1).ConfigureAwait(false);
+                await sslStream.FlushAsync().ConfigureAwait(false);
                 
                 if (!accepted) return;
 
@@ -148,7 +153,7 @@ namespace WeShare.Core.Transfer
                 using var fs = new FileStream(dest, FileMode.Create, FileAccess.Write, FileShare.None, 81920, true);
                 
                 // 4. Decrypt file data
-                using var fileCryptoReader = EncryptionHelper.CreateDecryptionStream(rawStream);
+                using var fileCryptoReader = EncryptionHelper.CreateDecryptionStream(sslStream);
 
                 byte[] buffer = new byte[81920];
                 long totalRead = 0;
@@ -202,11 +207,12 @@ namespace WeShare.Core.Transfer
 
         // ── Send ───────────────────────────────────────────────────────────────
         public async Task SendFileAsync(string targetIp, int targetPort, string fileName, Stream fileStream, long totalBytes,
-                                        CancellationToken cancellationToken = default)
+                                        string filePath = "", CancellationToken cancellationToken = default)
         {
             var state = new FileTransferState
             {
                 FileName   = fileName,
+                FilePath   = filePath,
                 TotalBytes = totalBytes,
                 Status     = TransferStatus.Sending,
                 Direction  = TransferDirection.Sent,
@@ -232,6 +238,12 @@ namespace WeShare.Core.Transfer
                 }
 
                 using var rawStream = client.GetStream();
+                using var sslStream = new System.Net.Security.SslStream(
+                    rawStream,
+                    false,
+                    new System.Net.Security.RemoteCertificateValidationCallback((sender, certificate, chain, sslPolicyErrors) => true));
+
+                await sslStream.AuthenticateAsClientAsync("WeShare").ConfigureAwait(false);
 
                 // 1. Encrypt and send metadata
                 var json = JsonSerializer.Serialize(state);
@@ -239,13 +251,13 @@ namespace WeShare.Core.Transfer
                 var encryptedMeta = EncryptionHelper.Encrypt(metaBytes);
                 
                 byte[] lenBytes = BitConverter.GetBytes(encryptedMeta.Length);
-                await rawStream.WriteAsync(lenBytes, 0, 4, cancellationToken).ConfigureAwait(false);
-                await rawStream.WriteAsync(encryptedMeta, 0, encryptedMeta.Length, cancellationToken).ConfigureAwait(false);
-                await rawStream.FlushAsync(cancellationToken).ConfigureAwait(false);
+                await sslStream.WriteAsync(lenBytes, 0, 4, cancellationToken).ConfigureAwait(false);
+                await sslStream.WriteAsync(encryptedMeta, 0, encryptedMeta.Length, cancellationToken).ConfigureAwait(false);
+                await sslStream.FlushAsync(cancellationToken).ConfigureAwait(false);
 
                 // 2. Read response (unencrypted handshake response)
                 byte[] respBuffer = new byte[1];
-                int r = await rawStream.ReadAsync(respBuffer, 0, 1, cancellationToken).ConfigureAwait(false);
+                int r = await sslStream.ReadAsync(respBuffer, 0, 1, cancellationToken).ConfigureAwait(false);
                 if (r == 0 || respBuffer[0] == 0)
                 {
                     state.Status = TransferStatus.Failed;
@@ -254,7 +266,7 @@ namespace WeShare.Core.Transfer
                 }
 
                 // 3. Encrypt and send file data
-                using (var fileCryptoWriter = EncryptionHelper.CreateEncryptionStream(rawStream))
+                using (var fileCryptoWriter = EncryptionHelper.CreateEncryptionStream(sslStream))
                 {
                     byte[] buffer = new byte[81920];
                     int read;

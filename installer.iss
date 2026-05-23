@@ -2,7 +2,7 @@
 ; Standalone Windows Installer — .NET 8 Self-Contained (no runtime required on target PC)
 
 #define AppName      "We Share"
-#define AppVersion   "1.1.0"
+#define AppVersion   "1.2.0"
 #define AppPublisher "Sowmiyan-S"
 #define AppURL       "https://github.com/sowmiyan-s/We-Share"
 #define AppExeName   "WeShare.Desktop.exe"
@@ -66,6 +66,8 @@ Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall add rule name=""{
 Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall add rule name=""{#AppName}"" dir=out action=allow program=""{app}\{#AppExeName}"" enable=yes profile=any"; Flags: runhidden
 
 [UninstallRun]
+; Kill running process before deleting files
+Filename: "taskkill.exe"; Parameters: "/f /im WeShare.Desktop.exe"; RunOnceId: "KillApp"; Flags: runhidden
 ; Remove firewall rules on uninstall
 Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall delete rule name=""{#AppName}"""; Flags: runhidden
 
@@ -152,6 +154,8 @@ end;
 function InitializeSetup: Boolean;
 var
   WinVer: TWindowsVersion;
+  UninstallerPath: string;
+  ResultCode: Integer;
 begin
   Result := True;
 
@@ -165,5 +169,28 @@ begin
       mbError, MB_OK
     );
     Result := False;
+    Exit;
   end;
+
+  // Detect previous installation and prompt for clean install
+  if RegQueryStringValue(HKLM, 'Software\Microsoft\Windows\CurrentVersion\Uninstall\{C7A9E5B2-D4A1-4F9C-B5A1-9E2F8B7D6C5A}_is1', 'UninstallString', UninstallerPath) or
+     RegQueryStringValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Uninstall\{C7A9E5B2-D4A1-4F9C-B5A1-9E2F8B7D6C5A}_is1', 'UninstallString', UninstallerPath) then
+  begin
+    if MsgBox('We Share is already installed on this computer.' + #13#10 + #13#10 +
+              'Would you like to perform a clean installation? (This uninstalls the previous version before installing, keeping your history database.)',
+              mbConfirmation, MB_YESNO) = IDYES then
+    begin
+      UninstallerPath := RemoveQuotes(UninstallerPath);
+      Exec(UninstallerPath, '/SILENT /NORESTART', '', SW_SHOW, ewWaitUntilTerminated, ResultCode);
+    end;
+  end;
+end;
+
+function PrepareToInstall(var NeedsReboot: Boolean): String;
+var
+  ResultCode: Integer;
+begin
+  Result := '';
+  // Force-kill the app before extracting files to avoid file-in-use locks
+  Exec('taskkill.exe', '/f /im WeShare.Desktop.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
 end;

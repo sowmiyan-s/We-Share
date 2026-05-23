@@ -68,6 +68,7 @@ namespace WeShare.UI.Views
         public MainView(IPlatformService? platformService)
         {
             InitializeComponent();
+            CleanTempZipDirectory();
 
             _saveDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
@@ -563,7 +564,7 @@ namespace WeShare.UI.Views
                     try
                     {
                         using var stream = await item.OpenStream();
-                        await _transferManager.SendFileAsync(device.IpAddress, device.Port, item.Name, stream, item.Size);
+                        await _transferManager.SendFileAsync(device.IpAddress, device.Port, item.Name, stream, item.Size, item.Path);
 
                         // Transfer succeeded — now remove it from the queue
                         await Dispatcher.UIThread.InvokeAsync(() =>
@@ -662,6 +663,10 @@ namespace WeShare.UI.Views
         {
             QueueEmptyLabel.IsVisible = SendQueue.Count == 0;
             SendFooter.IsVisible      = SendQueue.Count > 0;
+            if (ZipSendBtn != null)
+            {
+                ZipSendBtn.IsVisible = SendQueue.Count > 1;
+            }
             string targetName = _sendTarget != null ? _sendTarget.Name : "None selected";
             SendSummaryText.Text = $"{SendQueue.Count} file(s) | Target: {targetName}";
         }
@@ -689,7 +694,7 @@ namespace WeShare.UI.Views
                 try
                 {
                     using var stream = await item.OpenStream();
-                    await _transferManager.SendFileAsync(_sendTarget.IpAddress, _sendTarget.Port, item.Name, stream, item.Size);
+                    await _transferManager.SendFileAsync(_sendTarget.IpAddress, _sendTarget.Port, item.Name, stream, item.Size, item.Path);
 
                     // Success — remove from front of queue
                     if (SendQueue.Count > 0 && SendQueue[0] == item)
@@ -1131,6 +1136,7 @@ namespace WeShare.UI.Views
                 {
                     _currentSendingFileId = null;
                     await _dbHelper.SaveTransferAsync(state);
+                    CleanTempZipFile(state.FilePath);
                 }
             });
         }
@@ -1149,6 +1155,7 @@ namespace WeShare.UI.Views
                 else
                 {
                     _currentSendingFileId = null;
+                    CleanTempZipFile(state.FilePath);
                 }
                 await _dbHelper.SaveTransferAsync(state);
                 string reason = !string.IsNullOrEmpty(state.ErrorMessage) ? state.ErrorMessage : "Connection failed or rejected";
@@ -1231,6 +1238,8 @@ namespace WeShare.UI.Views
             // original network the user was on before joining the hotspot.
             _wifiConnector?.Cleanup();
             _wifiConnector?.Dispose();
+
+            CleanTempZipDirectory();
         }
 
         // CTS to cancel the previous toast's hide-delay when a new toast fires
@@ -1268,6 +1277,100 @@ namespace WeShare.UI.Views
                 }
                 catch (OperationCanceledException) { /* newer toast took over */ }
             });
+        }
+
+        // ── ZIP Multi-file Send & Cleanups ────────────────────────────────────
+        private string GetTempZipDirectory()
+        {
+            return @"d:\PROJECTS\WE SHARE\temp_zip_send";
+        }
+
+        private void CleanTempZipDirectory()
+        {
+            try
+            {
+                var tempDir = GetTempZipDirectory();
+                if (Directory.Exists(tempDir))
+                {
+                    Directory.Delete(tempDir, true);
+                }
+            }
+            catch { }
+        }
+
+        private void CleanTempZipFile(string? filePath)
+        {
+            if (string.IsNullOrEmpty(filePath)) return;
+            try
+            {
+                var tempDir = GetTempZipDirectory();
+                if (Path.GetFullPath(filePath).StartsWith(Path.GetFullPath(tempDir), StringComparison.OrdinalIgnoreCase))
+                {
+                    if (File.Exists(filePath))
+                    {
+                        File.Delete(filePath);
+                    }
+                }
+            }
+            catch { }
+        }
+
+        private async void ZipSend_Click(object sender, RoutedEventArgs e)
+        {
+            if (SendQueue.Count <= 1)
+            {
+                ShowToast("Add multiple files to send as a ZIP archive");
+                return;
+            }
+
+            try
+            {
+                var tempDir = GetTempZipDirectory();
+                Directory.CreateDirectory(tempDir);
+
+                var zipName = $"WeShare_Archive_{DateTime.Now:yyyyMMdd_HHmmss}.zip";
+                var zipPath = Path.Combine(tempDir, zipName);
+
+                ShowToast("Creating ZIP archive...");
+
+                // Compress queued files to the ZIP archive on a background thread to keep UI fluid
+                await Task.Run(async () =>
+                {
+                    using (var fs = new FileStream(zipPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                    using (var archive = new System.IO.Compression.ZipArchive(fs, System.IO.Compression.ZipArchiveMode.Create))
+                    {
+                        foreach (var item in SendQueue.ToList())
+                        {
+                            var entry = archive.CreateEntry(item.Name, System.IO.Compression.CompressionLevel.Fastest);
+                            using (var entryStream = entry.Open())
+                            using (var fileStream = await item.OpenStream())
+                            {
+                                await fileStream.CopyToAsync(entryStream);
+                            }
+                        }
+                    }
+                });
+
+                var zipInfo = new FileInfo(zipPath);
+
+                // Clear queue and replace it with the single ZIP file
+                SendQueue.Clear();
+                SendQueue.Add(new QueueItem
+                {
+                    Name = zipName,
+                    Path = zipPath,
+                    Size = zipInfo.Length,
+                    OpenStream = () => Task.FromResult<Stream>(File.OpenRead(zipPath)),
+                    Thumbnail = null
+                });
+
+                ShowToast("ZIP archive created!");
+                NavSendDiscovery_Click(this, new RoutedEventArgs());
+            }
+            catch (Exception ex)
+            {
+                ShowToast($"ZIP creation failed: {ex.Message}");
+            }
         }
     }
 }

@@ -750,12 +750,13 @@
              </ScrollViewer>
              
              <Border Grid.Row="1" Margin="0,24,0,0" x:Name="SendFooter" IsVisible="False" Classes="GlassCard" Padding="24,20" CornerRadius="12">
-                <Grid ColumnDefinitions="*, Auto">
+                <Grid ColumnDefinitions="*, Auto, Auto">
                    <StackPanel VerticalAlignment="Center">
                       <TextBlock x:Name="SendSummaryText" Text="0 files selected" Foreground="{DynamicResource TextPrimary}" FontWeight="Bold" FontSize="14"/>
                       <TextBlock Text="Ready for next step" Foreground="{DynamicResource TextSecondary}" FontSize="11"/>
                    </StackPanel>
-                   <Button Grid.Column="1" Classes="PrimaryBtn" Content="CHOOSE RECEIVER" Width="200" HorizontalContentAlignment="Center" Click="NavSendDiscovery_Click"/>
+                   <Button Grid.Column="1" x:Name="ZipSendBtn" Content="ZIP &amp; SEND" Click="ZipSend_Click" Background="Transparent" BorderBrush="{StaticResource ElectricIndigoBrush}" BorderThickness="1" Foreground="{StaticResource ElectricIndigoBrush}" FontWeight="Bold" FontSize="13" Padding="20,12" CornerRadius="8" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                   <Button Grid.Column="2" Classes="PrimaryBtn" Content="CHOOSE RECEIVER" Width="200" HorizontalContentAlignment="Center" Click="NavSendDiscovery_Click"/>
                 </Grid>
              </Border>
           </Grid>
@@ -952,7 +953,7 @@
                        <StackPanel Orientation="Horizontal" Spacing="8">
                          <Border Background="#186366F1" BorderBrush="{StaticResource ElectricIndigoBrush}"
                                  BorderThickness="1" CornerRadius="4" Padding="8,3">
-                           <TextBlock Text="v1.1.0" FontSize="10" FontWeight="Bold"
+                           <TextBlock Text="v1.2.0" FontSize="10" FontWeight="Bold"
                                       Foreground="{StaticResource ElectricIndigoBrush}"/>
                          </Border>
                          <Border Background="#1510B981" BorderBrush="{StaticResource TealSuccessBrush}"
@@ -1204,15 +1205,21 @@
          <!-- Orbital ring animation -->
          <Panel Width="120" Height="120" HorizontalAlignment="Center">
 
-           <!-- Outer orbit ring -->
-           <Ellipse Classes="SplashOrbit1" Width="120" Height="120"
-                    Stroke="{StaticResource ElectricIndigoBrush}" StrokeThickness="2"
-                    StrokeDashArray="6,18" Opacity="0.6"/>
+           <!-- Outer orbit ring with glowing dot -->
+           <Panel Classes="SplashOrbit1" Width="120" Height="120">
+              <Ellipse Width="120" Height="120"
+                       Stroke="{StaticResource ElectricIndigoBrush}" StrokeThickness="2"
+                       StrokeDashArray="6,18" Opacity="0.6"/>
+              <Border Width="8" Height="8" Background="White" CornerRadius="4" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,-3,0,0" BoxShadow="0 0 12 3 #6366F1"/>
+           </Panel>
 
-           <!-- Inner orbit ring (counter-rotate) -->
-           <Ellipse Classes="SplashOrbit2" Width="88" Height="88"
-                    Stroke="{StaticResource ElectricIndigoBrush}" StrokeThickness="1.5"
-                    StrokeDashArray="4,12" Opacity="0.4"/>
+           <!-- Inner orbit ring with glowing dot (counter-rotate) -->
+           <Panel Classes="SplashOrbit2" Width="88" Height="88">
+              <Ellipse Width="88" Height="88"
+                       Stroke="{StaticResource ElectricIndigoBrush}" StrokeThickness="1.5"
+                       StrokeDashArray="4,12" Opacity="0.4"/>
+              <Border Width="6" Height="6" Background="White" CornerRadius="3" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,-2,0,0" BoxShadow="0 0 10 2 #6366F1"/>
+           </Panel>
 
            <!-- Pulsing logo hub -->
            <Border Classes="SplashLogoPulse" Width="64" Height="64" CornerRadius="16"

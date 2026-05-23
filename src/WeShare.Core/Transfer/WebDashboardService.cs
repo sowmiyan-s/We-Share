@@ -8,6 +8,8 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using WeShare.Core.Models;
+using WeShare.Core.Services;
+using WeShare.Core.Discovery;
 
 namespace WeShare.Core.Transfer
 {
@@ -200,6 +202,23 @@ namespace WeShare.Core.Transfer
                     {
                         var peers = _getPeers?.Invoke() ?? Array.Empty<DeviceModel>();
                         await SendJson(stream, peers);
+                    }
+
+                    else if (method == "GET" && path == "/api/qr")
+                    {
+                        var ip = UdpDiscoveryService.GetLocalIp();
+                        var url = $"http://{ip}:{Port}";
+                        var qrBytes = QrCodeService.GenerateQrCodePng(url);
+                        
+                        var header = $"HTTP/1.1 200 OK\r\n" +
+                                     $"Content-Type: image/png\r\n" +
+                                     $"Content-Length: {qrBytes.Length}\r\n" +
+                                     "Connection: close\r\n" +
+                                     "Access-Control-Allow-Origin: *\r\n" +
+                                     "\r\n";
+                        await stream.WriteAsync(Encoding.ASCII.GetBytes(header));
+                        await stream.WriteAsync(qrBytes);
+                        await stream.FlushAsync();
                     }
 
                     else if (method == "GET" && path == "/api/files")
