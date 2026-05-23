@@ -238,7 +238,9 @@ namespace WeShare.UI.Views
         // ── Empty state ───────────────────────────────────────────────────────
         private void UpdateEmptyState()
         {
-            // Empty state handled visually or not needed
+            // Show "LOOKING FOR DEVICES..." hint on the send-discovery radar when empty.
+            // RadarEmptyHint lives inside SendDiscoveryPanel so it only renders when visible.
+            RadarEmptyHint.IsVisible = Devices.Count == 0;
         }
 
         private void ShowPanel(Control panel, string title, Button? navBtn = null)
@@ -300,6 +302,11 @@ namespace WeShare.UI.Views
             SendStepWizard.IsVisible = true;
             Step1Indicator.Foreground = SolidColorBrush.Parse("#40FFFFFF");
             Step2Indicator.Foreground = SolidColorBrush.Parse("#6366F1");
+
+            // Update the "LOOKING FOR DEVICES..." hint immediately, then trigger a
+            // fresh broadcast so newly-arrived receivers appear on the radar quickly.
+            UpdateEmptyState();
+            _ = _discoveryService.BroadcastPresenceAsync();
         }
 
         private void NavReceiveMode_Click(object sender, RoutedEventArgs e)
@@ -412,15 +419,13 @@ namespace WeShare.UI.Views
             {
                 while (true)
                 {
-                    // Dequeue the next item on the UI thread (ObservableCollection is not thread-safe)
+                    // Peek at the first item WITHOUT removing it — we only dequeue after success.
+                    // If the transfer fails, the item stays in the queue so the user can retry.
                     QueueItem? item = null;
                     await Dispatcher.UIThread.InvokeAsync(() =>
                     {
                         if (SendQueue.Count > 0)
-                        {
                             item = SendQueue[0];
-                            SendQueue.RemoveAt(0);
-                        }
                     });
 
                     if (item == null)
@@ -441,11 +446,29 @@ namespace WeShare.UI.Views
                     {
                         SendProgressFile.Text = item.Name;
                         SendProgressBar.Value = 0;
-                        UpdateQueueUI();
                     });
 
-                    using var stream = await item.OpenStream();
-                    await _transferManager.SendFileAsync(device.IpAddress, device.Port, item.Name, stream, item.Size);
+                    try
+                    {
+                        using var stream = await item.OpenStream();
+                        await _transferManager.SendFileAsync(device.IpAddress, device.Port, item.Name, stream, item.Size);
+
+                        // Transfer succeeded — now remove it from the queue
+                        await Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            if (SendQueue.Count > 0 && SendQueue[0] == item)
+                                SendQueue.RemoveAt(0);
+                            UpdateQueueUI();
+                        });
+                    }
+                    catch (Exception ex) when (ex is not OperationCanceledException)
+                    {
+                        // Transfer failed — item is still at position 0 so the user can retry.
+                        // Stop processing the rest of the queue for this session.
+                        ShowToast($"Transfer failed: {ex.Message}");
+                        _isSending = false;
+                        break;
+                    }
                 }
 
                 ShowToast("All transfers completed");
@@ -540,23 +563,40 @@ namespace WeShare.UI.Views
                 return;
             }
 
-            var toSend = SendQueue.ToList();
-            SendQueue.Clear();
-            UpdateQueueUI();
             SendProgressBorder.IsVisible = true;
+            int sentCount = 0;
 
-            foreach (var item in toSend)
+            // Process each item one at a time; only remove it from the queue AFTER
+            // it succeeds.  This way a failure leaves remaining files intact for retry.
+            while (SendQueue.Count > 0)
             {
+                var item = SendQueue[0];
                 SendProgressFile.Text = item.Name;
                 SendProgressBar.Value = 0;
-                using var stream = await item.OpenStream();
-                await _transferManager.SendFileAsync(_sendTarget.IpAddress, _sendTarget.Port, item.Name, stream, item.Size);
+
+                try
+                {
+                    using var stream = await item.OpenStream();
+                    await _transferManager.SendFileAsync(_sendTarget.IpAddress, _sendTarget.Port, item.Name, stream, item.Size);
+
+                    // Success — remove from front of queue
+                    if (SendQueue.Count > 0 && SendQueue[0] == item)
+                        SendQueue.RemoveAt(0);
+                    sentCount++;
+                    UpdateQueueUI();
+                }
+                catch (Exception ex)
+                {
+                    SendProgressBorder.IsVisible = false;
+                    ShowToast($"Transfer failed: {ex.Message}");
+                    return;
+                }
             }
 
             SendProgressBorder.IsVisible = false;
             _sendTarget = null;
             UpdateQueueUI();
-            ShowToast($"Successfully sent {toSend.Count} file(s)");
+            ShowToast($"Successfully sent {sentCount} file(s)");
             NavHome_Click(this, new RoutedEventArgs());
         }
 
@@ -806,7 +846,10 @@ namespace WeShare.UI.Views
                 if (!device.IsReceiver)
                 {
                     if (existing != null)
+                    {
                         Devices.Remove(existing);
+                        UpdateEmptyState();
+                    }
                     return;
                 }
 
@@ -814,6 +857,7 @@ namespace WeShare.UI.Views
                 if (existing == null) 
                 {
                     Devices.Add(device);
+                    UpdateEmptyState();
                 }
                 else 
                 {

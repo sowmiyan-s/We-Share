@@ -172,23 +172,31 @@ namespace WeShare.Core.Discovery
         }
 
         /// <summary>Get the best local IPv4 address to include in our broadcast payload.</summary>
+        /// <remarks>
+        /// Pass 1: prefer physical/wireless adapters (filters out generic virtual adapters like VMware/Hyper-V).
+        /// Pass 2: if no physical IP found, fall back to virtual adapters — this covers the Desert Mode case
+        ///         where the WeShare hotspot creates a "Microsoft Wi-Fi Direct Virtual Adapter" and that is
+        ///         the ONLY routable interface available (192.168.137.1).
+        /// </remarks>
         public static string GetLocalIp()
         {
-            var interfaces = NetworkInterface.GetAllNetworkInterfaces()
-                .Where(ni => ni.OperationalStatus == OperationalStatus.Up && 
+            // Pass 1 — physical adapters only (filter out common VM/VPN virtual adapters)
+            static bool IsNoisyVirtual(NetworkInterface ni) =>
+                ni.Description.Contains("VMware",    StringComparison.OrdinalIgnoreCase) ||
+                ni.Description.Contains("Hyper-V",   StringComparison.OrdinalIgnoreCase) ||
+                ni.Description.Contains("Host-Only", StringComparison.OrdinalIgnoreCase) ||
+                ni.Description.Contains("Pseudo",    StringComparison.OrdinalIgnoreCase) ||
+                ni.Description.Contains("VPN",       StringComparison.OrdinalIgnoreCase) ||
+                ni.Name.Contains("vEthernet",        StringComparison.OrdinalIgnoreCase);
+
+            var physicalFirst = NetworkInterface.GetAllNetworkInterfaces()
+                .Where(ni => ni.OperationalStatus == OperationalStatus.Up &&
                              ni.NetworkInterfaceType != NetworkInterfaceType.Loopback &&
-                             !ni.Description.Contains("Virtual", StringComparison.OrdinalIgnoreCase) &&
-                             !ni.Description.Contains("Pseudo", StringComparison.OrdinalIgnoreCase) &&
-                             !ni.Description.Contains("VPN", StringComparison.OrdinalIgnoreCase) &&
-                             !ni.Description.Contains("VMware", StringComparison.OrdinalIgnoreCase) &&
-                             !ni.Description.Contains("Hyper-V", StringComparison.OrdinalIgnoreCase) &&
-                             !ni.Description.Contains("Host-Only", StringComparison.OrdinalIgnoreCase) &&
-                             !ni.Name.Contains("vEthernet", StringComparison.OrdinalIgnoreCase))
+                             !IsNoisyVirtual(ni))
                 .OrderByDescending(ni => ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211)
-                .ThenByDescending(ni => ni.Description.Contains("Hotspot", StringComparison.OrdinalIgnoreCase))
                 .ThenByDescending(ni => ni.NetworkInterfaceType == NetworkInterfaceType.Ethernet);
 
-            foreach (var ni in interfaces)
+            foreach (var ni in physicalFirst)
             {
                 foreach (var ua in ni.GetIPProperties().UnicastAddresses)
                 {
@@ -196,6 +204,24 @@ namespace WeShare.Core.Discovery
                         return ua.Address.ToString();
                 }
             }
+
+            // Pass 2 — fall back to ALL virtual adapters (catches the WeShare Desert Mode hotspot at 192.168.137.1)
+            var allUp = NetworkInterface.GetAllNetworkInterfaces()
+                .Where(ni => ni.OperationalStatus == OperationalStatus.Up &&
+                             ni.NetworkInterfaceType != NetworkInterfaceType.Loopback);
+
+            foreach (var ni in allUp)
+            {
+                foreach (var ua in ni.GetIPProperties().UnicastAddresses)
+                {
+                    if (ua.Address.AddressFamily == AddressFamily.InterNetwork && !IPAddress.IsLoopback(ua.Address))
+                    {
+                        Console.WriteLine($"[Discovery] GetLocalIp fallback via virtual adapter '{ni.Description}': {ua.Address}");
+                        return ua.Address.ToString();
+                    }
+                }
+            }
+
             return "127.0.0.1";
         }
 

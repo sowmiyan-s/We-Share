@@ -9,6 +9,10 @@ namespace WeShare.Core.Data
     {
         private readonly string _dbPath;
 
+        // Single write-at-a-time lock prevents "database is locked" errors
+        // that happen when rapid progress-update saves overlap each other.
+        private readonly SemaphoreSlim _writeLock = new(1, 1);
+
         public DatabaseHelper(string? dbPath = null)
         {
             if (dbPath == null)
@@ -38,6 +42,15 @@ namespace WeShare.Core.Data
             {
                 using var conn = new SqliteConnection($"Data Source={_dbPath}");
                 conn.Open();
+
+                // WAL mode: allows concurrent reads while a write is in progress,
+                // and prevents "database is locked" on rapid saves from progress events.
+                using (var walCmd = conn.CreateCommand())
+                {
+                    walCmd.CommandText = "PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL;";
+                    walCmd.ExecuteNonQuery();
+                }
+
                 using var cmd = conn.CreateCommand();
                 cmd.CommandText = @"
                     CREATE TABLE IF NOT EXISTS Transfers (
@@ -77,6 +90,7 @@ namespace WeShare.Core.Data
         // ── Write ──────────────────────────────────────────────────────────────
         public async Task SaveTransferAsync(FileTransferState state)
         {
+            await _writeLock.WaitAsync();
             try
             {
                 using var conn = await OpenConnectionAsync();
@@ -102,6 +116,7 @@ namespace WeShare.Core.Data
                 await cmd.ExecuteNonQueryAsync();
             }
             catch (Exception ex) { Console.WriteLine($"[DB] Save failed: {ex.Message}"); }
+            finally { _writeLock.Release(); }
         }
 
         // ── Read ───────────────────────────────────────────────────────────────

@@ -191,7 +191,7 @@ namespace WeShare.Core.Transfer
 
                     else if (method == "GET" && path == "/api/me")
                     {
-                        string remoteIp = ((IPEndPoint)client.Client.RemoteEndPoint!).Address.ToString();
+                        string remoteIp = client.Client.RemoteEndPoint is System.Net.IPEndPoint rep ? rep.Address.ToString() : "unknown";
                         WebClientConnected?.Invoke("Web Portal", remoteIp);
                         await SendJson(stream, new { name = _localDevice.Name, ip = _localDevice.IpAddress });
                     }
@@ -246,7 +246,10 @@ namespace WeShare.Core.Transfer
                     else if (method == "GET" && path == "/download")
                     {
                         var query = parts[1].Contains('?') ? parts[1].Split('?')[1] : "";
-                        var id = query.Split('&').FirstOrDefault(p => p.StartsWith("id="))?.Split('=')[1];
+                        // Split on '=' with max of 2 parts so an empty value (?id=) never throws IndexOutOfRangeException
+                        var idPart  = query.Split('&').FirstOrDefault(p => p.StartsWith("id="));
+                        var idSplit = idPart?.Split('=', 2);
+                        var id      = idSplit?.Length == 2 ? idSplit[1] : null;
                         
                         SharedFile? file = null;
                         await _filesLock.WaitAsync();

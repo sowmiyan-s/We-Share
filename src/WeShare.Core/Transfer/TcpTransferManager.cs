@@ -102,7 +102,7 @@ namespace WeShare.Core.Transfer
 
                 if (state == null) return;
 
-                state.RemoteIp = ((IPEndPoint)client.Client.RemoteEndPoint!).Address.ToString();
+                state.RemoteIp = client.Client.RemoteEndPoint is IPEndPoint rep ? rep.Address.ToString() : "unknown";
                 state.PeerName = !string.IsNullOrEmpty(state.SenderName) ? state.SenderName : state.RemoteIp;
                 state.Status    = TransferStatus.Receiving;
                 state.Direction = TransferDirection.Received;
