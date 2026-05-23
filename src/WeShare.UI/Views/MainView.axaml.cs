@@ -942,7 +942,18 @@ namespace WeShare.UI.Views
             _discoveryService?.StopListening();
             _transferManager?.StopListening();
             _webDashboardService?.Stop();
-            _hotspotService?.StopAsync();
+
+            // Stop the hotspot and wait for it — this ensures the Desert Mode
+            // hostednetwork is shut down and the user's original Wi-Fi is restored
+            // before the process exits.
+            if (_hotspotService != null)
+            {
+                try { _hotspotService.StopAsync().GetAwaiter().GetResult(); }
+                catch { }
+            }
+
+            // Remove the temporary WeShare Wi-Fi profile and reconnect to the
+            // original network the user was on before joining the hotspot.
             _wifiConnector?.Cleanup();
             _wifiConnector?.Dispose();
         }
