@@ -8,6 +8,7 @@ namespace WeShare.Core.Services
     {
         string GetDeviceType(); // "PC", "Phone", "Tablet"
         string GetDefaultSavePath();
+        Task<string?> GetCurrentWifiSsidAsync();
         
         // Hotspot Management
         Task<(bool Success, string Message)> StartHotspotAsync(string ssid, string password);

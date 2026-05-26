@@ -2,7 +2,7 @@
 ; Standalone Windows Installer — .NET 8 Self-Contained (no runtime required on target PC)
 
 #define AppName      "We Share"
-#define AppVersion   "1.2.0"
+#define AppVersion   "1.3.0"
 #define AppPublisher "Sowmiyan-S"
 #define AppURL       "https://github.com/sowmiyan-s/We-Share"
 #define AppExeName   "WeShare.Desktop.exe"
@@ -25,6 +25,7 @@ OutputDir=setup
 OutputBaseFilename=WeShare_Setup_{#AppVersion}
 SetupIconFile={#AppIcon}
 PrivilegesRequired=admin
+PrivilegesRequiredOverridesAllowed=dialog
 ; Installer banner (164 × 314 px BMP) and small logo (55 × 58 px BMP)
 WizardImageFile=src\WeShare.UI\Assets\Design\installer_banner_light.bmp
 WizardSmallImageFile=src\WeShare.UI\Assets\logo_light.bmp
@@ -55,7 +56,7 @@ Source: "LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 [Icons]
 Name: "{group}\{#AppName}";              Filename: "{app}\{#AppExeName}"; IconFilename: "{app}\{#AppExeName}"
 Name: "{autodesktop}\{#AppName}";        Filename: "{app}\{#AppExeName}"; Tasks: desktopicon; IconFilename: "{app}\{#AppExeName}"
-Name: "{userstartup}\{#AppName}";        Filename: "{app}\{#AppExeName}"; Tasks: startupicon
+Name: "{commonstartup}\{#AppName}";      Filename: "{app}\{#AppExeName}"; Tasks: startupicon
 Name: "{group}\Uninstall {#AppName}";    Filename: "{uninstallexe}"
 
 [Run]
@@ -69,7 +70,7 @@ Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall add rule name=""{
 ; Kill running process before deleting files
 Filename: "taskkill.exe"; Parameters: "/f /im WeShare.Desktop.exe"; RunOnceId: "KillApp"; Flags: runhidden
 ; Remove firewall rules on uninstall
-Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall delete rule name=""{#AppName}"""; Flags: runhidden
+Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall delete rule name=""{#AppName}"""; RunOnceId: "RemoveFirewallRule"; Flags: runhidden
 
 [Code]
 var

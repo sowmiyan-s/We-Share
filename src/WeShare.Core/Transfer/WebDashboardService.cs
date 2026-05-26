@@ -10,16 +10,12 @@ using System.Threading.Tasks;
 using WeShare.Core.Models;
 using WeShare.Core.Services;
 using WeShare.Core.Discovery;
+using System.Linq;
 
 namespace WeShare.Core.Transfer
 {
     /// <summary>
-    /// Lightweight raw-TCP HTTP server â€” no HttpListener, no admin rights needed.
-    /// Exposes:
-    ///   GET  /             â†’ Mobile dashboard HTML
-    ///   GET  /api/devices  â†’ JSON list of discovered peers
-    ///   GET  /api/me       â†’ JSON { name, ip }
-    ///   POST /upload       â†’ Stream a file; Header: X-File-Name
+    /// Lightweight raw-TCP HTTP server — no HttpListener, no admin rights needed.
     /// </summary>
     public partial class WebDashboardService
     {
@@ -28,14 +24,30 @@ namespace WeShare.Core.Transfer
         private Func<IReadOnlyList<DeviceModel>>? _getPeers;
         private TcpListener? _listener;
         private CancellationTokenSource? _cts;
+        
         private readonly List<SharedFile> _sharedFiles = new();
+        private readonly Dictionary<string, List<SharedFile>> _clientSpecificFiles = new(StringComparer.OrdinalIgnoreCase);
         private readonly SemaphoreSlim _filesLock = new(1, 1);
-        private readonly List<StreamWriter> _eventClients = new();
-        private readonly SemaphoreSlim _clientsLock = new(1, 1);
+        
+        private readonly Dictionary<string, WebClientInfo> _activeWebClients = new(StringComparer.OrdinalIgnoreCase);
+        private readonly SemaphoreSlim _webClientsLock = new(1, 1);
+        
         public int Port { get; } = 8080;
+        public byte[]? LogoBytes { get; set; }
         
         public event Action<string, string, long>? WebFileReceived;
         public event Action<string, string>? WebClientConnected;
+        public event Action<WebClientInfo>? WebClientConnectedEx;
+        public event Action<string>? WebClientDisconnectedEx;
+        public event Action<string, string, string, long>? WebFileShared;
+
+        public class WebClientInfo
+        {
+            public string ClientId { get; set; } = "";
+            public string Name { get; set; } = "";
+            public string IpAddress { get; set; } = "";
+            public StreamWriter? EventWriter { get; set; }
+        }
 
         public class SharedFile
         {
@@ -63,38 +75,85 @@ namespace WeShare.Core.Transfer
             {
                 if (_sharedFiles.Any(f => f.Path == filePath)) return;
                 _sharedFiles.Add(new SharedFile { Name = info.Name, Path = filePath, Size = info.Length });
-                NotifyClients("refresh");
             }
             finally { _filesLock.Release(); }
+            NotifyAllClients("refresh");
         }
 
-        private async void NotifyClients(string type)
+        public void ShareForWebClient(string clientId, string filePath)
         {
-            await _clientsLock.WaitAsync();
+            var info = new FileInfo(filePath);
+            if (!info.Exists) return;
+            SharedFile sharedFile;
+            _filesLock.Wait();
+            try
+            {
+                if (!_clientSpecificFiles.TryGetValue(clientId, out var list))
+                {
+                    list = new List<SharedFile>();
+                    _clientSpecificFiles[clientId] = list;
+                }
+                if (list.Any(f => f.Path == filePath)) return;
+                sharedFile = new SharedFile { Name = info.Name, Path = filePath, Size = info.Length };
+                list.Add(sharedFile);
+            }
+            finally { _filesLock.Release(); }
+            
+            // Notify client about the specific offer
+            NotifyClient(clientId, $"offer:{{\"id\":\"{sharedFile.Id}\",\"name\":\"{Uri.EscapeDataString(sharedFile.Name)}\",\"size\":{sharedFile.Size}}}");
+        }
+
+        private async void NotifyAllClients(string type)
+        {
+            await _webClientsLock.WaitAsync();
             try
             {
                 var data = $"data: {type}\n\n";
-                var bytes = Encoding.UTF8.GetBytes(data);
-                
-                var deadClients = new List<StreamWriter>();
-                foreach (var client in _eventClients)
+                foreach (var kvp in _activeWebClients)
+                {
+                    if (kvp.Value.EventWriter != null)
+                    {
+                        try
+                        {
+                            await kvp.Value.EventWriter.WriteAsync(data);
+                            await kvp.Value.EventWriter.FlushAsync();
+                        }
+                        catch { kvp.Value.EventWriter = null; }
+                    }
+                }
+            }
+            finally { _webClientsLock.Release(); }
+        }
+
+        private async void NotifyClient(string clientId, string type)
+        {
+            await _webClientsLock.WaitAsync();
+            try
+            {
+                if (_activeWebClients.TryGetValue(clientId, out var clientInfo) && clientInfo.EventWriter != null)
                 {
                     try
                     {
-                        await client.WriteAsync(data);
-                        await client.FlushAsync();
+                        await clientInfo.EventWriter.WriteAsync($"data: {type}\n\n");
+                        await clientInfo.EventWriter.FlushAsync();
                     }
-                    catch { deadClients.Add(client); }
+                    catch
+                    {
+                        clientInfo.EventWriter = null;
+                    }
                 }
-                foreach (var dc in deadClients) _eventClients.Remove(dc);
             }
-            finally { _clientsLock.Release(); }
+            finally { _webClientsLock.Release(); }
         }
 
         public void ClearSharedFiles() 
         { 
             _filesLock.Wait();
-            try { _sharedFiles.Clear(); }
+            try 
+            { 
+                _sharedFiles.Clear(); 
+                _clientSpecificFiles.Clear();
+            }
             finally { _filesLock.Release(); }
         }
 
@@ -120,7 +179,6 @@ namespace WeShare.Core.Transfer
             _listener?.Stop();
         }
 
-        // â”€â”€ Accept loop â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         private async Task AcceptLoop(CancellationToken token)
         {
             while (!token.IsCancellationRequested)
@@ -134,8 +192,6 @@ namespace WeShare.Core.Transfer
             }
         }
 
-        // ── Per-connection handler ──────────────────────────────────────────────────
-
         private async Task HandleClient(TcpClient client)
         {
             using (client)
@@ -144,7 +200,6 @@ namespace WeShare.Core.Transfer
                 {
                     using var stream = new BufferedStream(client.GetStream(), 65536);
                     
-                    // --- Parse Request Headers (Avoid StreamReader buffering issues) ---
                     byte[] headerBuffer = new byte[8192];
                     int totalHeaderRead = 0;
                     int headerEndIndex = -1;
@@ -187,6 +242,23 @@ namespace WeShare.Core.Transfer
                             headers[line[..colon].Trim()] = line[(colon + 1)..].Trim();
                     }
 
+                    // --- Parse Query Parameters ---
+                    var queryParams = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                    string queryString = parts[1].Contains('?') ? parts[1].Split('?')[1] : "";
+                    if (!string.IsNullOrEmpty(queryString))
+                    {
+                        foreach (var pair in queryString.Split('&'))
+                        {
+                            var kv = pair.Split('=', 2);
+                            if (kv.Length == 2)
+                            {
+                                string k = Uri.UnescapeDataString(kv[0]);
+                                string v = Uri.UnescapeDataString(kv[1]);
+                                queryParams[k] = v;
+                            }
+                        }
+                    }
+
                     // --- CORS + route dispatch ---
                     if (method == "GET" && path == "/")
                         await SendResponse(stream, 200, "text/html; charset=utf-8", GetDashboardHtml());
@@ -221,15 +293,71 @@ namespace WeShare.Core.Transfer
                         await stream.FlushAsync();
                     }
 
+                    else if (method == "GET" && path == "/api/logo")
+                    {
+                        if (LogoBytes != null)
+                        {
+                            var header = $"HTTP/1.1 200 OK\r\n" +
+                                         $"Content-Type: image/png\r\n" +
+                                         $"Content-Length: {LogoBytes.Length}\r\n" +
+                                         "Connection: close\r\n" +
+                                         "Access-Control-Allow-Origin: *\r\n" +
+                                         "\r\n";
+                            await stream.WriteAsync(Encoding.ASCII.GetBytes(header));
+                            await stream.WriteAsync(LogoBytes);
+                            await stream.FlushAsync();
+                        }
+                        else
+                        {
+                            var header = "HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n";
+                            await stream.WriteAsync(Encoding.ASCII.GetBytes(header));
+                            await stream.FlushAsync();
+                        }
+                    }
+
+                    else if (method == "POST" && path == "/api/decline")
+                    {
+                        string? clientId = queryParams.GetValueOrDefault("clientId");
+                        string? fileId = queryParams.GetValueOrDefault("id");
+                        if (!string.IsNullOrEmpty(clientId) && !string.IsNullOrEmpty(fileId))
+                        {
+                            await _filesLock.WaitAsync();
+                            try
+                            {
+                                if (_clientSpecificFiles.TryGetValue(clientId, out var list))
+                                {
+                                    var item = list.FirstOrDefault(f => f.Id == fileId);
+                                    if (item != null) list.Remove(item);
+                                }
+                            }
+                            finally { _filesLock.Release(); }
+                        }
+                        await SendResponse(stream, 200, "text/plain", "OK");
+                    }
+
                     else if (method == "GET" && path == "/api/files")
                     {
+                        string? clientId = queryParams.GetValueOrDefault("clientId");
+                        var resultFiles = new List<SharedFile>();
                         await _filesLock.WaitAsync();
-                        try { await SendJson(stream, _sharedFiles); }
+                        try 
+                        { 
+                            resultFiles.AddRange(_sharedFiles);
+                            if (!string.IsNullOrEmpty(clientId) && _clientSpecificFiles.TryGetValue(clientId, out var specFiles))
+                            {
+                                resultFiles.AddRange(specFiles);
+                            }
+                        }
                         finally { _filesLock.Release(); }
+                        await SendJson(stream, resultFiles);
                     }
 
                     else if (method == "GET" && path == "/api/events")
                     {
+                        string clientId = queryParams.GetValueOrDefault("clientId", Guid.NewGuid().ToString("n"));
+                        string clientName = queryParams.GetValueOrDefault("name", "Web Client");
+                        string remoteIp = client.Client.RemoteEndPoint is System.Net.IPEndPoint rep ? rep.Address.ToString() : "unknown";
+
                         var header = "HTTP/1.1 200 OK\r\n" +
                                      "Content-Type: text/event-stream\r\n" +
                                      "Cache-Control: no-cache\r\n" +
@@ -240,13 +368,26 @@ namespace WeShare.Core.Transfer
                         await stream.FlushAsync();
                         
                         var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true };
-                        await _clientsLock.WaitAsync();
-                        try { _eventClients.Add(writer); }
-                        finally { _clientsLock.Release(); }
+                        var clientInfo = new WebClientInfo
+                        {
+                            ClientId = clientId,
+                            Name = clientName,
+                            IpAddress = remoteIp,
+                            EventWriter = writer
+                        };
+
+                        await _webClientsLock.WaitAsync();
+                        try 
+                        { 
+                            _activeWebClients[clientId] = clientInfo;
+                        }
+                        finally { _webClientsLock.Release(); }
+
+                        WebClientConnectedEx?.Invoke(clientInfo);
 
                         try
                         {
-                            while (client.Connected)
+                            while (client.Connected && clientInfo.EventWriter != null)
                             {
                                 await writer.WriteAsync(": keepalive\n\n");
                                 await Task.Delay(20000);
@@ -255,24 +396,41 @@ namespace WeShare.Core.Transfer
                         catch { }
                         finally
                         {
-                            await _clientsLock.WaitAsync();
-                            try { _eventClients.Remove(writer); }
-                            finally { _clientsLock.Release(); }
+                            await _webClientsLock.WaitAsync();
+                            try
+                            {
+                                if (_activeWebClients.TryGetValue(clientId, out var stored) && stored == clientInfo)
+                                {
+                                    _activeWebClients.Remove(clientId);
+                                }
+                            }
+                            finally { _webClientsLock.Release(); }
+
+                            WebClientDisconnectedEx?.Invoke(clientId);
                         }
-                        return;
                     }
 
                     else if (method == "GET" && path == "/download")
                     {
                         var query = parts[1].Contains('?') ? parts[1].Split('?')[1] : "";
-                        // Split on '=' with max of 2 parts so an empty value (?id=) never throws IndexOutOfRangeException
                         var idPart  = query.Split('&').FirstOrDefault(p => p.StartsWith("id="));
                         var idSplit = idPart?.Split('=', 2);
                         var id      = idSplit?.Length == 2 ? idSplit[1] : null;
                         
                         SharedFile? file = null;
                         await _filesLock.WaitAsync();
-                        try { file = _sharedFiles.FirstOrDefault(f => f.Id == id); }
+                        try 
+                        { 
+                            file = _sharedFiles.FirstOrDefault(f => f.Id == id);
+                            if (file == null)
+                            {
+                                foreach (var list in _clientSpecificFiles.Values)
+                                {
+                                    file = list.FirstOrDefault(f => f.Id == id);
+                                    if (file != null) break;
+                                }
+                            }
+                        }
                         finally { _filesLock.Release(); }
 
                         if (file != null && File.Exists(file.Path))
@@ -283,6 +441,7 @@ namespace WeShare.Core.Transfer
                                          $"Content-Disposition: attachment; filename=\"{Uri.EscapeDataString(file.Name)}\"\r\n" +
                                          $"Content-Length: {info.Length}\r\n" +
                                          "Connection: close\r\n" +
+                                         "Access-Control-Allow-Origin: *\r\n" +
                                          "\r\n";
                             await stream.WriteAsync(Encoding.ASCII.GetBytes(header));
                             using var fs = new FileStream(file.Path, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -295,12 +454,28 @@ namespace WeShare.Core.Transfer
 
                     else if (method == "POST" && path == "/upload")
                     {
+                        string? clientId = queryParams.GetValueOrDefault("clientId");
+                        string uploaderName = "Mobile Web";
+                        if (!string.IsNullOrEmpty(clientId))
+                        {
+                            await _webClientsLock.WaitAsync();
+                            try
+                            {
+                                if (_activeWebClients.TryGetValue(clientId, out var clientInfo))
+                                {
+                                    uploaderName = clientInfo.Name;
+                                }
+                            }
+                            finally { _webClientsLock.Release(); }
+                        }
+
                         string rawName = headers.GetValueOrDefault("X-File-Name", $"upload_{DateTime.Now.Ticks}.dat");
                         string filename = Path.GetFileName(Uri.UnescapeDataString(rawName)); 
                         long contentLength = long.TryParse(headers.GetValueOrDefault("Content-Length", "0"), out var cl) ? cl : 0;
 
-                        Directory.CreateDirectory(_saveDirectory);
-                        string dest = GetUniqueFilePath(_saveDirectory, filename);
+                        string webSharedDir = Path.Combine(_saveDirectory, "web_shared");
+                        Directory.CreateDirectory(webSharedDir);
+                        string dest = GetUniqueFilePath(webSharedDir, filename);
 
                         using var fs = new FileStream(dest, FileMode.Create, FileAccess.Write, FileShare.None, 65536, true);
                         byte[] buf = new byte[65536];
@@ -315,7 +490,7 @@ namespace WeShare.Core.Transfer
                         }
 
                         if (written > 0)
-                            WebFileReceived?.Invoke("Mobile Web", dest, written);
+                            WebFileShared?.Invoke(clientId ?? "unknown", uploaderName, dest, written);
 
                         await SendJson(stream, new { success = true, saved = Path.GetFileName(dest), bytes = written });
                     }
@@ -329,7 +504,6 @@ namespace WeShare.Core.Transfer
             }
         }
 
-        // â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         private static async Task SendResponse(Stream stream, int status, string contentType, string body)
         {
             var statusText = status switch
@@ -347,11 +521,11 @@ namespace WeShare.Core.Transfer
             };
             var bodyBytes = Encoding.UTF8.GetBytes(body);
             var header = $"HTTP/1.1 {status} {statusText}\r\n" +
-                         $"Content-Type: {contentType}\r\n" +
-                         $"Content-Length: {bodyBytes.Length}\r\n" +
-                         "Connection: close\r\n" +
-                         "Access-Control-Allow-Origin: *\r\n" +
-                         "\r\n";
+                          $"Content-Type: {contentType}\r\n" +
+                          $"Content-Length: {bodyBytes.Length}\r\n" +
+                          "Connection: close\r\n" +
+                          "Access-Control-Allow-Origin: *\r\n" +
+                          "\r\n";
             await stream.WriteAsync(Encoding.ASCII.GetBytes(header));
             await stream.WriteAsync(bodyBytes);
             await stream.FlushAsync();

@@ -311,7 +311,7 @@ namespace WeShare.Desktop.Services
         /// Reads the current connected Wi-Fi SSID via "netsh wlan show interfaces".
         /// Returns null if no Wi-Fi network is currently connected.
         /// </summary>
-        private static async Task<string?> GetCurrentWifiSsidAsync()
+        public async Task<string?> GetCurrentWifiSsidAsync()
         {
             try
             {

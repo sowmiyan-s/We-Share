@@ -20,6 +20,8 @@ namespace WeShare.UI.Services
             return weShare;
         }
 
+        public Task<string?> GetCurrentWifiSsidAsync() => Task.FromResult<string?>(null);
+
         public Task<(bool Success, string Message)> StartHotspotAsync(string ssid, string password) => 
             Task.FromResult((false, "Hotspot not supported on this platform."));
 

@@ -30,9 +30,9 @@ dist/
 build/
 *.exe
 
-# Ignore setup folder contents except for the setup installer executable
+# Ignore setup folder contents except for the versioned installer (tracked via Git LFS)
 setup/*
-!setup/WeShare_Setup.exe
+!setup/WeShare_Setup_*.exe
 
 # Logs & crash dumps
 *.log

@@ -52,6 +52,7 @@ namespace WeShare.UI.Views
         public ObservableCollection<FileTransferState> ActiveReceives { get; } = new();
         public ObservableCollection<FileTransferState> ReceivedFiles { get; } = new();
         public ObservableCollection<FileTransferState> LibraryFiles { get; } = new();
+        public ObservableCollection<StagedWebFile> StagedWebFiles { get; } = new();
         
         // Concurrency and Session Management
         private readonly System.Threading.SemaphoreSlim _uiRequestLock = new(1, 1);
@@ -80,6 +81,8 @@ namespace WeShare.UI.Views
             SendQueueList.ItemsSource = SendQueue;
             IncomingList.ItemsSource  = ActiveReceives;
             ReceivedFilesList.ItemsSource = LibraryFiles;
+
+
 
             Devices.CollectionChanged += (_, _) => UpdateEmptyState();
             SendQueue.CollectionChanged += (_, _) =>
@@ -119,6 +122,7 @@ namespace WeShare.UI.Views
 
             _saveDirectory = _platformService.GetDefaultSavePath();
             SettingsSaveLocationLabel.Text = _saveDirectory;
+            CleanWebSharedDirectory();
             
             // Transfer – listen for incoming file sends
             try
@@ -141,9 +145,23 @@ namespace WeShare.UI.Views
             try
             {
                 _webDashboardService = new WebDashboardService(_saveDirectory, _localDevice);
+                try
+                {
+                    using var assetStream = Avalonia.Platform.AssetLoader.Open(new Uri("avares://WeShare.UI/Assets/logo.png"));
+                    using var ms = new MemoryStream();
+                    assetStream.CopyTo(ms);
+                    _webDashboardService.LogoBytes = ms.ToArray();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[WebDashboard] Failed to load logo asset: {ex.Message}");
+                }
                 _webDashboardService.SetPeersProvider(() => Devices.ToList());
                 _webDashboardService.WebFileReceived += OnWebFileReceived;
                 _webDashboardService.WebClientConnected += OnWebClientConnected;
+                _webDashboardService.WebClientConnectedEx += OnWebClientConnectedEx;
+                _webDashboardService.WebClientDisconnectedEx += OnWebClientDisconnectedEx;
+                _webDashboardService.WebFileShared += OnWebFileShared;
                 _webDashboardService.Start();
             }
             catch (Exception ex)
@@ -227,17 +245,8 @@ namespace WeShare.UI.Views
             NavHome_Click(this, new RoutedEventArgs());
 
             // Network check — auto-start hotspot or auto-join if no network
-            var ip = UdpDiscoveryService.GetLocalIp();
-            SidebarNetworkInfo.Text  = $"{ip}:{_localDevice.Port}";
-            HomeNetworkInfoText.Text = SidebarNetworkInfo.Text;
-            HomeWebPortalText.Text   = $"http://{ip}:8080";
-            GenerateQrBitmap($"http://{ip}:8080");
-
-            if (ip == "127.0.0.1")
-            {
-                // No network detected — run auto-network logic in background
-                _ = Task.Run(TryAutoNetworkAsync);
-            }
+            UpdateNetworkLabels();
+            _ = Task.Run(TryAutoNetworkAsync);
         }
 
         private void TitleBar_PointerPressed(object sender, PointerPressedEventArgs e)
@@ -271,6 +280,7 @@ namespace WeShare.UI.Views
             if (SendFilesPanel != null) SendFilesPanel.IsVisible = false;
             if (SendDiscoveryPanel != null) SendDiscoveryPanel.IsVisible = false;
             if (TransfersPanel != null) TransfersPanel.IsVisible = false;
+            if (WebSharedPanel != null) WebSharedPanel.IsVisible = false;
             if (SendStepWizard != null) SendStepWizard.IsVisible = false;
 
             bool wasReceiver = _localDevice.IsReceiver;
@@ -301,6 +311,11 @@ namespace WeShare.UI.Views
         private void NavHome_Click(object? sender, RoutedEventArgs e) => ShowPanel(HomePanel, "HOME", NavHomeBtn);
         private void NavFiles_Click(object? sender, RoutedEventArgs e) => ShowPanel(FilesPanel, "LIBRARY", NavFilesBtn);
         private void NavTransfers_Click(object? sender, RoutedEventArgs e) => ShowPanel(TransfersPanel, "TRANSFERS", NavTransfersBtn);
+        private void NavWebShared_Click(object? sender, RoutedEventArgs e)
+        {
+            ShowPanel(WebSharedPanel, "WEB SHARED", NavWebSharedBtn);
+            UpdateWebSharedClientsList();
+        }
         private void NavSettings_Click(object? sender, RoutedEventArgs e) => ShowPanel(SettingsPanel, "SETTINGS", NavSettBtn);
         private void NavAbout_Click(object? sender, RoutedEventArgs e) => ShowPanel(AboutPanel, "ABOUT", NavAboutBtn);
 
@@ -371,6 +386,18 @@ namespace WeShare.UI.Views
             }
         }
 
+        private async void CopyWifiWebLink_Click(object sender, RoutedEventArgs e)
+        {
+            var url = HomeWifiWebPortalText?.Text ?? "";
+            if (string.IsNullOrEmpty(url)) return;
+            var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
+            if (clipboard != null)
+            {
+                await clipboard.SetTextAsync(url);
+                ShowToast($"Copied: {url}");
+            }
+        }
+
         private void GenerateQrBitmap(string url)
         {
             try
@@ -386,7 +413,7 @@ namespace WeShare.UI.Views
 
         private void SetActiveNav(Button? activeBtn)
         {
-            var buttons = new[] { NavHomeBtn, NavFilesBtn, NavTransfersBtn, NavSettBtn, NavAboutBtn };
+            var buttons = new[] { NavHomeBtn, NavFilesBtn, NavTransfersBtn, NavWebSharedBtn, NavSettBtn, NavAboutBtn };
             foreach (var btn in buttons)
                 if (btn != null) btn.Classes.Set("Active", btn == activeBtn);
         }
@@ -563,16 +590,29 @@ namespace WeShare.UI.Views
 
                     try
                     {
-                        using var stream = await item.OpenStream();
-                        await _transferManager.SendFileAsync(device.IpAddress, device.Port, item.Name, stream, item.Size, item.Path);
-
-                        // Transfer succeeded — now remove it from the queue
-                        await Dispatcher.UIThread.InvokeAsync(() =>
+                        if (device.Type == "Web Client")
                         {
-                            if (SendQueue.Count > 0 && SendQueue[0] == item)
-                                SendQueue.RemoveAt(0);
-                            UpdateQueueUI();
-                        });
+                            _webDashboardService?.ShareForWebClient(device.Id, item.Path);
+                            await Dispatcher.UIThread.InvokeAsync(() =>
+                            {
+                                if (SendQueue.Count > 0 && SendQueue[0] == item)
+                                    SendQueue.RemoveAt(0);
+                                UpdateQueueUI();
+                            });
+                        }
+                        else
+                        {
+                            using var stream = await item.OpenStream();
+                            await _transferManager.SendFileAsync(device.IpAddress, device.Port, item.Name, stream, item.Size, item.Path);
+
+                            // Transfer succeeded — now remove it from the queue
+                            await Dispatcher.UIThread.InvokeAsync(() =>
+                            {
+                                if (SendQueue.Count > 0 && SendQueue[0] == item)
+                                    SendQueue.RemoveAt(0);
+                                UpdateQueueUI();
+                            });
+                        }
                     }
                     catch (Exception ex) when (ex is not OperationCanceledException)
                     {
@@ -622,7 +662,7 @@ namespace WeShare.UI.Views
                 e.DragEffects = DragDropEffects.None;
         }
 
-        private void OnDrop(object? sender, DragEventArgs e)
+        private async void OnDrop(object? sender, DragEventArgs e)
         {
             var files = e.Data.GetFiles();
             if (files != null)
@@ -636,13 +676,25 @@ namespace WeShare.UI.Views
                     {
                         var info = new FileInfo(path);
                         if (!SendQueue.Any(q => q.Path == path))
+                        {
+                            Avalonia.Media.Imaging.Bitmap? thumbnail = null;
+                            var ext = Path.GetExtension(path).ToLower();
+                            if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".bmp" || ext == ".webp")
+                            {
+                                thumbnail = LoadThumbnail(path);
+                            }
+                            else
+                            {
+                                thumbnail = await LoadWindowsShellThumbnailAsync(path);
+                            }
                             SendQueue.Add(new QueueItem {
                                 Name = info.Name,
                                 Path = path,
                                 Size = info.Length,
                                 OpenStream = () => Task.FromResult<Stream>(File.OpenRead(path)),
-                                Thumbnail = LoadThumbnail(path)
+                                Thumbnail = thumbnail
                             });
+                        }
                     }
                 }
                 UpdateQueueUI();
@@ -693,8 +745,15 @@ namespace WeShare.UI.Views
 
                 try
                 {
-                    using var stream = await item.OpenStream();
-                    await _transferManager.SendFileAsync(_sendTarget.IpAddress, _sendTarget.Port, item.Name, stream, item.Size, item.Path);
+                    if (_sendTarget.Type == "Web Client")
+                    {
+                        _webDashboardService?.ShareForWebClient(_sendTarget.Id, item.Path);
+                    }
+                    else
+                    {
+                        using var stream = await item.OpenStream();
+                        await _transferManager.SendFileAsync(_sendTarget.IpAddress, _sendTarget.Port, item.Name, stream, item.Size, item.Path);
+                    }
 
                     // Success — remove from front of queue
                     if (SendQueue.Count > 0 && SendQueue[0] == item)
@@ -728,30 +787,133 @@ namespace WeShare.UI.Views
             foreach (var f in result)
             {
                 var props = await f.GetBasicPropertiesAsync();
+                var localPath = f.Path.LocalPath ?? "";
+                var ext = Path.GetExtension(localPath).ToLower();
+                Avalonia.Media.Imaging.Bitmap? thumbnail = null;
+                if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".bmp" || ext == ".webp")
+                {
+                    thumbnail = await LoadThumbnailAsync(f);
+                }
+                else
+                {
+                    thumbnail = await LoadWindowsShellThumbnailAsync(localPath);
+                }
                 list.Add(new QueueItem { 
                     Name = f.Name, 
-                    Path = f.Path.LocalPath ?? "", 
+                    Path = localPath, 
                     Size = (long)(props.Size ?? 0), 
                     OpenStream = () => f.OpenReadAsync(),
-                    Thumbnail = LoadThumbnail(f.Path.LocalPath)
+                    Thumbnail = thumbnail
                 });
             }
             return list;
         }
 
+        private async Task<Avalonia.Media.Imaging.Bitmap?> LoadWindowsShellThumbnailAsync(string path)
+        {
+            DebugLog($"LoadWindowsShellThumbnailAsync called for: '{path}'");
+            try
+            {
+                if (System.IO.File.Exists(path))
+                {
+                    var file = await Windows.Storage.StorageFile.GetFileFromPathAsync(path);
+                    if (file != null)
+                    {
+                        using var thumbnail = await file.GetThumbnailAsync(Windows.Storage.FileProperties.ThumbnailMode.SingleItem, 80);
+                        if (thumbnail != null)
+                        {
+                            using var stream = System.IO.WindowsRuntimeStreamExtensions.AsStreamForRead(thumbnail);
+                            var bmp = new Avalonia.Media.Imaging.Bitmap(stream);
+                            DebugLog($"Successfully loaded Windows shell thumbnail for '{path}' (size: {bmp.Size})");
+                            return bmp;
+                        }
+                        else
+                        {
+                            DebugLog("GetThumbnailAsync returned null");
+                        }
+                    }
+                    else
+                    {
+                        DebugLog("GetFileFromPathAsync returned null");
+                    }
+                }
+                else
+                {
+                    DebugLog($"File does not exist: '{path}'");
+                }
+            }
+            catch (Exception ex)
+            {
+                DebugLog($"Failed to load Windows shell thumbnail for '{path}': {ex.Message}\n{ex.StackTrace}");
+            }
+            return null;
+        }
+
+        private static void DebugLog(string message)
+        {
+            try
+            {
+                System.IO.File.AppendAllText(@"D:\PROJECTS\WE SHARE\thumbnail_debug.log", $"[{DateTime.Now:HH:mm:ss}] {message}\n");
+            }
+            catch {}
+        }
+
+        private async Task<Avalonia.Media.Imaging.Bitmap?> LoadThumbnailAsync(IStorageFile file)
+        {
+            DebugLog($"LoadThumbnailAsync called for file: '{file.Name}', path='{file.Path}'");
+            try
+            {
+                var ext = System.IO.Path.GetExtension(file.Name).ToLower();
+                DebugLog($"Resolved extension: '{ext}'");
+                if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".bmp" || ext == ".webp")
+                {
+                    using var stream = await file.OpenReadAsync();
+                    DebugLog($"Opened read stream. Length={stream.Length}, CanSeek={stream.CanSeek}");
+                    var bmp = Avalonia.Media.Imaging.Bitmap.DecodeToWidth(stream, 80);
+                    DebugLog($"Successfully decoded bitmap. Size: {bmp.Size.Width}x{bmp.Size.Height}");
+                    return bmp;
+                }
+                else
+                {
+                    DebugLog($"Not a supported extension: '{ext}'");
+                }
+            }
+            catch (Exception ex)
+            {
+                DebugLog($"Failed to load thumbnail for '{file.Name}': {ex.Message}\n{ex.StackTrace}");
+            }
+            return null;
+        }
+
         private Avalonia.Media.Imaging.Bitmap? LoadThumbnail(string? path)
         {
-            if (string.IsNullOrEmpty(path)) return null;
+            DebugLog($"LoadThumbnail called for path: '{path}'");
+            if (string.IsNullOrEmpty(path))
+            {
+                DebugLog("Path is null or empty.");
+                return null;
+            }
             try
             {
                 var ext = System.IO.Path.GetExtension(path).ToLower();
+                DebugLog($"Resolved extension: '{ext}'");
                 if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".bmp" || ext == ".webp")
                 {
                     using var stream = System.IO.File.OpenRead(path);
-                    return Avalonia.Media.Imaging.Bitmap.DecodeToWidth(stream, 80);
+                    DebugLog($"Opened file stream. Length={stream.Length}, CanSeek={stream.CanSeek}");
+                    var bmp = Avalonia.Media.Imaging.Bitmap.DecodeToWidth(stream, 80);
+                    DebugLog($"Successfully decoded file bitmap. Size: {bmp.Size.Width}x{bmp.Size.Height}");
+                    return bmp;
+                }
+                else
+                {
+                    DebugLog($"Not a supported extension: '{ext}'");
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                DebugLog($"Failed to load '{path}': {ex.Message}\n{ex.StackTrace}");
+            }
             return null;
         }
 
@@ -888,11 +1050,31 @@ namespace WeShare.UI.Views
             UpdateNetworkLabels();
         }
 
-        // ── Auto-Network (Desert Mode) ─────────────────────────────────────────
         private async Task TryAutoNetworkAsync()
         {
             try
             {
+                var ip = UdpDiscoveryService.GetLocalIp();
+                bool hasRealIp = ip != "127.0.0.1";
+
+                if (hasRealIp)
+                {
+                    // Already connected to a network — run direct host hotspot so users can connect
+                    _hotspotService = new HotspotService();
+                    if (await _hotspotService.IsSupportedAsync())
+                    {
+                        ShowToast("Starting WeShare hotspot...");
+                        var (started, _) = await _hotspotService.StartAsync();
+                        if (started)
+                        {
+                            await Task.Delay(1000);
+                            UpdateNetworkLabels();
+                            ShowToast($"Hotspot active — connect devices to \"{HotspotService.TargetSsid}\"");
+                        }
+                    }
+                    return;
+                }
+
                 _wifiConnector = new WifiConnectorService();
 
                 // Step 1 — Try to JOIN an existing WeShare hotspot (client role)
@@ -928,8 +1110,8 @@ namespace WeShare.UI.Views
                 }
 
                 ShowToast("Starting WeShare hotspot...");
-                var (started, _) = await _hotspotService.StartAsync();
-                if (started)
+                var (startedHost, _) = await _hotspotService.StartAsync();
+                if (startedHost)
                 {
                     await Task.Delay(1000);
                     UpdateNetworkLabels();
@@ -942,23 +1124,55 @@ namespace WeShare.UI.Views
             }
         }
 
-        /// <summary>Updates the existing network info labels in-place (no new UI elements).</summary>
-        private void UpdateNetworkLabels()
+        /// <summary>Updates the existing network info labels in-place.</summary>
+        private async void UpdateNetworkLabels()
         {
+            var ip = UdpDiscoveryService.GetLocalIp();
+            bool hasRealIp = ip != "127.0.0.1";
+            string ssid = "Not Connected";
+            string password = "None";
+
+            bool isHotspotRunning = _hotspotService != null && _hotspotService.IsRunning;
+
+            if (isHotspotRunning)
+            {
+                ssid = HotspotService.TargetSsid;
+                password = HotspotService.TargetPassword;
+            }
+            else if (hasRealIp)
+            {
+                var detectedSsid = await _platformService.GetCurrentWifiSsidAsync();
+                ssid = !string.IsNullOrEmpty(detectedSsid) ? detectedSsid : "Local Wi-Fi Network";
+                password = "None (Already Connected)";
+            }
+
             Dispatcher.UIThread.Post(() =>
             {
-                var ip = UdpDiscoveryService.GetLocalIp();
-                bool hasRealIp = ip != "127.0.0.1";
-
                 string info = hasRealIp
                     ? $"{ip}:{_localDevice.Port}"
-                    : $"📶 {HotspotService.TargetSsid} / {HotspotService.TargetPassword}";
+                    : $"📶 {ssid} / {password}";
 
                 SidebarNetworkInfo.Text  = info;
-                HomeNetworkInfoText.Text = info;
-                string webUrl = hasRealIp ? $"http://{ip}:8080" : "http://192.168.137.1:8080";
+                HomeNetworkInfoText.Text = ssid;
+                HomeWifiPasswordText.Text = password;
+                
+                string hostIp = isHotspotRunning ? _hotspotService!.HotspotIp : ip;
+                string webUrl = $"http://{hostIp}:8080";
                 HomeWebPortalText.Text   = webUrl;
                 GenerateQrBitmap(webUrl);
+
+                if (isHotspotRunning && hasRealIp && ip != _hotspotService!.HotspotIp)
+                {
+                    string wifiWebUrl = $"http://{ip}:8080";
+                    if (HomeWifiWebPortalText != null) HomeWifiWebPortalText.Text = wifiWebUrl;
+                    if (HomeWifiWebPortalPanel != null) HomeWifiWebPortalPanel.IsVisible = true;
+                    if (WebPortalLabel != null) WebPortalLabel.Text = "Web Portal (Hotspot Gateway)";
+                }
+                else
+                {
+                    if (HomeWifiWebPortalPanel != null) HomeWifiWebPortalPanel.IsVisible = false;
+                    if (WebPortalLabel != null) WebPortalLabel.Text = "Web Portal (Local Share)";
+                }
             });
         }
 
@@ -1219,6 +1433,66 @@ namespace WeShare.UI.Views
             });
         }
 
+        private void OnWebClientConnectedEx(WebDashboardService.WebClientInfo client)
+        {
+            Dispatcher.UIThread.Post(() => {
+                var existing = Devices.FirstOrDefault(d => d.Id == client.ClientId);
+                if (existing != null)
+                {
+                    existing.Name = client.Name;
+                    existing.IpAddress = client.IpAddress;
+                    existing.LastSeen = DateTime.Now;
+                }
+                else
+                {
+                    Devices.Add(new DeviceModel
+                    {
+                        Id = client.ClientId,
+                        Name = client.Name,
+                        IpAddress = client.IpAddress,
+                        Type = "Web Client",
+                        LastSeen = DateTime.Now,
+                        Port = 8080
+                    });
+                }
+                UpdateEmptyState();
+                ShowToast($"Web client '{client.Name}' connected");
+                if (WebSharedPanel != null && WebSharedPanel.IsVisible)
+                {
+                    UpdateWebSharedClientsList();
+                }
+            });
+        }
+
+        private void OnWebClientDisconnectedEx(string clientId)
+        {
+            Dispatcher.UIThread.Post(() => {
+                var existing = Devices.FirstOrDefault(d => d.Id == clientId);
+                if (existing != null)
+                {
+                    Devices.Remove(existing);
+                    UpdateEmptyState();
+                    ShowToast($"Web client '{existing.Name}' disconnected");
+                }
+
+                // Cleanup staged files for this disconnected client
+                var toRemove = StagedWebFiles.Where(f => f.ClientId == clientId).ToList();
+                foreach (var file in toRemove)
+                {
+                    try
+                    {
+                        if (File.Exists(file.FilePath))
+                        {
+                            File.Delete(file.FilePath);
+                        }
+                    }
+                    catch { }
+                    StagedWebFiles.Remove(file);
+                }
+                UpdateWebSharedClientsList();
+            });
+        }
+
         public void Shutdown()
         {
             _discoveryService?.StopListening();
@@ -1238,7 +1512,8 @@ namespace WeShare.UI.Views
             // original network the user was on before joining the hotspot.
             _wifiConnector?.Cleanup();
             _wifiConnector?.Dispose();
-
+ 
+            CleanWebSharedDirectory();
             CleanTempZipDirectory();
         }
 
@@ -1370,6 +1645,186 @@ namespace WeShare.UI.Views
             catch (Exception ex)
             {
                 ShowToast($"ZIP creation failed: {ex.Message}");
+            }
+        }
+
+        // ── Web Shared Staging Helpers ─────────────────────────────────────────
+
+        private void OnWebFileShared(string clientId, string clientName, string filePath, long size)
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                var file = new StagedWebFile
+                {
+                    ClientId = clientId,
+                    ClientName = clientName,
+                    FilePath = filePath,
+                    Size = size
+                };
+                StagedWebFiles.Add(file);
+
+                var selected = WebClientsListBox.SelectedItem as DeviceModel;
+                if (selected != null && selected.Id == clientId)
+                {
+                    UpdateWebSharedFilesList();
+                }
+
+                ShowToast($"New web shared file from '{clientName}': {Path.GetFileName(filePath)}");
+            });
+        }
+
+        private void UpdateWebSharedClientsList()
+        {
+            var webClients = Devices.Where(d => d.Type == "Web Client").ToList();
+            WebClientsListBox.ItemsSource = webClients;
+
+            var selected = WebClientsListBox.SelectedItem as DeviceModel;
+            if (selected == null || !webClients.Any(c => c.Id == selected.Id))
+            {
+                WebClientsListBox.SelectedItem = webClients.FirstOrDefault();
+            }
+            UpdateWebSharedFilesList();
+        }
+
+        private void UpdateWebSharedFilesList()
+        {
+            var selectedClient = WebClientsListBox.SelectedItem as DeviceModel;
+            if (selectedClient == null)
+            {
+                WebSharedFilesList.ItemsSource = null;
+                WebFilesCountText.Text = "0 files";
+                WebFilesEmptyLabel.IsVisible = true;
+                return;
+            }
+
+            var clientFiles = StagedWebFiles.Where(f => f.ClientId == selectedClient.Id).ToList();
+            WebSharedFilesList.ItemsSource = clientFiles;
+            WebFilesCountText.Text = $"{clientFiles.Count} file{(clientFiles.Count == 1 ? "" : "s")}";
+            WebFilesEmptyLabel.IsVisible = clientFiles.Count == 0;
+        }
+
+        private void WebClientsListBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+        {
+            UpdateWebSharedFilesList();
+        }
+
+        private async void AcceptWebSharedFile_Click(object? sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.Tag is StagedWebFile stagedFile)
+            {
+                try
+                {
+                    if (File.Exists(stagedFile.FilePath))
+                    {
+                        string destPath = GetUniqueFilePath(_saveDirectory, stagedFile.FileName);
+                        File.Move(stagedFile.FilePath, destPath);
+
+                        var state = new FileTransferState
+                        {
+                            FileName = Path.GetFileName(destPath),
+                            FilePath = destPath,
+                            TotalBytes = stagedFile.Size,
+                            TransferredBytes = stagedFile.Size,
+                            Status = TransferStatus.Done,
+                            Direction = TransferDirection.Received,
+                            PeerName = stagedFile.ClientName,
+                            Timestamp = DateTime.UtcNow
+                        };
+
+                        await _dbHelper.SaveTransferAsync(state);
+                        ReceivedFiles.Insert(0, state);
+                        StagedWebFiles.Remove(stagedFile);
+                        UpdateWebSharedFilesList();
+                        ShowToast($"File accepted and saved: {state.FileName}");
+                    }
+                    else
+                    {
+                        ShowToast("Source file does not exist.");
+                        StagedWebFiles.Remove(stagedFile);
+                        UpdateWebSharedFilesList();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ShowToast($"Failed to accept file: {ex.Message}");
+                }
+            }
+        }
+
+        private void RejectWebSharedFile_Click(object? sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.Tag is StagedWebFile stagedFile)
+            {
+                try
+                {
+                    if (File.Exists(stagedFile.FilePath))
+                    {
+                        File.Delete(stagedFile.FilePath);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[WebShared] Error deleting rejected file: {ex.Message}");
+                }
+
+                StagedWebFiles.Remove(stagedFile);
+                UpdateWebSharedFilesList();
+                ShowToast($"Rejected file: {stagedFile.FileName}");
+            }
+        }
+
+        private void CleanWebSharedDirectory()
+        {
+            try
+            {
+                string webSharedDir = Path.Combine(_saveDirectory, "web_shared");
+                if (Directory.Exists(webSharedDir))
+                {
+                    var files = Directory.GetFiles(webSharedDir);
+                    foreach (var f in files)
+                    {
+                        try { File.Delete(f); } catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        private static string GetUniqueFilePath(string dir, string filename)
+        {
+            string baseName = Path.GetFileNameWithoutExtension(filename);
+            string ext = Path.GetExtension(filename);
+            string dest = Path.Combine(dir, filename);
+            int count = 1;
+            while (File.Exists(dest))
+            {
+                dest = Path.Combine(dir, $"{baseName} ({count}){ext}");
+                count++;
+            }
+            return dest;
+        }
+    }
+
+    public class StagedWebFile
+    {
+        public string ClientId { get; set; } = "";
+        public string ClientName { get; set; } = "";
+        public string FilePath { get; set; } = "";
+        public string FileName => Path.GetFileName(FilePath);
+        public long Size { get; set; }
+        public string SizeDisplay
+        {
+            get
+            {
+                string[] sizes = { "B", "KB", "MB", "GB", "TB" };
+                int order = 0;
+                double len = Size;
+                while (len >= 1024 && order < sizes.Length - 1)
+                {
+                    order++;
+                    len /= 1024;
+                }
+                return $"{len:0.##} {sizes[order]}";
             }
         }
     }
