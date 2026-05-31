@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patch Notes — We Share</title>
+  <meta name="description" content="We Share release notes and version history — see what's new in each version." />
+  <link rel="icon" href="logo.png" type="image/png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">
+        <img src="logo.png" alt="We Share Logo" class="nav-logo-img" />
+        <span class="nav-logo-text">We<span> Share</span></span>
+      </a>
+      <div class="nav-links" id="navLinks">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="how-to-use.html" class="nav-link">How to Use</a>
+        <a href="downloads.html" class="nav-link">Downloads</a>
+        <a href="faq.html" class="nav-link">FAQ</a>
+        <a href="patch-notes.html" class="nav-link active">Patch Notes</a>
+      </div>
+      <a href="downloads.html" class="btn-nav-cta">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download
+      </a>
+      <button class="nav-hamburger" id="hamburger" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="page-hero">
+    <div class="tag">Patch Notes</div>
+    <h1>What's <span class="gradient-text">New</span></h1>
+    <p>A full history of every We Share release — features added, bugs fixed, and improvements made.</p>
+  </div>
+
+  <div class="patch-section">
+
+    <!-- v1.3.0 -->
+    <div class="patch-entry" id="v130">
+      <div class="patch-dot"></div>
+      <div class="patch-version-label">
+        <span class="patch-version-num">v1.3.0</span>
+        <span class="patch-date">May 2026</span>
+        <span class="patch-badge-latest">Latest</span>
+      </div>
+      <ul class="patch-list">
+        <li><span class="patch-tag tag-new">New</span> Transfer Wizard — a guided step-by-step flow for sending files, reducing friction for first-time users</li>
+        <li><span class="patch-tag tag-new">New</span> Animated splash screen with orbital ring loader on startup</li>
+        <li><span class="patch-tag tag-new">New</span> Radar scan sweep animation now shows active discovery in real time</li>
+        <li><span class="patch-tag tag-improve">Improve</span> Multi-threaded TCP engine rewritten for better throughput on large files</li>
+        <li><span class="patch-tag tag-improve">Improve</span> Device nodes on radar now show device name and OS icon</li>
+        <li><span class="patch-tag tag-improve">Improve</span> Transfer progress bar now shows speed (MB/s) and ETA</li>
+        <li><span class="patch-tag tag-ui">UI</span> New premium dark theme with Indigo/Slate color palette, frosted glass cards</li>
+        <li><span class="patch-tag tag-ui">UI</span> Toast notifications slide in from top with smooth animation</li>
+        <li><span class="patch-tag tag-fix">Fix</span> Desert Mode hotspot no longer fails when Windows Hotspot was previously left in an error state</li>
+        <li><span class="patch-tag tag-fix">Fix</span> Fixed a rare crash when accepting a transfer while the app was minimized</li>
+        <li><span class="patch-tag tag-fix">Fix</span> Web Portal no longer shows a blank page on first load in Firefox</li>
+      </ul>
+      <div style="margin-top: 16px;">
+        <a href="downloads.html" class="btn-outline" style="font-size:0.85rem; padding: 8px 18px;">Download v1.3.0 →</a>
+      </div>
+    </div>
+
+    <!-- v1.2.0 -->
+    <div class="patch-entry" id="v120">
+      <div class="patch-dot" style="background: var(--indigo-dim); box-shadow: 0 0 8px rgba(79,70,229,0.4);"></div>
+      <div class="patch-version-label">
+        <span class="patch-version-num">v1.2.0</span>
+        <span class="patch-date">March 2026</span>
+      </div>
+      <ul class="patch-list">
+        <li><span class="patch-tag tag-new">New</span> Web Portal — any browser-capable device can now send/receive files from the PC at <code>http://&lt;ip&gt;:8080</code></li>
+        <li><span class="patch-tag tag-new">New</span> Web Portal displays a live file upload progress bar in the browser</li>
+        <li><span class="patch-tag tag-new">New</span> Accept / Reject notifications redesigned — now show file preview icon and total size</li>
+        <li><span class="patch-tag tag-improve">Improve</span> UDP discovery broadcast interval reduced for 2× faster device appearance on radar</li>
+        <li><span class="patch-tag tag-improve">Improve</span> Installer now auto-uninstalls previous version before upgrading, keeping history database intact</li>
+        <li><span class="patch-tag tag-ui">UI</span> Radar redesigned with concentric rings and pulsing device nodes</li>
+        <li><span class="patch-tag tag-ui">UI</span> Settings page now shows current local IP and Web Portal URL for easy sharing</li>
+        <li><span class="patch-tag tag-fix">Fix</span> Fixed transfers failing silently when sender's firewall blocked outbound TCP on port used</li>
+        <li><span class="patch-tag tag-fix">Fix</span> Fixed device name showing as empty string on some Windows configurations</li>
+      </ul>
+      <div style="margin-top: 16px;">
+        <a href="../setup/WeShare_Setup_1.2.0.exe" class="btn-outline" style="font-size:0.85rem; padding: 8px 18px;" download>Download v1.2.0 →</a>
+      </div>
+    </div>
+
+    <!-- v1.1.0 -->
+    <div class="patch-entry" id="v110">
+      <div class="patch-dot" style="background: var(--indigo-dim); box-shadow: 0 0 8px rgba(79,70,229,0.4);"></div>
+      <div class="patch-version-label">
+        <span class="patch-version-num">v1.1.0</span>
+        <span class="patch-date">January 2026</span>
+      </div>
+      <ul class="patch-list">
+        <li><span class="patch-tag tag-new">New</span> Desert Mode — auto-creates Wi-Fi hotspot when no router detected; other PC auto-connects with no user input</li>
+        <li><span class="patch-tag tag-new">New</span> Transfer history stored in local SQLite database, viewable in the History tab</li>
+        <li><span class="patch-tag tag-new">New</span> Accept / Reject popup with 30-second auto-reject timer</li>
+        <li><span class="patch-tag tag-new">New</span> Multiple file selection — send entire folders in one go</li>
+        <li><span class="patch-tag tag-improve">Improve</span> TCP engine now uses parallel streams for large files, doubling throughput on fast networks</li>
+        <li><span class="patch-tag tag-improve">Improve</span> Installer now adds Windows Firewall rules automatically</li>
+        <li><span class="patch-tag tag-ui">UI</span> Full dark mode design system implemented across all screens</li>
+        <li><span class="patch-tag tag-fix">Fix</span> Fixed radar not updating when a device disconnected mid-session</li>
+        <li><span class="patch-tag tag-fix">Fix</span> Fixed first-run crash on systems without a default network adapter configured</li>
+      </ul>
+      <div style="margin-top: 16px;">
+        <a href="../setup/WeShare_Setup_1.1.0.exe" class="btn-outline" style="font-size:0.85rem; padding: 8px 18px;" download>Download v1.1.0 →</a>
+      </div>
+    </div>
+
+  </div>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand"><img src="logo.png" alt="We Share" class="footer-logo" /> We Share</div>
+      <div class="footer-links">
+        <a href="index.html">Home</a>
+        <a href="how-to-use.html">How to Use</a>
+        <a href="downloads.html">Downloads</a>
+        <a href="faq.html">FAQ</a>
+        <a href="patch-notes.html">Patch Notes</a>
+        <a href="https://github.com/sowmiyan-s/We-Share" target="_blank" rel="noopener">GitHub</a>
+      </div>
+      <p class="footer-copy">
+        © 2026 We Share &middot; Developed by <a href="https://github.com/sowmiyan-s" target="_blank" rel="noopener">Sowmiyan s</a><br>
+        Hosted on <a href="https://vercel.com" target="_blank" rel="noopener">Vercel</a> &amp; <a href="https://www.netlify.com" target="_blank" rel="noopener">Netlify</a>
+      </p>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>
