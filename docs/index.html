@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>We Share — Fast, Local, Secure File Transfers</title>
-  <meta name="description" content="We Share is a premium desktop utility for instant, cable-free file transfers. No internet, no cloud, no limits. Works on any network — or even with no network at all." />
-  <meta property="og:title" content="We Share — Fast, Local, Secure File Transfers" />
-  <meta property="og:description" content="Zero config. Zero data charges. Maximum privacy. Transfer files at full local network speed." />
+  <title>We Share — Open Source Local File Sharing</title>
+  <meta name="description" content="An open-source desktop utility for direct, local file transfers. Works on any local network, with zero cloud dependency and zero configuration." />
+  <meta property="og:title" content="We Share — Open Source Local File Sharing" />
+  <meta property="og:description" content="No internet required. No cloud limits. Direct local socket file transfers at maximum speed." />
   <meta property="og:image" content="logo.png" />
   <link rel="icon" href="logo.png" type="image/png" />
   <link rel="stylesheet" href="style.css" />
@@ -43,38 +43,38 @@
     <div class="hero-content">
       <div class="hero-badge">
         <span class="badge-dot"></span>
-        Version 1.3.0 is out now
-        <a href="patch-notes.html" class="badge-link">See what's new →</a>
+        Version 1.3.0 released
+        <a href="patch-notes.html" class="badge-link">Release notes →</a>
       </div>
 
       <h1 class="hero-title">
-        <span class="line-1">Share files instantly</span>
-        <span class="line-2">across any device.</span>
+        <span class="line-1">Local file sharing.</span>
+        <span class="line-2">No internet needed.</span>
       </h1>
 
       <p class="hero-desc">
-        We Share transfers files between your devices at <strong>full local network speed</strong> — no internet, no cloud, no accounts required. Works over Wi-Fi, LAN, or even <strong>without a router</strong>.
+        We Share transfers files directly between computers at the maximum physical speed of your local network connection. No external servers, no logins, and your data never leaves your local network.
       </p>
 
       <div class="hero-actions">
         <a href="downloads.html" class="btn-primary btn-lg" id="hero-dl-btn">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Download for Windows — Free
+          Download for Windows
         </a>
         <a href="how-to-use.html" class="btn-ghost" id="hero-howto-btn">
-          How it works
+          Documentation
         </a>
       </div>
 
       <div class="hero-trust">
         <span class="trust-item">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          No internet required
+          100% Offline
         </span>
         <span class="trust-sep">·</span>
         <span class="trust-item">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-          Windows 10 &amp; 11
+          Windows 10 / 11
         </span>
         <span class="trust-sep">·</span>
         <span class="trust-item">
@@ -91,20 +91,20 @@
           <span class="t-dot t-dot-r"></span>
           <span class="t-dot t-dot-y"></span>
           <span class="t-dot t-dot-g"></span>
-          <span class="terminal-title">we-share — transfer</span>
+          <span class="terminal-title">weshare — local console</span>
         </div>
         <div class="terminal-body">
-          <div class="t-line"><span class="t-prompt">›</span><span class="t-cmd">weshare scan --network</span></div>
-          <div class="t-line"><span class="t-output">scanning local network...</span></div>
-          <div class="t-line"><span class="t-output t-success">✓ LAPTOP-SOWMI  192.168.1.4</span></div>
-          <div class="t-line"><span class="t-output t-success">✓ Pixel-8-Pro   192.168.1.7</span></div>
-          <div class="t-line"><span class="t-prompt">›</span><span class="t-cmd">weshare send</span> <span class="t-highlight">./project.zip</span> <span class="t-comment">→ LAPTOP</span></div>
-          <div class="t-line"><span class="t-output">transfer: 1.2 GB @ <span class="t-success">487 MB/s</span></span></div>
-          <div class="t-line"><span class="t-output t-success">✓ done in 2.5s</span></div>
+          <div class="t-line"><span class="t-prompt">›</span><span class="t-cmd">weshare scan --local</span></div>
+          <div class="t-line"><span class="t-output">searching local network...</span></div>
+          <div class="t-line"><span class="t-output t-success">✓ LAPTOP-SOWMIAN  192.168.1.104</span></div>
+          <div class="t-line"><span class="t-output t-success">✓ PHONE-RECEIVER  192.168.1.107</span></div>
+          <div class="t-line"><span class="t-prompt">›</span><span class="t-cmd">weshare send</span> <span class="t-highlight">./project.zip</span> <span class="t-comment">→ LAPTOP-SOWMIAN</span></div>
+          <div class="t-line"><span class="t-output">sending: 1.2 GB @ <span class="t-success">112 MB/s</span></span></div>
+          <div class="t-line"><span class="t-output t-success">✓ transfer completed in 10.7s</span></div>
           <div class="t-line"><span class="t-prompt">›</span><span class="t-cursor"></span></div>
         </div>
         <div class="radar-section">
-          <span class="radar-label">network radar</span>
+          <span class="radar-label">local radar discovery</span>
           <div class="radar-mini">
             <div class="radar-mini-ring r-ring-3"></div>
             <div class="radar-mini-ring r-ring-2"></div>
@@ -119,7 +119,7 @@
           </div>
           <div class="radar-status">
             <span class="status-dot"></span>
-            2 devices discovered
+            2 devices active
           </div>
         </div>
       </div>
@@ -132,63 +132,63 @@
       <!-- Repeated twice for seamless loop -->
       <span class="ticker-item">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-        <strong>Turbo Transfer</strong> — full local speed
+        <strong>Direct TCP socket transfers</strong> — full network bandwidth
       </span>
       <span class="ticker-dot"></span>
       <span class="ticker-item">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49"/></svg>
-        <strong>Auto Discovery</strong> — zero config
+        <strong>UDP Auto-Discovery</strong> — zero configuration
       </span>
       <span class="ticker-dot"></span>
       <span class="ticker-item">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        <strong>100% Local</strong> — never leaves your network
+        <strong>100% Local</strong> — no tracking, no cloud relay
       </span>
       <span class="ticker-dot"></span>
       <span class="ticker-item">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-        <strong>Web Portal</strong> — share to any phone, no app
+        <strong>Web Dashboard</strong> — share with iOS &amp; Android
       </span>
       <span class="ticker-dot"></span>
       <span class="ticker-item">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 0-9.95 9h11.64"/></svg>
-        <strong>Desert Mode</strong> — no router needed
+        <strong>Offline mode</strong> — direct ad-hoc hotspot connection
       </span>
       <span class="ticker-dot"></span>
       <span class="ticker-item">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-        <strong>Accept / Reject</strong> — full control
+        <strong>Explicit permissions</strong> — approve or reject transfers
       </span>
       <span class="ticker-dot"></span>
       <!-- Duplicate for loop -->
       <span class="ticker-item">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-        <strong>Turbo Transfer</strong> — full local speed
+        <strong>Direct TCP socket transfers</strong> — full network bandwidth
       </span>
       <span class="ticker-dot"></span>
       <span class="ticker-item">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49"/></svg>
-        <strong>Auto Discovery</strong> — zero config
+        <strong>UDP Auto-Discovery</strong> — zero configuration
       </span>
       <span class="ticker-dot"></span>
       <span class="ticker-item">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        <strong>100% Local</strong> — never leaves your network
+        <strong>100% Local</strong> — no tracking, no cloud relay
       </span>
       <span class="ticker-dot"></span>
       <span class="ticker-item">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-        <strong>Web Portal</strong> — share to any phone, no app
+        <strong>Web Dashboard</strong> — share with iOS &amp; Android
       </span>
       <span class="ticker-dot"></span>
       <span class="ticker-item">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 0-9.95 9h11.64"/></svg>
-        <strong>Desert Mode</strong> — no router needed
+        <strong>Offline mode</strong> — direct ad-hoc hotspot connection
       </span>
       <span class="ticker-dot"></span>
       <span class="ticker-item">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-        <strong>Accept / Reject</strong> — full control
+        <strong>Explicit permissions</strong> — approve or reject transfers
       </span>
       <span class="ticker-dot"></span>
     </div>
@@ -197,54 +197,53 @@
   <section class="features-wrap" id="features">
     <div class="section-wrap">
       <div class="section-head">
-        <div class="overline">Features</div>
-        <h2>Everything you need to<br /><span class="gradient-text">move files fast.</span></h2>
-        <p>No throttling, no cloud handoff, no accounts. We Share stays out of your way.</p>
+        <h2>Built for speed and local utility</h2>
+        <p>No arbitrary bandwidth limits, no cloud middle-men, and no account registrations. Your data stays on your local network.</p>
       </div>
       <div class="features-grid">
         <div class="feat feat-1 reveal" id="feat-turbo">
           <div class="feat-icon teal">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
           </div>
-          <h3>Turbo Transfer</h3>
-          <p>A multi-threaded engine that maxes out your local connection. Transfer a 10 GB folder in seconds on Gigabit LAN — no throttling, no upload queues.</p>
-          <span class="feat-badge teal">Full Local Speed</span>
+          <h3>Direct Socket Transfers</h3>
+          <p>Utilizes multi-threaded TCP streams that saturate your local network connection. Transfer large files at the maximum physical speed of your network card—no server throttling.</p>
+          <span class="feat-badge teal">TCP Sockets</span>
         </div>
         <div class="feat feat-2 reveal" id="feat-radar">
           <div class="feat-icon amber">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/></svg>
           </div>
-          <h3>Auto Discovery</h3>
-          <p>Devices appear on the radar automatically. No IPs, no pairing, no setup — just open and share.</p>
+          <h3>Zero-Config Discovery</h3>
+          <p>Uses simple UDP broadcasts to identify other We Share instances on your local subnet automatically. No need to copy IP addresses or enter pairing codes.</p>
         </div>
         <div class="feat feat-3 reveal" id="feat-web">
           <div class="feat-icon teal">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
           </div>
-          <h3>Web Portal</h3>
-          <p>Any phone or tablet on the same Wi-Fi can share via browser at <code style="font-family:var(--font-mono);font-size:0.78rem;color:var(--teal)">:8080</code>. No app needed.</p>
+          <h3>Built-in Web Portal</h3>
+          <p>Allows mobile devices (iOS, Android) on the same network to share files via a web browser at port 8080. No client app install required on the phone.</p>
         </div>
         <div class="feat feat-4 reveal" id="feat-accept">
           <div class="feat-icon white">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
           </div>
-          <h3>Accept / Reject</h3>
-          <p>Every incoming transfer asks for permission. You decide what lands on your machine — full control, every time.</p>
+          <h3>Explicit Consent</h3>
+          <p>You have full control over what is received. Incoming file transfers require explicit permission before files are written to your local disk.</p>
         </div>
         <div class="feat feat-5 reveal" id="feat-history">
           <div class="feat-icon amber">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           </div>
-          <h3>Transfer History</h3>
-          <p>Every transfer is logged locally — file names, sizes, devices, timestamps. Always on your machine, never in the cloud.</p>
+          <h3>Local History Database</h3>
+          <p>All transfer events (sender, size, status, and time) are logged to a local, offline SQLite database on your device. Zero remote analytics.</p>
         </div>
         <div class="feat feat-6 reveal" id="feat-private">
           <div class="feat-icon teal">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           </div>
-          <h3>End-to-End Local &amp; Private</h3>
-          <p>Files travel directly between devices on your network. No servers, no cloud relays, no accounts, no data collection. The source code is open and verifiable.</p>
-          <span class="feat-badge amber">Zero Cloud</span>
+          <h3>Open Source &amp; Independent</h3>
+          <p>The code is fully open and MIT-licensed. There are no tracking scripts, telemetry calls, or remote servers. You can inspect the source code and compile it yourself.</p>
+          <span class="feat-badge amber">100% Offline</span>
         </div>
       </div>
     </div>
@@ -253,8 +252,7 @@
   <section class="how-wrap" id="how">
     <div class="section-wrap">
       <div class="section-head">
-        <div class="overline">How It Works</div>
-        <h2>Up and running in<br /><span class="gradient-text">under a minute.</span></h2>
+        <h2>Simple usage workflow</h2>
       </div>
       <div class="how-grid">
         <div class="how-step reveal" id="step-1">
@@ -262,24 +260,24 @@
           <div class="step-icon">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
           </div>
-          <h3>Open on both devices</h3>
-          <p>Launch We Share on the sender and receiver. Devices appear on each other's radar within seconds — completely automatic.</p>
+          <h3>Start the application</h3>
+          <p>Launch We Share on both the sending and receiving computers. They will automatically scan the local network and discover each other.</p>
         </div>
         <div class="how-step reveal" id="step-2">
           <div class="step-index">02</div>
           <div class="step-icon">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
           </div>
-          <h3>Pick files, pick target</h3>
-          <p>Drag and drop any files into We Share. Select the destination device from the radar. Hit Send.</p>
+          <h3>Select files &amp; target</h3>
+          <p>Drag and drop files or folders into the application, select the target device from the radar visual, and click Send.</p>
         </div>
         <div class="how-step reveal" id="step-3">
           <div class="step-index">03</div>
           <div class="step-icon">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
           </div>
-          <h3>Accept &amp; receive</h3>
-          <p>The receiver taps Accept. Transfer begins at full local speed. No clouds, no wait, no internet required.</p>
+          <h3>Accept the transfer</h3>
+          <p>The receiving computer receives a prompt. Once accepted, files are sent directly over TCP. No internet connection is used.</p>
         </div>
       </div>
       <div style="text-align:center; margin-top:40px;">
@@ -292,21 +290,20 @@
     <div class="desert-bg"></div>
     <div class="desert-inner">
       <div class="desert-text reveal">
-        <div class="overline">Desert Mode</div>
-        <h2>No router?<br /><span class="gradient-text">Not a problem.</span></h2>
-        <p>When there's no Wi-Fi at all, We Share creates its own hotspot and silently connects other PCs to it. No passwords typed, no settings changed — fully automatic from open to transfer.</p>
+        <h2>Offline Direct Sharing (Desert Mode)</h2>
+        <p>If there is no local network or Wi-Fi router available, We Share can establish a direct connection between computers using native Windows APIs.</p>
         <div class="flow-list">
           <div class="flow-item">
             <span class="flow-num">01</span>
-            <span class="flow-text"><strong>PC A</strong> opens We Share → auto-creates <strong>"WeShare"</strong> hotspot</span>
+            <span class="flow-text"><strong>PC A</strong> starts a direct, secure local Wi-Fi hotspot in the background.</span>
           </div>
           <div class="flow-item">
             <span class="flow-num">02</span>
-            <span class="flow-text"><strong>PC B</strong> opens We Share → detects hotspot, connects silently — <strong>no password</strong></span>
+            <span class="flow-text"><strong>PC B</strong> scans for the network and connects silently without prompts.</span>
           </div>
           <div class="flow-item">
             <span class="flow-num">03</span>
-            <span class="flow-text">Both appear on each other's radar → <strong>transfer as normal</strong></span>
+            <span class="flow-text">Both devices discover each other and transfer files directly at Wi-Fi speeds.</span>
           </div>
         </div>
       </div>
@@ -337,8 +334,7 @@
   <section class="scenarios-wrap" id="scenarios">
     <div class="section-wrap">
       <div class="section-head">
-        <div class="overline">Use Cases</div>
-        <h2>Works for every<br /><span class="gradient-text">sharing scenario.</span></h2>
+        <h2>Supported Sharing Scenarios</h2>
       </div>
       <div class="scenarios-grid">
         <div class="scenario reveal" id="sc-pcpc">
@@ -346,8 +342,8 @@
           <div class="scenario-icon">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="9" height="7" rx="1.5"/><rect x="13" y="3" width="9" height="7" rx="1.5"/><line x1="6.5" y1="10" x2="6.5" y2="14"/><line x1="17.5" y1="10" x2="17.5" y2="14"/><line x1="6.5" y1="14" x2="17.5" y2="14"/></svg>
           </div>
-          <h3>PC → PC</h3>
-          <p>Both on the same Wi-Fi or LAN. Devices discover each other instantly. Drag files, pick target, click Send — done in seconds at full network speed.</p>
+          <h3>PC to PC (Local Subnet)</h3>
+          <p>The fastest way to move data. Files are sent directly over your local Wi-Fi or wired Ethernet connection.</p>
           <a href="how-to-use.html#pc-to-pc" class="scenario-link">guide →</a>
         </div>
         <div class="scenario reveal" id="sc-pctomobile">
@@ -355,8 +351,8 @@
           <div class="scenario-icon">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="14" height="10" rx="2"/><rect x="14" y="7" width="8" height="14" rx="2"/><line x1="9" y1="21" x2="9" y2="17"/><line x1="7" y1="21" x2="11" y2="21"/></svg>
           </div>
-          <h3>PC → Mobile</h3>
-          <p>Open We Share's web portal on your phone browser at <code>:8080</code>. Browse, download, upload — no app install on the phone.</p>
+          <h3>PC to Mobile (Web Download)</h3>
+          <p>Access shared files from any phone or tablet on the same Wi-Fi using the built-in HTTP server. No app installation required on the client.</p>
           <a href="how-to-use.html#pc-to-mobile" class="scenario-link">guide →</a>
         </div>
         <div class="scenario reveal" id="sc-mobiletopc">
@@ -364,8 +360,8 @@
           <div class="scenario-icon">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
           </div>
-          <h3>Mobile → PC</h3>
-          <p>From your phone browser, open the portal and tap Upload. Photos, videos, any file — lands directly on the PC. No cables needed.</p>
+          <h3>Mobile to PC (Web Upload)</h3>
+          <p>Upload photos, videos, or documents directly from your phone's browser to your computer's designated folder.</p>
           <a href="how-to-use.html#mobile-to-pc" class="scenario-link">guide →</a>
         </div>
       </div>
@@ -377,8 +373,9 @@
     <div class="cta-bg-glow"></div>
     <div class="cta-inner">
       <img src="logo.png" alt="We Share" class="cta-logo" />
-      <h2>Start sharing files<br /><span class="gradient-text">in seconds.</span></h2>
-      <p>Free download. Self-contained installer. No sign-up, no cloud, no strings attached.</p>
+      <h2>Download We Share</h2>
+      <p>An offline-first, open-source file transfer tool. Simple setup, zero accounts, and full transfer speeds.</p>
+
       <a href="downloads.html" class="btn-primary btn-lg" id="cta-dl-btn">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Download for Windows — Free

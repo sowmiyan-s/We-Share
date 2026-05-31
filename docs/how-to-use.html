@@ -34,19 +34,19 @@
   </nav>
 
   <div class="page-hero">
-    <div class="tag">How to Use</div>
-    <h1>Share files in <span class="gradient-text">any scenario</span></h1>
-    <p>Step-by-step guides for every way you'd want to share files — PC to PC, phone to PC, PC to phone, and even with no Wi-Fi at all.</p>
+    <div class="tag">Documentation</div>
+    <h1>File Sharing Guide</h1>
+    <p>Follow these instructions to configure local PC-to-PC transfers, mobile sharing via the web portal, and offline hotspot configuration.</p>
   </div>
 
   <div class="howto-section">
 
     <!-- Quick nav tabs -->
     <div class="howto-nav">
-      <a href="#pc-to-pc"     class="howto-tab active" id="tab-pc-to-pc">PC → PC</a>
-      <a href="#pc-to-mobile" class="howto-tab" id="tab-pc-to-mobile">PC → Mobile</a>
-      <a href="#mobile-to-pc" class="howto-tab" id="tab-mobile-to-pc">Mobile → PC</a>
-      <a href="#desert-mode"  class="howto-tab" id="tab-desert">Desert Mode</a>
+      <a href="#pc-to-pc"     class="howto-tab active" id="tab-pc-to-pc">PC to PC</a>
+      <a href="#pc-to-mobile" class="howto-tab" id="tab-pc-to-mobile">PC to Mobile</a>
+      <a href="#mobile-to-pc" class="howto-tab" id="tab-mobile-to-pc">Mobile to PC</a>
+      <a href="#desert-mode"  class="howto-tab" id="tab-desert">Offline Hotspot</a>
     </div>
 
     <!-- PC to PC -->
@@ -55,49 +55,49 @@
         <span class="block-icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
         </span>
-        PC to PC
+        PC to PC (Local Subnet)
       </h2>
-      <p class="block-desc">Both PCs must be on the same Wi-Fi or LAN network. We Share auto-discovers them — no setup needed.</p>
+      <p class="block-desc">Transfer files between two computers on the same local subnet (Wi-Fi or Ethernet). Devices discover each other automatically.</p>
       <div class="step-list">
         <div class="step-item">
           <div class="step-num-sm">1</div>
           <div class="step-item-text">
-            <h4>Install &amp; open We Share on both PCs</h4>
-            <p>Download and run the installer on both machines. Launch We Share — it will automatically scan your network and display nearby devices on the radar.</p>
+            <h4>Start We Share on both devices</h4>
+            <p>Download and run the application on both computers. On startup, the utility scans the local subnet using UDP broadcasts and lists active peers on the radar visual.</p>
           </div>
         </div>
         <div class="step-item">
           <div class="step-num-sm">2</div>
           <div class="step-item-text">
-            <h4>Select your files on the sender</h4>
-            <p>On the PC you want to send from, click the send area or drag and drop your files into We Share. You can send multiple files at once.</p>
+            <h4>Stage files on the sending PC</h4>
+            <p>On the sending computer, drag and drop files/folders into the application window, or click the staging area to browse and select files.</p>
           </div>
         </div>
         <div class="step-item">
           <div class="step-num-sm">3</div>
           <div class="step-item-text">
-            <h4>Pick the destination PC from the radar</h4>
-            <p>The radar shows all discovered devices. Click the target PC's name or icon to select it as your destination.</p>
+            <h4>Select the destination peer</h4>
+            <p>Look at the discovery radar visual and click the name of the target computer to select it as the destination peer.</p>
           </div>
         </div>
         <div class="step-item">
           <div class="step-num-sm">4</div>
           <div class="step-item-text">
-            <h4>Click Send</h4>
-            <p>Hit the Send button. The receiver's PC will show a notification popup with the incoming file details.</p>
+            <h4>Initiate the transfer</h4>
+            <p>Click the Send button. This initiates a TCP connection request to the receiver, triggering a notification on their screen.</p>
           </div>
         </div>
         <div class="step-item">
           <div class="step-num-sm">5</div>
           <div class="step-item-text">
-            <h4>Accept on the receiving PC</h4>
-            <p>The receiver clicks <strong>Accept</strong> on the notification. The transfer starts immediately at full local network speed. Done!</p>
+            <h4>Accept the transfer on the receiving PC</h4>
+            <p>The receiver must click <strong>Accept</strong> on the prompt. The file transfer begins immediately over a direct TCP socket connection.</p>
           </div>
         </div>
       </div>
       <div class="info-box">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <p><strong>Tip:</strong> Transfer speed depends on your local network. On a Gigabit LAN or fast Wi-Fi 6, you can expect hundreds of MB/s.</p>
+        <p><strong>Note:</strong> Transfer speeds are limited only by your physical network link (e.g. Wi-Fi router bandwidth or Ethernet cabling).</p>
       </div>
     </div>
 
@@ -109,48 +109,48 @@
         </span>
         PC to Mobile (Web Portal)
       </h2>
-      <p class="block-desc">Your phone doesn't need the We Share app at all. Use the built-in Web Portal from any mobile browser.</p>
+      <p class="block-desc">Access shared files from any phone, tablet, or secondary device using the built-in HTTP dashboard. No app install needed on the client.</p>
       <div class="step-list">
         <div class="step-item">
           <div class="step-num-sm">1</div>
           <div class="step-item-text">
-            <h4>Open We Share on your PC</h4>
-            <p>Launch We Share. The Web Portal starts automatically in the background on port 8080.</p>
+            <h4>Open We Share on the host PC</h4>
+            <p>Start the app on your computer. The background HTTP server will automatically run on port 8080.</p>
           </div>
         </div>
         <div class="step-item">
           <div class="step-num-sm">2</div>
           <div class="step-item-text">
-            <h4>Connect your phone to the same Wi-Fi</h4>
-            <p>Make sure your phone is on the same Wi-Fi network as the PC running We Share.</p>
+            <h4>Connect the mobile device to the same Wi-Fi</h4>
+            <p>Ensure that the receiving phone or tablet is connected to the same local Wi-Fi router as the host PC.</p>
           </div>
         </div>
         <div class="step-item">
           <div class="step-num-sm">3</div>
           <div class="step-item-text">
-            <h4>Find the PC's local IP address</h4>
-            <p>In We Share, the Web Portal address is shown in the app. It looks like this:</p>
-            <code>http://192.168.x.x:8080</code>
+            <h4>Retrieve the Web Portal IP address</h4>
+            <p>The host PC's interface displays the local access address. It typically looks like this:</p>
+            <code>http://192.168.1.104:8080</code>
           </div>
         </div>
         <div class="step-item">
           <div class="step-num-sm">4</div>
           <div class="step-item-text">
-            <h4>Open that address in your phone's browser</h4>
-            <p>Type the address into Chrome, Safari, or any browser on your phone. The We Share Web Portal loads instantly — no install.</p>
+            <h4>Navigate to the address on your mobile device</h4>
+            <p>Open a web browser on the mobile device and enter the IP address. The web dashboard will load.</p>
           </div>
         </div>
         <div class="step-item">
           <div class="step-num-sm">5</div>
           <div class="step-item-text">
-            <h4>Browse and download files</h4>
-            <p>From the web portal you can browse files that the PC is sharing, download them to your phone, or upload files from your phone to the PC.</p>
+            <h4>Select and download files</h4>
+            <p>Browse the files staged for web sharing on the host PC, and click download on the web interface to save them to your mobile storage.</p>
           </div>
         </div>
       </div>
       <div class="info-box">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <p><strong>Works on any device</strong> with a browser — iPhone, Android, iPad, even another PC. No app needed on the receiving side.</p>
+        <p>This works on any device running a modern web browser (iOS, Android, macOS, Linux, or iPadOS).</p>
       </div>
     </div>
 
@@ -162,34 +162,34 @@
         </span>
         Mobile to PC (Upload via Web Portal)
       </h2>
-      <p class="block-desc">Send files from your phone to the PC using the same built-in Web Portal — no cables, no apps to install on the phone.</p>
+      <p class="block-desc">Send files from your phone or tablet directly to your computer using the local web dashboard.</p>
       <div class="step-list">
         <div class="step-item">
           <div class="step-num-sm">1</div>
           <div class="step-item-text">
-            <h4>Open We Share on your PC &amp; note the portal address</h4>
-            <p>Launch We Share on the PC. The Web Portal address (e.g. <code>http://192.168.1.5:8080</code>) is shown in the app interface.</p>
+            <h4>Open the Web Portal address on your mobile browser</h4>
+            <p>Access the portal using the host PC's local IP address (e.g. <code>http://192.168.1.104:8080</code>).</p>
           </div>
         </div>
         <div class="step-item">
           <div class="step-num-sm">2</div>
           <div class="step-item-text">
-            <h4>Open the portal address on your phone</h4>
-            <p>Join the same Wi-Fi and open the address in your phone's browser. The We Share portal appears.</p>
+            <h4>Tap the upload button in the browser</h4>
+            <p>Click the Upload button on the mobile dashboard interface. This opens your device's native file/photo selector.</p>
           </div>
         </div>
         <div class="step-item">
           <div class="step-num-sm">3</div>
           <div class="step-item-text">
-            <h4>Tap Upload &amp; pick your files</h4>
-            <p>Use the Upload button in the Web Portal to select photos, videos, documents, or any file from your phone's storage.</p>
+            <h4>Select files and transmit</h4>
+            <p>Select the photos, videos, or documents you want to transfer. The browser will transmit them directly to the PC over the local network.</p>
           </div>
         </div>
         <div class="step-item">
           <div class="step-num-sm">4</div>
           <div class="step-item-text">
-            <h4>Files land on your PC instantly</h4>
-            <p>Uploaded files are saved directly to the PC's configured receive folder. No confirmation needed on the PC side.</p>
+            <h4>Files are saved to your PC</h4>
+            <p>Uploaded files are written directly into the designated receive directory configured on your computer's We Share client.</p>
           </div>
         </div>
       </div>
@@ -201,35 +201,35 @@
         <span class="block-icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 0-9.95 9h11.64L9.74 16.6a5.43 5.43 0 0 0 2.26.4 5.5 5.5 0 1 0 0-11z"/></svg>
         </span>
-        Desert Mode — No Wi-Fi Needed
+        Offline Hotspot (Desert Mode)
       </h2>
-      <p class="block-desc">Transferring files when there's no router or Wi-Fi at all? We Share handles it automatically.</p>
+      <p class="block-desc">Transfer files when there is no active local network or Wi-Fi router nearby.</p>
       <div class="step-list">
         <div class="step-item">
           <div class="step-num-sm">1</div>
           <div class="step-item-text">
-            <h4>Open We Share on PC A (no Wi-Fi)</h4>
-            <p>When We Share detects no network, it automatically creates a Wi-Fi hotspot named <code>WeShare</code> on this PC. You don't need to do anything.</p>
+            <h4>Launch We Share on PC A (Host)</h4>
+            <p>When the application detects no active network connection, it automatically initializes a local, secure Wi-Fi hotspot named <code>WeShare</code>.</p>
           </div>
         </div>
         <div class="step-item">
           <div class="step-num-sm">2</div>
           <div class="step-item-text">
-            <h4>Open We Share on PC B (no Wi-Fi)</h4>
-            <p>PC B detects the <code>WeShare</code> hotspot and silently connects to it — no password prompt, no manual steps. The app handles everything.</p>
+            <h4>Launch We Share on PC B (Client)</h4>
+            <p>PC B detects the background hotspot and connects to it automatically using native WLAN APIs, without requiring any manual password entry.</p>
           </div>
         </div>
         <div class="step-item">
           <div class="step-num-sm">3</div>
           <div class="step-item-text">
-            <h4>Transfer as normal</h4>
-            <p>Both PCs now see each other on the radar. Select files, pick the target, click Send, and Accept on the other side. Exactly the same as normal mode.</p>
+            <h4>Proceed with local transfer</h4>
+            <p>Once connected, both computers list each other on their radars and can transfer files directly over the ad-hoc connection.</p>
           </div>
         </div>
       </div>
       <div class="info-box">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <p><strong>Fully automatic.</strong> No passwords to type, no settings to change, no extra software needed. We Share figures out the entire connection by itself.</p>
+        <p>This flow is fully automated. No local configuration is changed, and the client will reconnect to its previous Wi-Fi network once the app is closed.</p>
       </div>
     </div>
 

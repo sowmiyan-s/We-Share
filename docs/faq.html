@@ -51,7 +51,7 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
         <div class="faq-answer"><div class="faq-answer-inner">
-          We Share is a free, open-source desktop app for Windows that lets you transfer files between devices at full local network speed — with no internet, no cloud, and no accounts required. It works on Wi-Fi, LAN, or even with no router at all (Desert Mode).
+          We Share is an open-source local file sharing utility written in C# (.NET 8) and styled with Avalonia UI. It sends files directly over local network sockets (TCP) without using any cloud relays or third-party web servers.
         </div></div>
       </div>
 
@@ -61,7 +61,7 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
         <div class="faq-answer"><div class="faq-answer-inner">
-          Yes — completely. We Share is MIT licensed, 100% open source, and free forever. No subscriptions, no premium tiers, no ads.
+          Yes. The project is licensed under the MIT License and the source code is entirely public. There are no subscriptions, ads, or tracking.
         </div></div>
       </div>
 
@@ -71,7 +71,7 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
         <div class="faq-answer"><div class="faq-answer-inner">
-          No. We Share is designed to work entirely on your local network — or even with no network at all (using Desert Mode). Your files never leave your local environment.
+          No. It operates entirely on your local area network (LAN/WLAN). If your router doesn't have an active internet link, or even if you don't have a router at all, the application will still function.
         </div></div>
       </div>
 
@@ -81,7 +81,7 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
         <div class="faq-answer"><div class="faq-answer-inner">
-          Absolutely not. No account, no sign-in, no email. Just install, open, and transfer.
+          No. We Share requires no registration, logins, or configuration. It runs locally as a self-contained program.
         </div></div>
       </div>
     </div>
@@ -96,7 +96,7 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
         <div class="faq-answer"><div class="faq-answer-inner">
-          The desktop app runs on <strong>Windows 10 (build 19041+)</strong> and <strong>Windows 11</strong>. However, any device — iPhone, Android, Mac, Linux — can receive and send files using the built-in <strong>Web Portal</strong> via a browser.
+          The native desktop client runs on Windows 10 (build 19041+) and Windows 11. Other operating systems (macOS, Linux, iOS, Android) can send and receive files by accessing the host's Web Portal via any standard browser.
         </div></div>
       </div>
 
@@ -106,7 +106,7 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
         <div class="faq-answer"><div class="faq-answer-inner">
-          Yes! We Share includes a built-in Web Portal. Open <code>http://&lt;pc-ip&gt;:8080</code> in your phone's browser (same Wi-Fi required) and you can upload files from your phone to the PC, or download files from the PC — no app install needed on the phone.
+          Yes. Start the app on your computer, note the web address displayed (which points to the app's local port 8080), and navigate to it on your phone's browser. You can then download shared files or upload photos and documents directly to your PC.
         </div></div>
       </div>
 
@@ -116,7 +116,7 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
         <div class="faq-answer"><div class="faq-answer-inner">
-          No limits on file types or file sizes. Transfer any file — videos, ISO images, folders, documents, anything. The only limit is your network speed and storage space.
+          No. Files are streamed directly between devices, meaning there are no arbitrary size limits or format restrictions. Transfers are limited only by your disk space and network interface card.
         </div></div>
       </div>
     </div>
@@ -131,7 +131,7 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
         <div class="faq-answer"><div class="faq-answer-inner">
-          Desert Mode is We Share's automatic hotspot feature. When no Wi-Fi router is detected, one PC automatically creates a Wi-Fi hotspot named <code>WeShare</code>. The other PC silently detects and connects to it — no passwords, no manual steps. Then the devices appear on each other's radar and you transfer normally.
+          If there is no active local network, We Share initializes an ad-hoc Wi-Fi hotspot in the background using Windows Mobile Hotspot APIs. The client device detects this specific SSID and establishes a handshake connection automatically, allowing offline local transfers without manual configuration.
         </div></div>
       </div>
 
@@ -141,7 +141,7 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
         <div class="faq-answer"><div class="faq-answer-inner">
-          We Share broadcasts a UDP signal on the local network. Nearby devices running We Share hear the broadcast and appear on the radar automatically. No manual IP entry, no pairing codes, no configuration.
+          We Share uses UDP socket broadcasting. It regularly sends discovery packets on a dedicated local subnet port. Other instances running on the same subnet listen to these broadcasts, parse the sender information, and list the active peers in the visual radar.
         </div></div>
       </div>
 
@@ -151,7 +151,7 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
         <div class="faq-answer"><div class="faq-answer-inner">
-          Yes. Every incoming file transfer shows a notification with the sender's name, file name(s), and size. You can Accept or Reject each transfer individually. Nothing is saved without your approval.
+          Yes. Every transfer request is parsed and prompts the receiver with the sender's hostname, file listing, and total payload size. Files will not be written to disk until you explicitly click Accept.
         </div></div>
       </div>
 
@@ -161,7 +161,7 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
         <div class="faq-answer"><div class="faq-answer-inner">
-          Yes. A local SQLite database tracks your transfer history including file names, sizes, sender/receiver, and timestamps. This database stays on your machine and is never uploaded anywhere.
+          Yes. A history database is managed locally via an offline SQLite file stored in the app data directory. This database remains entirely on your machine and is never shared or exported.
         </div></div>
       </div>
     </div>
@@ -176,7 +176,7 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
         <div class="faq-answer"><div class="faq-answer-inner">
-          Completely. We Share is local-only — your files travel directly from one device to another on your network. Nothing is sent to any server, no telemetry, no analytics, no data collection of any kind. The source code is open for anyone to verify.
+          Yes. All socket connections are established peer-to-peer on your local subnet. No telemetry, third-party analytics, or external trackers are compiled into the application.
         </div></div>
       </div>
 
@@ -186,7 +186,7 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
         <div class="faq-answer"><div class="faq-answer-inner">
-          Yes, completely normal. We Share uses local TCP and UDP sockets for device discovery and file transfer. Windows Firewall needs to allow this traffic for the app to function. The installer automatically adds the required rules. The rules are specific to the We Share executable and are removed when you uninstall.
+          Yes. Since We Share relies on local TCP and UDP sockets for network communication, Windows Firewall must be configured to allow this traffic on your local subnet. The installer automatically registers these rules for the application executable, and they are fully removed when you uninstall.
         </div></div>
       </div>
     </div>
@@ -202,11 +202,10 @@
         </button>
         <div class="faq-answer"><div class="faq-answer-inner">
           <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;padding:0">
-            <li>▸ Make sure both devices are on the <strong>same Wi-Fi network or LAN</strong>.</li>
-            <li>▸ Check that Windows Firewall isn't blocking We Share (the installer adds rules, but check manually if needed).</li>
-            <li>▸ If on a public Wi-Fi or corporate network, device isolation may be enabled — try a home network.</li>
-            <li>▸ Restart We Share on both devices.</li>
-            <li>▸ If no router is available, use <strong>Desert Mode</strong> — open We Share on both PCs and it will self-connect.</li>
+            <li>▸ Verify that both devices are connected to the same local subnet.</li>
+            <li>▸ On public or corporate networks, access point isolation (AP isolation) is often enabled, which blocks UDP broadcasts and peer communication.</li>
+            <li>▸ Check that your Windows Firewall allows UDP traffic on the radar discovery ports.</li>
+            <li>▸ If no wireless router is available, ensure you use the ad-hoc Desert Mode.</li>
           </ul>
         </div></div>
       </div>
@@ -217,7 +216,7 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
         <div class="faq-answer"><div class="faq-answer-inner">
-          We Share uses all available bandwidth — the transfer speed is limited by your network hardware. For fastest speeds: use a <strong>wired Ethernet</strong> connection if possible, or Wi-Fi 5/6. Speeds of 500 MB/s+ are achievable on Gigabit LAN.
+          We Share does not throttle bandwidth and streams files as fast as your hardware allows. For maximum throughput, connect via a wired gigabit Ethernet cable, or ensure your devices are close to a high-speed Wi-Fi 5/6 router with clear line of sight.
         </div></div>
       </div>
 
@@ -227,7 +226,7 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
         <div class="faq-answer"><div class="faq-answer-inner">
-          Download the latest installer from the <a href="downloads.html">Downloads page</a> and run it. The installer will detect the previous version and offer a clean upgrade while keeping your transfer history intact.
+          Download the new setup executable from the Downloads page. Running the installer will overwrite the application files while preserving your local SQLite database containing your transfer history.
         </div></div>
       </div>
     </div>

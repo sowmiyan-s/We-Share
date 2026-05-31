@@ -34,9 +34,9 @@
   </nav>
 
   <div class="page-hero">
-    <div class="tag">Patch Notes</div>
-    <h1>What's <span class="gradient-text">New</span></h1>
-    <p>A full history of every We Share release — features added, bugs fixed, and improvements made.</p>
+    <div class="tag">Changelog</div>
+    <h1>Release Notes</h1>
+    <p>Version history and technical changelogs for the We Share project.</p>
   </div>
 
   <div class="patch-section">
@@ -50,17 +50,17 @@
         <span class="patch-badge-latest">Latest</span>
       </div>
       <ul class="patch-list">
-        <li><span class="patch-tag tag-new">New</span> Transfer Wizard — a guided step-by-step flow for sending files, reducing friction for first-time users</li>
-        <li><span class="patch-tag tag-new">New</span> Animated splash screen with orbital ring loader on startup</li>
-        <li><span class="patch-tag tag-new">New</span> Radar scan sweep animation now shows active discovery in real time</li>
-        <li><span class="patch-tag tag-improve">Improve</span> Multi-threaded TCP engine rewritten for better throughput on large files</li>
-        <li><span class="patch-tag tag-improve">Improve</span> Device nodes on radar now show device name and OS icon</li>
-        <li><span class="patch-tag tag-improve">Improve</span> Transfer progress bar now shows speed (MB/s) and ETA</li>
-        <li><span class="patch-tag tag-ui">UI</span> New premium dark theme with Indigo/Slate color palette, frosted glass cards</li>
-        <li><span class="patch-tag tag-ui">UI</span> Toast notifications slide in from top with smooth animation</li>
-        <li><span class="patch-tag tag-fix">Fix</span> Desert Mode hotspot no longer fails when Windows Hotspot was previously left in an error state</li>
-        <li><span class="patch-tag tag-fix">Fix</span> Fixed a rare crash when accepting a transfer while the app was minimized</li>
-        <li><span class="patch-tag tag-fix">Fix</span> Web Portal no longer shows a blank page on first load in Firefox</li>
+        <li><span class="patch-tag tag-new">New</span> Transfer Wizard — step-by-step UI workflow for staging and executing file transfers.</li>
+        <li><span class="patch-tag tag-new">New</span> Splash screen with vector loading animation during application assembly initialization.</li>
+        <li><span class="patch-tag tag-new">New</span> Sweeping radar animation indicating active background UDP discovery scans.</li>
+        <li><span class="patch-tag tag-improve">Improve</span> Restructured TCP socket handling to use multi-threaded buffering, improving throughput for large files.</li>
+        <li><span class="patch-tag tag-improve">Improve</span> Peer entries on radar now parse and render NetBIOS hostnames and platform OS icons.</li>
+        <li><span class="patch-tag tag-improve">Improve</span> Updated progress indicator to render instantaneous network speeds (MB/s) and ETA.</li>
+        <li><span class="patch-tag tag-ui">UI</span> Frosted-glass panel styles and tuned color weights for better readability.</li>
+        <li><span class="patch-tag tag-ui">UI</span> Toast indicators now slide downward from the upper margin using native Avalonia transitions.</li>
+        <li><span class="patch-tag tag-fix">Fix</span> Resolved hotspot provisioning errors by querying and cleaning legacy tethering adapter states on startup.</li>
+        <li><span class="patch-tag tag-fix">Fix</span> Prevented null reference crashes when invoking transfer prompts while the window is minimized.</li>
+        <li><span class="patch-tag tag-fix">Fix</span> Resolved content security parsing issues preventing Firefox from loading local Web Portal scripts.</li>
       </ul>
       <div style="margin-top: 16px;">
         <a href="downloads.html" class="btn-outline" style="font-size:0.85rem; padding: 8px 18px;">Download v1.3.0 →</a>
@@ -75,15 +75,15 @@
         <span class="patch-date">March 2026</span>
       </div>
       <ul class="patch-list">
-        <li><span class="patch-tag tag-new">New</span> Web Portal — any browser-capable device can now send/receive files from the PC at <code>http://&lt;ip&gt;:8080</code></li>
-        <li><span class="patch-tag tag-new">New</span> Web Portal displays a live file upload progress bar in the browser</li>
-        <li><span class="patch-tag tag-new">New</span> Accept / Reject notifications redesigned — now show file preview icon and total size</li>
-        <li><span class="patch-tag tag-improve">Improve</span> UDP discovery broadcast interval reduced for 2× faster device appearance on radar</li>
-        <li><span class="patch-tag tag-improve">Improve</span> Installer now auto-uninstalls previous version before upgrading, keeping history database intact</li>
-        <li><span class="patch-tag tag-ui">UI</span> Radar redesigned with concentric rings and pulsing device nodes</li>
-        <li><span class="patch-tag tag-ui">UI</span> Settings page now shows current local IP and Web Portal URL for easy sharing</li>
-        <li><span class="patch-tag tag-fix">Fix</span> Fixed transfers failing silently when sender's firewall blocked outbound TCP on port used</li>
-        <li><span class="patch-tag tag-fix">Fix</span> Fixed device name showing as empty string on some Windows configurations</li>
+        <li><span class="patch-tag tag-new">New</span> Web Portal — built-in HTTP server listening on port 8080 for web-based transfers on non-Windows devices.</li>
+        <li><span class="patch-tag tag-new">New</span> Live upload progress indicator inside the mobile web interface.</li>
+        <li><span class="patch-tag tag-new">New</span> Redesigned transfer prompt detailing staged files size and payload counts.</li>
+        <li><span class="patch-tag tag-improve">Improve</span> Optimized UDP broadcast intervals to minimize radar peer discovery latency.</li>
+        <li><span class="patch-tag tag-improve">Improve</span> Inno Setup script now handles silent upgrade and keeps SQLite database files intact.</li>
+        <li><span class="patch-tag tag-ui">UI</span> Re-rendered the radar panel with cleaner concentric vector designs.</li>
+        <li><span class="patch-tag tag-ui">UI</span> Display local IP bindings and web portal address inside the Settings pane.</li>
+        <li><span class="patch-tag tag-fix">Fix</span> Added socket connection timeouts and handled connection exceptions gracefully when blocked by firewalls.</li>
+        <li><span class="patch-tag tag-fix">Fix</span> Handled cases where system host machine name lookup returned null.</li>
       </ul>
       <div style="margin-top: 16px;">
         <a href="../setup/WeShare_Setup_1.2.0.exe" class="btn-outline" style="font-size:0.85rem; padding: 8px 18px;" download>Download v1.2.0 →</a>
@@ -98,15 +98,15 @@
         <span class="patch-date">January 2026</span>
       </div>
       <ul class="patch-list">
-        <li><span class="patch-tag tag-new">New</span> Desert Mode — auto-creates Wi-Fi hotspot when no router detected; other PC auto-connects with no user input</li>
-        <li><span class="patch-tag tag-new">New</span> Transfer history stored in local SQLite database, viewable in the History tab</li>
-        <li><span class="patch-tag tag-new">New</span> Accept / Reject popup with 30-second auto-reject timer</li>
-        <li><span class="patch-tag tag-new">New</span> Multiple file selection — send entire folders in one go</li>
-        <li><span class="patch-tag tag-improve">Improve</span> TCP engine now uses parallel streams for large files, doubling throughput on fast networks</li>
-        <li><span class="patch-tag tag-improve">Improve</span> Installer now adds Windows Firewall rules automatically</li>
-        <li><span class="patch-tag tag-ui">UI</span> Full dark mode design system implemented across all screens</li>
-        <li><span class="patch-tag tag-fix">Fix</span> Fixed radar not updating when a device disconnected mid-session</li>
-        <li><span class="patch-tag tag-fix">Fix</span> Fixed first-run crash on systems without a default network adapter configured</li>
+        <li><span class="patch-tag tag-new">New</span> Desert Mode — auto-provisions ad-hoc hotspots and handles background client association.</li>
+        <li><span class="patch-tag tag-new">New</span> Local SQLite database integration to archive transfer logs.</li>
+        <li><span class="patch-tag tag-new">New</span> Prompts automatically timeout and reject transfers after 30 seconds of receiver inactivity.</li>
+        <li><span class="patch-tag tag-new">New</span> Folder directory parsing and batch file stream queueing.</li>
+        <li><span class="patch-tag tag-improve">Improve</span> Implemented parallel TCP stream chunking for multi-core processors.</li>
+        <li><span class="patch-tag tag-improve">Improve</span> Setup installer automatically registers Windows Firewall rules using netsh.</li>
+        <li><span class="patch-tag tag-ui">UI</span> Implemented standardized dark theme styles.</li>
+        <li><span class="patch-tag tag-fix">Fix</span> Properly disposed connection resources and updated radar states when peer connection drops.</li>
+        <li><span class="patch-tag tag-fix">Fix</span> Handled system configurations lacking active network adapters.</li>
       </ul>
       <div style="margin-top: 16px;">
         <a href="../setup/WeShare_Setup_1.1.0.exe" class="btn-outline" style="font-size:0.85rem; padding: 8px 18px;" download>Download v1.1.0 →</a>

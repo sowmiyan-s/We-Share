@@ -637,17 +637,6 @@ body::before {
 }
 
 .section-head { margin-bottom: 64px; }
-.section-head .overline {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: #818CF8;
-  margin-bottom: 14px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
 
 .section-head h2 {
   font-family: var(--font-display);
@@ -802,17 +791,7 @@ body::before {
   background: radial-gradient(ellipse 70% 80% at 100% 50%, rgba(99,102,241,0.06) 0%, transparent 60%);
 }
 
-.desert-text .overline {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: #818CF8;
-  margin-bottom: 14px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+
 
 .desert-text h2 {
   font-family: var(--font-display);
