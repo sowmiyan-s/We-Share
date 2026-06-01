@@ -74,4 +74,33 @@ namespace WeShare.UI.Views
 
         public object?[] ConvertBack(object? value, Type[] targetTypes, object? parameter, CultureInfo culture) => throw new NotImplementedException();
     }
+
+    public class DeviceTypeToIconConverter : IValueConverter
+    {
+        public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        {
+            if (value is string name)
+            {
+                string lower = name.ToLowerInvariant();
+                if (lower.Contains("iphone") || lower.Contains("ipad") || lower.Contains("ios"))
+                    return "📱";
+                if (lower.Contains("android"))
+                    return "📱";
+                if (lower.Contains("mac") || lower.Contains("os x") || lower.Contains("osx"))
+                    return "💻";
+                if (lower.Contains("linux"))
+                    return "🐧";
+                if (lower.Contains("windows") || lower.Contains("win"))
+                    return "💻";
+                if (lower.Contains("web"))
+                    return "🌐";
+            }
+            return "💻";
+        }
+
+        public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

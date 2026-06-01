@@ -1,2 +1,3 @@
 [build]
+  command = "cp -r setup docs/setup"
   publish = "docs"

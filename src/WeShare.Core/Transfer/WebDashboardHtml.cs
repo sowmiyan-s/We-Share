@@ -9,15 +9,15 @@ namespace WeShare.Core.Transfer
 <meta name='viewport' content='width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no'>
 <meta name='description' content='We Share Web Portal for fast, secure local file sharing between your mobile device and PC.'>
 <title>We Share | Portal</title>
-<link href='https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap' rel='stylesheet'>
+<link href='https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap' rel='stylesheet'>
 <style>
 :root {
-  --bg: #0b0f17;
-  --panel: rgba(17, 24, 39, 0.75);
+  --bg: #0b0f19;
+  --panel: rgba(17, 24, 39, 0.7);
   --border: rgba(255, 255, 255, 0.08);
   --primary: #6366f1;
-  --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-  --primary-glow: rgba(99, 102, 241, 0.25);
+  --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  --primary-glow: rgba(99, 102, 241, 0.2);
   --text: #f3f4f6;
   --text-dim: #9ca3af;
   --card: rgba(255, 255, 255, 0.03);
@@ -25,11 +25,11 @@ namespace WeShare.Core.Transfer
 }
 html[data-theme='light'] {
   --bg: #f8fafc;
-  --panel: rgba(255, 255, 255, 0.85);
+  --panel: rgba(255, 255, 255, 0.7);
   --border: rgba(15, 23, 42, 0.08);
   --primary: #4f46e5;
-  --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #8b5cf6 100%);
-  --primary-glow: rgba(79, 70, 229, 0.15);
+  --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  --primary-glow: rgba(79, 70, 229, 0.1);
   --text: #0f172a;
   --text-dim: #64748b;
   --card: rgba(15, 23, 42, 0.03);
@@ -38,11 +38,18 @@ html[data-theme='light'] {
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body {
   background: var(--bg);
+  background-image: radial-gradient(var(--border) 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
+  animation: gridSweep 30s linear infinite;
   color: var(--text);
   font-family: 'Plus Jakarta Sans', sans-serif;
   line-height: 1.5;
   overflow-x: hidden;
   transition: background 0.3s ease, color 0.3s ease;
+}
+@keyframes gridSweep {
+  from { background-position: 0 0; }
+  to { background-position: 24px 24px; }
 }
 .container {
   max-width: 600px;
@@ -83,8 +90,58 @@ header {
 }
 .logo svg { width: 24px; height: 24px; fill: white; }
 .brand-container { flex: 1; }
-.brand { font-size: 18px; font-weight: 800; letter-spacing: 2px; }
-.host-status { font-size: 11px; color: var(--text-dim); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+.brand { font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 800; letter-spacing: 2px; }
+.host-status {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/* -- Status Pulse Ring -- */
+.status-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  position: relative;
+  display: inline-block;
+}
+.status-pulse::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+}
+.status-pulse.online {
+  background-color: #10b981;
+}
+.status-pulse.online::after {
+  border-color: #10b981;
+  animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+.status-pulse.connecting {
+  background-color: #f59e0b;
+}
+.status-pulse.connecting::after {
+  border-color: #f59e0b;
+  animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+.status-pulse.offline {
+  background-color: #ef4444;
+}
+.status-pulse.offline::after {
+  border-color: #ef4444;
+}
+@keyframes pulse-ring {
+  0% { transform: scale(0.5); opacity: 1; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
 
 /* -- Profile Settings in Header -- */
 .profile-box {
@@ -96,7 +153,7 @@ header {
   padding: 12px 16px;
   border-radius: 16px;
 }
-.profile-label { font-size: 11px; font-weight: 700; color: var(--text-dim); }
+.profile-label { font-family: 'Outfit', sans-serif; font-size: 11px; font-weight: 700; color: var(--text-dim); }
 .profile-input {
   flex: 1;
   background: var(--input-bg);
@@ -125,6 +182,7 @@ section {
   flex-direction: column;
 }
 .section-title {
+  font-family: 'Outfit', sans-serif;
   font-size: 11px;
   font-weight: 800;
   color: var(--text-dim);
@@ -171,7 +229,7 @@ section {
   transition: transform 0.3s ease;
 }
 .drop-zone:hover .dz-icon { transform: translateY(-5px) scale(1.1); }
-.dz-text { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+.dz-text { font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 6px; }
 .dz-sub { font-size: 12px; color: var(--text-dim); }
 
 /* -- File Cards -- */
@@ -186,12 +244,12 @@ section {
   gap: 14px;
   text-decoration: none;
   color: inherit;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .file-card:hover {
   border-color: var(--primary);
   background: var(--primary-glow);
-  transform: translateX(4px);
+  transform: translateY(-2px);
 }
 .f-icon {
   width: 44px;
@@ -204,9 +262,10 @@ section {
   font-size: 20px;
 }
 .f-info { flex: 1; min-width: 0; }
-.f-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.f-name { font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .f-size { font-size: 11px; color: var(--text-dim); font-weight: 500; margin-top: 2px; }
 .f-btn {
+  font-family: 'Outfit', sans-serif;
   background: var(--primary-gradient);
   color: white;
   border: none;
@@ -216,9 +275,9 @@ section {
   font-weight: 700;
   box-shadow: 0 4px 10px var(--primary-glow);
   cursor: pointer;
-  transition: transform 0.15s ease;
+  transition: all 0.2s;
 }
-.file-card:hover .f-btn { transform: scale(1.05); }
+.file-card:hover .f-btn:hover { transform: scale(1.05); }
 
 /* -- Progress Overlay -- */
 .overlay {
@@ -346,6 +405,7 @@ section {
   50% { transform: translateY(-8px); }
 }
 .dialog-title {
+  font-family: 'Outfit', sans-serif;
   font-size: 18px;
   font-weight: 800;
   margin-bottom: 8px;
@@ -365,7 +425,7 @@ section {
   flex: 1;
   padding: 12px 16px;
   border-radius: 12px;
-  font-family: inherit;
+  font-family: 'Outfit', sans-serif;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
@@ -402,7 +462,7 @@ section {
       </div>
       <div class='brand-container'>
         <div class='brand'>WE SHARE</div>
-        <div id='hostLine' class='host-status'>CONNECTING...</div>
+        <div id='hostLine' class='host-status'><span class='status-pulse connecting'></span>CONNECTING...</div>
       </div>
     </div>
     
@@ -599,6 +659,12 @@ function connectSSE() {
   const id = getClientId();
   const name = getClientName();
   sse = new EventSource('/api/events?clientId=' + id + '&name=' + encodeURIComponent(name));
+  sse.onopen = () => {
+    updateConnectionState();
+  };
+  sse.onerror = () => {
+    document.getElementById('hostLine').innerHTML = ""<span class='status-pulse offline'></span>DISCONNECTED"";
+  };
   sse.onmessage = e => {
     if (e.data === 'refresh') {
       loadFiles();
@@ -613,17 +679,19 @@ function connectSSE() {
   };
 }
 
+async function updateConnectionState() {
+  try {
+    const me = await fetch('/api/me').then(r=>r.json());
+    document.getElementById('hostLine').innerHTML = ""<span class='status-pulse online'></span>CONNECTED TO "" + escapeHtml((me.name).toUpperCase());
+  } catch(_){
+    document.getElementById('hostLine').innerHTML = ""<span class='status-pulse offline'></span>DISCONNECTED"";
+  }
+}
+
 async function init() {
   initName();
   connectSSE();
-  
-  try {
-    const me = await fetch('/api/me').then(r=>r.json());
-    document.getElementById('hostLine').textContent = 'CONNECTED TO ' + (me.name).toUpperCase();
-  } catch(_){
-    document.getElementById('hostLine').textContent = 'CONNECTED TO PC';
-  }
-  
+  await updateConnectionState();
   loadFiles();
 }
 

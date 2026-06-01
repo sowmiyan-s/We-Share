@@ -1827,5 +1827,24 @@ namespace WeShare.UI.Views
                 return $"{len:0.##} {sizes[order]}";
             }
         }
+
+        public string FileEmoji
+        {
+            get
+            {
+                string ext = Path.GetExtension(FilePath).ToLowerInvariant().TrimStart('.');
+                if (string.IsNullOrEmpty(ext)) return "📁";
+                if (System.Linq.Enumerable.Contains(new[] { "png", "jpg", "jpeg", "gif", "webp", "bmp", "svg" }, ext)) return "🖼️";
+                if (System.Linq.Enumerable.Contains(new[] { "mp4", "mkv", "avi", "mov", "webm", "flv", "wmv" }, ext)) return "🎥";
+                if (System.Linq.Enumerable.Contains(new[] { "mp3", "wav", "flac", "ogg", "m4a", "aac" }, ext)) return "🎵";
+                if (System.Linq.Enumerable.Contains(new[] { "pdf" }, ext)) return "📕";
+                if (System.Linq.Enumerable.Contains(new[] { "doc", "docx", "txt", "rtf", "md" }, ext)) return "📄";
+                if (System.Linq.Enumerable.Contains(new[] { "xls", "xlsx", "csv" }, ext)) return "📊";
+                if (System.Linq.Enumerable.Contains(new[] { "ppt", "pptx" }, ext)) return "📉";
+                if (System.Linq.Enumerable.Contains(new[] { "zip", "rar", "tar", "gz", "7z" }, ext)) return "📦";
+                if (System.Linq.Enumerable.Contains(new[] { "exe", "msi", "bat", "sh" }, ext)) return "⚙️";
+                return "📄";
+            }
+        }
     }
 }
