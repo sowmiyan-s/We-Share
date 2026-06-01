@@ -1,7 +1,5 @@
 {
+  "outputDirectory": "docs",
   "cleanUrls": true,
-  "rewrites": [
-    { "source": "/docs/:path*", "destination": "/docs/:path*" },
-    { "source": "/:path*", "destination": "/docs/:path*" }
-  ]
+  "trailingSlash": false
 }
