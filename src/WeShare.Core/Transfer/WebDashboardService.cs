@@ -152,7 +152,6 @@ namespace WeShare.Core.Transfer
             try 
             { 
                 _sharedFiles.Clear(); 
-                _clientSpecificFiles.Clear();
             }
             finally { _filesLock.Release(); }
         }
@@ -261,7 +260,20 @@ namespace WeShare.Core.Transfer
 
                     // --- CORS + route dispatch ---
                     if (method == "GET" && path == "/")
-                        await SendResponse(stream, 200, "text/html; charset=utf-8", GetDashboardHtml());
+                    {
+                        var bodyBytes = Encoding.UTF8.GetBytes(GetDashboardHtml());
+                        var header = "HTTP/1.1 200 OK\r\n" +
+                                     "Content-Type: text/html; charset=utf-8\r\n" +
+                                     $"Content-Length: {bodyBytes.Length}\r\n" +
+                                     "Cache-Control: no-store, no-cache, must-revalidate, max-age=0\r\n" +
+                                     "Pragma: no-cache\r\n" +
+                                     "Connection: close\r\n" +
+                                     "Access-Control-Allow-Origin: *\r\n" +
+                                     "\r\n";
+                        await stream.WriteAsync(Encoding.ASCII.GetBytes(header));
+                        await stream.WriteAsync(bodyBytes);
+                        await stream.FlushAsync();
+                    }
 
                     else if (method == "GET" && path == "/api/me")
                     {
@@ -326,7 +338,7 @@ namespace WeShare.Core.Transfer
                             {
                                 if (_clientSpecificFiles.TryGetValue(clientId, out var list))
                                 {
-                                    var item = list.FirstOrDefault(f => f.Id == fileId);
+                                    var item = list.FirstOrDefault(f => string.Equals(f.Id, fileId, StringComparison.OrdinalIgnoreCase));
                                     if (item != null) list.Remove(item);
                                 }
                             }
@@ -406,28 +418,35 @@ namespace WeShare.Core.Transfer
                             }
                             finally { _webClientsLock.Release(); }
 
+                            await _filesLock.WaitAsync();
+                            try
+                            {
+                                _clientSpecificFiles.Remove(clientId);
+                            }
+                            finally { _filesLock.Release(); }
+
                             WebClientDisconnectedEx?.Invoke(clientId);
                         }
                     }
 
                     else if (method == "GET" && path == "/download")
                     {
-                        var query = parts[1].Contains('?') ? parts[1].Split('?')[1] : "";
-                        var idPart  = query.Split('&').FirstOrDefault(p => p.StartsWith("id="));
-                        var idSplit = idPart?.Split('=', 2);
-                        var id      = idSplit?.Length == 2 ? idSplit[1] : null;
+                        string? id = queryParams.GetValueOrDefault("id");
                         
                         SharedFile? file = null;
                         await _filesLock.WaitAsync();
                         try 
                         { 
-                            file = _sharedFiles.FirstOrDefault(f => f.Id == id);
-                            if (file == null)
+                            if (!string.IsNullOrEmpty(id))
                             {
-                                foreach (var list in _clientSpecificFiles.Values)
+                                file = _sharedFiles.FirstOrDefault(f => string.Equals(f.Id, id, StringComparison.OrdinalIgnoreCase));
+                                if (file == null)
                                 {
-                                    file = list.FirstOrDefault(f => f.Id == id);
-                                    if (file != null) break;
+                                    foreach (var list in _clientSpecificFiles.Values)
+                                    {
+                                        file = list.FirstOrDefault(f => string.Equals(f.Id, id, StringComparison.OrdinalIgnoreCase));
+                                        if (file != null) break;
+                                    }
                                 }
                             }
                         }

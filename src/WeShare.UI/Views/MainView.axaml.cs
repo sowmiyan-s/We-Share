@@ -970,7 +970,7 @@ namespace WeShare.UI.Views
 
             if (receivedDone.Count == 0)
             {
-                LibraryStatsText.Text = "📊 No transfers recorded";
+                LibraryStatsText.Text = "No transfers recorded";
                 return;
             }
 
@@ -990,7 +990,7 @@ namespace WeShare.UI.Views
                 ? minDate.ToString("MMM d, yyyy")
                 : $"{minDate:MMM d} - {maxDate:MMM d, yyyy}";
 
-            LibraryStatsText.Text = $"📊 Total Received: {receivedDone.Count} files ({sizeDisplay})  •  Active since {rangeDisplay}";
+            LibraryStatsText.Text = $"Total Received: {receivedDone.Count} files ({sizeDisplay})  •  Active since {rangeDisplay}";
         }
 
         private void LoadReceivedFiles()
@@ -1828,22 +1828,29 @@ namespace WeShare.UI.Views
             }
         }
 
-        public string FileEmoji
+        public string FileTypeBadge
         {
             get
             {
                 string ext = Path.GetExtension(FilePath).ToLowerInvariant().TrimStart('.');
-                if (string.IsNullOrEmpty(ext)) return "📁";
-                if (System.Linq.Enumerable.Contains(new[] { "png", "jpg", "jpeg", "gif", "webp", "bmp", "svg" }, ext)) return "🖼️";
-                if (System.Linq.Enumerable.Contains(new[] { "mp4", "mkv", "avi", "mov", "webm", "flv", "wmv" }, ext)) return "🎥";
-                if (System.Linq.Enumerable.Contains(new[] { "mp3", "wav", "flac", "ogg", "m4a", "aac" }, ext)) return "🎵";
-                if (System.Linq.Enumerable.Contains(new[] { "pdf" }, ext)) return "📕";
-                if (System.Linq.Enumerable.Contains(new[] { "doc", "docx", "txt", "rtf", "md" }, ext)) return "📄";
-                if (System.Linq.Enumerable.Contains(new[] { "xls", "xlsx", "csv" }, ext)) return "📊";
-                if (System.Linq.Enumerable.Contains(new[] { "ppt", "pptx" }, ext)) return "📉";
-                if (System.Linq.Enumerable.Contains(new[] { "zip", "rar", "tar", "gz", "7z" }, ext)) return "📦";
-                if (System.Linq.Enumerable.Contains(new[] { "exe", "msi", "bat", "sh" }, ext)) return "⚙️";
-                return "📄";
+                if (string.IsNullOrEmpty(ext)) return "DIR";
+                return ext.ToUpperInvariant();
+            }
+        }
+ 
+        public string FileColor
+        {
+            get
+            {
+                string ext = Path.GetExtension(FilePath).ToLowerInvariant().TrimStart('.');
+                if (string.IsNullOrEmpty(ext)) return "#475569";
+                if (System.Linq.Enumerable.Contains(new[] { "png", "jpg", "jpeg", "gif", "webp", "bmp", "svg" }, ext)) return "#0ea5e9";
+                if (System.Linq.Enumerable.Contains(new[] { "mp4", "mkv", "avi", "mov", "webm", "flv", "wmv" }, ext)) return "#10b981";
+                if (System.Linq.Enumerable.Contains(new[] { "mp3", "wav", "flac", "ogg", "m4a", "aac" }, ext)) return "#ec4899";
+                if (System.Linq.Enumerable.Contains(new[] { "pdf", "doc", "docx", "txt", "rtf", "md", "xls", "xlsx", "csv", "ppt", "pptx" }, ext)) return "#3b82f6";
+                if (System.Linq.Enumerable.Contains(new[] { "zip", "rar", "tar", "gz", "7z" }, ext)) return "#f59e0b";
+                if (System.Linq.Enumerable.Contains(new[] { "exe", "msi", "bat", "sh" }, ext)) return "#6366f1";
+                return "#64748b";
             }
         }
     }

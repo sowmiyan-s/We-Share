@@ -83,19 +83,19 @@ namespace WeShare.UI.Views
             {
                 string lower = name.ToLowerInvariant();
                 if (lower.Contains("iphone") || lower.Contains("ipad") || lower.Contains("ios"))
-                    return "📱";
+                    return "MOB";
                 if (lower.Contains("android"))
-                    return "📱";
+                    return "MOB";
                 if (lower.Contains("mac") || lower.Contains("os x") || lower.Contains("osx"))
-                    return "💻";
+                    return "MAC";
                 if (lower.Contains("linux"))
-                    return "🐧";
+                    return "LNX";
                 if (lower.Contains("windows") || lower.Contains("win"))
-                    return "💻";
+                    return "PC";
                 if (lower.Contains("web"))
-                    return "🌐";
+                    return "WEB";
             }
-            return "💻";
+            return "DEV";
         }
 
         public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

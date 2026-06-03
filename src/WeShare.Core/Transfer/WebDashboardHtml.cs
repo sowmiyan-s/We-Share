@@ -9,47 +9,38 @@ namespace WeShare.Core.Transfer
 <meta name='viewport' content='width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no'>
 <meta name='description' content='We Share Web Portal for fast, secure local file sharing between your mobile device and PC.'>
 <title>We Share | Portal</title>
-<link href='https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap' rel='stylesheet'>
+<link href='https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@500;700;800&family=Manrope:wght@400;500;600;700&display=swap' rel='stylesheet'>
 <style>
 :root {
-  --bg: #0b0f19;
-  --panel: rgba(17, 24, 39, 0.7);
-  --border: rgba(255, 255, 255, 0.08);
-  --primary: #6366f1;
-  --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-  --primary-glow: rgba(99, 102, 241, 0.2);
-  --text: #f3f4f6;
-  --text-dim: #9ca3af;
-  --card: rgba(255, 255, 255, 0.03);
-  --input-bg: rgba(255, 255, 255, 0.05);
+  --bg: #07090e;
+  --panel: #0d111b;
+  --border: #1e293b;
+  --primary: #0ea5e9;
+  --primary-gradient: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+  --text: #f8fafc;
+  --text-dim: #64748b;
+  --card: #111827;
+  --input-bg: #1f2937;
 }
 html[data-theme='light'] {
   --bg: #f8fafc;
-  --panel: rgba(255, 255, 255, 0.7);
-  --border: rgba(15, 23, 42, 0.08);
-  --primary: #4f46e5;
-  --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-  --primary-glow: rgba(79, 70, 229, 0.1);
+  --panel: #ffffff;
+  --border: #e2e8f0;
+  --primary: #0284c7;
+  --primary-gradient: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
   --text: #0f172a;
   --text-dim: #64748b;
-  --card: rgba(15, 23, 42, 0.03);
-  --input-bg: rgba(15, 23, 42, 0.05);
+  --card: #f1f5f9;
+  --input-bg: #e2e8f0;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body {
   background: var(--bg);
-  background-image: radial-gradient(var(--border) 1.5px, transparent 1.5px);
-  background-size: 24px 24px;
-  animation: gridSweep 30s linear infinite;
   color: var(--text);
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Manrope', sans-serif;
   line-height: 1.5;
   overflow-x: hidden;
   transition: background 0.3s ease, color 0.3s ease;
-}
-@keyframes gridSweep {
-  from { background-position: 0 0; }
-  to { background-position: 24px 24px; }
 }
 .container {
   max-width: 600px;
@@ -63,14 +54,11 @@ body {
 header {
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 24px;
+  border-radius: 20px;
   padding: 24px;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   display: flex;
   flex-direction: column;
   gap: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
   position: relative;
 }
 .header-top {
@@ -81,16 +69,14 @@ header {
 .logo {
   width: 48px;
   height: 48px;
-  background: var(--primary-gradient);
-  border-radius: 14px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 20px var(--primary-glow);
+  border: 1px solid var(--border);
 }
-.logo svg { width: 24px; height: 24px; fill: white; }
 .brand-container { flex: 1; }
-.brand { font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 800; letter-spacing: 2px; }
+.brand { font-family: 'Cabinet Grotesk', sans-serif; font-size: 18px; font-weight: 800; letter-spacing: 2px; }
 .host-status {
   font-size: 11px;
   color: var(--text-dim);
@@ -151,16 +137,16 @@ header {
   background: var(--card);
   border: 1px solid var(--border);
   padding: 12px 16px;
-  border-radius: 16px;
+  border-radius: 14px;
 }
-.profile-label { font-family: 'Outfit', sans-serif; font-size: 11px; font-weight: 700; color: var(--text-dim); }
+.profile-label { font-family: 'Cabinet Grotesk', sans-serif; font-size: 11px; font-weight: 700; color: var(--text-dim); }
 .profile-input {
   flex: 1;
   background: var(--input-bg);
   border: 1px solid var(--border);
   color: var(--text);
   padding: 8px 12px;
-  border-radius: 10px;
+  border-radius: 8px;
   font-family: inherit;
   font-size: 13px;
   font-weight: 600;
@@ -173,16 +159,13 @@ header {
 section {
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 24px;
+  border-radius: 20px;
   padding: 24px;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
   display: flex;
   flex-direction: column;
 }
 .section-title {
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Cabinet Grotesk', sans-serif;
   font-size: 11px;
   font-weight: 800;
   color: var(--text-dim);
@@ -199,22 +182,20 @@ section {
 .drop-zone {
   position: relative;
   background: var(--card);
-  border: 2px dashed var(--border);
-  border-radius: 20px;
-  padding: 50px 20px;
+  border: 1.5px dashed var(--border);
+  border-radius: 16px;
+  padding: 40px 20px;
   text-align: center;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
   cursor: pointer;
 }
 .drop-zone:hover {
   border-color: var(--primary);
-  background: var(--primary-glow);
-  transform: translateY(-2px);
+  background: rgba(14, 165, 233, 0.04);
 }
 .drop-zone.drag {
   border-color: var(--primary);
-  background: var(--primary-glow);
-  transform: scale(0.98);
+  background: rgba(14, 165, 233, 0.08);
 }
 .drop-zone input {
   position: absolute;
@@ -222,14 +203,13 @@ section {
   opacity: 0;
   cursor: pointer;
 }
-.dz-icon {
-  font-size: 44px;
-  margin-bottom: 16px;
+.dz-icon-container {
+  margin-bottom: 12px;
   display: inline-block;
-  transition: transform 0.3s ease;
+  transition: transform 0.2s ease;
 }
-.drop-zone:hover .dz-icon { transform: translateY(-5px) scale(1.1); }
-.dz-text { font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+.drop-zone:hover .dz-icon-container { transform: translateY(-3px); }
+.dz-text { font-family: 'Cabinet Grotesk', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 4px; }
 .dz-sub { font-size: 12px; color: var(--text-dim); }
 
 /* -- File Cards -- */
@@ -237,55 +217,50 @@ section {
 .file-card {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 14px 16px;
+  border-radius: 12px;
+  padding: 12px 14px;
   display: flex;
   align-items: center;
   gap: 14px;
   text-decoration: none;
   color: inherit;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
 }
 .file-card:hover {
   border-color: var(--primary);
-  background: var(--primary-glow);
-  transform: translateY(-2px);
 }
 .f-icon {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   background: var(--input-bg);
-  border-radius: 12px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  border: 1px solid var(--border);
 }
 .f-info { flex: 1; min-width: 0; }
-.f-name { font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.f-name { font-family: 'Cabinet Grotesk', sans-serif; font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .f-size { font-size: 11px; color: var(--text-dim); font-weight: 500; margin-top: 2px; }
 .f-btn {
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Cabinet Grotesk', sans-serif;
   background: var(--primary-gradient);
   color: white;
   border: none;
   padding: 8px 16px;
-  border-radius: 10px;
+  border-radius: 8px;
   font-size: 11px;
   font-weight: 700;
-  box-shadow: 0 4px 10px var(--primary-glow);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: opacity 0.2s;
 }
-.file-card:hover .f-btn:hover { transform: scale(1.05); }
+.f-btn:hover { opacity: 0.9; }
 
 /* -- Progress Overlay -- */
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(11, 15, 23, 0.85);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(7, 9, 14, 0.95);
   z-index: 1000;
   display: none;
   flex-direction: column;
@@ -302,11 +277,11 @@ section {
   margin-bottom: 24px;
 }
 .progress-svg { transform: rotate(-90deg); }
-.prog-bg { fill: none; stroke: var(--border); stroke-width: 6; }
+.prog-bg { fill: none; stroke: var(--border); stroke-width: 5; }
 .prog-fill {
   fill: none;
-  stroke: url(#grad);
-  stroke-width: 6;
+  stroke: var(--primary);
+  stroke-width: 5;
   stroke-linecap: round;
   stroke-dasharray: 502;
   stroke-dashoffset: 502;
@@ -318,6 +293,7 @@ section {
   display: flex;
   align-items: center;
   justify-content: center;
+  font-family: 'Cabinet Grotesk', sans-serif;
   font-size: 28px;
   font-weight: 800;
 }
@@ -332,11 +308,10 @@ section {
   background: var(--primary-gradient);
   color: white;
   padding: 12px 24px;
-  border-radius: 50px;
+  border-radius: 30px;
   font-size: 13px;
   font-weight: 700;
-  box-shadow: 0 10px 25px var(--primary-glow);
-  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   z-index: 1100;
 }
 #toast.show { transform: translateX(-50%) translateY(0); }
@@ -348,7 +323,7 @@ section {
   right: 24px;
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 10px;
   width: 40px;
   height: 40px;
   display: flex;
@@ -356,25 +331,22 @@ section {
   justify-content: center;
   cursor: pointer;
   color: var(--text);
-  font-size: 16px;
   transition: all 0.2s;
 }
-#themeToggle:hover { border-color: var(--primary); background: var(--primary-glow); }
+#themeToggle:hover { border-color: var(--primary); }
 
 /* -- Accept Dialog Modal -- */
 .dialog-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(11, 15, 23, 0.85);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(7, 9, 14, 0.9);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 2000;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.2s ease;
 }
 .dialog-overlay.active {
   opacity: 1;
@@ -383,29 +355,28 @@ section {
 .dialog-box {
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 24px;
+  border-radius: 20px;
   padding: 32px 24px;
   width: 90%;
   max-width: 360px;
   text-align: center;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-  transform: scale(0.9);
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform: scale(0.95);
+  transition: transform 0.2s ease;
 }
 .dialog-overlay.active .dialog-box {
   transform: scale(1);
 }
 .dialog-icon {
-  font-size: 40px;
   margin-bottom: 16px;
+  display: inline-block;
   animation: bounce 2s infinite;
 }
 @keyframes bounce {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  50% { transform: translateY(-6px); }
 }
 .dialog-title {
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Cabinet Grotesk', sans-serif;
   font-size: 18px;
   font-weight: 800;
   margin-bottom: 8px;
@@ -424,8 +395,8 @@ section {
 .dialog-actions button {
   flex: 1;
   padding: 12px 16px;
-  border-radius: 12px;
-  font-family: 'Outfit', sans-serif;
+  border-radius: 10px;
+  font-family: 'Cabinet Grotesk', sans-serif;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
@@ -433,21 +404,19 @@ section {
   transition: all 0.2s;
 }
 .btn-decline {
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(239, 68, 68, 0.08);
   color: #ef4444;
-  border: 1px solid rgba(239, 68, 68, 0.2) !important;
+  border: 1px solid rgba(239, 68, 68, 0.15) !important;
 }
 .btn-decline:hover {
-  background: rgba(239, 68, 68, 0.2);
+  background: rgba(239, 68, 68, 0.15);
 }
 .btn-accept {
   background: var(--primary-gradient);
   color: white;
-  box-shadow: 0 6px 15px var(--primary-glow);
 }
 .btn-accept:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px var(--primary-glow);
+  opacity: 0.95;
 }
 </style>
 </head>
@@ -455,7 +424,7 @@ section {
 
 <div class='container'>
   <header>
-    <button id='themeToggle'>☀️</button>
+    <button id='themeToggle' aria-label='Toggle theme'></button>
     <div class='header-top'>
       <div class='logo' style='padding: 6px;'>
         <img src='/api/logo' style='width: 100%; height: 100%; object-fit: contain;' alt='Logo'/>
@@ -476,7 +445,9 @@ section {
     <div class='section-title'>Send to PC</div>
     <div class='drop-zone' id='dropZone'>
       <input type='file' id='fileInput' multiple onchange='handleFiles(this.files)'>
-      <span class='dz-icon'>🚀</span>
+      <div class='dz-icon-container'>
+        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='width: 44px; height: 44px; stroke: var(--primary);'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/><polyline points='17 8 12 3 7 8'/><line x1='12' y1='3' x2='12' y2='15'/></svg>
+      </div>
       <div class='dz-text'>Tap or Drop Files</div>
       <div class='dz-sub'>Files will be sent straight to the host PC</div>
     </div>
@@ -502,12 +473,6 @@ section {
 <div class='overlay' id='overlay'>
   <div class='progress-container'>
     <svg class='progress-svg' width='160' height='160' viewBox='0 0 160 160'>
-      <defs>
-        <linearGradient id='grad' x1='0%' y1='0%' x2='100%' y2='100%'>
-          <stop offset='0%' stop-color='#6366f1' />
-          <stop offset='100%' stop-color='#a855f7' />
-        </linearGradient>
-      </defs>
       <circle class='prog-bg' cx='80' cy='80' r='70'/>
       <circle class='prog-fill' id='progFill' cx='80' cy='80' r='70'/>
     </svg>
@@ -521,7 +486,9 @@ section {
 
 <div class='dialog-overlay' id='acceptDialogOverlay'>
   <div class='dialog-box'>
-    <div class='dialog-icon'>📥</div>
+    <div class='dialog-icon'>
+      <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='width: 48px; height: 48px; stroke: var(--primary);'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/><polyline points='7 10 12 15 17 10'/><line x1='12' y1='15' x2='12' y2='3'/></svg>
+    </div>
     <div class='dialog-title'>Incoming File</div>
     <div class='dialog-msg' id='dialogMsg'>Incoming file from PC: filename.ext (size).</div>
     <div class='dialog-actions'>
@@ -534,6 +501,9 @@ section {
 <script>
 const CIRC = 2 * Math.PI * 70;
 let sse = null;
+
+const sunIcon = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' style='width: 18px; height: 18px; display: block;'><circle cx='12' cy='12' r='4'/><path d='M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41'/></svg>`;
+const moonIcon = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' style='width: 18px; height: 18px; display: block;'><path d='M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z'/></svg>`;
 
 function getClientId() {
   let id = localStorage.getItem('weshare_client_id');
@@ -663,7 +633,7 @@ function connectSSE() {
     updateConnectionState();
   };
   sse.onerror = () => {
-    document.getElementById('hostLine').innerHTML = ""<span class='status-pulse offline'></span>DISCONNECTED"";
+    document.getElementById('hostLine').innerHTML = `<span class='status-pulse offline'></span>DISCONNECTED`;
   };
   sse.onmessage = e => {
     if (e.data === 'refresh') {
@@ -682,14 +652,15 @@ function connectSSE() {
 async function updateConnectionState() {
   try {
     const me = await fetch('/api/me').then(r=>r.json());
-    document.getElementById('hostLine').innerHTML = ""<span class='status-pulse online'></span>CONNECTED TO "" + escapeHtml((me.name).toUpperCase());
+    document.getElementById('hostLine').innerHTML = `<span class='status-pulse online'></span>CONNECTED TO ` + escapeHtml((me.name).toUpperCase());
   } catch(_){
-    document.getElementById('hostLine').innerHTML = ""<span class='status-pulse offline'></span>DISCONNECTED"";
+    document.getElementById('hostLine').innerHTML = `<span class='status-pulse offline'></span>DISCONNECTED`;
   }
 }
 
 async function init() {
   initName();
+  updateThemeButton();
   connectSSE();
   await updateConnectionState();
   loadFiles();
@@ -705,10 +676,10 @@ async function loadFiles() {
     if (loadedFilesList.length) {
       sec.style.display = 'block';
       list.innerHTML = loadedFilesList.map((f, idx) => {
-        const emoji = getFileEmoji(f.name);
+        const svgIcon = getFileIconSvg(f.name);
         return `
         <div class='file-card'>
-          <div class='f-icon'>${emoji}</div>
+          <div class='f-icon'>${svgIcon}</div>
           <div class='f-info'>
             <div class='f-name'>${escapeHtml(f.name)}</div>
             <div class='f-size'>${fmt(f.size)}</div>
@@ -720,14 +691,24 @@ async function loadFiles() {
   } catch(_){}
 }
 
-function getFileEmoji(name) {
+function getFileIconSvg(name) {
   const ext = name.split('.').pop().toLowerCase();
-  if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(ext)) return '🖼️';
-  if (['mp4', 'mkv', 'avi', 'mov', 'webm'].includes(ext)) return '🎥';
-  if (['mp3', 'wav', 'flac', 'ogg', 'm4a'].includes(ext)) return '🎵';
-  if (['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt'].includes(ext)) return '📄';
-  if (['zip', 'rar', 'tar', 'gz', '7z'].includes(ext)) return '📦';
-  return '📁';
+  if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(ext)) {
+    return `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='width: 22px; height: 22px; stroke: #06b6d4;'><rect x='3' y='3' width='18' height='18' rx='2' ry='2'/><circle cx='8.5' cy='8.5' r='1.5'/><polyline points='21 15 16 10 5 21'/></svg>`;
+  }
+  if (['mp4', 'mkv', 'avi', 'mov', 'webm'].includes(ext)) {
+    return `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='width: 22px; height: 22px; stroke: #10b981;'><path d='M23 7l-7 5 7 5V7z'/><rect x='1' y='5' width='15' height='14' rx='2' ry='2'/></svg>`;
+  }
+  if (['mp3', 'wav', 'flac', 'ogg', 'm4a'].includes(ext)) {
+    return `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='width: 22px; height: 22px; stroke: #ec4899;'><path d='M9 18V5l12-2v13'/><circle cx='6' cy='18' r='3'/><circle cx='18' cy='16' r='3'/></svg>`;
+  }
+  if (['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt'].includes(ext)) {
+    return `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='width: 22px; height: 22px; stroke: #3b82f6;'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/><line x1='16' y1='13' x2='8' y2='13'/><line x1='16' y1='17' x2='8' y2='17'/></svg>`;
+  }
+  if (['zip', 'rar', 'tar', 'gz', '7z'].includes(ext)) {
+    return `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='width: 22px; height: 22px; stroke: #eab308;'><polyline points='22 12 16 12 14 15 10 15 8 12 2 12'/><path d='M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z'/></svg>`;
+  }
+  return `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='width: 22px; height: 22px; stroke: var(--text-dim);'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/></svg>`;
 }
 
 async function handleFiles(files) {
@@ -776,6 +757,11 @@ function fmt(b){
   return (b/1048576).toFixed(1)+' MB';
 }
 
+function updateThemeButton() {
+  const current = document.documentElement.getAttribute('data-theme');
+  toggleBtn.innerHTML = current === 'light' ? moonIcon : sunIcon;
+}
+
 const dz = document.getElementById('dropZone');
 dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag');});
 dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));
@@ -786,62 +772,16 @@ toggleBtn.addEventListener('click', () => {
   const current = document.documentElement.getAttribute('data-theme');
   if (current === 'light') {
     document.documentElement.removeAttribute('data-theme');
-    toggleBtn.textContent = '☀️';
   } else {
     document.documentElement.setAttribute('data-theme', 'light');
-    toggleBtn.textContent = '🌙';
   }
+  updateThemeButton();
 });
 
 // Auto detect system theme
 if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
   document.documentElement.setAttribute('data-theme', 'light');
-  toggleBtn.textContent = '🌙';
 }
-
-document.getElementById('btnAccept').addEventListener('click', async () => {
-  if (currentOffer) {
-    const offer = currentOffer;
-    document.getElementById('acceptDialogOverlay').classList.remove('active');
-    isShowingOffer = false;
-    currentOffer = null;
-
-    const ov = document.getElementById('overlay');
-    document.getElementById('overlayTitle').textContent = 'DOWNLOADING';
-    document.getElementById('ovFile').textContent = offer.name;
-    setProg(0);
-    ov.classList.add('active');
-
-    try {
-      await downloadFile(offer.id, offer.name);
-      showToast('Downloaded ' + offer.name);
-    } catch (ex) {
-      console.error(ex);
-      showToast('Download failed');
-    } finally {
-      ov.classList.remove('active');
-      loadFiles();
-      processNextOffer();
-    }
-  }
-});
-
-document.getElementById('btnDecline').addEventListener('click', async () => {
-  if (currentOffer) {
-    const offer = currentOffer;
-    const id = getClientId();
-    document.getElementById('acceptDialogOverlay').classList.remove('active');
-    isShowingOffer = false;
-    currentOffer = null;
-
-    try {
-      await fetch('/api/decline?clientId=' + id + '&id=' + offer.id, { method: 'POST' });
-    } catch(_) {}
-    
-    loadFiles();
-    processNextOffer();
-  }
-});
 
 init();
 </script>
