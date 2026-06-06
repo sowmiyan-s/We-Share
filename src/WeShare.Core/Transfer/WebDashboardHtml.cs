@@ -9,36 +9,43 @@ namespace WeShare.Core.Transfer
 <meta name='viewport' content='width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no'>
 <meta name='description' content='We Share Web Portal for fast, secure local file sharing between your mobile device and PC.'>
 <title>We Share | Portal</title>
-<link href='https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@500;700;800&family=Manrope:wght@400;500;600;700&display=swap' rel='stylesheet'>
+
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+
 :root {
-  --bg: #07090e;
-  --panel: #0d111b;
-  --border: #1e293b;
-  --primary: #0ea5e9;
-  --primary-gradient: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-  --text: #f8fafc;
-  --text-dim: #64748b;
-  --card: #111827;
-  --input-bg: #1f2937;
+  --bg: #09090b;
+  --panel: #18181b;
+  --border: #27272a;
+  --primary: #10b981;
+  --primary-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  --text: #f4f4f5;
+  --text-dim: #a1a1aa;
+  --card: #202023;
+  --input-bg: #27272a;
+  --badge-bg: rgba(16, 185, 129, 0.1);
+  --badge-text: #34d399;
 }
 html[data-theme='light'] {
-  --bg: #f8fafc;
+  --bg: #fafafa;
   --panel: #ffffff;
-  --border: #e2e8f0;
-  --primary: #0284c7;
-  --primary-gradient: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-  --text: #0f172a;
-  --text-dim: #64748b;
-  --card: #f1f5f9;
-  --input-bg: #e2e8f0;
+  --border: #e4e4e7;
+  --primary: #059669;
+  --primary-gradient: linear-gradient(135deg, #059669 0%, #047857 100%);
+  --text: #09090b;
+  --text-dim: #71717a;
+  --card: #f4f4f5;
+  --input-bg: #e4e4e7;
+  --badge-bg: rgba(5, 150, 105, 0.08);
+  --badge-text: #047857;
 }
+
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Manrope', sans-serif;
-  line-height: 1.5;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.6;
   overflow-x: hidden;
   transition: background 0.3s ease, color 0.3s ease;
 }
@@ -48,8 +55,37 @@ body {
   padding: 30px 20px;
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 24px;
 }
+
+/* -- Marquee Banner -- */
+.marquee-banner {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px 16px;
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.marquee-content {
+  display: inline-block;
+  padding-left: 100%;
+  animation: marquee-scroll 30s linear infinite;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--primary);
+}
+@keyframes marquee-scroll {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-100%, 0, 0); }
+}
+
 /* -- Header -- */
 header {
   background: var(--panel);
@@ -58,7 +94,7 @@ header {
   padding: 24px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
   position: relative;
 }
 .header-top {
@@ -74,19 +110,27 @@ header {
   align-items: center;
   justify-content: center;
   border: 1px solid var(--border);
+  background: var(--card);
 }
 .brand-container { flex: 1; }
-.brand { font-family: 'Cabinet Grotesk', sans-serif; font-size: 18px; font-weight: 800; letter-spacing: 2px; }
+.brand { 
+  font-family: 'Bricolage Grotesque', sans-serif; 
+  font-size: 20px; 
+  font-weight: 800; 
+  letter-spacing: 1.5px; 
+}
 .host-status {
   font-size: 11px;
   color: var(--text-dim);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-top: 4px;
+  margin-top: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: var(--input-bg);
 }
 
 /* -- Status Pulse Ring -- */
@@ -139,7 +183,13 @@ header {
   padding: 12px 16px;
   border-radius: 14px;
 }
-.profile-label { font-family: 'Cabinet Grotesk', sans-serif; font-size: 11px; font-weight: 700; color: var(--text-dim); }
+.profile-label { 
+  font-family: 'Bricolage Grotesque', sans-serif; 
+  font-size: 11px; 
+  font-weight: 800; 
+  color: var(--text-dim); 
+  letter-spacing: 0.5px;
+}
 .profile-input {
   flex: 1;
   background: var(--input-bg);
@@ -151,9 +201,12 @@ header {
   font-size: 13px;
   font-weight: 600;
   outline: none;
-  transition: border-color 0.2s;
+  transition: all 0.2s;
 }
-.profile-input:focus { border-color: var(--primary); }
+.profile-input:focus { 
+  border-color: var(--primary); 
+  background: var(--panel);
+}
 
 /* -- Section -- */
 section {
@@ -165,12 +218,12 @@ section {
   flex-direction: column;
 }
 .section-title {
-  font-family: 'Cabinet Grotesk', sans-serif;
-  font-size: 11px;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 12px;
   font-weight: 800;
   color: var(--text-dim);
   text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
   margin-bottom: 18px;
   display: flex;
   align-items: center;
@@ -191,11 +244,11 @@ section {
 }
 .drop-zone:hover {
   border-color: var(--primary);
-  background: rgba(14, 165, 233, 0.04);
+  background: var(--input-bg);
 }
 .drop-zone.drag {
   border-color: var(--primary);
-  background: rgba(14, 165, 233, 0.08);
+  background: var(--input-bg);
 }
 .drop-zone input {
   position: absolute;
@@ -209,7 +262,12 @@ section {
   transition: transform 0.2s ease;
 }
 .drop-zone:hover .dz-icon-container { transform: translateY(-3px); }
-.dz-text { font-family: 'Cabinet Grotesk', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.dz-text { 
+  font-family: 'Bricolage Grotesque', sans-serif; 
+  font-size: 16px; 
+  font-weight: 800; 
+  margin-bottom: 4px; 
+}
 .dz-sub { font-size: 12px; color: var(--text-dim); }
 
 /* -- File Cards -- */
@@ -228,6 +286,7 @@ section {
 }
 .file-card:hover {
   border-color: var(--primary);
+  background: var(--input-bg);
 }
 .f-icon {
   width: 40px;
@@ -240,17 +299,24 @@ section {
   border: 1px solid var(--border);
 }
 .f-info { flex: 1; min-width: 0; }
-.f-name { font-family: 'Cabinet Grotesk', sans-serif; font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.f-size { font-size: 11px; color: var(--text-dim); font-weight: 500; margin-top: 2px; }
+.f-name { 
+  font-family: 'Bricolage Grotesque', sans-serif; 
+  font-size: 14px; 
+  font-weight: 700; 
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+}
+.f-size { font-size: 12px; color: var(--text-dim); font-weight: 500; margin-top: 2px; }
 .f-btn {
-  font-family: 'Cabinet Grotesk', sans-serif;
+  font-family: 'Bricolage Grotesque', sans-serif;
   background: var(--primary-gradient);
   color: white;
   border: none;
   padding: 8px 16px;
   border-radius: 8px;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
   transition: opacity 0.2s;
 }
@@ -260,44 +326,149 @@ section {
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(7, 9, 14, 0.95);
+  background: rgba(9, 9, 11, 0.96);
   z-index: 1000;
   display: none;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px;
+  padding: 24px;
   text-align: center;
 }
 .overlay.active { display: flex; }
-.progress-container {
-  width: 160px;
-  height: 160px;
-  position: relative;
-  margin-bottom: 24px;
+
+/* -- Windows Style Transfer Dialog -- */
+.win-dialog {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 400px;
+  padding: 24px;
+  font-family: inherit;
+  color: var(--text);
+  box-sizing: border-box;
 }
-.progress-svg { transform: rotate(-90deg); }
-.prog-bg { fill: none; stroke: var(--border); stroke-width: 5; }
-.prog-fill {
-  fill: none;
-  stroke: var(--primary);
-  stroke-width: 5;
-  stroke-linecap: round;
-  stroke-dasharray: 502;
-  stroke-dashoffset: 502;
-  transition: stroke-dashoffset 0.1s linear;
+
+.win-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  margin-bottom: 20px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
-.prog-text {
-  position: absolute;
-  inset: 0;
+
+.win-close-btn {
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--text-dim);
+  line-height: 1;
+  transition: color 0.2s;
+}
+.win-close-btn:hover {
+  color: var(--text);
+}
+
+.win-file-info {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.win-filename {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 6px;
+}
+
+.win-detail-text {
+  font-size: 12px;
+  color: var(--text-dim);
+  font-weight: 500;
+}
+
+.win-progress-row {
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-family: 'Cabinet Grotesk', sans-serif;
-  font-size: 28px;
-  font-weight: 800;
+  gap: 12px;
+  margin-bottom: 20px;
 }
-.ov-file { font-size: 13px; color: var(--text-dim); margin-top: 12px; max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
+
+.win-progress-bar-bg {
+  flex: 1;
+  height: 8px;
+  background: var(--input-bg);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid var(--border);
+}
+
+.win-progress-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: #107c41; /* Windows Green */
+  border-radius: 4px;
+  transition: width 0.1s linear;
+}
+
+.win-percent {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  min-width: 35px;
+  text-align: right;
+}
+
+.win-graph-container {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+  overflow: hidden;
+  margin-bottom: 20px;
+  position: relative;
+  height: 120px;
+}
+
+#speedGraph {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.win-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.win-cancel-btn {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.win-cancel-btn:hover {
+  background: var(--input-bg);
+  border-color: var(--text-dim);
+}
 
 /* -- Toast -- */
 #toast {
@@ -309,8 +480,9 @@ section {
   color: white;
   padding: 12px 24px;
   border-radius: 30px;
+  font-family: 'Bricolage Grotesque', sans-serif;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 800;
   transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   z-index: 1100;
 }
@@ -333,13 +505,51 @@ section {
   color: var(--text);
   transition: all 0.2s;
 }
-#themeToggle:hover { border-color: var(--primary); }
+#themeToggle:hover { border-color: var(--primary); background: var(--input-bg); }
+
+/* -- Captive Portal Warning Card -- */
+.captive-warning-card {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: 16px;
+  padding: 16px;
+  display: none;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+.cw-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.cw-content {
+  flex: 1;
+}
+.cw-title {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  color: #f59e0b;
+  margin-bottom: 4px;
+}
+.cw-text {
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+.cw-link {
+  color: var(--primary);
+  font-weight: 700;
+  text-decoration: underline;
+  word-break: break-all;
+}
 
 /* -- Accept Dialog Modal -- */
 .dialog-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(7, 9, 14, 0.9);
+  background: rgba(9, 9, 11, 0.96);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -358,7 +568,7 @@ section {
   border-radius: 20px;
   padding: 32px 24px;
   width: 90%;
-  max-width: 360px;
+  max-width: 380px;
   text-align: center;
   transform: scale(0.95);
   transition: transform 0.2s ease;
@@ -376,11 +586,11 @@ section {
   50% { transform: translateY(-6px); }
 }
 .dialog-title {
-  font-family: 'Cabinet Grotesk', sans-serif;
-  font-size: 18px;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 20px;
   font-weight: 800;
-  margin-bottom: 8px;
-  letter-spacing: 1px;
+  margin-bottom: 10px;
+  letter-spacing: 0.5px;
 }
 .dialog-msg {
   font-size: 13px;
@@ -396,12 +606,14 @@ section {
   flex: 1;
   padding: 12px 16px;
   border-radius: 10px;
-  font-family: 'Cabinet Grotesk', sans-serif;
+  font-family: 'Bricolage Grotesque', sans-serif;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
   border: none;
   transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 .btn-decline {
   background: rgba(239, 68, 68, 0.08);
@@ -423,6 +635,31 @@ section {
 <body>
 
 <div class='container'>
+  <div class='marquee-banner'>
+    <div class='marquee-content'>
+      LOCAL HIGH-SPEED SHARING ACTIVE • SECURE DIRECT P2P TRANSFER • ZERO CLOUD STORAGE • WE SHARE PORTAL v1.0.0 • CONNECTED AND READY
+    </div>
+  </div>
+
+  <div id='captiveWarning' class='captive-warning-card' style='position: relative; display: none; flex-direction: column; gap: 12px;'>
+    <div style='display: flex; gap: 12px; align-items: flex-start;'>
+      <div class='cw-icon'>
+        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='#f59e0b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' style='width: 24px; height: 24px; min-width: 24px;'><path d='M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z'/><line x1='12' y1='9' x2='12' y2='13'/><line x1='12' y1='17' x2='12.01' y2='17'/></svg>
+      </div>
+      <div class='cw-content'>
+        <div class='cw-title'>File Uploads Restricted?</div>
+        <div class='cw-text'>If you are using the system 'Sign in' popup, your phone restricts file uploads. Tap the button below to open WeShare in your default browser:</div>
+      </div>
+      <button onclick=""document.getElementById('captiveWarning').style.display='none'"" style=""background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:18px; line-height:1; padding:0 4px;"">&times;</button>
+    </div>
+    <div style='padding-left: 36px;'>
+      <button onclick='openInBrowser()' style='background: var(--primary-gradient); color: white; border: none; padding: 8px 16px; border-radius: 8px; font-family: inherit; font-size: 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;'>
+        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' style='width: 12px; height: 12px;'><path d='M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6'/><polyline points='15 3 21 3 21 9'/><line x1='10' y1='14' x2='21' y2='3'/></svg>
+        OPEN IN SYSTEM BROWSER
+      </button>
+    </div>
+  </div>
+
   <header>
     <button id='themeToggle' aria-label='Toggle theme'></button>
     <div class='header-top'>
@@ -471,15 +708,33 @@ section {
 </div>
 
 <div class='overlay' id='overlay'>
-  <div class='progress-container'>
-    <svg class='progress-svg' width='160' height='160' viewBox='0 0 160 160'>
-      <circle class='prog-bg' cx='80' cy='80' r='70'/>
-      <circle class='prog-fill' id='progFill' cx='80' cy='80' r='70'/>
-    </svg>
-    <div class='prog-text' id='progText'>0%</div>
+  <div class='win-dialog'>
+    <div class='win-header'>
+      <span id='overlayTitle'>Copying...</span>
+      <span class='win-close-btn' onclick='window.location.reload()'>&times;</span>
+    </div>
+    
+    <div class='win-file-info'>
+      <div id='ovFile' class='win-filename'>filename.ext</div>
+      <div id='winTimeSpeed' class='win-detail-text'>Calculating speed and time...</div>
+    </div>
+    
+    <div class='win-progress-row'>
+      <div class='win-progress-bar-bg'>
+        <div id='winProgressBarFill' class='win-progress-bar-fill'></div>
+      </div>
+      <div id='progText' class='win-percent'>0%</div>
+    </div>
+
+    <div class='win-graph-container'>
+      <canvas id='speedGraph' width='300' height='100'></canvas>
+    </div>
+
+    <div class='win-footer'>
+      <div id='winProgressDetails' class='win-detail-text'>0 KB of 0 KB</div>
+      <button class='win-cancel-btn' onclick='window.location.reload()'>Cancel</button>
+    </div>
   </div>
-  <div class='brand' id='overlayTitle' style='font-size: 12px; letter-spacing: 2px; color: var(--primary); font-weight: 800;'>UPLOADING</div>
-  <div class='ov-file' id='ovFile'>filename.ext</div>
 </div>
 
 <div id='toast'>Files sent successfully!</div>
@@ -501,32 +756,54 @@ section {
 <script>
 const CIRC = 2 * Math.PI * 70;
 let sse = null;
+let speedHistory = [];
+const maxGraphPoints = 40;
 
 const sunIcon = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' style='width: 18px; height: 18px; display: block;'><circle cx='12' cy='12' r='4'/><path d='M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41'/></svg>`;
 const moonIcon = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' style='width: 18px; height: 18px; display: block;'><path d='M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z'/></svg>`;
 
 function getClientId() {
-  let id = localStorage.getItem('weshare_client_id');
-  if (!id) {
-    id = 'wc_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now().toString(36);
-    localStorage.setItem('weshare_client_id', id);
+  try {
+    let id = localStorage.getItem('weshare_client_id');
+    if (!id) {
+      id = 'wc_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now().toString(36);
+      localStorage.setItem('weshare_client_id', id);
+    }
+    return id;
+  } catch (e) {
+    if (!window.weshare_mem_client_id) {
+      window.weshare_mem_client_id = 'wc_mem_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now().toString(36);
+    }
+    return window.weshare_mem_client_id;
   }
-  return id;
 }
 
 function getClientName() {
-  let name = localStorage.getItem('weshare_client_name');
-  if (!name) {
-    const platforms = ['iPhone', 'Android', 'iPad', 'Mac', 'Windows', 'Linux'];
-    const ua = navigator.userAgent;
-    let detected = 'Mobile Web';
-    for (const p of platforms) {
-      if (ua.includes(p)) { detected = p + ' Web'; break; }
+  try {
+    let name = localStorage.getItem('weshare_client_name');
+    if (!name) {
+      const platforms = ['iPhone', 'Android', 'iPad', 'Mac', 'Windows', 'Linux'];
+      const ua = navigator.userAgent;
+      let detected = 'Mobile Web';
+      for (const p of platforms) {
+        if (ua.includes(p)) { detected = p + ' Web'; break; }
+      }
+      name = detected + ' ' + Math.floor(Math.random() * 900 + 100);
+      localStorage.setItem('weshare_client_name', name);
     }
-    name = detected + ' ' + Math.floor(Math.random() * 900 + 100);
-    localStorage.setItem('weshare_client_name', name);
+    return name;
+  } catch (e) {
+    if (!window.weshare_mem_client_name) {
+      const platforms = ['iPhone', 'Android', 'iPad', 'Mac', 'Windows', 'Linux'];
+      const ua = navigator.userAgent;
+      let detected = 'Mobile Web';
+      for (const p of platforms) {
+        if (ua.includes(p)) { detected = p + ' Web'; break; }
+      }
+      window.weshare_mem_client_name = detected + ' ' + Math.floor(Math.random() * 900 + 100);
+    }
+    return window.weshare_mem_client_name;
   }
-  return name;
 }
 
 function initName() {
@@ -535,7 +812,11 @@ function initName() {
   input.addEventListener('change', () => {
     let name = input.value.trim();
     if (!name) name = 'Web Client';
-    localStorage.setItem('weshare_client_name', name);
+    try {
+      localStorage.setItem('weshare_client_name', name);
+    } catch (e) {
+      window.weshare_mem_client_name = name;
+    }
     connectSSE();
     showToast('Nickname updated to ' + name);
   });
@@ -553,12 +834,33 @@ function escapeHtml(str) {
 function downloadFile(id, name) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    xhr.open('GET', '/download?id=' + id);
+    const cId = getClientId();
+    xhr.open('GET', '/download?id=' + id + '&clientId=' + cId);
     xhr.responseType = 'blob';
+    
+    speedHistory = [];
+    let lastTime = Date.now();
+    let lastLoaded = 0;
     
     xhr.onprogress = e => {
       if (e.lengthComputable) {
-        setProg(e.loaded / e.total * 100);
+        const pct = e.loaded / e.total * 100;
+        const now = Date.now();
+        const elapsed = (now - lastTime) / 1000;
+        
+        if (elapsed >= 0.25 || pct >= 99.9) {
+          const loadedDiff = e.loaded - lastLoaded;
+          const speedMb = elapsed > 0 ? (loadedDiff / elapsed) / 1000000 : 0;
+          
+          lastTime = now;
+          lastLoaded = e.loaded;
+          
+          setProg(pct);
+          
+          document.getElementById('winTimeSpeed').textContent = speedMb.toFixed(1) + ' MB/s';
+          document.getElementById('winProgressDetails').textContent = fmt(e.loaded) + ' of ' + fmt(e.total);
+          drawGraph(speedMb);
+        }
       }
     };
     
@@ -622,6 +924,49 @@ function processNextOffer() {
   document.getElementById('acceptDialogOverlay').classList.add('active');
 }
 
+window.addEventListener('load', () => {
+  document.getElementById('btnAccept').addEventListener('click', () => {
+    if (!currentOffer) return;
+    const offer = currentOffer;
+    document.getElementById('acceptDialogOverlay').classList.remove('active');
+    isShowingOffer = false;
+    
+    const ov = document.getElementById('overlay');
+    document.getElementById('overlayTitle').textContent = 'DOWNLOADING';
+    document.getElementById('ovFile').textContent = offer.name;
+    setProg(0);
+    ov.classList.add('active');
+    downloadFile(offer.id, offer.name)
+      .then(() => {
+        showToast('Downloaded ' + offer.name);
+      })
+      .catch(err => {
+        console.error(err);
+        showToast('Download failed');
+      })
+      .finally(() => {
+        ov.classList.remove('active');
+        processNextOffer();
+      });
+  });
+
+  document.getElementById('btnDecline').addEventListener('click', () => {
+    if (!currentOffer) return;
+    const id = getClientId();
+    const offer = currentOffer;
+    document.getElementById('acceptDialogOverlay').classList.remove('active');
+    isShowingOffer = false;
+    fetch('/api/decline?clientId=' + id + '&id=' + offer.id, { method: 'POST' })
+      .then(() => {
+        showToast('Declined ' + offer.name);
+      })
+      .catch(console.error)
+      .finally(() => {
+        processNextOffer();
+      });
+  });
+});
+
 function connectSSE() {
   if (sse) {
     sse.close();
@@ -633,7 +978,11 @@ function connectSSE() {
     updateConnectionState();
   };
   sse.onerror = () => {
-    document.getElementById('hostLine').innerHTML = `<span class='status-pulse offline'></span>DISCONNECTED`;
+    if (sse.readyState === 0) { // EventSource.CONNECTING
+      document.getElementById('hostLine').innerHTML = `<span class='status-pulse connecting'></span>RECONNECTING...`;
+    } else {
+      document.getElementById('hostLine').innerHTML = `<span class='status-pulse offline'></span>DISCONNECTED`;
+    }
   };
   sse.onmessage = e => {
     if (e.data === 'refresh') {
@@ -658,12 +1007,62 @@ async function updateConnectionState() {
   }
 }
 
+function openInBrowser() {
+  const host = window.location.host;
+  const url = window.location.protocol + '//' + host;
+  const ua = navigator.userAgent.toLowerCase();
+  
+  if (/android/i.test(ua)) {
+    const intentUrl = 'intent://' + host + '/#Intent;scheme=http;action=android.intent.action.VIEW;end';
+    window.location.href = intentUrl;
+  } else {
+    navigator.clipboard.writeText(url).then(() => {
+      alert('Link copied! Please open Safari, paste the link, and hit Go.');
+    }).catch(() => {
+      const el = document.createElement('textarea');
+      el.value = url;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      alert('Link copied! Please open Safari, paste the link, and hit Go.');
+    });
+  }
+}
+
+function checkCaptivePortal() {
+  const ua = navigator.userAgent.toLowerCase();
+  const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(ua);
+  
+  const isIOSCNA = (ua.includes('iphone') || ua.includes('ipad') || ua.includes('ipod')) && !ua.includes('safari');
+  const isAndroidCNA = ua.includes('captiveportallogin') || ua.includes('g-portal') || ua.includes('okhttp') || ua.includes('; wv)');
+  
+  if (isMobile && (isIOSCNA || isAndroidCNA || document.referrer.includes('captive') || window.name === 'captive')) {
+    const card = document.getElementById('captiveWarning');
+    card.style.display = 'flex';
+    
+    const dz = document.getElementById('dropZone');
+    const input = document.getElementById('fileInput');
+    if (dz && input) {
+      input.disabled = true;
+      dz.style.opacity = '0.5';
+      dz.style.pointerEvents = 'none';
+      dz.style.cursor = 'not-allowed';
+      const dzText = dz.querySelector('.dz-text');
+      const dzSub = dz.querySelector('.dz-sub');
+      if (dzText) dzText.textContent = 'Uploads Restricted in Sign-in Window';
+      if (dzSub) dzSub.textContent = 'Please open in Chrome/Safari to send files';
+    }
+  }
+}
+
 async function init() {
   initName();
   updateThemeButton();
   connectSSE();
   await updateConnectionState();
   loadFiles();
+  checkCaptivePortal();
 }
 
 async function loadFiles() {
@@ -711,36 +1110,186 @@ function getFileIconSvg(name) {
   return `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='width: 22px; height: 22px; stroke: var(--text-dim);'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/></svg>`;
 }
 
+function drawGraph(speed) {
+  speedHistory.push(speed);
+  if (speedHistory.length > maxGraphPoints) {
+    speedHistory.shift();
+  }
+
+  const canvas = document.getElementById('speedGraph');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width;
+  const h = canvas.height;
+  
+  ctx.clearRect(0, 0, w, h);
+  
+  // Find max speed to scale graph
+  let maxSpeed = Math.max(...speedHistory, 5); // at least scale up to 5 MB/s
+  
+  // Draw grid lines
+  ctx.strokeStyle = 'rgba(128, 128, 128, 0.15)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  for (let i = 1; i < 4; i++) {
+    const y = (h / 4) * i;
+    ctx.moveTo(0, y);
+    ctx.lineTo(w, y);
+  }
+  ctx.stroke();
+  
+  // Draw speed line
+  ctx.strokeStyle = '#107c41'; // Windows Green
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  
+  const step = w / (maxGraphPoints - 1);
+  const getX = (idx) => idx * step;
+  const getY = (val) => h - (val / maxSpeed) * (h - 20) - 10;
+  
+  // Align data to right of the graph
+  const startIndex = maxGraphPoints - speedHistory.length;
+  
+  ctx.moveTo(getX(startIndex), getY(speedHistory[0]));
+  for (let i = 1; i < speedHistory.length; i++) {
+    ctx.lineTo(getX(startIndex + i), getY(speedHistory[i]));
+  }
+  ctx.stroke();
+  
+  // Fill under the line
+  ctx.fillStyle = 'rgba(16, 124, 65, 0.15)';
+  ctx.beginPath();
+  ctx.moveTo(getX(startIndex), h);
+  ctx.lineTo(getX(startIndex), getY(speedHistory[0]));
+  for (let i = 1; i < speedHistory.length; i++) {
+    ctx.lineTo(getX(startIndex + i), getY(speedHistory[i]));
+  }
+  ctx.lineTo(getX(startIndex + speedHistory.length - 1), h);
+  ctx.closePath();
+  ctx.fill();
+  
+  // Draw current speed value text in graph
+  ctx.fillStyle = 'var(--text)';
+  ctx.font = '10px sans-serif';
+  ctx.fillText(maxSpeed.toFixed(1) + ' MB/s max', 8, 15);
+}
+
 async function handleFiles(files) {
   if (!files.length) return;
-  const ov = document.getElementById('overlay');
-  document.getElementById('overlayTitle').textContent = 'UPLOADING';
-  ov.classList.add('active');
+  const id = getClientId();
+  let successCount = 0;
+  let failMessage = '';
+  
   for (const f of files) {
+    const ov = document.getElementById('overlay');
+    document.getElementById('overlayTitle').textContent = 'Requesting permission...';
     document.getElementById('ovFile').textContent = f.name;
     setProg(0);
-    await upload(f);
+    speedHistory = [];
+    
+    // Clear graph drawing
+    const canvas = document.getElementById('speedGraph');
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    
+    ov.classList.add('active');
+
+    try {
+      // 1. Request permission
+      const askRes = await fetch('/api/ask-receive?clientId=' + id + '&name=' + encodeURIComponent(f.name) + '&size=' + f.size, { method: 'POST' }).then(r => r.json());
+      if (!askRes.accepted) {
+        throw new Error(askRes.error || 'Rejected by host PC');
+      }
+      
+      // 2. Perform upload
+      document.getElementById('overlayTitle').textContent = 'Uploading...';
+      await upload(f, askRes.id);
+      successCount++;
+    } catch(err) {
+      console.error(err);
+      failMessage = err.message || 'Upload failed';
+      ov.classList.remove('active');
+      break;
+    }
+    ov.classList.remove('active');
   }
-  ov.classList.remove('active');
-  showToast('Sent ' + files.length + ' file(s) to PC');
+
+  if (successCount === files.length) {
+    showToast('Sent ' + files.length + ' file(s) to PC');
+  } else if (successCount > 0) {
+    showToast('Sent ' + successCount + ' of ' + files.length + ' file(s). Error: ' + failMessage);
+  } else {
+    showToast('Upload failed: ' + failMessage);
+  }
   document.getElementById('fileInput').value = '';
 }
 
 function setProg(p) {
-  document.getElementById('progFill').style.strokeDashoffset = CIRC - (p/100)*CIRC;
+  const fill = document.getElementById('winProgressBarFill');
+  if (fill) fill.style.width = p + '%';
   document.getElementById('progText').textContent = Math.round(p) + '%';
 }
 
-function upload(file) {
+function upload(file, uploadId) {
   return new Promise((res,rej)=>{
     const xhr = new XMLHttpRequest();
     const id = getClientId();
-    xhr.open('POST','/upload?clientId=' + id);
+    xhr.open('POST','/upload?clientId=' + id + '&id=' + uploadId);
     xhr.setRequestHeader('X-File-Name', encodeURIComponent(file.name));
+    
+    let lastTime = Date.now();
+    let lastLoaded = 0;
+    
     xhr.upload.onprogress = e => {
-      if (e.lengthComputable) setProg(e.loaded/e.total*100);
+      if (e.lengthComputable) {
+        const pct = e.loaded / e.total * 100;
+        const now = Date.now();
+        const elapsed = (now - lastTime) / 1000;
+        
+        if (elapsed >= 0.25 || pct >= 99.9) {
+          const loadedDiff = e.loaded - lastLoaded;
+          const speedMb = elapsed > 0 ? (loadedDiff / elapsed) / 1000000 : 0;
+          
+          lastTime = now;
+          lastLoaded = e.loaded;
+          
+          setProg(pct);
+          
+          document.getElementById('winTimeSpeed').textContent = speedMb.toFixed(1) + ' MB/s';
+          document.getElementById('winProgressDetails').textContent = fmt(e.loaded) + ' of ' + fmt(e.total);
+          drawGraph(speedMb);
+          
+          if (pct >= 99.9) {
+            document.getElementById('overlayTitle').textContent = 'Finishing...';
+          }
+        }
+      }
     };
-    xhr.onload=res; xhr.onerror=rej; xhr.send(file);
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          const resp = JSON.parse(xhr.responseText);
+          if (resp.success) {
+            res(resp);
+          } else {
+            rej(new Error(resp.error || 'Upload failed'));
+          }
+        } catch (e) {
+          res();
+        }
+      } else {
+        try {
+          const resp = JSON.parse(xhr.responseText);
+          rej(new Error(resp.error || 'Upload failed'));
+        } catch (e) {
+          rej(new Error('Upload failed with status ' + xhr.status));
+        }
+      }
+    };
+    xhr.onerror = () => rej(new Error('Network error'));
+    xhr.send(file);
   });
 }
 
@@ -783,7 +1332,9 @@ if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matc
   document.documentElement.setAttribute('data-theme', 'light');
 }
 
-init();
+window.addEventListener('load', () => {
+  init();
+});
 </script>
 </body>
 </html>";

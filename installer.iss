@@ -2,7 +2,7 @@
 ; Standalone Windows Installer — .NET 8 Self-Contained (no runtime required on target PC)
 
 #define AppName      "We Share"
-#define AppVersion   "1.3.1"
+#define AppVersion   "1.0.0"
 #define AppPublisher "Sowmiyan-S"
 #define AppURL       "https://github.com/sowmiyan-s/We-Share"
 #define AppExeName   "WeShare.Desktop.exe"

@@ -35,11 +35,17 @@ namespace WeShare.Core.Transfer
         public int Port { get; } = 8080;
         public byte[]? LogoBytes { get; set; }
         
-        public event Action<string, string, long>? WebFileReceived;
         public event Action<string, string>? WebClientConnected;
         public event Action<WebClientInfo>? WebClientConnectedEx;
         public event Action<string>? WebClientDisconnectedEx;
         public event Action<string, string, string, long>? WebFileShared;
+        public event Action<FileTransferState>? WebTransferStarted;
+        public event Action<FileTransferState>? WebTransferProgress;
+        public event Action<FileTransferState>? WebTransferCompleted;
+        public event Action<FileTransferState>? WebTransferFailed;
+        public Func<FileTransferState, Task<bool>>? WebFileSharedCallback { get; set; }
+        public Func<string, bool>? IsSessionActiveFilter { get; set; }
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<string, FileTransferState> _approvedUploads = new();
 
         public class WebClientInfo
         {
@@ -347,6 +353,73 @@ namespace WeShare.Core.Transfer
                         await SendResponse(stream, 200, "text/plain", "OK");
                     }
 
+                    else if (method == "POST" && path == "/api/ask-receive")
+                    {
+                        string? clientId = queryParams.GetValueOrDefault("clientId");
+                        string? name = queryParams.GetValueOrDefault("name");
+                        string? sizeStr = queryParams.GetValueOrDefault("size");
+                        long size = long.TryParse(sizeStr, out var s) ? s : 0;
+
+                        if (IsSessionActiveFilter != null && IsSessionActiveFilter(clientId ?? ""))
+                        {
+                            await SendResponse(stream, 400, "application/json", "{\"accepted\":false,\"error\":\"Another session is active on this device\"}");
+                            return;
+                        }
+
+                        string uploaderName = "Mobile Web";
+                        if (!string.IsNullOrEmpty(clientId))
+                        {
+                            await _webClientsLock.WaitAsync();
+                            try
+                            {
+                                if (_activeWebClients.TryGetValue(clientId, out var clientInfo))
+                                {
+                                    uploaderName = clientInfo.Name;
+                                }
+                            }
+                            finally { _webClientsLock.Release(); }
+                        }
+
+                        string filename = Path.GetFileName(Uri.UnescapeDataString(name ?? "upload.dat"));
+                        string webSharedDir = Path.Combine(_saveDirectory, "web_shared");
+                        Directory.CreateDirectory(webSharedDir);
+                        string dest = GetUniqueFilePath(webSharedDir, filename);
+
+                        var transferState = new FileTransferState
+                        {
+                            FileId = Guid.NewGuid().ToString("n"),
+                            FileName = filename,
+                            FilePath = dest,
+                            TotalBytes = size,
+                            TransferredBytes = 0,
+                            Status = TransferStatus.Receiving,
+                            Direction = TransferDirection.Received,
+                            PeerName = uploaderName,
+                            RemoteIp = client.Client.RemoteEndPoint is System.Net.IPEndPoint rep ? rep.Address.ToString() : "unknown",
+                            Timestamp = DateTime.UtcNow
+                        };
+
+                        bool accepted = false;
+                        if (WebFileSharedCallback != null)
+                        {
+                            accepted = await WebFileSharedCallback(transferState);
+                        }
+                        else
+                        {
+                            accepted = true;
+                        }
+
+                        if (accepted)
+                        {
+                            _approvedUploads[transferState.FileId] = transferState;
+                            await SendJson(stream, new { accepted = true, id = transferState.FileId });
+                        }
+                        else
+                        {
+                            await SendJson(stream, new { accepted = false });
+                        }
+                    }
+
                     else if (method == "GET" && path == "/api/files")
                     {
                         string? clientId = queryParams.GetValueOrDefault("clientId");
@@ -354,7 +427,6 @@ namespace WeShare.Core.Transfer
                         await _filesLock.WaitAsync();
                         try 
                         { 
-                            resultFiles.AddRange(_sharedFiles);
                             if (!string.IsNullOrEmpty(clientId) && _clientSpecificFiles.TryGetValue(clientId, out var specFiles))
                             {
                                 resultFiles.AddRange(specFiles);
@@ -432,21 +504,23 @@ namespace WeShare.Core.Transfer
                     else if (method == "GET" && path == "/download")
                     {
                         string? id = queryParams.GetValueOrDefault("id");
-                        
+                        string? clientId = queryParams.GetValueOrDefault("clientId");
+
+                        if (!string.IsNullOrEmpty(clientId) && IsSessionActiveFilter != null && IsSessionActiveFilter(clientId))
+                        {
+                            await SendResponse(stream, 403, "text/plain", "Another device session is active");
+                            return;
+                        }
+
                         SharedFile? file = null;
                         await _filesLock.WaitAsync();
                         try 
                         { 
-                            if (!string.IsNullOrEmpty(id))
+                            if (!string.IsNullOrEmpty(id) && !string.IsNullOrEmpty(clientId))
                             {
-                                file = _sharedFiles.FirstOrDefault(f => string.Equals(f.Id, id, StringComparison.OrdinalIgnoreCase));
-                                if (file == null)
+                                if (_clientSpecificFiles.TryGetValue(clientId, out var list))
                                 {
-                                    foreach (var list in _clientSpecificFiles.Values)
-                                    {
-                                        file = list.FirstOrDefault(f => string.Equals(f.Id, id, StringComparison.OrdinalIgnoreCase));
-                                        if (file != null) break;
-                                    }
+                                    file = list.FirstOrDefault(f => string.Equals(f.Id, id, StringComparison.OrdinalIgnoreCase));
                                 }
                             }
                         }
@@ -474,44 +548,83 @@ namespace WeShare.Core.Transfer
                     else if (method == "POST" && path == "/upload")
                     {
                         string? clientId = queryParams.GetValueOrDefault("clientId");
-                        string uploaderName = "Mobile Web";
-                        if (!string.IsNullOrEmpty(clientId))
+                        string? fileId = queryParams.GetValueOrDefault("id");
+
+                        FileTransferState? transferState = null;
+                        if (!string.IsNullOrEmpty(fileId))
                         {
-                            await _webClientsLock.WaitAsync();
-                            try
+                            _approvedUploads.TryGetValue(fileId, out transferState);
+                        }
+
+                        if (transferState == null)
+                        {
+                            await SendResponse(stream, 400, "application/json", "{\"success\":false,\"error\":\"Upload not pre-approved or invalid id\"}");
+                            return;
+                        }
+
+                        // Remove from approved uploads so it can't be reused
+                        _approvedUploads.TryRemove(fileId!, out _);
+
+                        string uploaderName = transferState.PeerName;
+                        string dest = transferState.FilePath;
+                        long contentLength = transferState.TotalBytes;
+
+                        WebTransferStarted?.Invoke(transferState);
+
+                        try
+                        {
+                            using (var fs = new FileStream(dest, FileMode.Create, FileAccess.Write, FileShare.None, 65536, true))
                             {
-                                if (_activeWebClients.TryGetValue(clientId, out var clientInfo))
+                                byte[] buf = new byte[65536];
+                                long written = 0;
+                                long lastReportedBytes = 0;
+                                DateTime lastReportTime = DateTime.UtcNow;
+
+                                while (written < contentLength)
                                 {
-                                    uploaderName = clientInfo.Name;
+                                    int toRead = (int)Math.Min(buf.Length, contentLength - written);
+                                    int n = await stream.ReadAsync(buf.AsMemory(0, toRead));
+                                    if (n == 0) break;
+                                    await fs.WriteAsync(buf.AsMemory(0, n));
+                                    written += n;
+
+                                    transferState.TransferredBytes = written;
+                                    var now = DateTime.UtcNow;
+                                    var elapsed = (now - lastReportTime).TotalSeconds;
+                                    if (elapsed >= 0.25)
+                                    {
+                                        long bytesSinceLast = written - lastReportedBytes;
+                                        transferState.SpeedMbPerSec = bytesSinceLast / elapsed / 1_000_000.0;
+                                        if (transferState.SpeedMbPerSec > 0 && transferState.TotalBytes > written)
+                                            transferState.ETA = TimeSpan.FromSeconds((transferState.TotalBytes - written) / (transferState.SpeedMbPerSec * 1_000_000.0));
+
+                                        lastReportedBytes = written;
+                                        lastReportTime = now;
+                                        WebTransferProgress?.Invoke(transferState);
+                                    }
+                                }
+
+                                if (written != contentLength)
+                                {
+                                    throw new Exception("Connection closed before complete transfer.");
                                 }
                             }
-                            finally { _webClientsLock.Release(); }
+
+                            transferState.Status = TransferStatus.Done;
+                            WebTransferCompleted?.Invoke(transferState);
+
+                            if (contentLength > 0)
+                                WebFileShared?.Invoke(clientId ?? "unknown", uploaderName, transferState.FilePath, contentLength);
+
+                            await SendJson(stream, new { success = true, saved = Path.GetFileName(transferState.FilePath), bytes = contentLength });
                         }
-
-                        string rawName = headers.GetValueOrDefault("X-File-Name", $"upload_{DateTime.Now.Ticks}.dat");
-                        string filename = Path.GetFileName(Uri.UnescapeDataString(rawName)); 
-                        long contentLength = long.TryParse(headers.GetValueOrDefault("Content-Length", "0"), out var cl) ? cl : 0;
-
-                        string webSharedDir = Path.Combine(_saveDirectory, "web_shared");
-                        Directory.CreateDirectory(webSharedDir);
-                        string dest = GetUniqueFilePath(webSharedDir, filename);
-
-                        using var fs = new FileStream(dest, FileMode.Create, FileAccess.Write, FileShare.None, 65536, true);
-                        byte[] buf = new byte[65536];
-                        long written = 0;
-                        while (written < contentLength)
+                        catch (Exception ex)
                         {
-                            int toRead = (int)Math.Min(buf.Length, contentLength - written);
-                            int n = await stream.ReadAsync(buf.AsMemory(0, toRead));
-                            if (n == 0) break;
-                            await fs.WriteAsync(buf.AsMemory(0, n));
-                            written += n;
+                            transferState.Status = TransferStatus.Failed;
+                            transferState.ErrorMessage = ex.Message;
+                            WebTransferFailed?.Invoke(transferState);
+                            throw;
                         }
-
-                        if (written > 0)
-                            WebFileShared?.Invoke(clientId ?? "unknown", uploaderName, dest, written);
-
-                        await SendJson(stream, new { success = true, saved = Path.GetFileName(dest), bytes = written });
                     }
                     else
                         await SendResponse(stream, 404, "text/plain", "Not Found");

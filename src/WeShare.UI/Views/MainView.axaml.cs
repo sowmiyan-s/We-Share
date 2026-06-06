@@ -41,6 +41,7 @@ namespace WeShare.UI.Views
         private WebDashboardService? _webDashboardService;
         private HotspotService? _hotspotService;
         private WifiConnectorService? _wifiConnector;
+        private CaptivePortalService? _captivePortalService;
 
         private string _saveDirectory;
         private DeviceModel? _sendTarget;
@@ -157,11 +158,23 @@ namespace WeShare.UI.Views
                     Console.WriteLine($"[WebDashboard] Failed to load logo asset: {ex.Message}");
                 }
                 _webDashboardService.SetPeersProvider(() => Devices.ToList());
-                _webDashboardService.WebFileReceived += OnWebFileReceived;
                 _webDashboardService.WebClientConnected += OnWebClientConnected;
                 _webDashboardService.WebClientConnectedEx += OnWebClientConnectedEx;
                 _webDashboardService.WebClientDisconnectedEx += OnWebClientDisconnectedEx;
-                _webDashboardService.WebFileShared += OnWebFileShared;
+                _webDashboardService.WebFileSharedCallback = OnWebFileSharedCallback;
+                _webDashboardService.WebTransferStarted += OnTransferStarted;
+                _webDashboardService.WebTransferProgress += OnTransferProgress;
+                _webDashboardService.WebTransferCompleted += OnWebTransferCompleted;
+                _webDashboardService.WebTransferFailed += OnTransferFailed;
+                _webDashboardService.IsSessionActiveFilter = (string targetIpOrId) =>
+                {
+                    var activeIpOrId = GetActiveSessionDeviceIpOrId();
+                    if (activeIpOrId != null && activeIpOrId != targetIpOrId)
+                    {
+                        return true;
+                    }
+                    return false;
+                };
                 _webDashboardService.Start();
             }
             catch (Exception ex)
@@ -169,20 +182,6 @@ namespace WeShare.UI.Views
                 ShowToast($"Web Portal start failed: {ex.Message}");
             }
 
-            // Synchronize the SendQueue with the Web Portal shared files
-            SendQueue.CollectionChanged += (s, e) => {
-                if (_webDashboardService != null)
-                {
-                    _webDashboardService.ClearSharedFiles();
-                    foreach (var item in SendQueue)
-                    {
-                        if (!string.IsNullOrEmpty(item.Path))
-                        {
-                            _webDashboardService.ShareForWeb(item.Path);
-                        }
-                    }
-                }
-            };
 
             // Broadcast our presence so receivers can see us
             _ = Task.Run(async () =>
@@ -467,6 +466,20 @@ namespace WeShare.UI.Views
             RefreshHistory();
         }
 
+        private string? GetActiveSessionDeviceIpOrId()
+        {
+            if (_isSending && _sendTarget != null)
+            {
+                return !string.IsNullOrEmpty(_sendTarget.IpAddress) ? _sendTarget.IpAddress : _sendTarget.Id;
+            }
+            if (ActiveReceives.Count > 0)
+            {
+                var first = ActiveReceives[0];
+                return first.RemoteIp;
+            }
+            return null;
+        }
+
         private async void DeleteHistoryItem_Click(object sender, RoutedEventArgs e)
         {
             var state = (sender as Button)?.DataContext as FileTransferState;
@@ -505,6 +518,17 @@ namespace WeShare.UI.Views
             var device = (sender as Button)?.DataContext as DeviceModel;
             if (device == null) return;
 
+            var activeIpOrId = GetActiveSessionDeviceIpOrId();
+            if (activeIpOrId != null)
+            {
+                bool isSame = (device.IpAddress == activeIpOrId || device.Id == activeIpOrId);
+                if (!isSame)
+                {
+                    ShowToast("Session active: Can only send to/receive from the active device.");
+                    return;
+                }
+            }
+
             // If we're already sending to this device, just add to the queue
             if (_isSending && _sendTarget?.IpAddress == device.IpAddress)
             {
@@ -540,6 +564,17 @@ namespace WeShare.UI.Views
 
         private void StartSendSession(DeviceModel device)
         {
+            var activeIpOrId = GetActiveSessionDeviceIpOrId();
+            if (activeIpOrId != null)
+            {
+                bool isSame = (device.IpAddress == activeIpOrId || device.Id == activeIpOrId);
+                if (!isSame)
+                {
+                    ShowToast("Session active: Can only send to/receive from the active device.");
+                    return;
+                }
+            }
+
             _sendTarget = device;
             ShowToast($"Connecting to {device.Name}...");
 
@@ -1150,14 +1185,14 @@ namespace WeShare.UI.Views
             {
                 string info = hasRealIp
                     ? $"{ip}:{_localDevice.Port}"
-                    : $"📶 {ssid} / {password}";
+                    : $"Wi-Fi: {ssid} / {password}";
 
                 SidebarNetworkInfo.Text  = info;
                 HomeNetworkInfoText.Text = ssid;
                 HomeWifiPasswordText.Text = password;
                 
                 string hostIp = isHotspotRunning ? _hotspotService!.HotspotIp : ip;
-                string webUrl = $"http://{hostIp}:8080";
+                string webUrl = isHotspotRunning ? $"http://{hostIp}" : $"http://{hostIp}:8080";
                 HomeWebPortalText.Text   = webUrl;
                 GenerateQrBitmap(webUrl);
 
@@ -1172,6 +1207,22 @@ namespace WeShare.UI.Views
                 {
                     if (HomeWifiWebPortalPanel != null) HomeWifiWebPortalPanel.IsVisible = false;
                     if (WebPortalLabel != null) WebPortalLabel.Text = "Web Portal (Local Share)";
+                }
+            });
+
+            string hostIpStr = isHotspotRunning ? _hotspotService!.HotspotIp : ip;
+            _ = Task.Run(() =>
+            {
+                if (_captivePortalService != null)
+                {
+                    _captivePortalService.Stop();
+                    _captivePortalService = null;
+                }
+
+                if (System.Net.IPAddress.TryParse(hostIpStr, out var parsedIp) && !System.Net.IPAddress.IsLoopback(parsedIp) && parsedIp.ToString() != "127.0.0.1")
+                {
+                    _captivePortalService = new CaptivePortalService(parsedIp);
+                    _captivePortalService.Start();
                 }
             });
         }
@@ -1203,6 +1254,16 @@ namespace WeShare.UI.Views
         private TaskCompletionSource<bool>? _acceptTcs;
         private async Task<bool> OnTransferRequested(FileTransferState state)
         {
+            var activeIpOrId = GetActiveSessionDeviceIpOrId();
+            if (activeIpOrId != null)
+            {
+                bool isSame = (state.RemoteIp == activeIpOrId || state.FileId == activeIpOrId);
+                if (!isSame)
+                {
+                    return false;
+                }
+            }
+
             // 1. Auto-Accept Logic (Session)
             if (_lastAcceptedIp == state.RemoteIp && (DateTime.Now - _lastAcceptedTime).TotalSeconds < 60)
             {
@@ -1214,6 +1275,7 @@ namespace WeShare.UI.Views
             try
             {
                 _acceptTcs = new TaskCompletionSource<bool>();
+                _platformService.ShowSystemToast("Incoming File Request", $"{state.PeerName} wants to send {state.FileName} ({FileTransferState.FormatBytes(state.TotalBytes)})");
                 Dispatcher.UIThread.Post(() => {
                     AcceptRejectPanel.IsVisible = true;
                     IncomingFileName.Text = state.FileName;
@@ -1299,6 +1361,7 @@ namespace WeShare.UI.Views
                 { 
                     SendProgressBorder.IsVisible = true; 
                     _currentSendingFileId = state.FileId;
+                    SendSpeedGraph?.Clear();
                 }
                 
                 // Switch to Transfers view automatically when any transfer starts
@@ -1316,6 +1379,13 @@ namespace WeShare.UI.Views
                     SendProgressBar.Value  = state.ProgressPercentage;
                     SendProgressPct.Text   = $"{state.ProgressPercentage:F0}%";
                     SendProgressSpeed.Text = $"{state.SpeedMbPerSec:F2} MB/s | ETA: {state.ETA:mm\\:ss}";
+                    SendSpeedGraph?.AddSpeed(state.SpeedMbPerSec);
+                }
+
+                state.SpeedPoints.Add(state.SpeedMbPerSec);
+                if (state.SpeedPoints.Count > 40)
+                {
+                    state.SpeedPoints.RemoveAt(0);
                 }
 
                 GlobalActivityBorder.IsVisible = true;
@@ -1344,7 +1414,7 @@ namespace WeShare.UI.Views
                     await _dbHelper.SaveTransferAsync(state);
                     ReceivedFiles.Insert(0, state);
                     ShowToast($"Received: {state.FileName}");
-                    _platformService.ShowSystemToast("File Received", $"{state.FileName} from {state.PeerName}");
+                    _platformService.ShowSystemToast("File Received", $"{state.FileName} from {state.PeerName}", state.FilePath);
                 }
                 else
                 {
@@ -1374,6 +1444,7 @@ namespace WeShare.UI.Views
                 await _dbHelper.SaveTransferAsync(state);
                 string reason = !string.IsNullOrEmpty(state.ErrorMessage) ? state.ErrorMessage : "Connection failed or rejected";
                 ShowToast($"Transfer failed: {reason}");
+                _platformService.ShowSystemToast("Transfer Failed", $"{state.FileName}: {reason}");
             });
         }
 
@@ -1405,24 +1476,46 @@ namespace WeShare.UI.Views
             manager.TransferRequestCallback = OnTransferRequested;
         }
 
-        private void OnWebFileReceived(string peerName, string filePath, long size)
+
+        private void OnWebTransferCompleted(FileTransferState state)
         {
-            var state = new FileTransferState
-            {
-                FileName = Path.GetFileName(filePath),
-                FilePath = filePath,
-                TotalBytes = size,
-                TransferredBytes = size,
-                Status = TransferStatus.Done,
-                Direction = TransferDirection.Received,
-                PeerName = peerName,
-                Timestamp = DateTime.UtcNow
-            };
             Dispatcher.UIThread.Post(async () => {
-                await _dbHelper.SaveTransferAsync(state);
-                ReceivedFiles.Insert(0, state);
-                ShowToast($"Received via Web Portal: {state.FileName}");
-                UpdateEmptyState();
+                SendProgressBorder.IsVisible   = false;
+                GlobalActivityBorder.IsVisible = false;
+                if (HomeSpeedBadge != null) HomeSpeedBadge.IsVisible = false;
+
+                var ex = ActiveReceives.FirstOrDefault(s => s.FileId == state.FileId);
+                if (ex != null) ActiveReceives.Remove(ex);
+
+                if (state.Direction == TransferDirection.Received)
+                {
+                    try
+                    {
+                        if (System.IO.File.Exists(state.FilePath))
+                        {
+                            string filename = Path.GetFileName(state.FilePath);
+                            string ext = Path.GetExtension(filename);
+                            string category = TcpTransferManager.GetCategoryFolder(ext);
+                            string targetDir = Path.Combine(_saveDirectory, category);
+                            Directory.CreateDirectory(targetDir);
+
+                            string destPath = GetUniqueFilePath(targetDir, filename);
+                            System.IO.File.Move(state.FilePath, destPath);
+                            state.FilePath = destPath;
+
+                            await _dbHelper.SaveTransferAsync(state);
+                            ReceivedFiles.Insert(0, state);
+                            ShowToast($"Received via Web Portal: {state.FileName}");
+                            _platformService.ShowSystemToast("File Received", $"{state.FileName} from {state.PeerName}", state.FilePath);
+                            UpdateEmptyState();
+                            RefreshHistory();
+                        }
+                    }
+                    catch (Exception ex2)
+                    {
+                        Console.WriteLine($"[WebDashboard] Error finalizing received file: {ex2.Message}");
+                    }
+                }
             });
         }
 
@@ -1495,6 +1588,7 @@ namespace WeShare.UI.Views
 
         public void Shutdown()
         {
+            try { _captivePortalService?.Stop(); } catch { }
             _discoveryService?.StopListening();
             _transferManager?.StopListening();
             _webDashboardService?.Stop();
@@ -1650,27 +1744,63 @@ namespace WeShare.UI.Views
 
         // ── Web Shared Staging Helpers ─────────────────────────────────────────
 
-        private void OnWebFileShared(string clientId, string clientName, string filePath, long size)
+        private async Task<bool> OnWebFileSharedCallback(FileTransferState state)
         {
-            Dispatcher.UIThread.Post(() =>
+            // Prompt user using the standard dialog popup
+            bool accepted = await OnTransferRequested(state);
+
+            if (accepted)
             {
-                var file = new StagedWebFile
+                try
                 {
-                    ClientId = clientId,
-                    ClientName = clientName,
-                    FilePath = filePath,
-                    Size = size
-                };
-                StagedWebFiles.Add(file);
+                    if (File.Exists(state.FilePath))
+                    {
+                        string filename = Path.GetFileName(state.FilePath);
+                        string ext = Path.GetExtension(filename);
+                        string category = TcpTransferManager.GetCategoryFolder(ext);
+                        string targetDir = Path.Combine(_saveDirectory, category);
+                        Directory.CreateDirectory(targetDir);
 
-                var selected = WebClientsListBox.SelectedItem as DeviceModel;
-                if (selected != null && selected.Id == clientId)
-                {
-                    UpdateWebSharedFilesList();
+                        string destPath = GetUniqueFilePath(targetDir, filename);
+                        File.Move(state.FilePath, destPath);
+                        state.FilePath = destPath;
+
+                        await _dbHelper.SaveTransferAsync(state);
+                        Dispatcher.UIThread.Post(() => {
+                            ReceivedFiles.Insert(0, state);
+                            ShowToast($"Received via Web Portal: {state.FileName}");
+                            UpdateEmptyState();
+                            _platformService.ShowSystemToast("File Received", $"{state.FileName} from {state.PeerName}", state.FilePath);
+                        });
+                    }
                 }
+                catch (Exception ex)
+                {
+                    Dispatcher.UIThread.Post(() => {
+                        ShowToast($"Failed to save file: {ex.Message}");
+                    });
+                    return false;
+                }
+            }
+            else
+            {
+                try
+                {
+                    if (File.Exists(state.FilePath))
+                    {
+                        File.Delete(state.FilePath);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[WebShared] Error deleting rejected file: {ex.Message}");
+                }
+                Dispatcher.UIThread.Post(() => {
+                    ShowToast($"Rejected web file: {state.FileName}");
+                });
+            }
 
-                ShowToast($"New web shared file from '{clientName}': {Path.GetFileName(filePath)}");
-            });
+            return accepted;
         }
 
         private void UpdateWebSharedClientsList()

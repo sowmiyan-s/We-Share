@@ -41,94 +41,26 @@
 
   <div class="patch-section">
 
-    <!-- v1.3.1 -->
-    <div class="patch-entry" id="v131">
+    <!-- v1.0.0 -->
+    <div class="patch-entry" id="v100">
       <div class="patch-dot"></div>
       <div class="patch-version-label">
-        <span class="patch-version-num">v1.3.1</span>
+        <span class="patch-version-num">v1.0.0</span>
         <span class="patch-date">June 2026</span>
         <span class="patch-badge-latest">Latest</span>
       </div>
       <ul class="patch-list">
-        <li><span class="patch-tag tag-fix">Fix</span> Resolved mobile file transfer failure when requesting downloaded files from the PC client.</li>
-        <li><span class="patch-tag tag-ui">UI</span> Completely removed all emojis from the web portal and desktop client application.</li>
-        <li><span class="patch-tag tag-ui">UI</span> Introduced clean, color-coded file extension pills and client connection shortcodes (e.g. MOB, PC, LNX).</li>
-        <li><span class="patch-tag tag-ui">UI</span> Styled information cards with flat, technical indicators (SEC and MIT badges).</li>
-        <li><span class="patch-tag tag-improve">Improve</span> Integrated Cabinet Grotesk and Manrope typography with an obsidian dark theme for the web portal.</li>
+        <li><span class="patch-tag tag-new">New</span> **Desert Mode with Captive Portal**: Provision local hotspots and automatically route mobile users to the Web Portal via DNS and HTTP port 80 proxy redirects.</li>
+        <li><span class="patch-tag tag-new">New</span> **Pre-Upload Authorization**: Mobile uploads are fully verified and approved by the PC host via secure API permission requests *before* the file payload is transmitted.</li>
+        <li><span class="patch-tag tag-new">New</span> **Live Speed Graphs & Dialogs**: Real-time canvas-based speed graphs and flat green Windows-style progress bars on the Web Portal, matching the custom-drawn desktop speed line charts.</li>
+        <li><span class="patch-tag tag-new">New</span> **Single-Session Enforcement**: Prevents multiple concurrent device transfer sessions, protecting active connections by restricting and blocking page operations to one active peer.</li>
+        <li><span class="patch-tag tag-new">New</span> **Local SQLite database history logs**: Track all incoming and outgoing file transfers in a persistent database, with automatic startup migration for stuck transfers.</li>
+        <li><span class="patch-tag tag-improve">Improve</span> Robust multi-threaded TCP socket transfer engine with live transfer speed calculation and estimated completion times.</li>
+        <li><span class="patch-tag tag-ui">UI</span> Fluent-design interface powered by Avalonia UI, styled with frosted-glass panel effects and an indigo-slate dark theme.</li>
+        <li><span class="patch-tag tag-ui">UI</span> **Web Portal Visual Redesign**: Premium typography using loaded Google Fonts (`Bricolage Grotesque` & `Plus Jakarta Sans`), curated zinc/emerald color scheme, zero shadows/glows, and a dynamic scrolling marquee banner.</li>
       </ul>
       <div style="margin-top: 16px;">
-        <a href="setup/WeShare_Setup.exe" class="btn-outline" style="font-size:0.85rem; padding: 8px 18px;" download="WeShare_Setup_1.3.1.exe">Download v1.3.1 →</a>
-      </div>
-    </div>
-
-    <!-- v1.3.0 -->
-    <div class="patch-entry" id="v130">
-      <div class="patch-dot"></div>
-      <div class="patch-version-label">
-        <span class="patch-version-num">v1.3.0</span>
-        <span class="patch-date">May 2026</span>
-      </div>
-      <ul class="patch-list">
-        <li><span class="patch-tag tag-new">New</span> Transfer Wizard — step-by-step UI workflow for staging and executing file transfers.</li>
-        <li><span class="patch-tag tag-new">New</span> Splash screen with vector loading animation during application assembly initialization.</li>
-        <li><span class="patch-tag tag-new">New</span> Sweeping radar animation indicating active background UDP discovery scans.</li>
-        <li><span class="patch-tag tag-improve">Improve</span> Restructured TCP socket handling to use multi-threaded buffering, improving throughput for large files.</li>
-        <li><span class="patch-tag tag-improve">Improve</span> Peer entries on radar now parse and render NetBIOS hostnames and platform OS icons.</li>
-        <li><span class="patch-tag tag-improve">Improve</span> Updated progress indicator to render instantaneous network speeds (MB/s) and ETA.</li>
-        <li><span class="patch-tag tag-ui">UI</span> Frosted-glass panel styles and tuned color weights for better readability.</li>
-        <li><span class="patch-tag tag-ui">UI</span> Toast indicators now slide downward from the upper margin using native Avalonia transitions.</li>
-        <li><span class="patch-tag tag-fix">Fix</span> Resolved hotspot provisioning errors by querying and cleaning legacy tethering adapter states on startup.</li>
-        <li><span class="patch-tag tag-fix">Fix</span> Prevented null reference crashes when invoking transfer prompts while the window is minimized.</li>
-        <li><span class="patch-tag tag-fix">Fix</span> Resolved content security parsing issues preventing Firefox from loading local Web Portal scripts.</li>
-      </ul>
-      <div style="margin-top: 16px;">
-        <a href="setup/WeShare_Setup.exe" class="btn-outline" style="font-size:0.85rem; padding: 8px 18px;" download="WeShare_Setup_1.3.0.exe">Download v1.3.0 →</a>
-      </div>
-    </div>
-
-    <!-- v1.2.0 -->
-    <div class="patch-entry" id="v120">
-      <div class="patch-dot"></div>
-      <div class="patch-version-label">
-        <span class="patch-version-num">v1.2.0</span>
-        <span class="patch-date">March 2026</span>
-      </div>
-      <ul class="patch-list">
-        <li><span class="patch-tag tag-new">New</span> Web Portal — built-in HTTP server listening on port 8080 for web-based transfers on non-Windows devices.</li>
-        <li><span class="patch-tag tag-new">New</span> Live upload progress indicator inside the mobile web interface.</li>
-        <li><span class="patch-tag tag-new">New</span> Redesigned transfer prompt detailing staged files size and payload counts.</li>
-        <li><span class="patch-tag tag-improve">Improve</span> Optimized UDP broadcast intervals to minimize radar peer discovery latency.</li>
-        <li><span class="patch-tag tag-improve">Improve</span> Inno Setup script now handles silent upgrade and keeps SQLite database files intact.</li>
-        <li><span class="patch-tag tag-ui">UI</span> Re-rendered the radar panel with cleaner concentric vector designs.</li>
-        <li><span class="patch-tag tag-ui">UI</span> Display local IP bindings and web portal address inside the Settings pane.</li>
-        <li><span class="patch-tag tag-fix">Fix</span> Added socket connection timeouts and handled connection exceptions gracefully when blocked by firewalls.</li>
-        <li><span class="patch-tag tag-fix">Fix</span> Handled cases where system host machine name lookup returned null.</li>
-      </ul>
-      <div style="margin-top: 16px;">
-        <a href="setup/WeShare_Setup_1.2.0.exe" class="btn-outline" style="font-size:0.85rem; padding: 8px 18px;" download>Download v1.2.0 →</a>
-      </div>
-    </div>
-
-    <!-- v1.1.0 -->
-    <div class="patch-entry" id="v110">
-      <div class="patch-dot"></div>
-      <div class="patch-version-label">
-        <span class="patch-version-num">v1.1.0</span>
-        <span class="patch-date">January 2026</span>
-      </div>
-      <ul class="patch-list">
-        <li><span class="patch-tag tag-new">New</span> Desert Mode — auto-provisions ad-hoc hotspots and handles background client association.</li>
-        <li><span class="patch-tag tag-new">New</span> Local SQLite database integration to archive transfer logs.</li>
-        <li><span class="patch-tag tag-new">New</span> Prompts automatically timeout and reject transfers after 30 seconds of receiver inactivity.</li>
-        <li><span class="patch-tag tag-new">New</span> Folder directory parsing and batch file stream queueing.</li>
-        <li><span class="patch-tag tag-improve">Improve</span> Implemented parallel TCP stream chunking for multi-core processors.</li>
-        <li><span class="patch-tag tag-improve">Improve</span> Setup installer automatically registers Windows Firewall rules using netsh.</li>
-        <li><span class="patch-tag tag-ui">UI</span> Implemented standardized dark theme styles.</li>
-        <li><span class="patch-tag tag-fix">Fix</span> Properly disposed connection resources and updated radar states when peer connection drops.</li>
-        <li><span class="patch-tag tag-fix">Fix</span> Handled system configurations lacking active network adapters.</li>
-      </ul>
-      <div style="margin-top: 16px;">
-        <a href="setup/WeShare_Setup_1.1.0.exe" class="btn-outline" style="font-size:0.85rem; padding: 8px 18px;" download>Download v1.1.0 →</a>
+        <a href="setup/WeShare_Setup.exe" class="btn-outline" style="font-size:0.85rem; padding: 8px 18px;" download="WeShare_Setup_1.0.0.exe">Download v1.0.0 →</a>
       </div>
     </div>
 

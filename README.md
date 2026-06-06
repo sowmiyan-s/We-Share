@@ -42,14 +42,14 @@
 
 | Feature | Details |
 |---|---|
-| ⚡ **Turbo Transfer** | Multi-threaded TCP socket engine optimized for high-speed local transfers. |
+| ⚡ **Turbo Transfer** | Multi-threaded TCP socket engine optimized for high-speed local transfers with Windows-style speed graphs. |
 | 🔍 **Auto Discovery** | Zero-config peer detection using UDP broadcast — no manual IP entry needed. |
-| 🏜️ **Desert Mode** | No router? App auto-creates a hotspot and connects the other PC silently. |
-| ✅ **Accept / Reject** | Receiver gets a transfer request notification — full control over incoming files. |
-| 🎨 **Premium UI** | A stunning, modern interface powered by Avalonia UI with an Indigo/Slate aesthetic. |
-| 🔒 **Local Only** | End-to-end local — your data never leaves your local network. |
-| 🧙 **Transfer Wizard** | A streamlined, step-by-step process for sending and receiving files. |
-| 🌐 **Web Portal** | Any phone or tablet on the same network can share files via browser at `http://<ip>:8080`. |
+| 🏜️ **Desert Mode** | No router? App auto-creates a hotspot and connects the other PC silently. Includes Captive Portal redirect. |
+| ✅ **Pre-Upload Authorization** | Receiver prompts (Accept / Reject) *before* transfers start for both desktop and mobile web portal uploads. |
+| 🛡️ **Single-Session Protection** | Enforces one active transfer session at a time, protecting networks from connection collision. |
+| 📈 **Real-time Speed Graphs** | Windows-style green progress bars and canvas-drawn speed graphs on both desktop and web portal UI. |
+| 🎨 **Premium Web Portal UI** | Redesigned matte zinc/emerald mobile layout with custom typography (`Bricolage Grotesque`) and marquee banners. |
+| 🔒 **Local Only** | End-to-end local — SQLite log data, peer identification, and files never leave your local area network. |
 
 ---
 

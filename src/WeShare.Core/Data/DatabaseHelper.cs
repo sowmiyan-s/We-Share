@@ -72,6 +72,13 @@ namespace WeShare.Core.Data
                 TryAddColumn(conn, "Transfers", "PeerName",  "TEXT DEFAULT ''");
                 TryAddColumn(conn, "Transfers", "Direction", "INTEGER DEFAULT 0");
                 TryAddColumn(conn, "Transfers", "Timestamp", "TEXT DEFAULT ''");
+
+                // Fix any stuck "Receiving" status transfers to "Done" (5) from previous runs
+                using (var updateCmd = conn.CreateCommand())
+                {
+                    updateCmd.CommandText = "UPDATE Transfers SET Status = 5 WHERE Status = 2;";
+                    updateCmd.ExecuteNonQuery();
+                }
             }
             catch (Exception ex) { Console.WriteLine($"[DB] Init failed: {ex.Message}"); }
         }

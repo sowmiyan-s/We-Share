@@ -184,5 +184,8 @@ namespace WeShare.Core.Models
             if (bytes < 1024L * 1024 * 1024) return $"{bytes / 1024.0 / 1024:F1} MB";
             return $"{bytes / 1024.0 / 1024 / 1024:F2} GB";
         }
+
+        private readonly System.Collections.ObjectModel.ObservableCollection<double> _speedPoints = new();
+        public System.Collections.ObjectModel.ObservableCollection<double> SpeedPoints => _speedPoints;
     }
 }

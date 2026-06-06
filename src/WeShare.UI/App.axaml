@@ -21,6 +21,7 @@
                     <SolidColorBrush x:Key="GlassBorderBrush"     Color="#20FFFFFF"/> <!-- Soft glassy white line -->
                     <SolidColorBrush x:Key="GlassBackgroundBrush" Color="#181E293B"/> <!-- Translucent card fill -->
                     <SolidColorBrush x:Key="CardBackgroundBrush"  Color="#4D0F172A"/> <!-- Deeper translucent section fill -->
+                    <SolidColorBrush x:Key="SolidPanelBackgroundBrush"  Color="#0D111B"/>
                     <SolidColorBrush x:Key="RadarRingBrush"        Color="#1A6366F1"/>
                 </ResourceDictionary>
 
@@ -39,6 +40,7 @@
                     <SolidColorBrush x:Key="GlassBorderBrush"     Color="#120F172A"/> <!-- Soft dark divider line -->
                     <SolidColorBrush x:Key="GlassBackgroundBrush" Color="#B3FFFFFF"/> <!-- Translucent light white card fill -->
                     <SolidColorBrush x:Key="CardBackgroundBrush"  Color="#80E2E8F0"/> <!-- Soft gray card fill -->
+                    <SolidColorBrush x:Key="SolidPanelBackgroundBrush"  Color="#FFFFFF"/>
                     <SolidColorBrush x:Key="RadarRingBrush"        Color="#154F46E5"/>
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>

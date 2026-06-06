@@ -46,22 +46,22 @@ namespace WeShare.Core.Network
         private static string DetectType(NetworkInterface ni)
         {
             var desc = ni.Description.ToLower() + ni.Name.ToLower();
-
+ 
             if (ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 ||
                 desc.Contains("wi-fi") || desc.Contains("wifi") || desc.Contains("wireless") || desc.Contains("wlan"))
-                return "📶 Wi-Fi";
-
+                return "Wi-Fi";
+ 
             if (desc.Contains("usb") || desc.Contains("rndis") || desc.Contains("tether") || desc.Contains("android"))
-                return "🔌 USB Tethering";
-
+                return "USB Tethering";
+ 
             if (ni.NetworkInterfaceType == NetworkInterfaceType.Ethernet ||
                 desc.Contains("ethernet") || desc.Contains("local area"))
-                return "🖧 Ethernet";
-
+                return "Ethernet";
+ 
             if (desc.Contains("virtual") || desc.Contains("hyper-v") || desc.Contains("vmware"))
-                return "⚙️ Virtual";
-
-            return "🌐 Network";
+                return "Virtual";
+ 
+            return "Network";
         }
     }
 }

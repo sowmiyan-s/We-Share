@@ -15,6 +15,9 @@ using Windows.Devices.Bluetooth.Advertisement;
 using Windows.Networking.Connectivity;
 using Windows.Networking.NetworkOperators;
 using Windows.Storage.Streams;
+using Windows.UI.Notifications;
+using Windows.Data.Xml.Dom;
+
 
 namespace WeShare.Desktop.Services
 {
@@ -474,16 +477,44 @@ namespace WeShare.Desktop.Services
 
         public void ShowSystemToast(string title, string message, string? url = null)
         {
-            string script =
-                $"[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null; " +
-                $"[Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, ContentType = WindowsRuntime] | Out-Null; " +
-                $"$xml = [Windows.Data.Xml.Dom.XmlDocument]::new(); " +
-                $"$template = '<toast><visual><binding template=\"ToastGeneric\"><text>{title}</text><text>{message}</text></binding></visual></toast>'; " +
-                $"$xml.LoadXml($template); " +
-                $"$toast = [Windows.UI.Notifications.ToastNotification]::new($xml); " +
-                $"[Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier(\"We Share\").Show($toast);";
+            try
+            {
+                var toastXml = ToastNotificationManager.GetTemplateContent(ToastTemplateType.ToastText02);
+                
+                var textNodes = toastXml.GetElementsByTagName("text");
+                if (textNodes.Count > 0)
+                {
+                    textNodes[0].AppendChild(toastXml.CreateTextNode(title));
+                }
+                if (textNodes.Count > 1)
+                {
+                    textNodes[1].AppendChild(toastXml.CreateTextNode(message));
+                }
 
-            _ = RunElevatedAsync("powershell.exe", $"-Command \"{script}\"");
+                var toast = new ToastNotification(toastXml);
+                
+                if (!string.IsNullOrEmpty(url))
+                {
+                    toast.Activated += (sender, args) =>
+                    {
+                        if (url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || 
+                            url.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                        {
+                            OpenUrl(url);
+                        }
+                        else
+                        {
+                            OpenFile(url);
+                        }
+                    };
+                }
+
+                ToastNotificationManager.CreateToastNotifier("We Share").Show(toast);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[Notifications] Failed to show native toast: {ex.Message}");
+            }
         }
     }
 }

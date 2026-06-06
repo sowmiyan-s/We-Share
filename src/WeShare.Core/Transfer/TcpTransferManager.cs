@@ -316,7 +316,7 @@ namespace WeShare.Core.Transfer
         }
 
         // ── Helpers ───────────────────────────────────────────────────────────
-        private static string GetCategoryFolder(string ext)
+        public static string GetCategoryFolder(string ext)
         {
             ext = ext.ToLower().TrimStart('.');
             switch (ext)
