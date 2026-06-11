@@ -630,6 +630,48 @@ section {
 .btn-accept:hover {
   opacity: 0.95;
 }
+
+/* -- Batch Dialog File List -- */
+.batch-file-list {
+  text-align: left;
+  max-height: 240px;
+  overflow-y: auto;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.batch-file-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 12px;
+}
+.batch-file-item .bf-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 600;
+}
+.batch-file-item .bf-size {
+  color: var(--text-dim);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.batch-summary {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
 </style>
 </head>
 <body>
@@ -753,6 +795,21 @@ section {
   </div>
 </div>
 
+<div class='dialog-overlay' id='batchDialogOverlay'>
+  <div class='dialog-box'>
+    <div class='dialog-icon'>
+      <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='width: 48px; height: 48px; stroke: var(--primary);'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/><polyline points='7 10 12 15 17 10'/><line x1='12' y1='15' x2='12' y2='3'/></svg>
+    </div>
+    <div class='dialog-title' id='batchDialogTitle'>Incoming Files</div>
+    <div class='batch-summary' id='batchSummary'></div>
+    <div class='batch-file-list' id='batchFileList'></div>
+    <div class='dialog-actions'>
+      <button class='btn-decline' id='btnBatchDecline'>Decline All</button>
+      <button class='btn-accept' id='btnBatchAccept'>Accept All</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const CIRC = 2 * Math.PI * 70;
 let sse = null;
@@ -826,6 +883,9 @@ let currentOffer = null;
 let loadedFilesList = [];
 let offerQueue = [];
 let isShowingOffer = false;
+let currentBatchOffer = null;
+let activeUploadId = null;
+let useServerProgress = false;
 
 function escapeHtml(str) {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/""/g, '&quot;').replace(/'/g, '&#039;');
@@ -924,6 +984,44 @@ function processNextOffer() {
   document.getElementById('acceptDialogOverlay').classList.add('active');
 }
 
+function handleBatchOffer(files) {
+  currentBatchOffer = files;
+  const totalSize = files.reduce((s, f) => s + f.size, 0);
+  document.getElementById('batchDialogTitle').textContent = 'Incoming Files (' + files.length + ')';
+  document.getElementById('batchSummary').textContent = files.length + ' files • ' + fmt(totalSize) + ' total';
+  const listEl = document.getElementById('batchFileList');
+  listEl.innerHTML = files.map(f => `<div class='batch-file-item'><span class='bf-name'>${escapeHtml(f.name)}</span><span class='bf-size'>${fmt(f.size)}</span></div>`).join('');
+  document.getElementById('batchDialogOverlay').classList.add('active');
+}
+
+async function downloadBatchFiles(files) {
+  const ov = document.getElementById('overlay');
+  let successCount = 0;
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    document.getElementById('overlayTitle').textContent = 'DOWNLOADING (' + (i + 1) + '/' + files.length + ')';
+    document.getElementById('ovFile').textContent = file.name;
+    setProg(0);
+    speedHistory = [];
+    const canvas = document.getElementById('speedGraph');
+    if (canvas) { const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height); }
+    ov.classList.add('active');
+    try {
+      await downloadFile(file.id, file.name);
+      successCount++;
+    } catch (err) {
+      console.error(err);
+      showToast('Failed to download ' + file.name);
+    }
+  }
+  ov.classList.remove('active');
+  if (successCount === files.length) {
+    showToast('Downloaded all ' + files.length + ' files');
+  } else {
+    showToast('Downloaded ' + successCount + ' of ' + files.length + ' files');
+  }
+}
+
 window.addEventListener('load', () => {
   document.getElementById('btnAccept').addEventListener('click', () => {
     if (!currentOffer) return;
@@ -965,6 +1063,26 @@ window.addEventListener('load', () => {
         processNextOffer();
       });
   });
+
+  document.getElementById('btnBatchAccept').addEventListener('click', () => {
+    if (!currentBatchOffer) return;
+    const files = currentBatchOffer;
+    currentBatchOffer = null;
+    document.getElementById('batchDialogOverlay').classList.remove('active');
+    downloadBatchFiles(files);
+  });
+
+  document.getElementById('btnBatchDecline').addEventListener('click', () => {
+    if (!currentBatchOffer) return;
+    const id = getClientId();
+    const files = currentBatchOffer;
+    currentBatchOffer = null;
+    document.getElementById('batchDialogOverlay').classList.remove('active');
+    files.forEach(f => {
+      fetch('/api/decline?clientId=' + id + '&id=' + f.id, { method: 'POST' }).catch(console.error);
+    });
+    showToast('Declined ' + files.length + ' files');
+  });
 });
 
 function connectSSE() {
@@ -993,6 +1111,42 @@ function connectSSE() {
         handleIncomingOffer({ id: data.id, name: decodeURIComponent(data.name), size: data.size });
       } catch (ex) {
         console.error('Error parsing SSE offer:', ex);
+      }
+    } else if (e.data.startsWith('batch-offer:')) {
+      try {
+        const arr = JSON.parse(e.data.substring(12));
+        const files = arr.map(f => ({ id: f.id, name: decodeURIComponent(f.name), size: f.size }));
+        handleBatchOffer(files);
+      } catch (ex) {
+        console.error('Error parsing SSE batch-offer:', ex);
+      }
+    } else if (e.data.startsWith('progress:')) {
+      try {
+        const data = JSON.parse(e.data.substring(9));
+        if (activeUploadId && data.id === activeUploadId) {
+          useServerProgress = true;
+          const pct = data.total > 0 ? (data.received / data.total) * 100 : 0;
+          setProg(pct);
+          const speedMb = parseFloat(data.speed) || 0;
+          document.getElementById('winTimeSpeed').textContent = speedMb.toFixed(1) + ' MB/s';
+          document.getElementById('winProgressDetails').textContent = fmt(data.received) + ' of ' + fmt(data.total);
+          drawGraph(speedMb);
+          if (pct >= 99.9) {
+            document.getElementById('overlayTitle').textContent = 'Finishing...';
+          }
+        }
+      } catch (ex) {
+        console.error('Error parsing SSE progress:', ex);
+      }
+    } else if (e.data.startsWith('upload-complete:')) {
+      try {
+        const data = JSON.parse(e.data.substring(16));
+        if (activeUploadId && data.id === activeUploadId) {
+          setProg(100);
+          document.getElementById('overlayTitle').textContent = 'Complete!';
+        }
+      } catch (ex) {
+        console.error('Error parsing SSE upload-complete:', ex);
       }
     }
   };
@@ -1234,6 +1388,8 @@ function setProg(p) {
 
 function upload(file, uploadId) {
   return new Promise((res,rej)=>{
+    activeUploadId = uploadId;
+    useServerProgress = false;
     const xhr = new XMLHttpRequest();
     const id = getClientId();
     xhr.open('POST','/upload?clientId=' + id + '&id=' + uploadId);
@@ -1243,6 +1399,7 @@ function upload(file, uploadId) {
     let lastLoaded = 0;
     
     xhr.upload.onprogress = e => {
+      if (useServerProgress) return;
       if (e.lengthComputable) {
         const pct = e.loaded / e.total * 100;
         const now = Date.now();
@@ -1262,16 +1419,19 @@ function upload(file, uploadId) {
           drawGraph(speedMb);
           
           if (pct >= 99.9) {
-            document.getElementById('overlayTitle').textContent = 'Finishing...';
+            document.getElementById('overlayTitle').textContent = 'Server receiving...';
           }
         }
       }
     };
     xhr.onload = () => {
+      activeUploadId = null;
+      useServerProgress = false;
       if (xhr.status >= 200 && xhr.status < 300) {
         try {
           const resp = JSON.parse(xhr.responseText);
           if (resp.success) {
+            setProg(100);
             res(resp);
           } else {
             rej(new Error(resp.error || 'Upload failed'));
@@ -1288,7 +1448,7 @@ function upload(file, uploadId) {
         }
       }
     };
-    xhr.onerror = () => rej(new Error('Network error'));
+    xhr.onerror = () => { activeUploadId = null; useServerProgress = false; rej(new Error('Network error')); };
     xhr.send(file);
   });
 }

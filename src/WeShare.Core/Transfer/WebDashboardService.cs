@@ -86,10 +86,21 @@ namespace WeShare.Core.Transfer
             NotifyAllClients("refresh");
         }
 
-        public void ShareForWebClient(string clientId, string filePath)
+        public bool IsWebClientConnected(string clientId)
         {
+            _webClientsLock.Wait();
+            try
+            {
+                return _activeWebClients.TryGetValue(clientId, out var info) && info.EventWriter != null;
+            }
+            finally { _webClientsLock.Release(); }
+        }
+
+        public bool ShareForWebClient(string clientId, string filePath)
+        {
+            if (!IsWebClientConnected(clientId)) return false;
             var info = new FileInfo(filePath);
-            if (!info.Exists) return;
+            if (!info.Exists) return false;
             SharedFile sharedFile;
             _filesLock.Wait();
             try
@@ -99,7 +110,7 @@ namespace WeShare.Core.Transfer
                     list = new List<SharedFile>();
                     _clientSpecificFiles[clientId] = list;
                 }
-                if (list.Any(f => f.Path == filePath)) return;
+                if (list.Any(f => f.Path == filePath)) return true;
                 sharedFile = new SharedFile { Name = info.Name, Path = filePath, Size = info.Length };
                 list.Add(sharedFile);
             }
@@ -107,6 +118,40 @@ namespace WeShare.Core.Transfer
             
             // Notify client about the specific offer
             NotifyClient(clientId, $"offer:{{\"id\":\"{sharedFile.Id}\",\"name\":\"{Uri.EscapeDataString(sharedFile.Name)}\",\"size\":{sharedFile.Size}}}");
+            return true;
+        }
+
+        public bool ShareMultipleForWebClient(string clientId, List<string> filePaths)
+        {
+            if (!IsWebClientConnected(clientId)) return false;
+            var sharedFiles = new List<SharedFile>();
+            _filesLock.Wait();
+            try
+            {
+                if (!_clientSpecificFiles.TryGetValue(clientId, out var list))
+                {
+                    list = new List<SharedFile>();
+                    _clientSpecificFiles[clientId] = list;
+                }
+                foreach (var filePath in filePaths)
+                {
+                    var fInfo = new FileInfo(filePath);
+                    if (!fInfo.Exists) continue;
+                    if (list.Any(f => f.Path == filePath)) continue;
+                    var sf = new SharedFile { Name = fInfo.Name, Path = filePath, Size = fInfo.Length };
+                    list.Add(sf);
+                    sharedFiles.Add(sf);
+                }
+            }
+            finally { _filesLock.Release(); }
+
+            if (sharedFiles.Count == 0) return true;
+
+            // Build a single batch-offer SSE event
+            var filesJson = string.Join(",", sharedFiles.Select(f =>
+                $"{{\"id\":\"{f.Id}\",\"name\":\"{Uri.EscapeDataString(f.Name)}\",\"size\":{f.Size}}}" ));
+            NotifyClient(clientId, $"batch-offer:[{filesJson}]");
+            return true;
         }
 
         private async void NotifyAllClients(string type)
@@ -601,6 +646,13 @@ namespace WeShare.Core.Transfer
                                         lastReportedBytes = written;
                                         lastReportTime = now;
                                         WebTransferProgress?.Invoke(transferState);
+
+                                        // Push server-side progress to the uploading web client via SSE
+                                        if (!string.IsNullOrEmpty(clientId))
+                                        {
+                                            double speedVal = transferState.SpeedMbPerSec;
+                                            NotifyClient(clientId, $"progress:{{\"id\":\"{transferState.FileId}\",\"received\":{written},\"total\":{contentLength},\"speed\":{speedVal:F2}}}");
+                                        }
                                     }
                                 }
 
@@ -612,6 +664,12 @@ namespace WeShare.Core.Transfer
 
                             transferState.Status = TransferStatus.Done;
                             WebTransferCompleted?.Invoke(transferState);
+
+                            // Notify web client that upload is complete
+                            if (!string.IsNullOrEmpty(clientId))
+                            {
+                                NotifyClient(clientId, $"upload-complete:{{\"id\":\"{transferState.FileId}\"}}");
+                            }
 
                             if (contentLength > 0)
                                 WebFileShared?.Invoke(clientId ?? "unknown", uploaderName, transferState.FilePath, contentLength);

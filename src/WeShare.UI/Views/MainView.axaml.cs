@@ -307,16 +307,58 @@ namespace WeShare.UI.Views
             }
         }
 
-        private void NavHome_Click(object? sender, RoutedEventArgs e) => ShowPanel(HomePanel, "HOME", NavHomeBtn);
-        private void NavFiles_Click(object? sender, RoutedEventArgs e) => ShowPanel(FilesPanel, "LIBRARY", NavFilesBtn);
+        private bool HasActiveTransfer()
+        {
+            return _isSending || ActiveReceives.Count > 0;
+        }
+
+        private void NavHome_Click(object? sender, RoutedEventArgs e)
+        {
+            if (HasActiveTransfer())
+            {
+                ShowToast("Active transfer in progress — please wait");
+                return;
+            }
+            ShowPanel(HomePanel, "HOME", NavHomeBtn);
+        }
+        private void NavFiles_Click(object? sender, RoutedEventArgs e)
+        {
+            if (HasActiveTransfer())
+            {
+                ShowToast("Active transfer in progress — please wait");
+                return;
+            }
+            ShowPanel(FilesPanel, "LIBRARY", NavFilesBtn);
+        }
         private void NavTransfers_Click(object? sender, RoutedEventArgs e) => ShowPanel(TransfersPanel, "TRANSFERS", NavTransfersBtn);
         private void NavWebShared_Click(object? sender, RoutedEventArgs e)
         {
+            if (HasActiveTransfer())
+            {
+                ShowToast("Active transfer in progress — please wait");
+                return;
+            }
             ShowPanel(WebSharedPanel, "WEB SHARED", NavWebSharedBtn);
             UpdateWebSharedClientsList();
         }
-        private void NavSettings_Click(object? sender, RoutedEventArgs e) => ShowPanel(SettingsPanel, "SETTINGS", NavSettBtn);
-        private void NavAbout_Click(object? sender, RoutedEventArgs e) => ShowPanel(AboutPanel, "ABOUT", NavAboutBtn);
+        private void NavSettings_Click(object? sender, RoutedEventArgs e)
+        {
+            if (HasActiveTransfer())
+            {
+                ShowToast("Active transfer in progress — please wait");
+                return;
+            }
+            ShowPanel(SettingsPanel, "SETTINGS", NavSettBtn);
+        }
+        private void NavAbout_Click(object? sender, RoutedEventArgs e)
+        {
+            if (HasActiveTransfer())
+            {
+                ShowToast("Active transfer in progress — please wait");
+                return;
+            }
+            ShowPanel(AboutPanel, "ABOUT", NavAboutBtn);
+        }
 
         private void HomeSend_Click(object sender, RoutedEventArgs e)
         {
@@ -627,13 +669,49 @@ namespace WeShare.UI.Views
                     {
                         if (device.Type == "Web Client")
                         {
-                            _webDashboardService?.ShareForWebClient(device.Id, item.Path);
+                            // Batch all remaining web client files into a single notification
+                            var allPaths = new System.Collections.Generic.List<string>();
+                            var allItems = new System.Collections.Generic.List<QueueItem>();
                             await Dispatcher.UIThread.InvokeAsync(() =>
                             {
-                                if (SendQueue.Count > 0 && SendQueue[0] == item)
-                                    SendQueue.RemoveAt(0);
-                                UpdateQueueUI();
+                                foreach (var qi in SendQueue)
+                                {
+                                    allPaths.Add(qi.Path);
+                                    allItems.Add(qi);
+                                }
                             });
+
+                            if (allPaths.Count > 1)
+                            {
+                                bool sent = _webDashboardService?.ShareMultipleForWebClient(device.Id, allPaths) ?? false;
+                                if (!sent)
+                                {
+                                    ShowToast("Web client disconnected — cannot send files");
+                                    _isSending = false;
+                                    break;
+                                }
+                                await Dispatcher.UIThread.InvokeAsync(() =>
+                                {
+                                    SendQueue.Clear();
+                                    UpdateQueueUI();
+                                });
+                            }
+                            else
+                            {
+                                bool sent = _webDashboardService?.ShareForWebClient(device.Id, item.Path) ?? false;
+                                if (!sent)
+                                {
+                                    ShowToast("Web client disconnected — cannot send file");
+                                    _isSending = false;
+                                    break;
+                                }
+                                await Dispatcher.UIThread.InvokeAsync(() =>
+                                {
+                                    if (SendQueue.Count > 0 && SendQueue[0] == item)
+                                        SendQueue.RemoveAt(0);
+                                    UpdateQueueUI();
+                                });
+                            }
                         }
                         else
                         {
@@ -668,10 +746,11 @@ namespace WeShare.UI.Views
             }
             finally
             {
+                _isSending = false;
                 Dispatcher.UIThread.Post(() =>
                 {
                     SendProgressBorder.IsVisible = false;
-                    NavHome_Click(this, new RoutedEventArgs());
+                    ShowPanel(HomePanel, "HOME", NavHomeBtn);
                 });
             }
         }
@@ -772,6 +851,22 @@ namespace WeShare.UI.Views
 
             // Process each item one at a time; only remove it from the queue AFTER
             // it succeeds.  This way a failure leaves remaining files intact for retry.
+            if (_sendTarget.Type == "Web Client" && SendQueue.Count > 1)
+            {
+                // Batch all files into a single notification for web clients
+                var allPaths = SendQueue.Select(q => q.Path).ToList();
+                bool sent = _webDashboardService?.ShareMultipleForWebClient(_sendTarget.Id, allPaths) ?? false;
+                if (!sent)
+                {
+                    SendProgressBorder.IsVisible = false;
+                    ShowToast("Web client disconnected — cannot send files");
+                    return;
+                }
+                sentCount = SendQueue.Count;
+                SendQueue.Clear();
+            }
+            else
+            {
             while (SendQueue.Count > 0)
             {
                 var item = SendQueue[0];
@@ -782,7 +877,13 @@ namespace WeShare.UI.Views
                 {
                     if (_sendTarget.Type == "Web Client")
                     {
-                        _webDashboardService?.ShareForWebClient(_sendTarget.Id, item.Path);
+                        bool sent = _webDashboardService?.ShareForWebClient(_sendTarget.Id, item.Path) ?? false;
+                        if (!sent)
+                        {
+                            SendProgressBorder.IsVisible = false;
+                            ShowToast("Web client disconnected — cannot send file");
+                            return;
+                        }
                     }
                     else
                     {
@@ -803,12 +904,13 @@ namespace WeShare.UI.Views
                     return;
                 }
             }
+            }
 
             SendProgressBorder.IsVisible = false;
             _sendTarget = null;
             UpdateQueueUI();
             ShowToast($"Successfully sent {sentCount} file(s)");
-            NavHome_Click(this, new RoutedEventArgs());
+            ShowPanel(HomePanel, "HOME", NavHomeBtn);
         }
 
         private async Task<System.Collections.Generic.List<QueueItem>> PickFilesAsync()
@@ -1307,7 +1409,7 @@ namespace WeShare.UI.Views
         private void RejectTransfer_Click(object sender, RoutedEventArgs e)
         {
             AcceptRejectPanel.IsVisible = false;
-            NavHome_Click(this, new RoutedEventArgs());
+            ShowPanel(HomePanel, "HOME", NavHomeBtn);
             _acceptTcs?.TrySetResult(false);
         }
 
