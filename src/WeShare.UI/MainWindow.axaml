@@ -4,13 +4,14 @@
         x:Class="WeShare.UI.MainWindow"
         Title="We Share"
         Icon="/Assets/app-icon.png"
-        Width="1200" Height="800"
-        MinWidth="1000" MinHeight="700"
+        Width="1050" Height="700"
+        MinWidth="950" MinHeight="650"
+        CanResize="True"
         Background="Transparent"
         TransparencyLevelHint="Mica"
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaChromeHints="PreferSystemChrome"
         ExtendClientAreaTitleBarHeightHint="-1">
 
-  <views:MainView x:Name="MainContent"/>
+  <views:MainView x:Name="MainContent" />
 </Window>

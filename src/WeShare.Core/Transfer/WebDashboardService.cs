@@ -413,6 +413,7 @@ namespace WeShare.Core.Transfer
                     else if (method == "POST" && path == "/api/ask-receive")
                     {
                         string? clientId = queryParams.GetValueOrDefault("clientId");
+                        string? targetId = queryParams.GetValueOrDefault("targetId");
                         string? name = queryParams.GetValueOrDefault("name");
                         string? sizeStr = queryParams.GetValueOrDefault("size");
                         long size = long.TryParse(sizeStr, out var s) ? s : 0;
@@ -456,24 +457,33 @@ namespace WeShare.Core.Transfer
                             Timestamp = DateTime.UtcNow
                         };
 
-                        bool accepted = false;
-                        if (WebFileSharedCallback != null)
+                        if (!string.IsNullOrEmpty(targetId) && targetId != "pc")
                         {
-                            accepted = await WebFileSharedCallback(transferState);
-                        }
-                        else
-                        {
-                            accepted = true;
-                        }
-
-                        if (accepted)
-                        {
+                            transferState.ErrorMessage = "TARGET:" + targetId;
                             _approvedUploads[transferState.FileId] = transferState;
                             await SendJson(stream, new { accepted = true, id = transferState.FileId });
                         }
                         else
                         {
-                            await SendJson(stream, new { accepted = false });
+                            bool accepted = false;
+                            if (WebFileSharedCallback != null)
+                            {
+                                accepted = await WebFileSharedCallback(transferState);
+                            }
+                            else
+                            {
+                                accepted = true;
+                            }
+
+                            if (accepted)
+                            {
+                                _approvedUploads[transferState.FileId] = transferState;
+                                await SendJson(stream, new { accepted = true, id = transferState.FileId });
+                            }
+                            else
+                            {
+                                await SendJson(stream, new { accepted = false });
+                            }
                         }
                     }
 
@@ -684,7 +694,20 @@ namespace WeShare.Core.Transfer
                             }
 
                             if (contentLength > 0)
-                                WebFileShared?.Invoke(clientId ?? "unknown", uploaderName, transferState.FilePath, contentLength);
+                            {
+                                if (transferState.ErrorMessage != null && transferState.ErrorMessage.StartsWith("TARGET:"))
+                                {
+                                    string tId = transferState.ErrorMessage.Substring(7);
+                                    ShareForWebClient(tId, transferState.FilePath);
+                                    // Optional: still invoke PC callback so it shows in PC library, but maybe skip the "ask receive" popup.
+                                    // We already bypassed WebFileSharedCallback in ask-receive, so this just adds it to library.
+                                    WebFileShared?.Invoke(clientId ?? "unknown", uploaderName, transferState.FilePath, contentLength);
+                                }
+                                else
+                                {
+                                    WebFileShared?.Invoke(clientId ?? "unknown", uploaderName, transferState.FilePath, contentLength);
+                                }
+                            }
 
                             await SendJson(stream, new { success = true, saved = Path.GetFileName(transferState.FilePath), bytes = contentLength });
                         }

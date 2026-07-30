@@ -721,7 +721,12 @@ section {
   </header>
 
   <section id='uploadSection'>
-    <div class='section-title'>Send to PC</div>
+    <div class='section-title' style='display:flex; justify-content:space-between; align-items:center;'>
+      <span>Send Files</span>
+      <select id='targetDeviceSelect' style='padding: 4px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-family: inherit; font-size: 12px; outline: none; max-width: 150px;'>
+          <option value='pc'>Host PC</option>
+      </select>
+    </div>
     <div class='drop-zone' id='dropZone'>
       <input type='file' id='fileInput' multiple onchange='handleFiles(this.files)'>
       <div class='dz-icon-container'>
@@ -1105,6 +1110,7 @@ function connectSSE() {
   sse.onmessage = e => {
     if (e.data === 'refresh') {
       loadFiles();
+      loadDevices();
     } else if (e.data.startsWith('offer:')) {
       try {
         const data = JSON.parse(e.data.substring(6));
@@ -1216,7 +1222,28 @@ async function init() {
   connectSSE();
   await updateConnectionState();
   loadFiles();
+  loadDevices();
   checkCaptivePortal();
+}
+
+async function loadDevices() {
+  try {
+    const id = getClientId();
+    const devices = await fetch('/api/devices').then(r=>r.json());
+    const select = document.getElementById('targetDeviceSelect');
+    if (!select) return;
+    const currentVal = select.value;
+    select.innerHTML = '<option value=\'pc\'>Host PC</option>';
+    for (const d of devices) {
+      if (d.id !== id) {
+        const opt = document.createElement('option');
+        opt.value = d.id;
+        opt.textContent = escapeHtml(d.name) + (d.type === 'Web Client' ? ' (Web)' : '');
+        select.appendChild(opt);
+      }
+    }
+    if (Array.from(select.options).some(o => o.value === currentVal)) select.value = currentVal;
+  } catch(e){}
 }
 
 async function loadFiles() {
@@ -1352,7 +1379,8 @@ async function handleFiles(files) {
 
     try {
       // 1. Request permission
-      const askRes = await fetch('/api/ask-receive?clientId=' + id + '&name=' + encodeURIComponent(f.name) + '&size=' + f.size, { method: 'POST' }).then(r => r.json());
+      const targetId = document.getElementById('targetDeviceSelect').value;
+      const askRes = await fetch('/api/ask-receive?clientId=' + id + '&targetId=' + targetId + '&name=' + encodeURIComponent(f.name) + '&size=' + f.size, { method: 'POST' }).then(r => r.json());
       if (!askRes.accepted) {
         throw new Error(askRes.error || 'Rejected by host PC');
       }

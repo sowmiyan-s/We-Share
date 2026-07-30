@@ -1340,6 +1340,11 @@ namespace WeShare.UI.Views
             });
         }
 
+        private void ManualStartHotspot_Click(object sender, RoutedEventArgs e)
+        {
+            _ = Task.Run(TryAutoNetworkAsync);
+        }
+
         private void ManualConnect_Click(object sender, RoutedEventArgs e)
         {
             ManualIPDialog.IsVisible = true;
