@@ -310,6 +310,18 @@ namespace WeShare.Core.Transfer
                     }
 
                     // --- CORS + route dispatch ---
+                    if (method == "OPTIONS")
+                    {
+                        var header = "HTTP/1.1 204 No Content\r\n" +
+                                     "Access-Control-Allow-Origin: *\r\n" +
+                                     "Access-Control-Allow-Methods: GET, POST, OPTIONS\r\n" +
+                                     "Access-Control-Allow-Headers: *\r\n" +
+                                     "Connection: close\r\n\r\n";
+                        await stream.WriteAsync(Encoding.ASCII.GetBytes(header));
+                        await stream.FlushAsync();
+                        return;
+                    }
+
                     if (method == "GET" && path == "/")
                     {
                         var bodyBytes = Encoding.UTF8.GetBytes(GetDashboardHtml());

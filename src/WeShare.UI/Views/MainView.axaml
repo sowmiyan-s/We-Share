@@ -382,7 +382,8 @@
         </Border>
 
         <!-- Dynamic Content -->
-        <Grid Grid.Row="1">
+        <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+        <Grid>
             
             <!-- Wizard Progress Indicator -->
             <StackPanel x:Name="SendStepWizard" IsVisible="False" Orientation="Horizontal" Spacing="24" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,24,0,0" ZIndex="100">
@@ -1090,7 +1091,7 @@
                    <!-- App Identity Block -->
                    <StackPanel Orientation="Horizontal" Spacing="24" Margin="0,0,0,32">
                      <Border Classes="SplashLogoPulse" Width="72" Height="72" CornerRadius="18"
-                             ClipToBounds="True" BoxShadow="0 8 32 0 #50000000">
+                                     ClipToBounds="True" BoxShadow="0 8 32 0 #50000000">
                        <Image Source="/Assets/logo.png" Stretch="Uniform"/>
                      </Border>
                      <StackPanel VerticalAlignment="Center" Spacing="4">
@@ -1099,7 +1100,7 @@
                        <StackPanel Orientation="Horizontal" Spacing="8">
                          <Border Background="#186366F1" BorderBrush="{StaticResource ElectricIndigoBrush}"
                                  BorderThickness="1" CornerRadius="4" Padding="8,3">
-                           <TextBlock Text="v1.0.0" FontSize="10" FontWeight="Bold"
+                           <TextBlock x:Name="AboutVersionText" Text="v1.0.0" FontSize="10" FontWeight="Bold"
                                       Foreground="{DynamicResource ElectricIndigoBrush}"/>
                          </Border>
                          <Border Background="#1510B981" BorderBrush="{StaticResource TealSuccessBrush}"
@@ -1283,13 +1284,37 @@
                             <Button Grid.Column="1" Content="BROWSE" Click="ChangeSaveLocation_Click" Background="{DynamicResource GlassBackgroundBrush}" BorderBrush="{DynamicResource GlassBorderBrush}" BorderThickness="1" Padding="16,10" CornerRadius="8" Margin="16,0,0,0"/>
                          </Grid>
                       </StackPanel>
+
+                      <!-- Updates Setting -->
+                      <StackPanel Spacing="12">
+                         <TextBlock Text="UPDATES" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondary}" LetterSpacing="2"/>
+                         <Grid ColumnDefinitions="*, Auto">
+                            <StackPanel Spacing="4" VerticalAlignment="Center" MaxWidth="340">
+                               <TextBlock x:Name="SettingsVersionText" Text="Current Version: v1.0.0" Foreground="{DynamicResource TextPrimary}" FontSize="13" FontWeight="SemiBold"/>
+                               <TextBlock x:Name="SettingsUpdateStatusText" Text="Up to date" FontSize="11" Foreground="{DynamicResource TextSecondary}" Opacity="0.7"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                               <Button x:Name="SettingsCheckUpdateBtn" Content="CHECK NOW" Click="CheckForUpdate_Click" Background="{DynamicResource GlassBackgroundBrush}" BorderBrush="{DynamicResource GlassBorderBrush}" BorderThickness="1" Padding="16,10" CornerRadius="8" Margin="16,0,0,0"/>
+                               <Button x:Name="SettingsDownloadInstallBtn" Content="DOWNLOAD &amp; INSTALL" Click="DownloadInstallUpdate_Click" Classes="PrimaryBtn" IsVisible="False" Padding="16,10" CornerRadius="8"/>
+                            </StackPanel>
+                         </Grid>
+                         <!-- Update progress indicator -->
+                         <StackPanel x:Name="SettingsUpdateProgressPanel" Spacing="8" IsVisible="False" Margin="0,8,0,0">
+                            <Grid ColumnDefinitions="*, Auto">
+                               <TextBlock x:Name="SettingsUpdateProgressText" Text="Downloading update..." FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
+                               <TextBlock Grid.Column="1" x:Name="SettingsUpdateProgressPct" Text="0%" FontSize="11" FontWeight="Bold" Foreground="{StaticResource ElectricIndigoBrush}"/>
+                            </Grid>
+                            <ProgressBar x:Name="SettingsUpdateProgressBar" Height="4" CornerRadius="2" Foreground="#107C41" Background="#20FFFFFF"/>
+                         </StackPanel>
+                      </StackPanel>
                    </StackPanel>
                 </Border>
-             </StackPanel>
-          </Grid>
-        </Grid>
-      </Grid>
-    </Grid>
+              </StackPanel>
+           </Grid>
+         </Grid>
+        </ScrollViewer>
+       </Grid>
+     </Grid>
 
     <!-- MOBILE NAVIGATION (For Phone device types) -->
     <Border x:Name="BottomNav" Grid.ColumnSpan="2" VerticalAlignment="Bottom" Height="80" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource GlassBorderBrush}" BorderThickness="0,1,0,0" IsVisible="False">

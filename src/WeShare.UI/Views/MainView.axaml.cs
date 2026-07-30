@@ -12,6 +12,9 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Net.Http;
+using System.Text.Json;
+using System.Diagnostics;
 using WeShare.Core.Data;
 using WeShare.Core.Discovery;
 using WeShare.Core.Models;
@@ -32,6 +35,10 @@ namespace WeShare.UI.Views
 
     public partial class MainView : UserControl
     {
+        public const string CurrentVersion = "1.0.0";
+        private string? _latestVersionDownloadUrl;
+        private string? _latestVersionName;
+
         // ── Services ──────────────────────────────────────────────────────────
         private DeviceModel _localDevice;
         private UdpDiscoveryService _discoveryService;
@@ -239,6 +246,10 @@ namespace WeShare.UI.Views
 
             // Load received history
             LoadReceivedFiles();
+
+            // Set version labels dynamically
+            AboutVersionText.Text = $"v{CurrentVersion}";
+            SettingsVersionText.Text = $"Current Version: v{CurrentVersion}";
 
             UpdateEmptyState();
             NavHome_Click(this, new RoutedEventArgs());
@@ -563,7 +574,7 @@ namespace WeShare.UI.Views
             var activeIpOrId = GetActiveSessionDeviceIpOrId();
             if (activeIpOrId != null)
             {
-                bool isSame = (device.IpAddress == activeIpOrId || device.Id == activeIpOrId);
+                bool isSame = (IsSameIpAddress(device.IpAddress, activeIpOrId) || device.Id == activeIpOrId);
                 if (!isSame)
                 {
                     ShowToast("Session active: Can only send to/receive from the active device.");
@@ -572,7 +583,7 @@ namespace WeShare.UI.Views
             }
 
             // If we're already sending to this device, just add to the queue
-            if (_isSending && _sendTarget?.IpAddress == device.IpAddress)
+            if (_isSending && IsSameIpAddress(_sendTarget?.IpAddress, device.IpAddress))
             {
                 ShowPanel(SendFilesPanel, "SEND FILES", null);
                 return;
@@ -609,7 +620,7 @@ namespace WeShare.UI.Views
             var activeIpOrId = GetActiveSessionDeviceIpOrId();
             if (activeIpOrId != null)
             {
-                bool isSame = (device.IpAddress == activeIpOrId || device.Id == activeIpOrId);
+                bool isSame = (IsSameIpAddress(device.IpAddress, activeIpOrId) || device.Id == activeIpOrId);
                 if (!isSame)
                 {
                     ShowToast("Session active: Can only send to/receive from the active device.");
@@ -1294,7 +1305,7 @@ namespace WeShare.UI.Views
                 HomeWifiPasswordText.Text = password;
                 
                 string hostIp = isHotspotRunning ? _hotspotService!.HotspotIp : ip;
-                string webUrl = isHotspotRunning ? $"http://{hostIp}" : $"http://{hostIp}:8080";
+                string webUrl = $"http://{hostIp}:8080";
                 HomeWebPortalText.Text   = webUrl;
                 GenerateQrBitmap(webUrl);
 
@@ -1346,28 +1357,48 @@ namespace WeShare.UI.Views
             
             // Add a virtual device for this IP
             var device = new DeviceModel { Name = $"Manual Peer ({ip})", IpAddress = ip, Port = 45679 };
-            if (!Devices.Any(d => d.IpAddress == ip)) Devices.Add(device);
+            if (!Devices.Any(d => IsSameIpAddress(d.IpAddress, ip))) Devices.Add(device);
 
             _sendTarget = device;
             ShowToast($"Connecting to {ip}:45679...");
             ShowPanel(SendFilesPanel, "SEND FILES", null);
         }
 
+        private static bool IsSameIpAddress(string? ip1, string? ip2)
+        {
+            if (string.IsNullOrEmpty(ip1) || string.IsNullOrEmpty(ip2))
+                return false;
+
+            if (ip1.Equals(ip2, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            if (System.Net.IPAddress.TryParse(ip1, out var parsed1) && System.Net.IPAddress.TryParse(ip2, out var parsed2))
+            {
+                if (System.Net.IPAddress.IsLoopback(parsed1) && System.Net.IPAddress.IsLoopback(parsed2))
+                    return true;
+
+                return parsed1.MapToIPv4().Equals(parsed2.MapToIPv4());
+            }
+
+            return false;
+        }
+
         private TaskCompletionSource<bool>? _acceptTcs;
         private async Task<bool> OnTransferRequested(FileTransferState state)
         {
             var activeIpOrId = GetActiveSessionDeviceIpOrId();
+            bool isSame = false;
             if (activeIpOrId != null)
             {
-                bool isSame = (state.RemoteIp == activeIpOrId || state.FileId == activeIpOrId);
+                isSame = (IsSameIpAddress(state.RemoteIp, activeIpOrId) || state.FileId == activeIpOrId);
                 if (!isSame)
                 {
                     return false;
                 }
             }
 
-            // 1. Auto-Accept Logic (Session)
-            if (_lastAcceptedIp == state.RemoteIp && (DateTime.Now - _lastAcceptedTime).TotalSeconds < 60)
+            // 1. Auto-Accept Logic (Session) - check before lock
+            if (isSame || (IsSameIpAddress(_lastAcceptedIp, state.RemoteIp) && (DateTime.Now - _lastAcceptedTime).TotalSeconds < 60))
             {
                 return true;
             }
@@ -1376,6 +1407,22 @@ namespace WeShare.UI.Views
             await _uiRequestLock.WaitAsync();
             try
             {
+                // Re-evaluate active session and auto-accept conditions inside the lock
+                var currentActiveIpOrId = GetActiveSessionDeviceIpOrId();
+                bool currentIsSame = false;
+                if (currentActiveIpOrId != null)
+                {
+                    currentIsSame = (IsSameIpAddress(state.RemoteIp, currentActiveIpOrId) || state.FileId == currentActiveIpOrId);
+                }
+
+                if (currentIsSame || (IsSameIpAddress(_lastAcceptedIp, state.RemoteIp) && (DateTime.Now - _lastAcceptedTime).TotalSeconds < 60))
+                {
+                    // Extend the auto-accept session since it is accepted
+                    _lastAcceptedIp = state.RemoteIp;
+                    _lastAcceptedTime = DateTime.Now;
+                    return true;
+                }
+
                 _acceptTcs = new TaskCompletionSource<bool>();
                 _platformService.ShowSystemToast("Incoming File Request", $"{state.PeerName} wants to send {state.FileName} ({FileTransferState.FormatBytes(state.TotalBytes)})");
                 Dispatcher.UIThread.Post(() => {
@@ -1500,6 +1547,12 @@ namespace WeShare.UI.Views
                     HomeSpeedBadge.Text       = $"{dir} {state.SpeedMbPerSec:F1} MB/s";
                     HomeSpeedBadge.IsVisible  = true;
                 }
+
+                if (state.Direction == TransferDirection.Received)
+                {
+                    _lastAcceptedIp = state.RemoteIp;
+                    _lastAcceptedTime = DateTime.Now;
+                }
             });
         }
 
@@ -1517,6 +1570,8 @@ namespace WeShare.UI.Views
                     ReceivedFiles.Insert(0, state);
                     ShowToast($"Received: {state.FileName}");
                     _platformService.ShowSystemToast("File Received", $"{state.FileName} from {state.PeerName}", state.FilePath);
+                    _lastAcceptedIp = state.RemoteIp;
+                    _lastAcceptedTime = DateTime.Now;
                 }
                 else
                 {
@@ -1576,6 +1631,169 @@ namespace WeShare.UI.Views
             manager.TransferCompleted += OnTransferCompleted;
             manager.TransferFailed    += OnTransferFailed;
             manager.TransferRequestCallback = OnTransferRequested;
+        }
+
+        private async void CheckForUpdate_Click(object sender, RoutedEventArgs e)
+        {
+            if (SettingsCheckUpdateBtn == null || SettingsUpdateStatusText == null) return;
+
+            SettingsCheckUpdateBtn.IsEnabled = false;
+            SettingsUpdateStatusText.Text = "Checking for updates...";
+            
+            try
+            {
+                using var client = new HttpClient();
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("WeShare-Updater");
+                
+                var response = await client.GetAsync("https://api.github.com/repos/sowmiyan-s/We-Share/releases/latest");
+                if (!response.IsSuccessStatusCode)
+                {
+                    SettingsUpdateStatusText.Text = $"Failed to check updates (HTTP {response.StatusCode})";
+                    SettingsCheckUpdateBtn.IsEnabled = true;
+                    return;
+                }
+                
+                var json = await response.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(json);
+                var root = doc.RootElement;
+                
+                if (root.TryGetProperty("tag_name", out var tagProp))
+                {
+                    var tagName = tagProp.GetString()?.Trim();
+                    if (!string.IsNullOrEmpty(tagName))
+                    {
+                        var latestVersionStr = tagName.TrimStart('v');
+                        if (Version.TryParse(latestVersionStr, out var latestVersion) && 
+                            Version.TryParse(CurrentVersion, out var currentVersion))
+                        {
+                            if (latestVersion > currentVersion)
+                            {
+                                string? downloadUrl = null;
+                                if (root.TryGetProperty("assets", out var assetsProp) && assetsProp.ValueKind == JsonValueKind.Array)
+                                {
+                                    foreach (var asset in assetsProp.EnumerateArray())
+                                    {
+                                        if (asset.TryGetProperty("name", out var nameProp) && 
+                                            asset.TryGetProperty("browser_download_url", out var urlProp))
+                                        {
+                                            var assetName = nameProp.GetString();
+                                            if (assetName != null && assetName.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+                                            {
+                                                downloadUrl = urlProp.GetString();
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                                
+                                if (!string.IsNullOrEmpty(downloadUrl))
+                                {
+                                    _latestVersionDownloadUrl = downloadUrl;
+                                    _latestVersionName = tagName;
+                                    SettingsUpdateStatusText.Text = $"Update available: {tagName}!";
+                                    if (SettingsDownloadInstallBtn != null) SettingsDownloadInstallBtn.IsVisible = true;
+                                    ShowToast($"Update {tagName} is available!");
+                                }
+                                else
+                                {
+                                    SettingsUpdateStatusText.Text = $"Update available ({tagName}), but no installer found.";
+                                }
+                            }
+                            else
+                            {
+                                SettingsUpdateStatusText.Text = "You are running the latest version.";
+                                ShowToast("You are running the latest version.");
+                            }
+                        }
+                        else
+                        {
+                            SettingsUpdateStatusText.Text = "Failed to parse version information.";
+                        }
+                    }
+                }
+                else
+                {
+                    SettingsUpdateStatusText.Text = "Failed to retrieve release information.";
+                }
+            }
+            catch (Exception ex)
+            {
+                SettingsUpdateStatusText.Text = $"Error checking updates: {ex.Message}";
+                ShowToast("Failed to check for updates");
+            }
+            finally
+            {
+                SettingsCheckUpdateBtn.IsEnabled = true;
+            }
+        }
+
+        private async void DownloadInstallUpdate_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(_latestVersionDownloadUrl)) return;
+            if (SettingsDownloadInstallBtn == null || SettingsCheckUpdateBtn == null || 
+                SettingsUpdateProgressPanel == null || SettingsUpdateProgressBar == null || 
+                SettingsUpdateProgressPct == null || SettingsUpdateStatusText == null) return;
+            
+            SettingsDownloadInstallBtn.IsEnabled = false;
+            SettingsCheckUpdateBtn.IsEnabled = false;
+            SettingsUpdateProgressPanel.IsVisible = true;
+            SettingsUpdateProgressBar.Value = 0;
+            SettingsUpdateProgressPct.Text = "0%";
+            
+            try
+            {
+                using var client = new HttpClient();
+                using var response = await client.GetAsync(_latestVersionDownloadUrl, HttpCompletionOption.ResponseHeadersRead);
+                response.EnsureSuccessStatusCode();
+                
+                var totalBytes = response.Content.Headers.ContentLength ?? -1L;
+                var tempPath = Path.Combine(Path.GetTempPath(), $"WeShare_Setup_Update.exe");
+                
+                using (var contentStream = await response.Content.ReadAsStreamAsync())
+                using (var fileStream = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None, 81920, true))
+                {
+                    var buffer = new byte[81920];
+                    long totalRead = 0;
+                    int read;
+                    
+                    while ((read = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                    {
+                        await fileStream.WriteAsync(buffer, 0, read);
+                        totalRead += read;
+                        
+                        if (totalBytes > 0)
+                        {
+                            double pct = (double)totalRead / totalBytes * 100;
+                            Dispatcher.UIThread.Post(() =>
+                            {
+                                SettingsUpdateProgressBar.Value = pct;
+                                SettingsUpdateProgressPct.Text = $"{pct:F0}%";
+                            });
+                        }
+                    }
+                    await fileStream.FlushAsync();
+                }
+                
+                ShowToast("Download complete. Starting installer...");
+                
+                var psi = new ProcessStartInfo
+                {
+                    FileName = tempPath,
+                    UseShellExecute = true
+                };
+                Process.Start(psi);
+                
+                Shutdown();
+                Environment.Exit(0);
+            }
+            catch (Exception ex)
+            {
+                SettingsUpdateStatusText.Text = $"Failed to download update: {ex.Message}";
+                ShowToast($"Update download failed: {ex.Message}");
+                SettingsDownloadInstallBtn.IsEnabled = true;
+                SettingsCheckUpdateBtn.IsEnabled = true;
+                SettingsUpdateProgressPanel.IsVisible = false;
+            }
         }
 
 
