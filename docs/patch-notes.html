@@ -46,14 +46,16 @@
       <div class="patch-dot"></div>
       <div class="patch-version-label">
         <span class="patch-version-num">v1.1.0</span>
-        <span class="patch-date">June 2026</span>
+        <span class="patch-date">July 2026</span>
         <span class="patch-badge-latest">Latest</span>
       </div>
       <ul class="patch-list">
         <li><span class="patch-tag tag-new">New</span> <strong>Grouped Multi-File Batch Notifications</strong>: Sending multiple files to a web client now displays a single unified consent pop-up showing all files, sizes, and a total summary with "Accept All" / "Decline All" options.</li>
+        <li><span class="patch-tag tag-improve">Improve</span> <strong>Compact Network Identity UI</strong>: Completely redesigned the network properties widget into an ultra-compact horizontal list, shaving over 300px off the minimum height requirements to support small laptops.</li>
         <li><span class="patch-tag tag-improve">Improve</span> <strong>Accurate Web Progress Tracking</strong>: The web portal progress bar now synchronizes directly with server SSE progress events, solving discrepancy issues caused by local browser upload buffers. Shows "Server receiving..." status when browser has completed buffering but the server is processing.</li>
         <li><span class="patch-tag tag-improve">Improve</span> <strong>Active Connection Guard</strong>: Checks web client connection status before initiating transfers to prevent silent "Failed to send" errors.</li>
         <li><span class="patch-tag tag-improve">Improve</span> <strong>Transfer Navigation Block</strong>: Prevents accidental navigation or closing the app/tab during active file transfers by guarding all panel buttons, while allowing access to the Transfers view.</li>
+        <li><span class="patch-tag tag-bug">Fix</span> <strong>UI Layout & Truncation</strong>: Fixed a layout bug where dynamic network text could overlap IP addresses, and restored standard 48px margin gaps from the sidebar across all views.</li>
         <li><span class="patch-tag tag-bug">Fix</span> Corrected post-transfer navigation in `MainView` to ensure UI cleanly returns to Home when transfers finish or are rejected.</li>
       </ul>
       <div style="margin-top: 16px;">
