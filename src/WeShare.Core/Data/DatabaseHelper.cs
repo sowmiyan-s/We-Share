@@ -79,6 +79,15 @@ namespace WeShare.Core.Data
                     updateCmd.CommandText = "UPDATE Transfers SET Status = 5 WHERE Status = 2;";
                     updateCmd.ExecuteNonQuery();
                 }
+
+                using var settingsCmd = conn.CreateCommand();
+                settingsCmd.CommandText = @"
+                    CREATE TABLE IF NOT EXISTS Settings (
+                        Key   TEXT PRIMARY KEY,
+                        Value TEXT
+                    );
+                ";
+                settingsCmd.ExecuteNonQuery();
             }
             catch (Exception ex) { Console.WriteLine($"[DB] Init failed: {ex.Message}"); }
         }
@@ -186,6 +195,69 @@ namespace WeShare.Core.Data
                 await cmd.ExecuteNonQueryAsync();
             }
             catch (Exception ex) { Console.WriteLine($"[DB] Clear failed: {ex.Message}"); }
+        }
+
+        // ── Settings ───────────────────────────────────────────────────────────
+        public async Task SetSettingAsync(string key, string value)
+        {
+            await _writeLock.WaitAsync();
+            try
+            {
+                using var conn = await OpenConnectionAsync();
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = "INSERT OR REPLACE INTO Settings (Key, Value) VALUES ($key, $val)";
+                cmd.Parameters.AddWithValue("$key", key);
+                cmd.Parameters.AddWithValue("$val", value);
+                await cmd.ExecuteNonQueryAsync();
+            }
+            catch (Exception ex) { Console.WriteLine($"[DB] SetSetting failed: {ex.Message}"); }
+            finally { _writeLock.Release(); }
+        }
+
+        public async Task<string?> GetSettingAsync(string key, string? defaultValue = null)
+        {
+            try
+            {
+                using var conn = await OpenConnectionAsync();
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = "SELECT Value FROM Settings WHERE Key = $key";
+                cmd.Parameters.AddWithValue("$key", key);
+                var obj = await cmd.ExecuteScalarAsync();
+                return obj?.ToString() ?? defaultValue;
+            }
+            catch { return defaultValue; }
+        }
+
+        public string? GetSetting(string key, string? defaultValue = null)
+        {
+            try
+            {
+                using var conn = new SqliteConnection($"Data Source={_dbPath}");
+                conn.Open();
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = "SELECT Value FROM Settings WHERE Key = $key";
+                cmd.Parameters.AddWithValue("$key", key);
+                var obj = cmd.ExecuteScalar();
+                return obj?.ToString() ?? defaultValue;
+            }
+            catch { return defaultValue; }
+        }
+
+        public void SetSetting(string key, string value)
+        {
+            _writeLock.Wait();
+            try
+            {
+                using var conn = new SqliteConnection($"Data Source={_dbPath}");
+                conn.Open();
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = "INSERT OR REPLACE INTO Settings (Key, Value) VALUES ($key, $val)";
+                cmd.Parameters.AddWithValue("$key", key);
+                cmd.Parameters.AddWithValue("$val", value);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex) { Console.WriteLine($"[DB] SetSetting sync failed: {ex.Message}"); }
+            finally { _writeLock.Release(); }
         }
     }
 }

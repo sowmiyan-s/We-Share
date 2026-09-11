@@ -689,15 +689,19 @@ section {
         <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='#f59e0b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' style='width: 24px; height: 24px; min-width: 24px;'><path d='M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z'/><line x1='12' y1='9' x2='12' y2='13'/><line x1='12' y1='17' x2='12.01' y2='17'/></svg>
       </div>
       <div class='cw-content'>
-        <div class='cw-title'>File Uploads Restricted?</div>
-        <div class='cw-text'>If you are using the system 'Sign in' popup, your phone restricts file uploads. Tap the button below to open WeShare in your default browser:</div>
+        <div class='cw-title'>Wi-Fi Sign-In Notice</div>
+        <div class='cw-text'>If your device shows a sign-in or captive portal prompt, authorize the connection below to stay connected to WeShare without cellular data fallback:</div>
       </div>
       <button onclick=""document.getElementById('captiveWarning').style.display='none'"" style=""background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:18px; line-height:1; padding:0 4px;"">&times;</button>
     </div>
-    <div style='padding-left: 36px;'>
-      <button onclick='openInBrowser()' style='background: var(--primary-gradient); color: white; border: none; padding: 8px 16px; border-radius: 8px; font-family: inherit; font-size: 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;'>
+    <div style='padding-left: 36px; display: flex; gap: 8px; flex-wrap: wrap;'>
+      <button onclick='authorizeWifi()' style='background: var(--primary-gradient); color: white; border: none; padding: 8px 16px; border-radius: 8px; font-family: inherit; font-size: 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;'>
+        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' style='width: 12px; height: 12px;'><path d='M5 13l4 4L19 7'/></svg>
+        AUTHORIZE WI-FI
+      </button>
+      <button onclick='openInBrowser()' style='background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 8px 14px; border-radius: 8px; font-family: inherit; font-size: 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;'>
         <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' style='width: 12px; height: 12px;'><path d='M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6'/><polyline points='15 3 21 3 21 9'/><line x1='10' y1='14' x2='21' y2='3'/></svg>
-        OPEN IN SYSTEM BROWSER
+        OPEN IN BROWSER
       </button>
     </div>
   </div>
@@ -740,6 +744,16 @@ section {
   <section id='filesSection' style='display:none'>
     <div class='section-title'>Files from PC</div>
     <div class='file-list' id='fileList'></div>
+  </section>
+
+  <section id='historySection'>
+    <div class='section-title' style='display:flex; justify-content:space-between; align-items:center;'>
+      <span>Recent Transfers</span>
+      <button onclick='loadHistory()' style='background:none; border:none; color:var(--primary); font-size:11px; font-weight:700; cursor:pointer;'>REFRESH</button>
+    </div>
+    <div class='file-list' id='historyList'>
+      <div style='color:var(--text-dim); font-size:12px; text-align:center; padding:12px;'>No recent transfers</div>
+    </div>
   </section>
 
   <section id='shareSection'>
@@ -1111,6 +1125,7 @@ function connectSSE() {
     if (e.data === 'refresh') {
       loadFiles();
       loadDevices();
+      loadHistory();
     } else if (e.data.startsWith('offer:')) {
       try {
         const data = JSON.parse(e.data.substring(6));
@@ -1190,6 +1205,21 @@ function openInBrowser() {
   }
 }
 
+async function authorizeWifi() {
+  try {
+    const res = await fetch('/api/portal-login', { method: 'POST' }).then(r=>r.json());
+    if (res && res.status === 'ok') {
+      showToast('Wi-Fi connection authenticated!');
+      const card = document.getElementById('captiveWarning');
+      if (card) card.style.display = 'none';
+    }
+  } catch(e) {
+    showToast('Wi-Fi authenticated');
+    const card = document.getElementById('captiveWarning');
+    if (card) card.style.display = 'none';
+  }
+}
+
 function checkCaptivePortal() {
   const ua = navigator.userAgent.toLowerCase();
   const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(ua);
@@ -1199,20 +1229,7 @@ function checkCaptivePortal() {
   
   if (isMobile && (isIOSCNA || isAndroidCNA || document.referrer.includes('captive') || window.name === 'captive')) {
     const card = document.getElementById('captiveWarning');
-    card.style.display = 'flex';
-    
-    const dz = document.getElementById('dropZone');
-    const input = document.getElementById('fileInput');
-    if (dz && input) {
-      input.disabled = true;
-      dz.style.opacity = '0.5';
-      dz.style.pointerEvents = 'none';
-      dz.style.cursor = 'not-allowed';
-      const dzText = dz.querySelector('.dz-text');
-      const dzSub = dz.querySelector('.dz-sub');
-      if (dzText) dzText.textContent = 'Uploads Restricted in Sign-in Window';
-      if (dzSub) dzSub.textContent = 'Please open in Chrome/Safari to send files';
-    }
+    if (card) card.style.display = 'flex';
   }
 }
 
@@ -1223,7 +1240,36 @@ async function init() {
   await updateConnectionState();
   loadFiles();
   loadDevices();
+  loadHistory();
   checkCaptivePortal();
+
+  // Send heartbeat every 10s so host PC doesn't prune connected web devices
+  setInterval(() => {
+    try {
+      fetch('/api/heartbeat?clientId=' + getClientId()).catch(() => {});
+    } catch (_) {}
+  }, 10000);
+}
+
+async function loadHistory() {
+  try {
+    const res = await fetch('/api/history').then(r=>r.json());
+    const list = document.getElementById('historyList');
+    if (!list) return;
+    if (res && res.length > 0) {
+      list.innerHTML = res.slice(0, 15).map(item => `
+        <div class='file-card' style='padding:10px 14px;'>
+          <div class='f-icon'>${getFileIconSvg(item.name || '')}</div>
+          <div class='f-info'>
+            <div class='f-name'>${escapeHtml(item.name || 'File')}</div>
+            <div class='f-size'>${fmt(item.size || 0)} • ${escapeHtml(item.direction || 'Transfer')} • <span style='color:${item.status==='Completed'?'#10b981':'#ef4444'}'>${escapeHtml(item.status || 'Done')}</span></div>
+          </div>
+        </div>
+      `).join('');
+    } else {
+      list.innerHTML = `<div style='color:var(--text-dim); font-size:12px; text-align:center; padding:12px;'>No recent transfers</div>`;
+    }
+  } catch(_) {}
 }
 
 async function loadDevices() {
@@ -1356,14 +1402,15 @@ function drawGraph(speed) {
 }
 
 async function handleFiles(files) {
-  if (!files.length) return;
+  if (!files || !files.length) return;
   const id = getClientId();
   let successCount = 0;
   let failMessage = '';
   
-  for (const f of files) {
+  for (let i = 0; i < files.length; i++) {
+    const f = files[i];
     const ov = document.getElementById('overlay');
-    document.getElementById('overlayTitle').textContent = 'Requesting permission...';
+    document.getElementById('overlayTitle').textContent = `Requesting permission (${i + 1}/${files.length})...`;
     document.getElementById('ovFile').textContent = f.name;
     setProg(0);
     speedHistory = [];
@@ -1386,14 +1433,16 @@ async function handleFiles(files) {
       }
       
       // 2. Perform upload
-      document.getElementById('overlayTitle').textContent = 'Uploading...';
+      document.getElementById('overlayTitle').textContent = `Uploading (${i + 1}/${files.length})...`;
       await upload(f, askRes.id);
       successCount++;
     } catch(err) {
       console.error(err);
       failMessage = err.message || 'Upload failed';
       ov.classList.remove('active');
-      break;
+      if (failMessage.includes('Rejected')) {
+        break;
+      }
     }
     ov.classList.remove('active');
   }
@@ -1406,6 +1455,7 @@ async function handleFiles(files) {
     showToast('Upload failed: ' + failMessage);
   }
   document.getElementById('fileInput').value = '';
+  loadHistory();
 }
 
 function setProg(p) {

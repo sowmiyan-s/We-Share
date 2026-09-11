@@ -7,7 +7,7 @@
         Width="1050" Height="700"
         MinWidth="950" MinHeight="650"
         CanResize="True"
-        Background="Transparent"
+        Background="#121212"
         TransparencyLevelHint="Mica"
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaChromeHints="PreferSystemChrome"

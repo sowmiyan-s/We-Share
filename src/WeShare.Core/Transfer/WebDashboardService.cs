@@ -43,8 +43,12 @@ namespace WeShare.Core.Transfer
         public event Action<FileTransferState>? WebTransferProgress;
         public event Action<FileTransferState>? WebTransferCompleted;
         public event Action<FileTransferState>? WebTransferFailed;
+        public event Action<string>? WebClientHeartbeat;
         public Func<FileTransferState, Task<bool>>? WebFileSharedCallback { get; set; }
         public Func<string, bool>? IsSessionActiveFilter { get; set; }
+        public Func<string, string, bool>? IsSessionActiveFilterEx { get; set; }
+        private Func<IReadOnlyList<FileTransferState>>? _getHistory;
+        public void SetHistoryProvider(Func<IReadOnlyList<FileTransferState>> provider) => _getHistory = provider;
         private readonly System.Collections.Concurrent.ConcurrentDictionary<string, FileTransferState> _approvedUploads = new();
 
         public class WebClientInfo
@@ -351,6 +355,45 @@ namespace WeShare.Core.Transfer
                         await SendJson(stream, peers);
                     }
 
+                    else if (path == "/api/portal-login")
+                    {
+                        string remoteIp = client.Client.RemoteEndPoint is System.Net.IPEndPoint rep ? rep.Address.ToString() : "unknown";
+                        CaptivePortalService.AuthorizeIp(remoteIp);
+                        string? cId = queryParams.GetValueOrDefault("clientId");
+                        if (!string.IsNullOrEmpty(cId))
+                        {
+                            WebClientHeartbeat?.Invoke(cId);
+                        }
+                        await SendJson(stream, new { success = true, ip = remoteIp, authenticated = true });
+                    }
+
+                    else if (path == "/api/heartbeat")
+                    {
+                        string? cId = queryParams.GetValueOrDefault("clientId");
+                        if (!string.IsNullOrEmpty(cId))
+                        {
+                            WebClientHeartbeat?.Invoke(cId);
+                        }
+                        await SendJson(stream, new { success = true });
+                    }
+
+                    else if (method == "GET" && path == "/api/history")
+                    {
+                        var history = _getHistory?.Invoke() ?? Array.Empty<FileTransferState>();
+                        var list = history.Take(25).Select(h => new
+                        {
+                            id = h.FileId,
+                            name = h.FileName,
+                            size = h.TotalBytes,
+                            sizeDisplay = h.FileSizeDisplay,
+                            direction = h.Direction.ToString(),
+                            peer = h.PeerName,
+                            status = h.Status.ToString(),
+                            timestamp = h.Timestamp.ToString("yyyy-MM-dd HH:mm")
+                        });
+                        await SendJson(stream, list);
+                    }
+
                     else if (method == "GET" && path == "/api/qr")
                     {
                         var ip = UdpDiscoveryService.GetLocalIp();
@@ -417,10 +460,26 @@ namespace WeShare.Core.Transfer
                         string? name = queryParams.GetValueOrDefault("name");
                         string? sizeStr = queryParams.GetValueOrDefault("size");
                         long size = long.TryParse(sizeStr, out var s) ? s : 0;
+                        string remoteIp = client.Client.RemoteEndPoint is System.Net.IPEndPoint rep ? rep.Address.ToString() : "unknown";
 
-                        if (IsSessionActiveFilter != null && IsSessionActiveFilter(clientId ?? ""))
+                        if (!string.IsNullOrEmpty(clientId))
                         {
-                            await SendResponse(stream, 400, "application/json", "{\"accepted\":false,\"error\":\"Another session is active on this device\"}");
+                            WebClientHeartbeat?.Invoke(clientId);
+                        }
+
+                        bool isBlocked = false;
+                        if (IsSessionActiveFilterEx != null)
+                        {
+                            isBlocked = IsSessionActiveFilterEx(clientId ?? "", remoteIp);
+                        }
+                        else if (IsSessionActiveFilter != null)
+                        {
+                            isBlocked = IsSessionActiveFilter(remoteIp);
+                        }
+
+                        if (isBlocked)
+                        {
+                            await SendResponse(stream, 400, "application/json", "{\"accepted\":false,\"error\":\"Another device session is currently active\"}");
                             return;
                         }
 
@@ -453,7 +512,7 @@ namespace WeShare.Core.Transfer
                             Status = TransferStatus.Receiving,
                             Direction = TransferDirection.Received,
                             PeerName = uploaderName,
-                            RemoteIp = client.Client.RemoteEndPoint is System.Net.IPEndPoint rep ? rep.Address.ToString() : "unknown",
+                            RemoteIp = remoteIp,
                             Timestamp = DateTime.UtcNow
                         };
 
@@ -541,7 +600,8 @@ namespace WeShare.Core.Transfer
                             while (client.Connected && clientInfo.EventWriter != null)
                             {
                                 await writer.WriteAsync(": keepalive\n\n");
-                                await Task.Delay(20000);
+                                WebClientHeartbeat?.Invoke(clientId);
+                                await Task.Delay(10000);
                             }
                         }
                         catch { }
@@ -635,6 +695,17 @@ namespace WeShare.Core.Transfer
                         string uploaderName = transferState.PeerName;
                         string dest = transferState.FilePath;
                         long contentLength = transferState.TotalBytes;
+
+                        if (headers.TryGetValue("Content-Length", out var clHeader) && long.TryParse(clHeader, out var parsedCl) && parsedCl > 0)
+                        {
+                            contentLength = parsedCl;
+                            transferState.TotalBytes = parsedCl;
+                        }
+
+                        if (!string.IsNullOrEmpty(clientId))
+                        {
+                            WebClientHeartbeat?.Invoke(clientId);
+                        }
 
                         WebTransferStarted?.Invoke(transferState);
 

@@ -100,27 +100,61 @@ namespace WeShare.Core.Discovery
                 var json  = JsonSerializer.Serialize(_localDevice);
                 var bytes = Encoding.UTF8.GetBytes(json);
 
-                // Broadcast on ALL active network adapters' subnets for max reach
-                var broadcasts = GetBroadcastAddresses();
-                broadcasts.Add(IPAddress.Broadcast); // also try 255.255.255.255
+                // Collect (localInterfaceIp, subnetBroadcastIp) pairs for all active adapters
+                var adapterEndpoints = GetAdapterEndpoints();
 
-                using var sender = new UdpClient();
-                sender.EnableBroadcast = true;
-                sender.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-
-                foreach (var bcast in broadcasts)
+                foreach (var (localIp, bcastIp) in adapterEndpoints)
                 {
                     try
                     {
-                        var ep = new IPEndPoint(bcast, DiscoveryPort);
+                        using var sender = new UdpClient(new IPEndPoint(localIp, 0));
+                        sender.EnableBroadcast = true;
+                        sender.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+
+                        // Broadcast on adapter's calculated subnet broadcast
+                        var ep = new IPEndPoint(bcastIp, DiscoveryPort);
                         await sender.SendAsync(bytes, bytes.Length, ep);
-                        Console.WriteLine($"[Discovery] Broadcast → {bcast}");
+
+                        // Also broadcast on 255.255.255.255 from this specific adapter
+                        var globalEp = new IPEndPoint(IPAddress.Broadcast, DiscoveryPort);
+                        await sender.SendAsync(bytes, bytes.Length, globalEp);
+
+                        // Desert Mode directed ping: If on 192.168.137.x, send direct unicast to peers
+                        if (localIp.ToString().StartsWith("192.168.137."))
+                        {
+                            if (localIp.ToString() == "192.168.137.1")
+                            {
+                                // We are the hotspot host — probe first 15 client addresses
+                                for (int host = 2; host <= 15; host++)
+                                {
+                                    var clientEp = new IPEndPoint(IPAddress.Parse($"192.168.137.{host}"), DiscoveryPort);
+                                    await sender.SendAsync(bytes, bytes.Length, clientEp);
+                                }
+                            }
+                            else
+                            {
+                                // We are a client connected to the hotspot — ping the gateway host directly
+                                var hostEp = new IPEndPoint(IPAddress.Parse("192.168.137.1"), DiscoveryPort);
+                                await sender.SendAsync(bytes, bytes.Length, hostEp);
+                            }
+                        }
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"[Discovery] Broadcast failed to {bcast}: {ex.Message}");
+                        Console.WriteLine($"[Discovery] Broadcast from {localIp} error: {ex.Message}");
                     }
                 }
+
+                // Global fallback sender
+                try
+                {
+                    using var globalSender = new UdpClient();
+                    globalSender.EnableBroadcast = true;
+                    globalSender.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                    var bcastEp = new IPEndPoint(IPAddress.Broadcast, DiscoveryPort);
+                    await globalSender.SendAsync(bytes, bytes.Length, bcastEp);
+                }
+                catch { }
             }
             catch (Exception ex)
             {
@@ -129,10 +163,10 @@ namespace WeShare.Core.Discovery
         }
 
         // ── Helpers ───────────────────────────────────────────────────────────
-        /// <summary>Get subnet broadcast addresses for all active IPv4 adapters.</summary>
-        private static List<IPAddress> GetBroadcastAddresses()
+        /// <summary>Returns (localIp, subnetBroadcast) for all active IPv4 interfaces.</summary>
+        private static List<(IPAddress LocalIp, IPAddress BroadcastIp)> GetAdapterEndpoints()
         {
-            var result = new List<IPAddress>();
+            var result = new List<(IPAddress, IPAddress)>();
             foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
             {
                 if (ni.OperationalStatus != OperationalStatus.Up) continue;
@@ -141,21 +175,33 @@ namespace WeShare.Core.Discovery
                 foreach (var ua in ni.GetIPProperties().UnicastAddresses)
                 {
                     if (ua.Address.AddressFamily != AddressFamily.InterNetwork) continue;
-                    if (IPAddress.IsLoopback(ua.Address)) continue;
+                    if (!IsValidIpv4(ua.Address)) continue;
 
-                    // subnet broadcast = ip | (~mask)
-                    var ipBytes   = ua.Address.GetAddressBytes();
+                    var ipBytes = ua.Address.GetAddressBytes();
                     var maskBytes = ua.IPv4Mask?.GetAddressBytes();
-                    if (maskBytes == null) continue;
+                    if (maskBytes == null)
+                    {
+                        result.Add((ua.Address, IPAddress.Broadcast));
+                        continue;
+                    }
 
                     var bcast = new byte[4];
                     for (int i = 0; i < 4; i++)
                         bcast[i] = (byte)(ipBytes[i] | ~maskBytes[i]);
 
-                    result.Add(new IPAddress(bcast));
+                    result.Add((ua.Address, new IPAddress(bcast)));
                 }
             }
             return result;
+        }
+
+        private static bool IsValidIpv4(IPAddress addr)
+        {
+            if (IPAddress.IsLoopback(addr)) return false;
+            var str = addr.ToString();
+            if (str.StartsWith("169.254.")) return false; // Exclude APIPA / Link-Local
+            if (str == "0.0.0.0") return false;
+            return true;
         }
 
         /// <summary>Returns true if the address belongs to this machine.</summary>
@@ -172,15 +218,8 @@ namespace WeShare.Core.Discovery
         }
 
         /// <summary>Get the best local IPv4 address to include in our broadcast payload.</summary>
-        /// <remarks>
-        /// Pass 1: prefer physical/wireless adapters (filters out generic virtual adapters like VMware/Hyper-V).
-        /// Pass 2: if no physical IP found, fall back to virtual adapters — this covers the Desert Mode case
-        ///         where the WeShare hotspot creates a "Microsoft Wi-Fi Direct Virtual Adapter" and that is
-        ///         the ONLY routable interface available (192.168.137.1).
-        /// </remarks>
         public static string GetLocalIp()
         {
-            // Pass 1 — physical adapters only (filter out common VM/VPN virtual adapters)
             static bool IsNoisyVirtual(NetworkInterface ni) =>
                 ni.Description.Contains("VMware",    StringComparison.OrdinalIgnoreCase) ||
                 ni.Description.Contains("Hyper-V",   StringComparison.OrdinalIgnoreCase) ||
@@ -189,6 +228,7 @@ namespace WeShare.Core.Discovery
                 ni.Description.Contains("VPN",       StringComparison.OrdinalIgnoreCase) ||
                 ni.Name.Contains("vEthernet",        StringComparison.OrdinalIgnoreCase);
 
+            // Pass 1 — Physical wireless or ethernet adapters with valid non-APIPA IP
             var physicalFirst = NetworkInterface.GetAllNetworkInterfaces()
                 .Where(ni => ni.OperationalStatus == OperationalStatus.Up &&
                              ni.NetworkInterfaceType != NetworkInterfaceType.Loopback &&
@@ -200,12 +240,12 @@ namespace WeShare.Core.Discovery
             {
                 foreach (var ua in ni.GetIPProperties().UnicastAddresses)
                 {
-                    if (ua.Address.AddressFamily == AddressFamily.InterNetwork && !IPAddress.IsLoopback(ua.Address))
+                    if (ua.Address.AddressFamily == AddressFamily.InterNetwork && IsValidIpv4(ua.Address))
                         return ua.Address.ToString();
                 }
             }
 
-            // Pass 2 — fall back to ALL virtual adapters (catches the WeShare Desert Mode hotspot at 192.168.137.1)
+            // Pass 2 — Check for WeShare Desert Mode virtual hotspot adapter (192.168.137.1)
             var allUp = NetworkInterface.GetAllNetworkInterfaces()
                 .Where(ni => ni.OperationalStatus == OperationalStatus.Up &&
                              ni.NetworkInterfaceType != NetworkInterfaceType.Loopback);
@@ -214,9 +254,8 @@ namespace WeShare.Core.Discovery
             {
                 foreach (var ua in ni.GetIPProperties().UnicastAddresses)
                 {
-                    if (ua.Address.AddressFamily == AddressFamily.InterNetwork && !IPAddress.IsLoopback(ua.Address))
+                    if (ua.Address.AddressFamily == AddressFamily.InterNetwork && IsValidIpv4(ua.Address))
                     {
-                        Console.WriteLine($"[Discovery] GetLocalIp fallback via virtual adapter '{ni.Description}': {ua.Address}");
                         return ua.Address.ToString();
                     }
                 }

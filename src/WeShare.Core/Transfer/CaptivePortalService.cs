@@ -105,6 +105,18 @@ namespace WeShare.Core.Transfer
             }
         }
 
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, bool> _authorizedIps = new(StringComparer.OrdinalIgnoreCase);
+
+        public static void AuthorizeIp(string ip)
+        {
+            if (!string.IsNullOrEmpty(ip))
+            {
+                _authorizedIps[ip] = true;
+            }
+        }
+
+        public static bool IsIpAuthorized(string ip) => !string.IsNullOrEmpty(ip) && _authorizedIps.ContainsKey(ip);
+
         private async Task HandleHttpClient(TcpClient client)
         {
             using (client)
@@ -116,6 +128,7 @@ namespace WeShare.Core.Transfer
                     int read = await stream.ReadAsync(buffer, 0, buffer.Length);
                     if (read == 0) return;
 
+                    string clientIp = client.Client.RemoteEndPoint is IPEndPoint rep ? rep.Address.ToString() : "";
                     string request = Encoding.ASCII.GetString(buffer, 0, read);
                     string host = "";
                     string path = "";
@@ -135,10 +148,59 @@ namespace WeShare.Core.Transfer
 
                     bool isLocalHost = host.Contains(_redirectIp.ToString()) || 
                                        host.Contains("localhost") || 
-                                       host.Contains("127.0.0.1");
+                                       host.Contains("127.0.0.1") ||
+                                       host.Contains("weshare.local");
+
+                    // 1. Check for standard captive network probes from mobile OSes
+                    bool isAndroidProbe = path.Contains("generate_204") || path.Contains("gen_204") || host.Contains("connectivitycheck.gstatic.com") || host.Contains("clients3.google.com");
+                    bool isAppleProbe   = path.Contains("hotspot-detect.html") || path.Contains("success.html") || host.Contains("captive.apple.com");
+                    bool isWindowsProbe = path.Contains("connecttest.txt") || host.Contains("msftconnecttest.com");
+                    bool isFirefoxProbe = path.Contains("canonical.html") || host.Contains("detectportal.firefox.com");
+
+                    // If client is already authorized (or has loaded the portal), satisfy the probe
+                    if (IsIpAuthorized(clientIp))
+                    {
+                        if (isAndroidProbe)
+                        {
+                            byte[] resp = Encoding.ASCII.GetBytes("HTTP/1.1 204 No Content\r\nConnection: close\r\n\r\n");
+                            await stream.WriteAsync(resp, 0, resp.Length);
+                            await stream.FlushAsync();
+                            return;
+                        }
+                        if (isAppleProbe)
+                        {
+                            string body = "<HTML><HEAD><TITLE>Success</TITLE></HEAD><BODY>Success</BODY></HTML>";
+                            byte[] resp = Encoding.ASCII.GetBytes($"HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: {body.Length}\r\nConnection: close\r\n\r\n{body}");
+                            await stream.WriteAsync(resp, 0, resp.Length);
+                            await stream.FlushAsync();
+                            return;
+                        }
+                        if (isWindowsProbe)
+                        {
+                            string body = "Microsoft Connect Test";
+                            byte[] resp = Encoding.ASCII.GetBytes($"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {body.Length}\r\nConnection: close\r\n\r\n{body}");
+                            await stream.WriteAsync(resp, 0, resp.Length);
+                            await stream.FlushAsync();
+                            return;
+                        }
+                        if (isFirefoxProbe)
+                        {
+                            string body = "success\n";
+                            byte[] resp = Encoding.ASCII.GetBytes($"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {body.Length}\r\nConnection: close\r\n\r\n{body}");
+                            await stream.WriteAsync(resp, 0, resp.Length);
+                            await stream.FlushAsync();
+                            return;
+                        }
+                    }
 
                     if (isLocalHost)
                     {
+                        // Once client visits portal, authorize their IP for subsequent probes
+                        if (!string.IsNullOrEmpty(clientIp))
+                        {
+                            AuthorizeIp(clientIp);
+                        }
+
                         Console.WriteLine($"[CaptivePortal] Proxying request from {client.Client.RemoteEndPoint} to http://{host}{path} -> 127.0.0.1:{_targetPort}");
                         
                         using var backend = new TcpClient();

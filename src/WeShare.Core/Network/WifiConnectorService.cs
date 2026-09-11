@@ -413,7 +413,11 @@ namespace WeShare.Core.Network
                 {
                     if (addr.Address.AddressFamily == AddressFamily.InterNetwork &&
                         !IPAddress.IsLoopback(addr.Address))
-                        return addr.Address.ToString();
+                    {
+                        var ipStr = addr.Address.ToString();
+                        if (!ipStr.StartsWith("169.254.") && ipStr != "0.0.0.0")
+                            return ipStr;
+                    }
                 }
             }
             return "127.0.0.1";

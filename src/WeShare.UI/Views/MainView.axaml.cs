@@ -29,13 +29,14 @@ namespace WeShare.UI.Views
         public string Name { get; set; } = "";
         public string Path { get; set; } = "";
         public long Size { get; set; }
+        public string SizeDisplay => FileTransferState.FormatBytes(Size);
         public Func<Task<Stream>> OpenStream { get; set; } = null!;
         public Avalonia.Media.Imaging.Bitmap? Thumbnail { get; set; }
     }
 
     public partial class MainView : UserControl
     {
-        public const string CurrentVersion = "1.0.0";
+        public const string CurrentVersion = "1.1.0";
         private string? _latestVersionDownloadUrl;
         private string? _latestVersionName;
 
@@ -70,6 +71,7 @@ namespace WeShare.UI.Views
         private bool _isLibraryUpdatePending = false;
         private string? _currentSendingFileId;
         private string _currentDateFilter = "All";
+        private bool _autoAcceptAllTransfers = false;
 
 
         public MainView() : this(App.PlatformService) { }
@@ -131,6 +133,10 @@ namespace WeShare.UI.Views
             _saveDirectory = _platformService.GetDefaultSavePath();
             SettingsSaveLocationLabel.Text = _saveDirectory;
             CleanWebSharedDirectory();
+
+            var autoAcceptVal = _dbHelper.GetSetting("AutoAcceptTransfers", "false");
+            _autoAcceptAllTransfers = autoAcceptVal == "true";
+            if (AutoAcceptToggle != null) AutoAcceptToggle.IsChecked = _autoAcceptAllTransfers;
             
             // Transfer – listen for incoming file sends
             try
@@ -168,6 +174,8 @@ namespace WeShare.UI.Views
                 _webDashboardService.WebClientConnected += OnWebClientConnected;
                 _webDashboardService.WebClientConnectedEx += OnWebClientConnectedEx;
                 _webDashboardService.WebClientDisconnectedEx += OnWebClientDisconnectedEx;
+                _webDashboardService.WebClientHeartbeat += OnWebClientHeartbeat;
+                _webDashboardService.WebFileShared += OnWebFileShared;
                 _webDashboardService.WebFileSharedCallback = OnWebFileSharedCallback;
                 _webDashboardService.WebTransferStarted += OnTransferStarted;
                 _webDashboardService.WebTransferProgress += OnTransferProgress;
@@ -179,6 +187,19 @@ namespace WeShare.UI.Views
                     if (activeIpOrId != null && activeIpOrId != targetIpOrId)
                     {
                         return true;
+                    }
+                    return false;
+                };
+                _webDashboardService.IsSessionActiveFilterEx = (string clientId, string remoteIp) =>
+                {
+                    var activeIpOrId = GetActiveSessionDeviceIpOrId();
+                    if (activeIpOrId != null)
+                    {
+                        bool isSame = IsSameIpAddress(remoteIp, activeIpOrId) || clientId == activeIpOrId;
+                        if (!isSame)
+                        {
+                            return true;
+                        }
                     }
                     return false;
                 };
@@ -821,9 +842,60 @@ namespace WeShare.UI.Views
                             });
                         }
                     }
+                    else if (Directory.Exists(path))
+                    {
+                        await AddDirectoryToQueueAsync(path);
+                    }
                 }
                 UpdateQueueUI();
                 NavSendFiles_Click(this, new RoutedEventArgs());
+            }
+        }
+
+        private async void BrowseFolder_Click(object sender, RoutedEventArgs e)
+        {
+            var topLevel = TopLevel.GetTopLevel(this);
+            if (topLevel == null) return;
+            var folders = await topLevel.StorageProvider.OpenFolderPickerAsync(
+                new FolderPickerOpenOptions { Title = "Select folder to send", AllowMultiple = false });
+            if (folders.Count == 0) return;
+            var folderPath = folders[0].Path.LocalPath;
+            if (string.IsNullOrEmpty(folderPath) || !Directory.Exists(folderPath)) return;
+
+            await AddDirectoryToQueueAsync(folderPath);
+        }
+
+        private async Task AddDirectoryToQueueAsync(string folderPath)
+        {
+            try
+            {
+                string folderName = Path.GetFileName(folderPath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+                if (string.IsNullOrEmpty(folderName)) folderName = "Folder";
+
+                ShowToast($"Compressing folder '{folderName}'...");
+                string tempZip = Path.Combine(Path.GetTempPath(), $"WeShare_{folderName}_{DateTime.Now:yyyyMMddHHmmss}.zip");
+
+                await Task.Run(() =>
+                {
+                    if (File.Exists(tempZip)) File.Delete(tempZip);
+                    System.IO.Compression.ZipFile.CreateFromDirectory(folderPath, tempZip, System.IO.Compression.CompressionLevel.Fastest, true);
+                });
+
+                var fi = new FileInfo(tempZip);
+                SendQueue.Add(new QueueItem
+                {
+                    Name = $"{folderName}.zip",
+                    Path = tempZip,
+                    Size = fi.Length,
+                    OpenStream = () => Task.FromResult<Stream>(File.OpenRead(tempZip)),
+                    Thumbnail = null
+                });
+                UpdateQueueUI();
+                ShowToast($"Folder zipped and added: {folderName}.zip ({FileTransferState.FormatBytes(fi.Length)})");
+            }
+            catch (Exception ex)
+            {
+                ShowToast($"Failed to compress folder: {ex.Message}");
             }
         }
 
@@ -848,7 +920,7 @@ namespace WeShare.UI.Views
             SendSummaryText.Text = $"{SendQueue.Count} file(s) | Target: {targetName}";
         }
 
-        private async void SendNow_Click(object sender, RoutedEventArgs e)
+        private void SendNow_Click(object sender, RoutedEventArgs e)
         {
             if (SendQueue.Count == 0) return;
             if (_sendTarget == null)
@@ -857,71 +929,13 @@ namespace WeShare.UI.Views
                 return;
             }
 
-            SendProgressBorder.IsVisible = true;
-            int sentCount = 0;
-
-            // Process each item one at a time; only remove it from the queue AFTER
-            // it succeeds.  This way a failure leaves remaining files intact for retry.
-            if (_sendTarget.Type == "Web Client" && SendQueue.Count > 1)
+            if (_isSending)
             {
-                // Batch all files into a single notification for web clients
-                var allPaths = SendQueue.Select(q => q.Path).ToList();
-                bool sent = _webDashboardService?.ShareMultipleForWebClient(_sendTarget.Id, allPaths) ?? false;
-                if (!sent)
-                {
-                    SendProgressBorder.IsVisible = false;
-                    ShowToast("Web client disconnected — cannot send files");
-                    return;
-                }
-                sentCount = SendQueue.Count;
-                SendQueue.Clear();
-            }
-            else
-            {
-            while (SendQueue.Count > 0)
-            {
-                var item = SendQueue[0];
-                SendProgressFile.Text = item.Name;
-                SendProgressBar.Value = 0;
-
-                try
-                {
-                    if (_sendTarget.Type == "Web Client")
-                    {
-                        bool sent = _webDashboardService?.ShareForWebClient(_sendTarget.Id, item.Path) ?? false;
-                        if (!sent)
-                        {
-                            SendProgressBorder.IsVisible = false;
-                            ShowToast("Web client disconnected — cannot send file");
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        using var stream = await item.OpenStream();
-                        await _transferManager.SendFileAsync(_sendTarget.IpAddress, _sendTarget.Port, item.Name, stream, item.Size, item.Path);
-                    }
-
-                    // Success — remove from front of queue
-                    if (SendQueue.Count > 0 && SendQueue[0] == item)
-                        SendQueue.RemoveAt(0);
-                    sentCount++;
-                    UpdateQueueUI();
-                }
-                catch (Exception ex)
-                {
-                    SendProgressBorder.IsVisible = false;
-                    ShowToast($"Transfer failed: {ex.Message}");
-                    return;
-                }
-            }
+                ShowToast("A transfer is already in progress");
+                return;
             }
 
-            SendProgressBorder.IsVisible = false;
-            _sendTarget = null;
-            UpdateQueueUI();
-            ShowToast($"Successfully sent {sentCount} file(s)");
-            ShowPanel(HomePanel, "HOME", NavHomeBtn);
+            StartSendSession(_sendTarget);
         }
 
         private async Task<System.Collections.Generic.List<QueueItem>> PickFilesAsync()
@@ -1179,6 +1193,39 @@ namespace WeShare.UI.Views
 
         private void OpenDownloadFolder_Click(object sender, RoutedEventArgs e) => _platformService.OpenUrl($"file://{_saveDirectory}");
         private void OpenFileInList_Click(object sender, RoutedEventArgs e) { if ((sender as Button)?.Tag is FileTransferState s) _platformService.OpenFile(s.FilePath); }
+        
+        private void OpenFolderInList_Click(object sender, RoutedEventArgs e)
+        {
+            if ((sender as Button)?.Tag is FileTransferState s && !string.IsNullOrEmpty(s.FilePath))
+            {
+                string? dir = Path.GetDirectoryName(s.FilePath);
+                if (!string.IsNullOrEmpty(dir) && Directory.Exists(dir))
+                {
+                    _platformService.OpenUrl($"file://{dir}");
+                }
+            }
+        }
+
+        private async void ClearCompletedTransfers_Click(object sender, RoutedEventArgs e)
+        {
+            var completed = ReceivedFiles.Where(f => f.IsCompleted || f.Status == TransferStatus.Failed).ToList();
+            int count = completed.Count;
+            foreach (var c in completed)
+            {
+                await _dbHelper.DeleteTransferAsync(c.FileId);
+                ReceivedFiles.Remove(c);
+            }
+            RefreshHistory();
+            UpdateLibraryFilesList();
+            ShowToast($"Cleared {count} transfer(s)");
+        }
+
+        private void AutoAcceptSwitch_Changed(object? sender, RoutedEventArgs e)
+        {
+            _autoAcceptAllTransfers = AutoAcceptToggle?.IsChecked ?? false;
+            _dbHelper.SetSetting("AutoAcceptTransfers", _autoAcceptAllTransfers ? "true" : "false");
+            ShowToast(_autoAcceptAllTransfers ? "Auto-accept enabled" : "Auto-accept disabled");
+        }
 
         private async void ClearAllHistory_Click(object sender, RoutedEventArgs e)
         {
@@ -1402,8 +1449,8 @@ namespace WeShare.UI.Views
                 }
             }
 
-            // 1. Auto-Accept Logic (Session) - check before lock
-            if (isSame || (IsSameIpAddress(_lastAcceptedIp, state.RemoteIp) && (DateTime.Now - _lastAcceptedTime).TotalSeconds < 60))
+            // 1. Auto-Accept Logic (Settings or active session) - check before lock
+            if (_autoAcceptAllTransfers || isSame || (IsSameIpAddress(_lastAcceptedIp, state.RemoteIp) && (DateTime.Now - _lastAcceptedTime).TotalSeconds < 60))
             {
                 return true;
             }
@@ -1420,7 +1467,7 @@ namespace WeShare.UI.Views
                     currentIsSame = (IsSameIpAddress(state.RemoteIp, currentActiveIpOrId) || state.FileId == currentActiveIpOrId);
                 }
 
-                if (currentIsSame || (IsSameIpAddress(_lastAcceptedIp, state.RemoteIp) && (DateTime.Now - _lastAcceptedTime).TotalSeconds < 60))
+                if (_autoAcceptAllTransfers || currentIsSame || (IsSameIpAddress(_lastAcceptedIp, state.RemoteIp) && (DateTime.Now - _lastAcceptedTime).TotalSeconds < 60))
                 {
                     // Extend the auto-accept session since it is accepted
                     _lastAcceptedIp = state.RemoteIp;
@@ -1471,16 +1518,6 @@ namespace WeShare.UI.Views
             Dispatcher.UIThread.Post(() => {
                 var existing = Devices.FirstOrDefault(d => d.Id == device.Id);
 
-                if (!device.IsReceiver)
-                {
-                    if (existing != null)
-                    {
-                        Devices.Remove(existing);
-                        UpdateEmptyState();
-                    }
-                    return;
-                }
-
                 // Ensure we don't show the same device multiple times (match by unique ID)
                 if (existing == null) 
                 {
@@ -1489,8 +1526,12 @@ namespace WeShare.UI.Views
                 }
                 else 
                 {
-                    // Update IP if it changed, and refresh last seen
+                    // Update IP and properties if changed, and refresh last seen
                     existing.IpAddress = device.IpAddress;
+                    existing.Port = device.Port;
+                    existing.Name = device.Name;
+                    existing.Type = device.Type;
+                    existing.IsReceiver = device.IsReceiver;
                     existing.LastSeen = DateTime.Now;
                 }
             });
@@ -1908,6 +1949,34 @@ namespace WeShare.UI.Views
                     StagedWebFiles.Remove(file);
                 }
                 UpdateWebSharedClientsList();
+            });
+        }
+
+        private void OnWebClientHeartbeat(string clientId)
+        {
+            Dispatcher.UIThread.Post(() => {
+                var existing = Devices.FirstOrDefault(d => d.Id == clientId);
+                if (existing != null)
+                {
+                    existing.LastSeen = DateTime.Now;
+                }
+            });
+        }
+
+        private void OnWebFileShared(string clientId, string clientName, string filePath, long size)
+        {
+            Dispatcher.UIThread.Post(() => {
+                var staged = new StagedWebFile
+                {
+                    ClientId = clientId,
+                    ClientName = clientName,
+                    FilePath = filePath,
+                    Size = size
+                };
+                StagedWebFiles.Add(staged);
+                UpdateWebSharedFilesList();
+                UpdateWebSharedClientsList();
+                ShowToast($"Received file '{Path.GetFileName(filePath)}' from {clientName}");
             });
         }
 
