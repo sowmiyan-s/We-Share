@@ -22,10 +22,11 @@
         <a href="downloads.html" class="nav-link">Downloads</a>
         <a href="faq.html" class="nav-link">FAQ</a>
         <a href="patch-notes.html" class="nav-link active">Patch Notes</a>
+        <a href="https://github.com/sowmiyan-s/We-Share/tree/main/assets/brand" target="_blank" rel="noopener" class="nav-link">Brand Assets</a>
       </div>
       <a href="downloads.html" class="btn-nav-cta" id="nav-dl-btn">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Download
+        Download Free
       </a>
       <button class="nav-hamburger" id="hamburger" aria-label="Open menu">
         <span></span><span></span><span></span>
@@ -36,7 +37,7 @@
   <div class="page-hero">
     <div class="tag">Changelog</div>
     <h1>Release Notes</h1>
-    <p>Version history and technical changelogs for the We Share project.</p>
+    <p>Version history and continuous improvements for the We Share app.</p>
   </div>
 
   <div class="patch-section">
@@ -46,20 +47,25 @@
       <div class="patch-dot"></div>
       <div class="patch-version-label">
         <span class="patch-version-num">v1.1.0</span>
-        <span class="patch-date">July 2026</span>
+        <span class="patch-date">September 2026</span>
         <span class="patch-badge-latest">Latest</span>
       </div>
       <ul class="patch-list">
-        <li><span class="patch-tag tag-new">New</span> <strong>Grouped Multi-File Batch Notifications</strong>: Sending multiple files to a web client now displays a single unified consent pop-up showing all files, sizes, and a total summary with "Accept All" / "Decline All" options.</li>
-        <li><span class="patch-tag tag-improve">Improve</span> <strong>Compact Network Identity UI</strong>: Completely redesigned the network properties widget into an ultra-compact horizontal list, shaving over 300px off the minimum height requirements to support small laptops.</li>
-        <li><span class="patch-tag tag-improve">Improve</span> <strong>Accurate Web Progress Tracking</strong>: The web portal progress bar now synchronizes directly with server SSE progress events, solving discrepancy issues caused by local browser upload buffers. Shows "Server receiving..." status when browser has completed buffering but the server is processing.</li>
-        <li><span class="patch-tag tag-improve">Improve</span> <strong>Active Connection Guard</strong>: Checks web client connection status before initiating transfers to prevent silent "Failed to send" errors.</li>
-        <li><span class="patch-tag tag-improve">Improve</span> <strong>Transfer Navigation Block</strong>: Prevents accidental navigation or closing the app/tab during active file transfers by guarding all panel buttons, while allowing access to the Transfers view.</li>
-        <li><span class="patch-tag tag-bug">Fix</span> <strong>UI Layout & Truncation</strong>: Fixed a layout bug where dynamic network text could overlap IP addresses, and restored standard 48px margin gaps from the sidebar across all views.</li>
-        <li><span class="patch-tag tag-bug">Fix</span> Corrected post-transfer navigation in `MainView` to ensure UI cleanly returns to Home when transfers finish or are rejected.</li>
+        <li><span class="patch-tag tag-new">New</span> <strong>AirDrop-Style Radar Receive Station</strong>: Pulsing concentric radar rings, center glowing node, and live listening status indicator. Zero technical jargon or complex IP configurations.</li>
+        <li><span class="patch-tag tag-new">New</span> <strong>Dynamic Radar Peer Discovery</strong>: Discovered PCs, Macs, iPhones, and Android devices orbit the radar scanner with instant tap-to-send dispatch.</li>
+        <li><span class="patch-tag tag-new">New</span> <strong>Web Transfer &amp; Dedicated Device Session Hub</strong>: Seamless bidirectional sharing with any phone or tablet via camera QR code. Select any web client to open a dedicated session for staging and sending multiple files directly or approving incoming uploads.</li>
+        <li><span class="patch-tag tag-new">New</span> <strong>Fluid Button Micro-Animations</strong>: GPU-accelerated cubic scaling transitions with zero margin restrictions and zero layout jitter on hover.</li>
+        <li><span class="patch-tag tag-new">New</span> <strong>Unified Obsidian Violet Theme</strong>: Signature dark glassmorphism design system with refined translucent cards, eliminating cluttered theme switches and color pickers.</li>
+        <li><span class="patch-tag tag-new">New</span> <strong>Zero Command Prompt Popups</strong>: Full native <code>WinExe</code> windowless execution for seamless background networking without flashing console windows.</li>
+        <li><span class="patch-tag tag-new">New</span> <strong>Streamlined Sidebar Architecture</strong>: Removed redundant back buttons from title bars and panels in favor of an intuitive, persistent sidebar navigation.</li>
+        <li><span class="patch-tag tag-new">New</span> <strong>Zero-Install Portable Edition</strong>: Self-contained, single-folder portable ZIP requiring zero admin privileges alongside the fast Inno Setup installer.</li>
+        <li><span class="patch-tag tag-improve">Improve</span> <strong>Pre-Upload Authorization</strong>: PC host verifies file names and byte sizes before any data packets are transmitted.</li>
+        <li><span class="patch-tag tag-improve">Improve</span> <strong>NIC Virtual Adapter Filtering</strong>: Automatically ignores Hyper-V, WSL, Docker, and VPN virtual interfaces, guaranteeing reliable LAN broadcast detection.</li>
+        <li><span class="patch-tag tag-bug">Fix</span> <strong>Radar Geometry &amp; Alignment</strong>: Concentric rings and peer markers accurately center on all window sizes and DPI scales.</li>
       </ul>
-      <div style="margin-top: 16px;">
-        <a href="https://github.com/sowmiyan-s/We-Share/raw/main/setup/WeShare_Setup.exe" class="btn-outline" style="font-size:0.85rem; padding: 8px 18px;" download="WeShare_Setup_1.1.0.exe">Download v1.1.0 →</a>
+      <div style="margin-top: 16px; display: flex; gap: 12px; flex-wrap: wrap;">
+        <a href="https://github.com/sowmiyan-s/We-Share/raw/main/setup/WeShare_Setup_1.1.0.exe" class="btn-outline" style="font-size:0.85rem; padding: 8px 18px;" download="WeShare_Setup_1.1.0.exe">Download Installer (.exe) &rarr;</a>
+        <a href="https://github.com/sowmiyan-s/We-Share/raw/main/setup/WeShare_Portable_win-x64.zip" class="btn-outline" style="font-size:0.85rem; padding: 8px 18px;" download="WeShare_Portable_win-x64.zip">Download Portable (.zip) &rarr;</a>
       </div>
     </div>
 
@@ -96,6 +102,7 @@
         <a href="downloads.html">Downloads</a>
         <a href="faq.html">FAQ</a>
         <a href="patch-notes.html">Patch Notes</a>
+        <a href="https://github.com/sowmiyan-s/We-Share/tree/main/assets/brand" target="_blank" rel="noopener">Brand Assets</a>
         <a href="https://github.com/sowmiyan-s/We-Share" target="_blank" rel="noopener">GitHub</a>
       </div>
       <p class="footer-copy">

@@ -15,6 +15,8 @@ namespace WeShare.Core.Models
         private string? _password;
         private DateTime _lastSeen = DateTime.Now;
         private bool _isReceiver = false;
+        private bool _isFavorite = false;
+        private string? _customNickname;
 
         public string Id
         {
@@ -25,8 +27,34 @@ namespace WeShare.Core.Models
         public string Name
         {
             get => _name;
-            set => SetProperty(ref _name, value);
+            set
+            {
+                if (SetProperty(ref _name, value))
+                {
+                    OnPropertyChanged(nameof(DisplayName));
+                }
+            }
         }
+
+        public bool IsFavorite
+        {
+            get => _isFavorite;
+            set => SetProperty(ref _isFavorite, value);
+        }
+
+        public string? CustomNickname
+        {
+            get => _customNickname;
+            set
+            {
+                if (SetProperty(ref _customNickname, value))
+                {
+                    OnPropertyChanged(nameof(DisplayName));
+                }
+            }
+        }
+
+        public string DisplayName => !string.IsNullOrWhiteSpace(_customNickname) ? _customNickname : _name;
 
         public string Type
         {

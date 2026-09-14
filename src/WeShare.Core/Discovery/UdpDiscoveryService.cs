@@ -162,6 +162,19 @@ namespace WeShare.Core.Discovery
             }
         }
 
+        public static bool IsNoisyVirtual(NetworkInterface ni) =>
+            ni.Description.Contains("VMware",      StringComparison.OrdinalIgnoreCase) ||
+            ni.Description.Contains("Hyper-V",     StringComparison.OrdinalIgnoreCase) ||
+            ni.Description.Contains("Host-Only",   StringComparison.OrdinalIgnoreCase) ||
+            ni.Description.Contains("Pseudo",      StringComparison.OrdinalIgnoreCase) ||
+            ni.Description.Contains("VPN",         StringComparison.OrdinalIgnoreCase) ||
+            ni.Description.Contains("VirtualBox",  StringComparison.OrdinalIgnoreCase) ||
+            ni.Description.Contains("WSL",         StringComparison.OrdinalIgnoreCase) ||
+            ni.Description.Contains("Docker",      StringComparison.OrdinalIgnoreCase) ||
+            ni.Description.Contains("TAP",         StringComparison.OrdinalIgnoreCase) ||
+            ni.Name.Contains("vEthernet",          StringComparison.OrdinalIgnoreCase) ||
+            ni.Name.Contains("Loopback",           StringComparison.OrdinalIgnoreCase);
+
         // ── Helpers ───────────────────────────────────────────────────────────
         /// <summary>Returns (localIp, subnetBroadcast) for all active IPv4 interfaces.</summary>
         private static List<(IPAddress LocalIp, IPAddress BroadcastIp)> GetAdapterEndpoints()
@@ -171,6 +184,11 @@ namespace WeShare.Core.Discovery
             {
                 if (ni.OperationalStatus != OperationalStatus.Up) continue;
                 if (ni.NetworkInterfaceType == NetworkInterfaceType.Loopback) continue;
+                
+                // Filter out noisy virtual switches (Hyper-V, WSL, Docker, VMware, VPNs) unless in Desert Mode
+                bool isDesert = ni.GetIPProperties().UnicastAddresses
+                    .Any(u => u.Address.ToString().StartsWith("192.168.137."));
+                if (!isDesert && IsNoisyVirtual(ni)) continue;
 
                 foreach (var ua in ni.GetIPProperties().UnicastAddresses)
                 {
@@ -220,14 +238,6 @@ namespace WeShare.Core.Discovery
         /// <summary>Get the best local IPv4 address to include in our broadcast payload.</summary>
         public static string GetLocalIp()
         {
-            static bool IsNoisyVirtual(NetworkInterface ni) =>
-                ni.Description.Contains("VMware",    StringComparison.OrdinalIgnoreCase) ||
-                ni.Description.Contains("Hyper-V",   StringComparison.OrdinalIgnoreCase) ||
-                ni.Description.Contains("Host-Only", StringComparison.OrdinalIgnoreCase) ||
-                ni.Description.Contains("Pseudo",    StringComparison.OrdinalIgnoreCase) ||
-                ni.Description.Contains("VPN",       StringComparison.OrdinalIgnoreCase) ||
-                ni.Name.Contains("vEthernet",        StringComparison.OrdinalIgnoreCase);
-
             // Pass 1 — Physical wireless or ethernet adapters with valid non-APIPA IP
             var physicalFirst = NetworkInterface.GetAllNetworkInterfaces()
                 .Where(ni => ni.OperationalStatus == OperationalStatus.Up &&

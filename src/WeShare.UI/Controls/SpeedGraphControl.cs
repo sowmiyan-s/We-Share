@@ -129,15 +129,34 @@ namespace WeShare.UI.Controls
                 points.Add(new Point(x, y));
             }
 
-            var linePen = new Pen(new SolidColorBrush(Color.Parse("#107C41")), 2); // Windows Green
+            var lineBrush = new LinearGradientBrush
+            {
+                StartPoint = new RelativePoint(0, 0, RelativeUnit.Relative),
+                EndPoint = new RelativePoint(1, 0, RelativeUnit.Relative),
+                GradientStops =
+                {
+                    new GradientStop(Color.Parse("#7C3AED"), 0),
+                    new GradientStop(Color.Parse("#EC4899"), 1)
+                }
+            };
+            var linePen = new Pen(lineBrush, 2.5);
             
             for (int i = 0; i < points.Count - 1; i++)
             {
                 context.DrawLine(linePen, points[i], points[i + 1]);
             }
 
-            // Fill area
-            var fillBrush = new SolidColorBrush(Color.FromArgb(30, 16, 124, 65));
+            // Fill area with brand gradient glow
+            var fillBrush = new LinearGradientBrush
+            {
+                StartPoint = new RelativePoint(0, 0, RelativeUnit.Relative),
+                EndPoint = new RelativePoint(0, 1, RelativeUnit.Relative),
+                GradientStops =
+                {
+                    new GradientStop(Color.FromArgb(50, 236, 72, 153), 0),
+                    new GradientStop(Color.FromArgb(6, 124, 58, 237), 1)
+                }
+            };
             var geometry = new StreamGeometry();
             using (var ctx = geometry.Open())
             {

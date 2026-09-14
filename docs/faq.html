@@ -4,12 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FAQ — We Share</title>
-  <meta name="description" content="Frequently asked questions about We Share — local file transfer, Desert Mode, Web Portal, compatibility, and more." />
+  <meta name="description" content="Frequently asked questions about We Share — simple answers about sharing speed, mobile phone compatibility, privacy, and offline sharing." />
   <link rel="icon" href="logo.png" type="image/png" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
+  <!-- Navigation -->
   <nav class="navbar" id="navbar">
     <div class="nav-inner">
       <a href="index.html" class="nav-logo">
@@ -22,33 +23,43 @@
         <a href="downloads.html" class="nav-link">Downloads</a>
         <a href="faq.html" class="nav-link active">FAQ</a>
         <a href="patch-notes.html" class="nav-link">Patch Notes</a>
+        <a href="https://github.com/sowmiyan-s/We-Share/tree/main/assets/brand" target="_blank" rel="noopener" class="nav-link">Brand Assets</a>
       </div>
       <a href="downloads.html" class="btn-nav-cta" id="nav-dl-btn">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Download
+        Download Free
       </a>
-      <button class="nav-hamburger" id="hamburger" aria-label="Open menu">
+      <button class="nav-hamburger" id="hamburger" aria-label="Open navigation menu">
         <span></span><span></span><span></span>
       </button>
     </div>
   </nav>
 
+  <!-- Page Header -->
   <div class="page-hero has-image">
     <div class="page-hero-content">
-      <div class="tag">FAQ</div>
+      <div class="tag">Help &amp; Answers</div>
       <h1>Frequently Asked Questions</h1>
-      <p>Everything you need to know about We Share. Can't find your answer? <a href="https://github.com/sowmiyan-s/We-Share/issues" target="_blank" rel="noopener">Open an issue on GitHub.</a></p>
+      <p>Clear, straightforward answers about how We Share works, how to share with phones, and why it's faster and more private than the cloud.</p>
     </div>
     <div class="page-hero-visual">
-      <img src="ASSERTS/3.png" alt="We Share Chat Robot" class="page-hero-img" />
+      <div class="figure-card" style="max-width: 320px; margin: 0 auto;">
+        <div class="figure-img-frame">
+          <img src="screenshot/screenshot-3.png" alt="We Share Radar Discovery" />
+        </div>
+        <div class="figure-caption">
+          <span>RADAR PEER SCANNING</span>
+          <span class="mono">VER 1.1.0</span>
+        </div>
+      </div>
     </div>
   </div>
 
   <div class="faq-section">
 
-    <!-- General -->
+    <!-- General Category -->
     <div class="faq-category">
-      <div class="faq-category-title">General</div>
+      <div class="faq-category-title">General Questions</div>
 
       <div class="faq-item" id="faq-what">
         <button class="faq-question" aria-expanded="false">
@@ -56,188 +67,139 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
         <div class="faq-answer"><div class="faq-answer-inner">
-          We Share is an open-source local file sharing utility written in C# (.NET 8) and styled with Avalonia UI. It sends files directly over local network sockets (TCP) without using any cloud relays or third-party web servers.
+          We Share is a free, easy-to-use desktop application for Windows that lets you send files, photos, videos, and full folders directly between nearby computers and smartphones. Everything moves directly through the air in your room, so it is super-fast and does not use any internet data.
         </div></div>
       </div>
 
       <div class="faq-item" id="faq-free">
         <button class="faq-question" aria-expanded="false">
-          Is it really free?
+          Is it really 100% free?
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
         <div class="faq-answer"><div class="faq-answer-inner">
-          Yes. The project is licensed under the MIT License and the source code is entirely public. There are no subscriptions, ads, or tracking.
+          Yes! We Share is completely free and open-source under the MIT license. There are no subscriptions, no ads, no premium locked features, and no trial limits.
         </div></div>
       </div>
 
       <div class="faq-item" id="faq-internet">
         <button class="faq-question" aria-expanded="false">
-          Does it require an internet connection?
+          Do I need an internet connection or mobile data?
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
         <div class="faq-answer"><div class="faq-answer-inner">
-          No. It operates entirely on your local area network (LAN/WLAN). If your router doesn't have an active internet link, or even if you don't have a router at all, the application will still function.
+          No. We Share uses 0 MB of your internet data plan. It sends files directly through your local Wi-Fi router. Even if your internet connection is down, or if you are in an area with no internet at all, the app continues to work normally.
         </div></div>
       </div>
 
       <div class="faq-item" id="faq-account">
         <button class="faq-question" aria-expanded="false">
-          Do I need to create an account?
+          Do I need to create an account or remember passwords?
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
         <div class="faq-answer"><div class="faq-answer-inner">
-          No. We Share requires no registration, logins, or configuration. It runs locally as a self-contained program.
+          No. You never have to sign up, enter an email, or create a password. You just open the app and start sharing immediately.
         </div></div>
       </div>
     </div>
 
-    <!-- Compatibility -->
+    <!-- Phones & Compatibility -->
     <div class="faq-category">
-      <div class="faq-category-title">Compatibility</div>
-
-      <div class="faq-item" id="faq-os">
-        <button class="faq-question" aria-expanded="false">
-          What operating systems are supported?
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        </button>
-        <div class="faq-answer"><div class="faq-answer-inner">
-          The native desktop client runs on Windows 10 (build 19041+) and Windows 11. Other operating systems (macOS, Linux, iOS, Android) can send and receive files by accessing the host's Web Portal via any standard browser.
-        </div></div>
-      </div>
+      <div class="faq-category-title">Phones &amp; Other Devices</div>
 
       <div class="faq-item" id="faq-phone">
         <button class="faq-question" aria-expanded="false">
-          Can I share files with my phone?
+          Can I send files to an iPhone or Android phone?
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
         <div class="faq-answer"><div class="faq-answer-inner">
-          Yes. Start the app on your computer, note the web address displayed (which points to the app's local port 8080), and navigate to it on your phone's browser. You can then download shared files or upload photos and documents directly to your PC.
+          Yes! The best part is that your phone does not need any app installed. Just open your phone's regular camera and point it at the QR code on your computer screen. A private webpage will open on your phone where you can download the files straight into your Photos or Files app.
         </div></div>
       </div>
 
-      <div class="faq-item" id="faq-filetype">
+      <div class="faq-item" id="faq-phone-to-pc">
         <button class="faq-question" aria-expanded="false">
-          Are there any file type or size limits?
+          Can I send photos and videos from my phone to my computer?
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
         <div class="faq-answer"><div class="faq-answer-inner">
-          No. Files are streamed directly between devices, meaning there are no arbitrary size limits or format restrictions. Transfers are limited only by your disk space and network interface card.
+          Yes. After scanning the QR code with your phone camera, tap the Upload button on the webpage. Select whatever photos or videos you want to copy over, and they will arrive directly in your computer's Downloads folder in seconds.
+        </div></div>
+      </div>
+
+      <div class="faq-item" id="faq-limits">
+        <button class="faq-question" aria-expanded="false">
+          Are there any file size limits?
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <div class="faq-answer"><div class="faq-answer-inner">
+          None at all. Whether you are sending a 5 MB PDF, a 10 GB 4K movie, or a 60 GB video game folder, We Share handles it with no file size limits and zero compression.
         </div></div>
       </div>
     </div>
 
-    <!-- Features -->
+    <!-- Privacy & Safety -->
     <div class="faq-category">
-      <div class="faq-category-title">Features</div>
-
-      <div class="faq-item" id="faq-desert">
-        <button class="faq-question" aria-expanded="false">
-          What is Desert Mode?
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        </button>
-        <div class="faq-answer"><div class="faq-answer-inner">
-          If there is no active local network, We Share initializes an ad-hoc Wi-Fi hotspot in the background using Windows Mobile Hotspot APIs. The client device detects this specific SSID and establishes a handshake connection automatically, allowing offline local transfers without manual configuration.
-        </div></div>
-      </div>
-
-      <div class="faq-item" id="faq-discovery">
-        <button class="faq-question" aria-expanded="false">
-          How does device discovery work?
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        </button>
-        <div class="faq-answer"><div class="faq-answer-inner">
-          We Share uses UDP socket broadcasting. It regularly sends discovery packets on a dedicated local subnet port. Other instances running on the same subnet listen to these broadcasts, parse the sender information, and list the active peers in the visual radar.
-        </div></div>
-      </div>
-
-      <div class="faq-item" id="faq-accept-reject">
-        <button class="faq-question" aria-expanded="false">
-          Can I choose what files to accept?
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        </button>
-        <div class="faq-answer"><div class="faq-answer-inner">
-          Yes. Every transfer request is parsed and prompts the receiver with the sender's hostname, file listing, and total payload size. Files will not be written to disk until you explicitly click Accept.
-        </div></div>
-      </div>
-
-      <div class="faq-item" id="faq-history">
-        <button class="faq-question" aria-expanded="false">
-          Does We Share keep a transfer history?
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        </button>
-        <div class="faq-answer"><div class="faq-answer-inner">
-          Yes. A history database is managed locally via an offline SQLite file stored in the app data directory. This database remains entirely on your machine and is never shared or exported.
-        </div></div>
-      </div>
-    </div>
-
-    <!-- Privacy & Security -->
-    <div class="faq-category">
-      <div class="faq-category-title">Privacy &amp; Security</div>
+      <div class="faq-category-title">Privacy &amp; Safety</div>
 
       <div class="faq-item" id="faq-privacy">
         <button class="faq-question" aria-expanded="false">
-          Is my data private?
+          Are my files private?
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
         <div class="faq-answer"><div class="faq-answer-inner">
-          Yes. All socket connections are established peer-to-peer on your local subnet. No telemetry, third-party analytics, or external trackers are compiled into the application.
+          100% private. Unlike cloud storage providers (Google Drive, Dropbox, iCloud) where files are uploaded to external company servers, We Share moves your files directly between devices in your room. Your personal photos and documents never touch the internet.
+        </div></div>
+      </div>
+
+      <div class="faq-item" id="faq-consent">
+        <button class="faq-question" aria-expanded="false">
+          Can strangers send files to my PC without me knowing?
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <div class="faq-answer"><div class="faq-answer-inner">
+          Never. Whenever anyone attempts to send you files, a clear prompt appears on your screen displaying their device name, the list of files, and the total size. Nothing is ever saved to your disk until you click Accept.
         </div></div>
       </div>
 
       <div class="faq-item" id="faq-firewall">
         <button class="faq-question" aria-expanded="false">
-          The installer mentions firewall rules — is that normal?
+          Why does Windows ask to allow the app through the firewall?
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
         <div class="faq-answer"><div class="faq-answer-inner">
-          Yes. Since We Share relies on local TCP and UDP sockets for network communication, Windows Firewall must be configured to allow this traffic on your local subnet. The installer automatically registers these rules for the application executable, and they are fully removed when you uninstall.
+          Because We Share connects computers directly across your home Wi-Fi rather than routing through the internet, Windows asks for permission to allow nearby devices on your network to communicate with the app. This is completely standard and safe for local sharing software.
         </div></div>
       </div>
     </div>
 
-    <!-- Troubleshooting -->
+    <!-- Practical Scenarios -->
     <div class="faq-category">
-      <div class="faq-category-title">Troubleshooting</div>
+      <div class="faq-category-title">Practical Scenarios</div>
 
-      <div class="faq-item" id="faq-not-finding">
+      <div class="faq-item" id="faq-desert">
         <button class="faq-question" aria-expanded="false">
-          Devices aren't finding each other — what do I do?
+          What if there is no Wi-Fi router available (like on a plane or outdoors)?
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
         <div class="faq-answer"><div class="faq-answer-inner">
-          <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;padding:0">
-            <li>▸ Verify that both devices are connected to the same local subnet.</li>
-            <li>▸ On public or corporate networks, access point isolation (AP isolation) is often enabled, which blocks UDP broadcasts and peer communication.</li>
-            <li>▸ Check that your Windows Firewall allows UDP traffic on the radar discovery ports.</li>
-            <li>▸ If no wireless router is available, ensure you use the ad-hoc Desert Mode.</li>
-          </ul>
+          We Share includes an automatic offline mode. If you are on an airplane flight, in a car, or during a stormy home power outage, We Share automatically creates a direct wireless link between your laptops so you can continue sharing at full speed without needing a router or internet link.
         </div></div>
       </div>
 
-      <div class="faq-item" id="faq-slow">
+      <div class="faq-item" id="faq-speed">
         <button class="faq-question" aria-expanded="false">
-          Transfers feel slow — how do I speed them up?
+          How fast are the file transfers?
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
         <div class="faq-answer"><div class="faq-answer-inner">
-          We Share does not throttle bandwidth and streams files as fast as your hardware allows. For maximum throughput, connect via a wired gigabit Ethernet cable, or ensure your devices are close to a high-speed Wi-Fi 5/6 router with clear line of sight.
-        </div></div>
-      </div>
-
-      <div class="faq-item" id="faq-update">
-        <button class="faq-question" aria-expanded="false">
-          How do I update We Share?
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        </button>
-        <div class="faq-answer"><div class="faq-answer-inner">
-          Download the new setup executable from the Downloads page. Running the installer will overwrite the application files while preserving your local SQLite database containing your transfer history.
+          Extremely fast. Because files move directly between your devices over your local connection instead of uploading to slow internet servers, a 2 GB video often transfers in just a few seconds.
         </div></div>
       </div>
     </div>
 
   </div>
 
+  <!-- Footer -->
   <footer class="footer">
     <div class="footer-inner">
       <div class="footer-brand"><img src="logo.png" alt="We Share" class="footer-logo" /> We Share</div>
@@ -247,10 +209,11 @@
         <a href="downloads.html">Downloads</a>
         <a href="faq.html">FAQ</a>
         <a href="patch-notes.html">Patch Notes</a>
+        <a href="https://github.com/sowmiyan-s/We-Share/tree/main/assets/brand" target="_blank" rel="noopener">Brand Assets</a>
         <a href="https://github.com/sowmiyan-s/We-Share" target="_blank" rel="noopener">GitHub</a>
       </div>
       <p class="footer-copy">
-        © 2026 We Share &middot; Developed by <a href="https://github.com/sowmiyan-s" target="_blank" rel="noopener">Sowmiyan s</a>
+        &copy; 2026 We Share &middot; Developed by <a href="https://github.com/sowmiyan-s" target="_blank" rel="noopener">Sowmiyan s</a>
       </p>
     </div>
   </footer>

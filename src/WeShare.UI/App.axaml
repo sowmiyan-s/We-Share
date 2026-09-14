@@ -6,184 +6,195 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.ThemeDictionaries>
-                <!-- SPOTIFY IMMERSIVE DARK THEME -->
+                <!-- MODERN SLATE OBSIDIAN / ROYAL VIOLET & REFINED FUCHSIA -->
                 <ResourceDictionary x:Key="Dark">
                     <!-- Core Canvas & Surface -->
-                    <Color x:Key="BaseBackground">#121212</Color>
-                    <Color x:Key="SurfaceDark">#181818</Color>
-                    <Color x:Key="CardDark">#242424</Color>
-                    <Color x:Key="CardElevated">#282828</Color>
-                    <Color x:Key="CardHover">#2e2e2e</Color>
+                    <Color x:Key="BaseBackground">#090A0F</Color>
+                    <Color x:Key="SurfaceDark">#11131C</Color>
+                    <Color x:Key="CardDark">#161824</Color>
+                    <Color x:Key="CardElevated">#1C1F2E</Color>
+                    <Color x:Key="CardHover">#23273A</Color>
+                    <Color x:Key="BorderSubtle">#222638</Color>
+                    <Color x:Key="BorderHover">#363D57</Color>
 
-                    <!-- Spotify Brand Green -->
-                    <Color x:Key="SpotifyGreen">#1ED760</Color>
-                    <Color x:Key="SpotifyGreenPressed">#1DB954</Color>
-                    <Color x:Key="SpotifyGreenHover">#3BE477</Color>
-                    <Color x:Key="SpotifyGreenDim">#169C46</Color>
+                    <!-- Brand Identity: Royal Violet & Refined Fuchsia -->
+                    <Color x:Key="BrandViolet">#7C3AED</Color>
+                    <Color x:Key="BrandVioletDim">#6D28D9</Color>
+                    <Color x:Key="BrandVioletHover">#8B5CF6</Color>
+                    <Color x:Key="BrandMagenta">#EC4899</Color>
+                    <Color x:Key="BrandMagentaHover">#F472B6</Color>
+                    <Color x:Key="BrandMagentaPressed">#DB2777</Color>
+
+                    <!-- Enterprise Telemetry Colors -->
+                    <Color x:Key="TelemetryCyan">#06B6D4</Color>
+                    <Color x:Key="TelemetrySuccess">#10B981</Color>
 
                     <!-- Backward Compatibility Mapping -->
-                    <Color x:Key="ElectricIndigo">#1ED760</Color>
-                    <Color x:Key="ElectricIndigoDim">#1DB954</Color>
-                    <Color x:Key="TealAccent">#1ED760</Color>
-                    <Color x:Key="DeepSlate">#121212</Color>
-                    <Color x:Key="GlassFill">#181818</Color>
-                    <Color x:Key="GlassStroke">#282828</Color>
+                    <Color x:Key="SpotifyGreen">#7C3AED</Color>
+                    <Color x:Key="SpotifyGreenPressed">#6D28D9</Color>
+                    <Color x:Key="SpotifyGreenHover">#8B5CF6</Color>
+                    <Color x:Key="SpotifyGreenDim">#5B21B6</Color>
+                    <Color x:Key="ElectricIndigo">#7C3AED</Color>
+                    <Color x:Key="ElectricIndigoDim">#6D28D9</Color>
+                    <Color x:Key="TealAccent">#06B6D4</Color>
+                    <Color x:Key="DeepSlate">#090A0F</Color>
+                    <Color x:Key="GlassFill">#12141F</Color>
+                    <Color x:Key="GlassStroke">#222638</Color>
 
                     <!-- Typography Palette -->
-                    <Color x:Key="TextPrimary">#FFFFFF</Color>
-                    <Color x:Key="TextSecondary">#B3B3B3</Color>
-                    <Color x:Key="TextMuted">#7C7C7C</Color>
-                    <Color x:Key="TextNegative">#F3727F</Color>
-                    <Color x:Key="TextWarning">#FFA42B</Color>
-                    <Color x:Key="TextAnnouncement">#539DF5</Color>
+                    <Color x:Key="TextPrimary">#F8FAFC</Color>
+                    <Color x:Key="TextSecondary">#94A3B8</Color>
+                    <Color x:Key="TextMuted">#64748B</Color>
+                    <Color x:Key="TextNegative">#EF4444</Color>
+                    <Color x:Key="TextWarning">#06B6D4</Color>
+                    <Color x:Key="TextAnnouncement">#06B6D4</Color>
 
                     <!-- Brushes -->
-                    <SolidColorBrush x:Key="BaseBackgroundBrush"        Color="#121212"/>
-                    <SolidColorBrush x:Key="SurfaceBackgroundBrush"     Color="#181818"/>
-                    <SolidColorBrush x:Key="CardBackgroundBrush"        Color="#242424"/>
-                    <SolidColorBrush x:Key="CardElevatedBrush"          Color="#282828"/>
-                    <SolidColorBrush x:Key="CardHoverBrush"             Color="#2E2E2E"/>
-                    <SolidColorBrush x:Key="GlassBackgroundBrush"       Color="#181818"/>
-                    <SolidColorBrush x:Key="GlassBorderBrush"           Color="#282828"/>
-                    <SolidColorBrush x:Key="SolidPanelBackgroundBrush"  Color="#121212"/>
-                    <SolidColorBrush x:Key="RadarRingBrush"             Color="#261ED760"/>
-                    <SolidColorBrush x:Key="SpotifyGreenBrush"          Color="#1ED760"/>
-                    <SolidColorBrush x:Key="SpotifyGreenPressedBrush"   Color="#1DB954"/>
-                    <SolidColorBrush x:Key="TextPrimaryBrush"           Color="#FFFFFF"/>
-                    <SolidColorBrush x:Key="TextSecondaryBrush"         Color="#B3B3B3"/>
-                    <SolidColorBrush x:Key="TextMutedBrush"             Color="#7C7C7C"/>
+                    <SolidColorBrush x:Key="BaseBackgroundBrush"        Color="#090A0F"/>
+                    <SolidColorBrush x:Key="SurfaceBackgroundBrush"     Color="#11131C"/>
+                    <SolidColorBrush x:Key="CardBackgroundBrush"        Color="#161824"/>
+                    <SolidColorBrush x:Key="CardElevatedBrush"          Color="#1C1F2E"/>
+                    <SolidColorBrush x:Key="CardHoverBrush"             Color="#23273A"/>
+                    <SolidColorBrush x:Key="BorderSubtleBrush"          Color="#222638"/>
+                    <SolidColorBrush x:Key="BorderHoverBrush"           Color="#363D57"/>
+                    <SolidColorBrush x:Key="GlassBackgroundBrush"       Color="#12141F"/>
+                    <SolidColorBrush x:Key="GlassBorderBrush"           Color="#222638"/>
+                    <SolidColorBrush x:Key="SolidPanelBackgroundBrush"  Color="#090A0F"/>
+                    <SolidColorBrush x:Key="RadarRingBrush"             Color="#207C3AED"/>
+                    <SolidColorBrush x:Key="SpotifyGreenBrush"          Color="#7C3AED"/>
+                    <SolidColorBrush x:Key="SpotifyGreenPressedBrush"   Color="#6D28D9"/>
+                    <SolidColorBrush x:Key="BrandVioletBrush"           Color="#7C3AED"/>
+                    <SolidColorBrush x:Key="BrandMagentaBrush"          Color="#EC4899"/>
+                    <SolidColorBrush x:Key="TelemetryCyanBrush"         Color="#06B6D4"/>
+                    <SolidColorBrush x:Key="TextPrimaryBrush"           Color="#F8FAFC"/>
+                    <SolidColorBrush x:Key="TextSecondaryBrush"         Color="#94A3B8"/>
+                    <SolidColorBrush x:Key="TextMutedBrush"             Color="#64748B"/>
                 </ResourceDictionary>
 
-                <!-- SPOTIFY CONTRAST LIGHT THEME -->
+                <!-- ENTERPRISE LIGHT THEME -->
                 <ResourceDictionary x:Key="Light">
-                    <Color x:Key="BaseBackground">#F4F4F5</Color>
+                    <Color x:Key="BaseBackground">#F5F6FA</Color>
                     <Color x:Key="SurfaceDark">#FFFFFF</Color>
-                    <Color x:Key="CardDark">#EAEAEA</Color>
-                    <Color x:Key="CardElevated">#DFDFDF</Color>
-                    <Color x:Key="CardHover">#D5D5D5</Color>
+                    <Color x:Key="CardDark">#ECEEF5</Color>
+                    <Color x:Key="CardElevated">#E2E5F0</Color>
+                    <Color x:Key="CardHover">#D8DCEB</Color>
+                    <Color x:Key="BorderSubtle">#D1D6E6</Color>
+                    <Color x:Key="BorderHover">#B2BACF</Color>
 
-                    <Color x:Key="SpotifyGreen">#169C46</Color>
-                    <Color x:Key="SpotifyGreenPressed">#12823A</Color>
-                    <Color x:Key="SpotifyGreenHover">#1ED760</Color>
-                    <Color x:Key="SpotifyGreenDim">#0E662C</Color>
+                    <Color x:Key="BrandViolet">#7928CA</Color>
+                    <Color x:Key="BrandVioletDim">#6017A6</Color>
+                    <Color x:Key="BrandMagenta">#D900FF</Color>
+                    <Color x:Key="BrandMagentaHover">#E6007A</Color>
+                    <Color x:Key="BrandMagentaPressed">#B800E6</Color>
 
-                    <Color x:Key="ElectricIndigo">#169C46</Color>
-                    <Color x:Key="ElectricIndigoDim">#12823A</Color>
-                    <Color x:Key="TealAccent">#169C46</Color>
-                    <Color x:Key="DeepSlate">#F4F4F5</Color>
+                    <Color x:Key="TelemetryCyan">#0284C7</Color>
+                    <Color x:Key="TelemetrySuccess">#16A34A</Color>
+
+                    <Color x:Key="SpotifyGreen">#D900FF</Color>
+                    <Color x:Key="SpotifyGreenPressed">#B800E6</Color>
+                    <Color x:Key="SpotifyGreenHover">#E6007A</Color>
+                    <Color x:Key="SpotifyGreenDim">#7928CA</Color>
+                    <Color x:Key="ElectricIndigo">#7928CA</Color>
+                    <Color x:Key="ElectricIndigoDim">#6017A6</Color>
+                    <Color x:Key="TealAccent">#0284C7</Color>
+                    <Color x:Key="DeepSlate">#F5F6FA</Color>
                     <Color x:Key="GlassFill">#FFFFFF</Color>
-                    <Color x:Key="GlassStroke">#E0E0E0</Color>
+                    <Color x:Key="GlassStroke">#D1D6E6</Color>
 
-                    <Color x:Key="TextPrimary">#121212</Color>
-                    <Color x:Key="TextSecondary">#535353</Color>
-                    <Color x:Key="TextMuted">#7C7C7C</Color>
-                    <Color x:Key="TextNegative">#D32F2F</Color>
-                    <Color x:Key="TextWarning">#ED6C02</Color>
-                    <Color x:Key="TextAnnouncement">#0288D1</Color>
+                    <Color x:Key="TextPrimary">#0F111A</Color>
+                    <Color x:Key="TextSecondary">#4B5268</Color>
+                    <Color x:Key="TextMuted">#7B8399</Color>
+                    <Color x:Key="TextNegative">#DC2626</Color>
+                    <Color x:Key="TextWarning">#D97706</Color>
+                    <Color x:Key="TextAnnouncement">#0284C7</Color>
 
-                    <SolidColorBrush x:Key="BaseBackgroundBrush"        Color="#F4F4F5"/>
+                    <SolidColorBrush x:Key="BaseBackgroundBrush"        Color="#F5F6FA"/>
                     <SolidColorBrush x:Key="SurfaceBackgroundBrush"     Color="#FFFFFF"/>
-                    <SolidColorBrush x:Key="CardBackgroundBrush"        Color="#EAEAEA"/>
-                    <SolidColorBrush x:Key="CardElevatedBrush"          Color="#DFDFDF"/>
-                    <SolidColorBrush x:Key="CardHoverBrush"             Color="#D5D5D5"/>
+                    <SolidColorBrush x:Key="CardBackgroundBrush"        Color="#ECEEF5"/>
+                    <SolidColorBrush x:Key="CardElevatedBrush"          Color="#E2E5F0"/>
+                    <SolidColorBrush x:Key="CardHoverBrush"             Color="#D8DCEB"/>
+                    <SolidColorBrush x:Key="BorderSubtleBrush"          Color="#D1D6E6"/>
+                    <SolidColorBrush x:Key="BorderHoverBrush"           Color="#B2BACF"/>
                     <SolidColorBrush x:Key="GlassBackgroundBrush"       Color="#FFFFFF"/>
-                    <SolidColorBrush x:Key="GlassBorderBrush"           Color="#E0E0E0"/>
+                    <SolidColorBrush x:Key="GlassBorderBrush"           Color="#D1D6E6"/>
                     <SolidColorBrush x:Key="SolidPanelBackgroundBrush"  Color="#FFFFFF"/>
-                    <SolidColorBrush x:Key="RadarRingBrush"             Color="#20169C46"/>
-                    <SolidColorBrush x:Key="SpotifyGreenBrush"          Color="#169C46"/>
-                    <SolidColorBrush x:Key="SpotifyGreenPressedBrush"   Color="#12823A"/>
-                    <SolidColorBrush x:Key="TextPrimaryBrush"           Color="#121212"/>
-                    <SolidColorBrush x:Key="TextSecondaryBrush"         Color="#535353"/>
-                    <SolidColorBrush x:Key="TextMutedBrush"             Color="#7C7C7C"/>
+                    <SolidColorBrush x:Key="RadarRingBrush"             Color="#207928CA"/>
+                    <SolidColorBrush x:Key="SpotifyGreenBrush"          Color="#D900FF"/>
+                    <SolidColorBrush x:Key="SpotifyGreenPressedBrush"   Color="#B800E6"/>
+                    <SolidColorBrush x:Key="BrandVioletBrush"           Color="#7928CA"/>
+                    <SolidColorBrush x:Key="BrandMagentaBrush"          Color="#D900FF"/>
+                    <SolidColorBrush x:Key="TelemetryCyanBrush"         Color="#0284C7"/>
+                    <SolidColorBrush x:Key="TextPrimaryBrush"           Color="#0F111A"/>
+                    <SolidColorBrush x:Key="TextSecondaryBrush"         Color="#4B5268"/>
+                    <SolidColorBrush x:Key="TextMutedBrush"             Color="#7B8399"/>
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
 
             <!-- Global Named Brushes -->
-            <SolidColorBrush x:Key="ElectricIndigoBrush" Color="{DynamicResource ElectricIndigo}"/>
-            <SolidColorBrush x:Key="ElectricIndigoDimBrush" Color="{DynamicResource ElectricIndigoDim}"/>
-            <SolidColorBrush x:Key="TealSuccessBrush" Color="{DynamicResource SpotifyGreen}"/>
+            <SolidColorBrush x:Key="ElectricIndigoBrush" Color="{DynamicResource BrandViolet}"/>
+            <SolidColorBrush x:Key="ElectricIndigoDimBrush" Color="{DynamicResource BrandVioletDim}"/>
+            <SolidColorBrush x:Key="TealSuccessBrush" Color="{DynamicResource BrandMagenta}"/>
+
+            <!-- Brand Gradient Brush (Violet to Fuchsia) -->
+            <LinearGradientBrush x:Key="BrandGradientBrush" StartPoint="0%,0%" EndPoint="100%,100%">
+                <GradientStop Color="#7C3AED" Offset="0"/>
+                <GradientStop Color="#EC4899" Offset="1"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="BrandGradientHBrush" StartPoint="0%,50%" EndPoint="100%,50%">
+                <GradientStop Color="#7C3AED" Offset="0"/>
+                <GradientStop Color="#EC4899" Offset="1"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="CyanGradientHBrush" StartPoint="0%,50%" EndPoint="100%,50%">
+                <GradientStop Color="#06B6D4" Offset="0"/>
+                <GradientStop Color="#0284C7" Offset="1"/>
+            </LinearGradientBrush>
+
+            <!-- Pure Resolution-Independent SVG Vector Icons -->
+            <StreamGeometry x:Key="IconHome">M3,12 L12,3 L21,12 V20 A1,1 0 0,1 20,21 H15 V15 H9 V21 H4 A1,1 0 0,1 3,20 Z</StreamGeometry>
+            <StreamGeometry x:Key="IconSend">M22,2 L11,13 M22,2 L15,22 L11,13 L2,9 Z</StreamGeometry>
+            <StreamGeometry x:Key="IconReceive">M12,3 L12,17 M5,10 L12,17 L19,10 M3,21 L21,21</StreamGeometry>
+            <StreamGeometry x:Key="IconTransfers">M13,2 L3,14 H12 L11,22 L21,10 H12 L13,2 Z</StreamGeometry>
+            <StreamGeometry x:Key="IconHistory">M12,8 V12 L15,15 M21,12 A9,9 0 1,1 3,12 A9,9 0 0,1 21,12 Z</StreamGeometry>
+            <StreamGeometry x:Key="IconMobile">M12,18 H12.01 M8,21 H16 A2,2 0 0,0 18,19 V5 A2,2 0 0,0 16,3 H8 A2,2 0 0,0 6,5 V19 A2,2 0 0,0 8,21 Z</StreamGeometry>
+            <StreamGeometry x:Key="IconSettings">M10.3,4.3 C10.7,2.5 13.3,2.5 13.7,4.3 A1.7,1.7 0 0,0 16.3,5.4 C17.8,4.5 19.6,6.2 18.7,7.8 A1.7,1.7 0 0,0 19.8,10.3 C21.5,10.7 21.5,13.3 19.8,13.7 A1.7,1.7 0 0,0 18.7,16.3 C19.6,17.8 17.8,19.6 16.3,18.7 A1.7,1.7 0 0,0 13.7,19.8 C13.3,21.5 10.7,21.5 10.3,19.8 A1.7,1.7 0 0,0 7.7,18.7 C6.2,19.6 4.4,17.8 5.3,16.3 A1.7,1.7 0 0,0 4.2,13.7 C2.5,13.3 2.5,10.7 4.2,10.3 A1.7,1.7 0 0,0 5.3,7.7 C4.4,6.2 6.2,4.4 7.7,5.3 A1.7,1.7 0 0,0 10.3,4.3 Z M15,12 A3,3 0 1,1 9,12 A3,3 0 0,1 15,12 Z</StreamGeometry>
+            <StreamGeometry x:Key="IconAbout">M12,16 V12 M12,8 H12.01 M21,12 A9,9 0 1,1 3,12 A9,9 0 0,1 21,12 Z</StreamGeometry>
+            <StreamGeometry x:Key="IconFolder">M3,7 V17 A2,2 0 0,0 5,19 H19 A2,2 0 0,0 21,17 V9 A2,2 0 0,0 19,7 H13 L11,5 H5 A2,2 0 0,0 3,7 Z</StreamGeometry>
+            <StreamGeometry x:Key="IconFile">M14,2 H6 A2,2 0 0,0 4,4 V20 A2,2 0 0,0 6,22 H18 A2,2 0 0,0 20,20 V8 Z M14,2 V8 H20</StreamGeometry>
+            <StreamGeometry x:Key="IconCheck">M5,13 L9,17 L19,7</StreamGeometry>
+            <StreamGeometry x:Key="IconClose">M6,18 L18,6 M6,6 L18,18</StreamGeometry>
+            <StreamGeometry x:Key="IconCopy">M8,16 H6 A2,2 0 0,1 4,14 V6 A2,2 0 0,1 6,4 H14 A2,2 0 0,1 16,6 V8 M10,10 H18 A2,2 0 0,1 20,12 V20 A2,2 0 0,1 18,22 H10 A2,2 0 0,1 8,20 V12 A2,2 0 0,1 10,10 Z</StreamGeometry>
+            <StreamGeometry x:Key="IconQr">M4,4 H10 V10 H4 Z M14,4 H20 V10 H14 Z M4,14 H10 V20 H4 Z M14,14 H17 V17 H14 Z M17,17 H20 V20 H17 Z</StreamGeometry>
+            <StreamGeometry x:Key="IconWifi">M5,12.5 A11,11 0 0,1 19.1,12.5 M1.4,9 A16,16 0 0,1 22.6,9 M8.5,16.1 A6,6 0 0,1 15.5,16.1 M12,20 H12.01</StreamGeometry>
+            <StreamGeometry x:Key="IconDevice">M4,6 H20 A2,2 0 0,1 22,8 V16 A2,2 0 0,1 20,18 H4 A2,2 0 0,1 2,16 V8 A2,2 0 0,1 4,6 Z M2,18 H22</StreamGeometry>
         </ResourceDictionary>
     </Application.Resources>
 
     <Application.Styles>
         <FluentTheme />
 
-        <!-- Spotify Radar Concentric Ripple Wave 1 -->
-        <Style Selector="Ellipse.RadarPulse">
-            <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
-            <Style.Animations>
-                <Animation Duration="0:0:3.2" IterationCount="Infinite">
-                    <KeyFrame Cue="0%">
-                        <Setter Property="ScaleTransform.ScaleX" Value="0.9"/>
-                        <Setter Property="ScaleTransform.ScaleY" Value="0.9"/>
-                        <Setter Property="Opacity"               Value="0.45"/>
-                    </KeyFrame>
-                    <KeyFrame Cue="100%">
-                        <Setter Property="ScaleTransform.ScaleX" Value="1.8"/>
-                        <Setter Property="ScaleTransform.ScaleY" Value="1.8"/>
-                        <Setter Property="Opacity"               Value="0"/>
-                    </KeyFrame>
-                </Animation>
-            </Style.Animations>
-        </Style>
-
-        <!-- Spotify Radar Concentric Ripple Wave 2 -->
-        <Style Selector="Ellipse.RadarPulseInner">
-            <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
-            <Style.Animations>
-                <Animation Duration="0:0:3.2" Delay="0:0:1.6" IterationCount="Infinite">
-                    <KeyFrame Cue="0%">
-                        <Setter Property="ScaleTransform.ScaleX" Value="0.9"/>
-                        <Setter Property="ScaleTransform.ScaleY" Value="0.9"/>
-                        <Setter Property="Opacity"               Value="0.45"/>
-                    </KeyFrame>
-                    <KeyFrame Cue="100%">
-                        <Setter Property="ScaleTransform.ScaleX" Value="1.8"/>
-                        <Setter Property="ScaleTransform.ScaleY" Value="1.8"/>
-                        <Setter Property="Opacity"               Value="0"/>
-                    </KeyFrame>
-                </Animation>
-            </Style.Animations>
-        </Style>
-
-        <!-- Spotify Radar Scanner Sweep -->
-        <Style Selector="Border.RadarScan">
-            <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
-            <Style.Animations>
-                <Animation Duration="0:0:3.6" IterationCount="Infinite">
-                    <KeyFrame Cue="0%">
-                        <Setter Property="RotateTransform.Angle" Value="0"/>
-                    </KeyFrame>
-                    <KeyFrame Cue="100%">
-                        <Setter Property="RotateTransform.Angle" Value="360"/>
-                    </KeyFrame>
-                </Animation>
-            </Style.Animations>
-        </Style>
-
-        <!-- Spotify Active Pulse -->
+        <!-- Professional Network Pulse Indicator -->
         <Style Selector="Border.NetworkSignalPulse">
             <Setter Property="Width" Value="8"/>
             <Setter Property="Height" Value="8"/>
             <Setter Property="CornerRadius" Value="4"/>
-            <Setter Property="Background" Value="#1ED760"/>
+            <Setter Property="Background" Value="#00D2FF"/>
             <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
             <Style.Animations>
-                <Animation Duration="0:0:2" IterationCount="Infinite">
+                <Animation Duration="0:0:2.4" IterationCount="Infinite">
                     <KeyFrame Cue="0%">
-                        <Setter Property="ScaleTransform.ScaleX" Value="0.8"/>
-                        <Setter Property="ScaleTransform.ScaleY" Value="0.8"/>
-                        <Setter Property="Opacity"               Value="0.5"/>
+                        <Setter Property="ScaleTransform.ScaleX" Value="0.85"/>
+                        <Setter Property="ScaleTransform.ScaleY" Value="0.85"/>
+                        <Setter Property="Opacity"               Value="0.6"/>
                     </KeyFrame>
                     <KeyFrame Cue="50%">
-                        <Setter Property="ScaleTransform.ScaleX" Value="1.3"/>
-                        <Setter Property="ScaleTransform.ScaleY" Value="1.3"/>
+                        <Setter Property="ScaleTransform.ScaleX" Value="1.2"/>
+                        <Setter Property="ScaleTransform.ScaleY" Value="1.2"/>
                         <Setter Property="Opacity"               Value="1"/>
                     </KeyFrame>
                     <KeyFrame Cue="100%">
-                        <Setter Property="ScaleTransform.ScaleX" Value="0.8"/>
-                        <Setter Property="ScaleTransform.ScaleY" Value="0.8"/>
-                        <Setter Property="Opacity"               Value="0.5"/>
+                        <Setter Property="ScaleTransform.ScaleX" Value="0.85"/>
+                        <Setter Property="ScaleTransform.ScaleY" Value="0.85"/>
+                        <Setter Property="Opacity"               Value="0.6"/>
                     </KeyFrame>
                 </Animation>
             </Style.Animations>
@@ -194,56 +205,72 @@
             <Setter Property="Width" Value="8"/>
             <Setter Property="Height" Value="8"/>
             <Setter Property="CornerRadius" Value="4"/>
-            <Setter Property="Background" Value="#1ED760"/>
+            <Setter Property="Background" Value="#8B12FF"/>
             <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
             <Style.Animations>
                 <Animation Duration="0:0:2" IterationCount="Infinite">
                     <KeyFrame Cue="0%">
-                        <Setter Property="ScaleTransform.ScaleX" Value="0.8"/>
-                        <Setter Property="ScaleTransform.ScaleY" Value="0.8"/>
+                        <Setter Property="ScaleTransform.ScaleX" Value="0.85"/>
+                        <Setter Property="ScaleTransform.ScaleY" Value="0.85"/>
                         <Setter Property="Opacity"               Value="0.5"/>
                     </KeyFrame>
                     <KeyFrame Cue="50%">
-                        <Setter Property="ScaleTransform.ScaleX" Value="1.3"/>
-                        <Setter Property="ScaleTransform.ScaleY" Value="1.3"/>
+                        <Setter Property="ScaleTransform.ScaleX" Value="1.2"/>
+                        <Setter Property="ScaleTransform.ScaleY" Value="1.2"/>
                         <Setter Property="Opacity"               Value="1"/>
                     </KeyFrame>
                     <KeyFrame Cue="100%">
-                        <Setter Property="ScaleTransform.ScaleX" Value="0.8"/>
-                        <Setter Property="ScaleTransform.ScaleY" Value="0.8"/>
+                        <Setter Property="ScaleTransform.ScaleX" Value="0.85"/>
+                        <Setter Property="ScaleTransform.ScaleY" Value="0.85"/>
                         <Setter Property="Opacity"               Value="0.5"/>
                     </KeyFrame>
                 </Animation>
             </Style.Animations>
         </Style>
 
-        <!-- Spotify Device Marker Node -->
-        <Style Selector="Border.DeviceMarker">
-            <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
-            <Style.Animations>
-                <Animation Duration="0:0:3" IterationCount="Infinite">
-                    <KeyFrame Cue="0%">
-                        <Setter Property="ScaleTransform.ScaleX" Value="0.97"/>
-                        <Setter Property="ScaleTransform.ScaleY" Value="0.97"/>
-                    </KeyFrame>
-                    <KeyFrame Cue="50%">
-                        <Setter Property="ScaleTransform.ScaleX" Value="1.03"/>
-                        <Setter Property="ScaleTransform.ScaleY" Value="1.03"/>
-                    </KeyFrame>
-                    <KeyFrame Cue="100%">
-                        <Setter Property="ScaleTransform.ScaleX" Value="0.97"/>
-                        <Setter Property="ScaleTransform.ScaleY" Value="0.97"/>
-                    </KeyFrame>
-                </Animation>
-            </Style.Animations>
+        <!-- Clean Obsidian Violet ListBox Selection -->
+        <Style Selector="ListBoxItem">
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+        <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#1FFFFFFF"/>
+        </Style>
+        <Style Selector="ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#337C3AED"/>
+        </Style>
+        <Style Selector="ListBoxItem:selected:focus /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#337C3AED"/>
+        </Style>
+        <Style Selector="ListBoxItem:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#447C3AED"/>
         </Style>
 
-        <!-- Spotify Pill TextBox Styling -->
+        <!-- Enterprise Device Node Hover -->
+        <Style Selector="Border.DeviceMarker">
+            <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.18" Easing="CubicEaseOut"/>
+                    <BrushTransition Property="BorderBrush" Duration="0:0:0.18"/>
+                    <BrushTransition Property="Background" Duration="0:0:0.18"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Border.DeviceMarker:pointerover">
+            <Setter Property="RenderTransform" Value="scale(1.06)"/>
+            <Setter Property="BorderBrush" Value="#FF007F"/>
+            <Setter Property="Background" Value="#1F2033"/>
+        </Style>
+
+        <!-- Enterprise Rounded TextBox Styling -->
         <Style Selector="TextBox">
-            <Setter Property="CornerRadius" Value="9999"/>
+            <Setter Property="CornerRadius" Value="8"/>
             <Setter Property="Padding" Value="14,10"/>
-            <Setter Property="Background" Value="#1F1F1F"/>
-            <Setter Property="BorderBrush" Value="#333333"/>
+            <Setter Property="Background" Value="#161724"/>
+            <Setter Property="BorderBrush" Value="#26283D"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Foreground" Value="#FFFFFF"/>
             <Setter Property="Transitions">
@@ -254,24 +281,24 @@
             </Setter>
         </Style>
         <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
-            <Setter Property="BorderBrush" Value="#FFFFFF"/>
-            <Setter Property="Background" Value="#242424"/>
+            <Setter Property="BorderBrush" Value="#8B12FF"/>
+            <Setter Property="Background" Value="#1A1B2C"/>
         </Style>
         
-        <!-- ToggleSwitch Spotify Styling -->
+        <!-- ToggleSwitch Styling -->
         <Style Selector="ToggleSwitch">
             <Setter Property="OnContent" Value=""/>
             <Setter Property="OffContent" Value=""/>
         </Style>
 
-        <!-- Spotify Green ProgressBar Styling -->
+        <!-- Enterprise Gradient / Magenta ProgressBar Styling -->
         <Style Selector="ProgressBar">
-            <Setter Property="CornerRadius" Value="9999"/>
-            <Setter Property="Background" Value="#2A2A2A"/>
-            <Setter Property="Foreground" Value="#1ED760"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Background" Value="#1F2033"/>
+            <Setter Property="Foreground" Value="#FF007F"/>
         </Style>
 
-        <!-- Toast Notification Notification -->
+        <!-- Toast Notification Animation -->
         <Style Selector="Border.ToastVisible">
             <Style.Animations>
                 <Animation Duration="0:0:0.25" FillMode="Forward">
@@ -287,54 +314,98 @@
             </Style.Animations>
         </Style>
 
-        <!-- Splash Orbital Dot Animations -->
-        <Style Selector="Panel.SplashOrbit1">
+        <!-- Circle Action Button on Home -->
+        <Style Selector="Button.CircleActionBtn">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="ClipToBounds" Value="False"/>
             <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
-            <Style.Animations>
-                <Animation Duration="0:0:1.8" IterationCount="Infinite" Easing="LinearEasing">
-                    <KeyFrame Cue="0%">
-                        <Setter Property="RotateTransform.Angle" Value="0"/>
-                    </KeyFrame>
-                    <KeyFrame Cue="100%">
-                        <Setter Property="RotateTransform.Angle" Value="360"/>
-                    </KeyFrame>
-                </Animation>
-            </Style.Animations>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.18" Easing="CubicEaseOut"/>
+                </Transitions>
+            </Setter>
         </Style>
-        <Style Selector="Panel.SplashOrbit2">
-            <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
-            <Style.Animations>
-                <Animation Duration="0:0:2.8" IterationCount="Infinite" Easing="LinearEasing">
-                    <KeyFrame Cue="0%">
-                        <Setter Property="RotateTransform.Angle" Value="360"/>
-                    </KeyFrame>
-                    <KeyFrame Cue="100%">
-                        <Setter Property="RotateTransform.Angle" Value="0"/>
-                    </KeyFrame>
-                </Animation>
-            </Style.Animations>
+        <Style Selector="Button.CircleActionBtn /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="ClipToBounds" Value="False"/>
         </Style>
-        <Style Selector="Border.SplashLogoPulse">
+        <Style Selector="Button.CircleActionBtn:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="ClipToBounds" Value="False"/>
+        </Style>
+        <Style Selector="Button.CircleActionBtn:pressed /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="ClipToBounds" Value="False"/>
+        </Style>
+        <Style Selector="Button.CircleActionBtn:pointerover">
+            <Setter Property="RenderTransform" Value="scale(1.04)"/>
+        </Style>
+        <Style Selector="Button.CircleActionBtn:pressed">
+            <Setter Property="RenderTransform" Value="scale(0.96)"/>
+        </Style>
+
+        <!-- Send Circle Disc -->
+        <Style Selector="Border.SendCircleDisc">
+            <Setter Property="Width" Value="190"/>
+            <Setter Property="Height" Value="190"/>
+            <Setter Property="CornerRadius" Value="95"/>
+            <Setter Property="ClipToBounds" Value="False"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BoxShadow" Value="0 8 28 0 #35000000"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BoxShadowsTransition Property="BoxShadow" Duration="0:0:0.2"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Button.CircleActionBtn:pointerover Border.SendCircleDisc">
+            <Setter Property="BoxShadow" Value="0 14 40 0 #55000000"/>
+        </Style>
+
+        <!-- Receive Circle Disc -->
+        <Style Selector="Border.ReceiveCircleDisc">
+            <Setter Property="Width" Value="190"/>
+            <Setter Property="Height" Value="190"/>
+            <Setter Property="CornerRadius" Value="95"/>
+            <Setter Property="ClipToBounds" Value="False"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BoxShadow" Value="0 8 28 0 #35000000"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BoxShadowsTransition Property="BoxShadow" Duration="0:0:0.2"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Button.CircleActionBtn:pointerover Border.ReceiveCircleDisc">
+            <Setter Property="BoxShadow" Value="0 14 40 0 #55000000"/>
+        </Style>
+
+        <!-- Cyan Action Button (for Receive Hub) -->
+        <Style Selector="Button.CyanBtn">
+            <Setter Property="Background" Value="{StaticResource CyanGradientHBrush}"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="20,11"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="13"/>
             <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
-            <Style.Animations>
-                <Animation Duration="0:0:2" IterationCount="Infinite" Easing="SineEaseInOut">
-                    <KeyFrame Cue="0%">
-                        <Setter Property="ScaleTransform.ScaleX" Value="0.94"/>
-                        <Setter Property="ScaleTransform.ScaleY" Value="0.94"/>
-                        <Setter Property="Opacity" Value="0.85"/>
-                    </KeyFrame>
-                    <KeyFrame Cue="50%">
-                        <Setter Property="ScaleTransform.ScaleX" Value="1.06"/>
-                        <Setter Property="ScaleTransform.ScaleY" Value="1.06"/>
-                        <Setter Property="Opacity" Value="1"/>
-                    </KeyFrame>
-                    <KeyFrame Cue="100%">
-                        <Setter Property="ScaleTransform.ScaleX" Value="0.94"/>
-                        <Setter Property="ScaleTransform.ScaleY" Value="0.94"/>
-                        <Setter Property="Opacity" Value="0.85"/>
-                    </KeyFrame>
-                </Animation>
-            </Style.Animations>
+            <Setter Property="ClipToBounds" Value="False"/>
+            <Setter Property="Transitions">
+               <Transitions>
+                  <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.12" Easing="CubicEaseOut"/>
+               </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Button.CyanBtn:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{StaticResource CyanGradientHBrush}"/>
+            <Setter Property="RenderTransform" Value="scale(1.02)"/>
+        </Style>
+        <Style Selector="Button.CyanBtn:pressed">
+            <Setter Property="RenderTransform" Value="scale(0.98)"/>
         </Style>
     </Application.Styles>
 </Application>

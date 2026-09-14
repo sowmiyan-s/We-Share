@@ -13,8 +13,6 @@ namespace WeShare.UI
             try
             {
                 if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
-                File.AppendAllText(Path.Combine(folder, "startup.log"), $"[{DateTime.Now}] App Main entered.\n");
-
                 App.PlatformService = new WeShare.Desktop.Services.WindowsPlatformService();
                 BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
             }
@@ -38,7 +36,7 @@ namespace WeShare.UI
                 .With(new Win32PlatformOptions
                 {
                     // More compatible rendering on older machines
-                    RenderingMode = new[] { Win32RenderingMode.Wgl, Win32RenderingMode.Software }
+                    RenderingMode = new[] { Win32RenderingMode.AngleEgl, Win32RenderingMode.Wgl, Win32RenderingMode.Software }
                 })
                 .LogToTrace();
     }

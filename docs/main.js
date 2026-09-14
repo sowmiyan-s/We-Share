@@ -81,8 +81,17 @@ document.querySelectorAll('.faq-question').forEach(btn => {
 });
 
 // ── How-to-use tab highlight on scroll ──
-const howtoSections = ['pc-to-pc','pc-to-mobile','mobile-to-pc','desert-mode'];
-const tabMap = { 'pc-to-pc':'tab-pc-to-pc','pc-to-mobile':'tab-pc-to-mobile','mobile-to-pc':'tab-mobile-to-pc','desert-mode':'tab-desert' };
+const howtoSections = ['between-pcs','pc-to-phone','phone-to-pc','offline-mode','pc-to-pc','pc-to-mobile','mobile-to-pc','desert-mode'];
+const tabMap = { 
+  'between-pcs': 'tab-pc-to-pc', 
+  'pc-to-phone': 'tab-pc-to-mobile', 
+  'phone-to-pc': 'tab-mobile-to-pc', 
+  'offline-mode': 'tab-desert',
+  'pc-to-pc': 'tab-pc-to-pc',
+  'pc-to-mobile': 'tab-pc-to-mobile',
+  'mobile-to-pc': 'tab-mobile-to-pc',
+  'desert-mode': 'tab-desert'
+};
 if (howtoSections.some(id => document.getElementById(id))) {
   const obs2 = new IntersectionObserver(entries => {
     entries.forEach(e => {
@@ -108,3 +117,37 @@ if (terminalLines.length) {
     }, 600 + i * 200);
   });
 }
+
+// ── Interactive App Showcase Tab Switcher ──
+const showcaseTabs = document.querySelectorAll('.showcase-tab');
+const showcaseImg  = document.getElementById('showcase-img');
+const showcaseCap  = document.getElementById('showcase-caption');
+
+if (showcaseTabs.length && showcaseImg && showcaseCap) {
+  showcaseTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      showcaseTabs.forEach(t => {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+      });
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+
+      const targetSrc = tab.getAttribute('data-img');
+      const targetCap = tab.getAttribute('data-caption');
+
+      if (targetSrc) {
+        showcaseImg.style.opacity = '0.3';
+        setTimeout(() => {
+          showcaseImg.src = targetSrc;
+          showcaseImg.style.opacity = '1';
+        }, 120);
+      }
+
+      if (targetCap) {
+        showcaseCap.innerHTML = `<span>${targetCap.toUpperCase()}</span><span class="mono">VER 1.1.0</span>`;
+      }
+    });
+  });
+}
+

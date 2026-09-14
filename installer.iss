@@ -24,10 +24,10 @@ AllowNoIcons=yes
 OutputDir=setup
 OutputBaseFilename=WeShare_Setup_{#AppVersion}
 SetupIconFile={#AppIcon}
-PrivilegesRequired=admin
+PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 ; Installer banner (164 × 314 px BMP) and small logo (55 × 58 px BMP)
-WizardImageFile=src\WeShare.UI\Assets\Design\installer_banner_light.bmp
+WizardImageFile=src\WeShare.UI\Assets\Design\installer_banner.bmp
 WizardSmallImageFile=src\WeShare.UI\Assets\logo_light.bmp
 Compression=lzma2/ultra64
 InternalCompressLevel=max

@@ -15,25 +15,28 @@
     <local:RadarPositionConverter x:Key="RadarPos"/>
     <local:DeviceTypeToIconConverter x:Key="DeviceTypeToIconConverter"/>
 
-    <!-- Spotify Theme Brushes -->
-    <SolidColorBrush x:Key="SpotifyGreenBrush" Color="#1ED760"/>
-    <SolidColorBrush x:Key="SpotifyGreenHoverBrush" Color="#3BE477"/>
-    <SolidColorBrush x:Key="SpotifyGreenPressedBrush" Color="#1DB954"/>
-    <SolidColorBrush x:Key="BaseBackgroundBrush" Color="#121212"/>
-    <SolidColorBrush x:Key="SurfaceBackgroundBrush" Color="#181818"/>
-    <SolidColorBrush x:Key="CardBackgroundBrush" Color="#242424"/>
-    <SolidColorBrush x:Key="CardHoverBrush" Color="#2A2A2A"/>
-    <SolidColorBrush x:Key="GlassBorderBrush" Color="#282828"/>
-    <SolidColorBrush x:Key="GlassBackgroundBrush" Color="#181818"/>
+    <!-- Obsidian Violet Theme Brushes -->
+    <SolidColorBrush x:Key="BrandVioletBrush" Color="#7C3AED"/>
+    <SolidColorBrush x:Key="BrandVioletHoverBrush" Color="#8B5CF6"/>
+    <SolidColorBrush x:Key="BrandVioletDimBrush" Color="#6D28D9"/>
+    <SolidColorBrush x:Key="BaseBackgroundBrush" Color="#090A0F"/>
+    <SolidColorBrush x:Key="SurfaceBackgroundBrush" Color="#11131C"/>
+    <SolidColorBrush x:Key="CardBackgroundBrush" Color="#161824"/>
+    <SolidColorBrush x:Key="CardHoverBrush" Color="#1C1F2E"/>
+    <SolidColorBrush x:Key="GlassBorderBrush" Color="#222638"/>
+    <SolidColorBrush x:Key="GlassBackgroundBrush" Color="#11131C"/>
     <SolidColorBrush x:Key="TextPrimaryBrush" Color="#FFFFFF"/>
-    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#B3B3B3"/>
-    <SolidColorBrush x:Key="TextMutedBrush" Color="#7C7C7C"/>
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#94A3B8"/>
+    <SolidColorBrush x:Key="TextMutedBrush" Color="#64748B"/>
     
-    <!-- Backward compatibility alias -->
-    <SolidColorBrush x:Key="ElectricIndigoBrush" Color="#1ED760"/>
-    <SolidColorBrush x:Key="ElectricIndigoDimBrush" Color="#1DB954"/>
-    <SolidColorBrush x:Key="TealSuccessBrush" Color="#1ED760"/>
-    <SolidColorBrush x:Key="DeepSlateBrush" Color="#121212"/>
+    <!-- Compatibility Aliases -->
+    <SolidColorBrush x:Key="SpotifyGreenBrush" Color="#7C3AED"/>
+    <SolidColorBrush x:Key="SpotifyGreenHoverBrush" Color="#8B5CF6"/>
+    <SolidColorBrush x:Key="SpotifyGreenPressedBrush" Color="#6D28D9"/>
+    <SolidColorBrush x:Key="ElectricIndigoBrush" Color="#7C3AED"/>
+    <SolidColorBrush x:Key="ElectricIndigoDimBrush" Color="#6D28D9"/>
+    <SolidColorBrush x:Key="TealSuccessBrush" Color="#10B981"/>
+    <SolidColorBrush x:Key="DeepSlateBrush" Color="#090A0F"/>
   </UserControl.Resources>
 
   <UserControl.Styles>
@@ -53,10 +56,10 @@
       </Setter>
     </Style>
     <Style Selector="Button.SidebarItem:pointerover /template/ ContentPresenter">
-      <Setter Property="Background" Value="#242424"/>
+      <Setter Property="Background" Value="#161824"/>
     </Style>
     <Style Selector="Button.SidebarItem.Active /template/ ContentPresenter">
-      <Setter Property="Background"     Value="#282828"/>
+      <Setter Property="Background"     Value="#1C1F2E"/>
     </Style>
     <Style Selector="Button.SidebarItem TextBlock">
        <Setter Property="Foreground" Value="#B3B3B3"/>
@@ -86,8 +89,8 @@
 
     <!-- Spotify Card (Clean, Sharp 8px Radius, Hover Lighten) -->
     <Style Selector="Border.GlassCard">
-        <Setter Property="Background" Value="#181818"/>
-        <Setter Property="BorderBrush" Value="#282828"/>
+        <Setter Property="Background" Value="#11131C"/>
+        <Setter Property="BorderBrush" Value="#1C1F2E"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="8"/>
         <Setter Property="ClipToBounds" Value="False"/>
@@ -100,73 +103,150 @@
         </Setter>
     </Style>
     <Style Selector="Border.GlassCard:pointerover">
-        <Setter Property="Background" Value="#242424"/>
+        <Setter Property="Background" Value="#161824"/>
         <Setter Property="BorderBrush" Value="#333333"/>
     </Style>
 
-    <!-- Spotify Primary Pill Button (#1ED760, Black Text, Uppercase, Tracked) -->
-    <Style Selector="Button.PrimaryBtn">
-       <Setter Property="Background" Value="#1ED760"/>
-       <Setter Property="Foreground" Value="#000000"/>
-       <Setter Property="Padding" Value="24,12"/>
-       <Setter Property="CornerRadius" Value="9999"/>
-       <Setter Property="FontWeight" Value="Bold"/>
-       <Setter Property="FontSize" Value="12"/>
-       <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
-       <Setter Property="Transitions">
-          <Transitions>
-             <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.12" Easing="CubicEaseOut"/>
-             <BrushTransition Property="Background" Duration="0:0:0.12"/>
-          </Transitions>
-       </Setter>
-    </Style>
-    <Style Selector="Button.PrimaryBtn:pointerover /template/ ContentPresenter">
-       <Setter Property="Background" Value="#3BE477"/>
-       <Setter Property="RenderTransform" Value="scale(1.04)"/>
-    </Style>
-    <Style Selector="Button.PrimaryBtn:pressed">
-       <Setter Property="Background" Value="#1DB954"/>
-       <Setter Property="RenderTransform" Value="scale(0.96)"/>
+        <!-- Radar Continuous Animations -->
+    <Style Selector="Border.RadarPulseRing1">
+        <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
+        <Style.Animations>
+            <Animation Duration="0:0:3" IterationCount="Infinite">
+                <KeyFrame Cue="0%">
+                    <Setter Property="ScaleTransform.ScaleX" Value="0.2"/>
+                    <Setter Property="ScaleTransform.ScaleY" Value="0.2"/>
+                    <Setter Property="Opacity" Value="0.85"/>
+                </KeyFrame>
+                <KeyFrame Cue="100%">
+                    <Setter Property="ScaleTransform.ScaleX" Value="1.0"/>
+                    <Setter Property="ScaleTransform.ScaleY" Value="1.0"/>
+                    <Setter Property="Opacity" Value="0.0"/>
+                </KeyFrame>
+            </Animation>
+        </Style.Animations>
     </Style>
 
-    <!-- Spotify Ghost / Outline Pill Button -->
-    <Style Selector="Button.GhostBtn">
-       <Setter Property="Background" Value="Transparent"/>
+    <Style Selector="Border.RadarPulseRing2">
+        <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
+        <Style.Animations>
+            <Animation Duration="0:0:3" Delay="0:0:1" IterationCount="Infinite">
+                <KeyFrame Cue="0%">
+                    <Setter Property="ScaleTransform.ScaleX" Value="0.2"/>
+                    <Setter Property="ScaleTransform.ScaleY" Value="0.2"/>
+                    <Setter Property="Opacity" Value="0.85"/>
+                </KeyFrame>
+                <KeyFrame Cue="100%">
+                    <Setter Property="ScaleTransform.ScaleX" Value="1.0"/>
+                    <Setter Property="ScaleTransform.ScaleY" Value="1.0"/>
+                    <Setter Property="Opacity" Value="0.0"/>
+                </KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+
+    <Style Selector="Border.RadarPulseRing3">
+        <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
+        <Style.Animations>
+            <Animation Duration="0:0:3" Delay="0:0:2" IterationCount="Infinite">
+                <KeyFrame Cue="0%">
+                    <Setter Property="ScaleTransform.ScaleX" Value="0.2"/>
+                    <Setter Property="ScaleTransform.ScaleY" Value="0.2"/>
+                    <Setter Property="Opacity" Value="0.85"/>
+                </KeyFrame>
+                <KeyFrame Cue="100%">
+                    <Setter Property="ScaleTransform.ScaleX" Value="1.0"/>
+                    <Setter Property="ScaleTransform.ScaleY" Value="1.0"/>
+                    <Setter Property="Opacity" Value="0.0"/>
+                </KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+
+    <Style Selector="Border.RadarSweepBeam">
+        <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
+        <Style.Animations>
+            <Animation Duration="0:0:4" IterationCount="Infinite">
+                <KeyFrame Cue="0%">
+                    <Setter Property="RotateTransform.Angle" Value="0"/>
+                </KeyFrame>
+                <KeyFrame Cue="100%">
+                    <Setter Property="RotateTransform.Angle" Value="360"/>
+                </KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+
+    <!-- Apple Developer Grade Primary Button (No clipping, smooth scaling on Button directly) -->
+    <Style Selector="Button.PrimaryBtn">
+       <Setter Property="Background" Value="#7C3AED"/>
        <Setter Property="Foreground" Value="#FFFFFF"/>
-       <Setter Property="BorderBrush" Value="#7C7C7C"/>
-       <Setter Property="BorderThickness" Value="1"/>
-       <Setter Property="Padding" Value="20,10"/>
-       <Setter Property="CornerRadius" Value="9999"/>
-       <Setter Property="FontWeight" Value="Bold"/>
-       <Setter Property="FontSize" Value="12"/>
+       <Setter Property="Padding" Value="22,11"/>
+       <Setter Property="CornerRadius" Value="10"/>
+       <Setter Property="FontWeight" Value="SemiBold"/>
+       <Setter Property="FontSize" Value="13"/>
        <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
+       <Setter Property="ClipToBounds" Value="False"/>
+       <Setter Property="Margin" Value="0,3"/>
        <Setter Property="Transitions">
           <Transitions>
-             <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.12" Easing="CubicEaseOut"/>
-             <BrushTransition Property="BorderBrush" Duration="0:0:0.12"/>
+             <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.18" Easing="CubicEaseOut"/>
+             <BrushTransition Property="Background" Duration="0:0:0.18"/>
           </Transitions>
        </Setter>
     </Style>
-    <Style Selector="Button.GhostBtn:pointerover /template/ ContentPresenter">
-       <Setter Property="BorderBrush" Value="#FFFFFF"/>
-       <Setter Property="Background" Value="#10FFFFFF"/>
+    <Style Selector="Button.PrimaryBtn:pointerover">
+       <Setter Property="Background" Value="#8B5CF6"/>
        <Setter Property="RenderTransform" Value="scale(1.03)"/>
     </Style>
-    <Style Selector="Button.GhostBtn:pressed">
+    <Style Selector="Button.PrimaryBtn:pressed">
+       <Setter Property="Background" Value="#6D28D9"/>
        <Setter Property="RenderTransform" Value="scale(0.97)"/>
     </Style>
 
-    <!-- Spotify Circular Action Button -->
+    <!-- Apple Developer Grade Ghost Button (No clipping, smooth scaling on Button directly) -->
+    <Style Selector="Button.GhostBtn">
+       <Setter Property="Background" Value="#161824"/>
+       <Setter Property="Foreground" Value="#F8FAFC"/>
+       <Setter Property="BorderBrush" Value="#222638"/>
+       <Setter Property="BorderThickness" Value="1"/>
+       <Setter Property="Padding" Value="18,10"/>
+       <Setter Property="CornerRadius" Value="10"/>
+       <Setter Property="FontWeight" Value="Medium"/>
+       <Setter Property="FontSize" Value="12"/>
+       <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
+       <Setter Property="ClipToBounds" Value="False"/>
+       <Setter Property="Margin" Value="0,3"/>
+       <Setter Property="Transitions">
+          <Transitions>
+             <BrushTransition Property="BorderBrush" Duration="0:0:0.18"/>
+             <BrushTransition Property="Background" Duration="0:0:0.18"/>
+             <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.18" Easing="CubicEaseOut"/>
+          </Transitions>
+       </Setter>
+    </Style>
+    <Style Selector="Button.GhostBtn:pointerover">
+       <Setter Property="BorderBrush" Value="#7C3AED"/>
+       <Setter Property="Background" Value="#1C1F2E"/>
+       <Setter Property="RenderTransform" Value="scale(1.03)"/>
+    </Style>
+    <Style Selector="Button.GhostBtn:pressed">
+       <Setter Property="Background" Value="#11131C"/>
+       <Setter Property="RenderTransform" Value="scale(0.97)"/>
+    </Style>
+
+    <!-- Circular Play / Action Button -->
     <Style Selector="Button.CircularPlay">
-       <Setter Property="Background" Value="#1ED760"/>
-       <Setter Property="Foreground" Value="#000000"/>
-       <Setter Property="Width" Value="52"/>
-       <Setter Property="Height" Value="52"/>
-       <Setter Property="CornerRadius" Value="26"/>
+       <Setter Property="Background" Value="#7C3AED"/>
+       <Setter Property="Foreground" Value="#FFFFFF"/>
+       <Setter Property="Width" Value="48"/>
+       <Setter Property="Height" Value="48"/>
+       <Setter Property="CornerRadius" Value="24"/>
        <Setter Property="Padding" Value="0"/>
        <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
        <Setter Property="HorizontalContentAlignment" Value="Center"/>
        <Setter Property="VerticalContentAlignment" Value="Center"/>
+       <Setter Property="ClipToBounds" Value="False"/>
+       <Setter Property="Margin" Value="2"/>
        <Setter Property="Transitions">
           <Transitions>
              <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.15" Easing="CubicEaseOut"/>
@@ -174,12 +254,12 @@
           </Transitions>
        </Setter>
     </Style>
-    <Style Selector="Button.CircularPlay:pointerover /template/ ContentPresenter">
-       <Setter Property="Background" Value="#3BE477"/>
-       <Setter Property="RenderTransform" Value="scale(1.08)"/>
+    <Style Selector="Button.CircularPlay:pointerover">
+       <Setter Property="Background" Value="#8B5CF6"/>
+       <Setter Property="RenderTransform" Value="scale(1.06)"/>
     </Style>
     <Style Selector="Button.CircularPlay:pressed">
-       <Setter Property="Background" Value="#1DB954"/>
+       <Setter Property="Background" Value="#6D28D9"/>
        <Setter Property="RenderTransform" Value="scale(0.95)"/>
     </Style>
 
@@ -200,14 +280,14 @@
        <Setter Property="RenderTransform" Value="translateY(-4px)"/>
     </Style>
     <Style Selector="Button.DashboardActionBtn:pointerover Border.GlassCard">
-       <Setter Property="Background" Value="#242424"/>
+       <Setter Property="Background" Value="#161824"/>
        <Setter Property="BorderBrush" Value="#333333"/>
        <Setter Property="BoxShadow" Value="0 16 32 0 #60000000"/>
     </Style>
 
     <!-- Spotify Filter Chips -->
     <Style Selector="Button.FilterChip">
-       <Setter Property="Background" Value="#242424"/>
+       <Setter Property="Background" Value="#161824"/>
        <Setter Property="Foreground" Value="#FFFFFF"/>
        <Setter Property="CornerRadius" Value="9999"/>
        <Setter Property="Padding" Value="16,8"/>
@@ -308,7 +388,7 @@
                 <Rectangle Classes="IconTint" Width="18" Height="18">
                   <Rectangle.OpacityMask><ImageBrush Source="/Assets/Icons/WEBSITE.png"/></Rectangle.OpacityMask>
                 </Rectangle>
-                <TextBlock Text="Web Portal" VerticalAlignment="Center"/>
+                <TextBlock Text="Web Transfer" VerticalAlignment="Center"/>
               </StackPanel>
             </Button>
           </StackPanel>
@@ -332,7 +412,7 @@
                 <Border Background="#242424" CornerRadius="6" Padding="12,10" Margin="4,2">
                   <Grid ColumnDefinitions="Auto, *">
                     <Border Width="28" Height="28" CornerRadius="14" Background="#10FFFFFF" Margin="0,0,10,0" VerticalAlignment="Center">
-                      <TextBlock Text="PC" FontSize="9" FontWeight="Bold" Foreground="#1ED760" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                      <TextBlock Text="PC" FontSize="9" FontWeight="Bold" Foreground="#7C3AED" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
                       <TextBlock x:Name="SidebarDeviceName" Text="DESKTOP-PEER" FontSize="12" FontWeight="Bold" Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
@@ -348,7 +428,7 @@
                       <Button Click="SendFile_Click" Background="Transparent" Padding="8,6" CornerRadius="6" HorizontalAlignment="Stretch">
                         <Grid ColumnDefinitions="Auto, *, Auto">
                           <Border Grid.Column="0" Width="26" Height="26" CornerRadius="13" Background="#1A1ED760" Margin="0,0,10,0" VerticalAlignment="Center">
-                            <TextBlock Text="{Binding Name, Converter={StaticResource DeviceTypeToIconConverter}}" FontSize="9" FontWeight="Bold" Foreground="#1ED760" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Name, Converter={StaticResource DeviceTypeToIconConverter}}" FontSize="9" FontWeight="Bold" Foreground="#7C3AED" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                           </Border>
                           <StackPanel Grid.Column="1" VerticalAlignment="Center">
                             <TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold" Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
@@ -394,7 +474,7 @@
           
           <!-- Spotify Global Activity Progress Line -->
           <Border x:Name="GlobalActivityBorder" IsVisible="False" Height="2" Background="Transparent" VerticalAlignment="Top" ZIndex="1000">
-             <ProgressBar x:Name="GlobalProgressBar" IsIndeterminate="False" Height="2" Foreground="#1ED760" Background="Transparent" BorderThickness="0"/>
+             <ProgressBar x:Name="GlobalProgressBar" IsIndeterminate="False" Height="2" Foreground="#7C3AED" Background="Transparent" BorderThickness="0"/>
           </Border>
 
           <!-- Top App Bar -->
@@ -426,15 +506,10 @@
           <!-- Dynamic Panel Area -->
           <Grid Grid.Row="1" Margin="32,24,32,24">
               
-              <!-- Send Wizard Step Indicator -->
-              <StackPanel x:Name="SendStepWizard" IsVisible="False" Orientation="Horizontal" Spacing="16" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,0,0,24" ZIndex="100">
-                 <Border Background="#242424" CornerRadius="9999" Padding="14,6">
-                   <TextBlock x:Name="Step1Indicator" Text="1. SELECT FILES" FontSize="10" FontWeight="Bold" Foreground="#1ED760" LetterSpacing="1"/>
-                 </Border>
-                 <Rectangle Width="24" Height="1" Fill="#333333" VerticalAlignment="Center"/>
-                 <Border Background="#242424" CornerRadius="9999" Padding="14,6">
-                   <TextBlock x:Name="Step2Indicator" Text="2. CHOOSE RECEIVER" FontSize="10" FontWeight="Bold" Foreground="#B3B3B3" LetterSpacing="1"/>
-                 </Border>
+              <!-- Send Wizard Step Indicator (Hidden) -->
+              <StackPanel x:Name="SendStepWizard" IsVisible="False">
+                 <TextBlock x:Name="Step1Indicator" IsVisible="False"/>
+                 <TextBlock x:Name="Step2Indicator" IsVisible="False"/>
               </StackPanel>
 
             <!-- ========================================== -->
@@ -465,7 +540,7 @@
                            <Border Classes="GlassCard" Padding="24" CornerRadius="8" Height="160">
                               <Grid RowDefinitions="*, Auto">
                                  <StackPanel Grid.Row="0" Spacing="6">
-                                    <TextBlock Text="SEND FILES" FontSize="11" FontWeight="Bold" Foreground="#1ED760" LetterSpacing="1.5"/>
+                                    <TextBlock Text="SEND FILES" FontSize="11" FontWeight="Bold" Foreground="#7C3AED" LetterSpacing="1.5"/>
                                     <TextBlock Text="Select &amp; Send" FontSize="20" FontWeight="Bold" Foreground="#FFFFFF"/>
                                     <TextBlock Text="Fast direct transfer to PC or mobile devices" FontSize="12" Foreground="#B3B3B3" TextWrapping="Wrap"/>
                                  </StackPanel>
@@ -483,7 +558,7 @@
                            <Border Classes="GlassCard" Padding="24" CornerRadius="8" Height="160">
                               <Grid RowDefinitions="*, Auto">
                                  <StackPanel Grid.Row="0" Spacing="6">
-                                    <TextBlock Text="RECEIVE MODE" FontSize="11" FontWeight="Bold" Foreground="#1ED760" LetterSpacing="1.5"/>
+                                    <TextBlock Text="RECEIVE MODE" FontSize="11" FontWeight="Bold" Foreground="#7C3AED" LetterSpacing="1.5"/>
                                     <TextBlock Text="Be Discoverable" FontSize="20" FontWeight="Bold" Foreground="#FFFFFF"/>
                                     <TextBlock Text="Accept files automatically or on demand" FontSize="12" Foreground="#B3B3B3" TextWrapping="Wrap"/>
                                  </StackPanel>
@@ -503,7 +578,7 @@
                         <Grid RowDefinitions="Auto, 12, *">
                            <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
                               <TextBlock Text="RECENT TRANSFERS" FontSize="11" FontWeight="Bold" Foreground="#B3B3B3" LetterSpacing="1.2" VerticalAlignment="Center"/>
-                              <Button Grid.Column="1" Content="SHOW ALL" Click="NavFiles_Click" Background="Transparent" Foreground="#1ED760" FontSize="11" FontWeight="Bold"/>
+                              <Button Grid.Column="1" Content="SHOW ALL" Click="NavFiles_Click" Background="Transparent" Foreground="#7C3AED" FontSize="11" FontWeight="Bold"/>
                            </Grid>
 
                            <!-- Empty Label -->
@@ -540,7 +615,7 @@
                   <Border Grid.Column="2" Background="#181818" BorderBrush="#282828" BorderThickness="1" CornerRadius="8" Padding="20" BoxShadow="0 4 24 0 #30000000">
                      <ScrollViewer>
                         <StackPanel Spacing="20">
-                           <TextBlock Text="MOBILE WEB PORTAL" FontSize="11" FontWeight="Bold" Foreground="#1ED760" LetterSpacing="1.2"/>
+                           <TextBlock Text="MOBILE WEB PORTAL" FontSize="11" FontWeight="Bold" Foreground="#7C3AED" LetterSpacing="1.2"/>
                            
                            <!-- QR Code in Spotify-style card -->
                            <Border Background="#FFFFFF" CornerRadius="8" Padding="12" HorizontalAlignment="Center" Width="160" Height="160">
@@ -609,7 +684,7 @@
                                     <Border Classes="TrackRow" Padding="12,10" Margin="0,0,0,4">
                                        <Grid ColumnDefinitions="Auto, *, Auto, Auto">
                                           <Border Grid.Column="0" Width="40" Height="40" Background="#242424" CornerRadius="4" Margin="0,0,14,0" VerticalAlignment="Center">
-                                             <Rectangle Width="18" Height="18" Fill="#1ED760"><Rectangle.OpacityMask><ImageBrush Source="/Assets/Icons/SEND FILE.png"/></Rectangle.OpacityMask></Rectangle>
+                                             <Rectangle Width="18" Height="18" Fill="#7C3AED"><Rectangle.OpacityMask><ImageBrush Source="/Assets/Icons/SEND FILE.png"/></Rectangle.OpacityMask></Rectangle>
                                           </Border>
                                           <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                              <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="Bold" Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
@@ -648,30 +723,28 @@
             <Grid x:Name="SendDiscoveryPanel" IsVisible="False" Classes="SignalPanel">
                <Grid>
                   <!-- Concentric Spotify Green Radar Stage -->
-                  <Panel Width="520" Height="520" HorizontalAlignment="Center" VerticalAlignment="Center">
-                     <Ellipse Width="520" Height="520" Stroke="#201ED760" StrokeThickness="1"/>
-                     <Ellipse Width="380" Height="380" Stroke="#15FFFFFF" StrokeThickness="1" StrokeDashArray="4,4"/>
-                     <Ellipse Width="220" Height="220" Stroke="#15FFFFFF" StrokeThickness="1" StrokeDashArray="4,4"/>
+                  <Panel Width="480" Height="360" HorizontalAlignment="Center" VerticalAlignment="Center" ClipToBounds="False">
+                     <!-- Radar Static Rings -->
+                     <Ellipse Width="340" Height="340" Stroke="#157C3AED" StrokeThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                     <Ellipse Width="260" Height="260" Stroke="#207C3AED" StrokeThickness="1" StrokeDashArray="4,4" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                     <Ellipse Width="180" Height="180" Stroke="#257C3AED" StrokeThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                     <Ellipse Width="100" Height="100" Stroke="#307C3AED" StrokeThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                      
-                     <!-- Ripple Waves -->
-                     <Ellipse Classes="RadarPulse" Width="320" Height="320" Fill="#1ED760"/>
-                     <Ellipse Classes="RadarPulseInner" Width="320" Height="320" Fill="#1ED760"/>
+                     <!-- Active Animated Pulsing Ripple Waves -->
+                     <Border Classes="RadarPulseRing1" Width="340" Height="340" CornerRadius="170" BorderBrush="#457C3AED" BorderThickness="1.5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                     <Border Classes="RadarPulseRing2" Width="340" Height="340" CornerRadius="170" BorderBrush="#357C3AED" BorderThickness="1.5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                     <Border Classes="RadarPulseRing3" Width="340" Height="340" CornerRadius="170" BorderBrush="#257C3AED" BorderThickness="1.5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
 
-                     <!-- Scanner Sweep -->
-                     <Border Width="520" Height="520" CornerRadius="260" Classes="RadarScan">
-                        <Border.RenderTransform><RotateTransform/></Border.RenderTransform>
-                        <Panel Width="520" Height="520">
-                           <Path Data="M 0,0 L 260,0 A 260,260 0 0 0 212.9,-149.1 Z" Fill="#1ED760" Opacity="0.12">
-                              <Path.RenderTransform><TranslateTransform X="260" Y="260"/></Path.RenderTransform>
-                           </Path>
-                        </Panel>
+                     <!-- Active Animated Rotating Radar Sweep Beam -->
+                     <Border Classes="RadarSweepBeam" Width="340" Height="340" CornerRadius="170" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Grid>
+                           <Border Width="2" Height="170" VerticalAlignment="Top" HorizontalAlignment="Center" Background="#707C3AED" BoxShadow="0 0 12 0 #507C3AED"/>
+                        </Grid>
                      </Border>
 
-                     <!-- Center Hub -->
-                     <Border Width="80" Height="80" Background="#1ED760" CornerRadius="40" BoxShadow="0 0 32 0 #501ED760">
-                        <Rectangle Width="28" Height="28" Fill="#000000">
-                           <Rectangle.OpacityMask><ImageBrush Source="/Assets/Icons/SCAN.png"/></Rectangle.OpacityMask>
-                        </Rectangle>
+                     <!-- Center Glowing Beacon Node -->
+                     <Border Width="60" Height="60" CornerRadius="30" Background="#7C3AED" BoxShadow="0 0 30 0 #907C3AED" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Path Data="{StaticResource IconDiscovery}" Fill="#FFFFFF" Width="24" Height="24" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                      </Border>
 
                      <!-- Floating Discovered Device Markers (Spotify Artist Avatar Style) -->
@@ -683,8 +756,8 @@
                            <DataTemplate x:DataType="models:DeviceModel">
                               <Button Click="SendFile_Click" Background="Transparent" Padding="0" BorderThickness="0">
                                  <StackPanel Spacing="6" HorizontalAlignment="Center">
-                                    <Border Classes="DeviceMarker" Width="64" Height="64" Background="#242424" BorderBrush="#1ED760" BorderThickness="2" CornerRadius="32" BoxShadow="0 8 24 0 #40000000">
-                                       <Rectangle Width="24" Height="24" Fill="#1ED760">
+                                    <Border Classes="DeviceMarker" Width="64" Height="64" Background="#242424" BorderBrush="#7C3AED" BorderThickness="2" CornerRadius="32" BoxShadow="0 8 24 0 #40000000">
+                                       <Rectangle Width="24" Height="24" Fill="#7C3AED">
                                           <Rectangle.OpacityMask><ImageBrush Source="/Assets/Icons/RECEIVE FILE.png"/></Rectangle.OpacityMask>
                                        </Rectangle>
                                     </Border>
@@ -708,7 +781,7 @@
 
                   <!-- Bottom Radar Controls -->
                   <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Center" Spacing="16" Margin="0,0,0,16">
-                     <TextBlock x:Name="RadarEmptyHint" Text="TAP ANY NEARBY DEVICE TO SEND FILES" FontSize="10" FontWeight="Bold" Foreground="#1ED760" LetterSpacing="2"/>
+                     <TextBlock x:Name="RadarEmptyHint" Text="TAP ANY NEARBY DEVICE TO SEND FILES" FontSize="10" FontWeight="Bold" Foreground="#7C3AED" LetterSpacing="2"/>
                      <StackPanel Orientation="Horizontal" Spacing="16" HorizontalAlignment="Center">
                         <Button Content="CANCEL" Click="CancelSending_Click" Classes="GhostBtn"/>
                         <Button Content="REFRESH RADAR" Click="RefreshDiscovery_Click" Classes="PrimaryBtn"/>
@@ -724,12 +797,27 @@
                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="24" MaxWidth="440">
                   
                   <!-- Pulsing Beacon -->
-                  <Panel Width="160" Height="160" HorizontalAlignment="Center">
-                     <Ellipse Classes="RadarPulse" Width="160" Height="160" Fill="#1ED760"/>
-                     <Border Width="90" Height="90" Background="#1ED760" CornerRadius="45" BoxShadow="0 0 40 0 #601ED760" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <Rectangle Width="36" Height="36" Fill="#000000">
-                           <Rectangle.OpacityMask><ImageBrush Source="/Assets/Icons/RECEIVE FILE.png"/></Rectangle.OpacityMask>
-                        </Rectangle>
+                  <Panel Width="440" Height="320" HorizontalAlignment="Center" ClipToBounds="False">
+                     <!-- Radar Static Rings -->
+                     <Ellipse Width="300" Height="300" Stroke="#157C3AED" StrokeThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                     <Ellipse Width="220" Height="220" Stroke="#207C3AED" StrokeThickness="1" StrokeDashArray="4,4" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                     <Ellipse Width="140" Height="140" Stroke="#257C3AED" StrokeThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+                     <!-- Active Animated Pulsing Ripple Waves -->
+                     <Border Classes="RadarPulseRing1" Width="300" Height="300" CornerRadius="150" BorderBrush="#457C3AED" BorderThickness="1.5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                     <Border Classes="RadarPulseRing2" Width="300" Height="300" CornerRadius="150" BorderBrush="#357C3AED" BorderThickness="1.5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                     <Border Classes="RadarPulseRing3" Width="300" Height="300" CornerRadius="150" BorderBrush="#257C3AED" BorderThickness="1.5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+                     <!-- Active Animated Rotating Radar Sweep Beam -->
+                     <Border Classes="RadarSweepBeam" Width="300" Height="300" CornerRadius="150" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Grid>
+                           <Border Width="2" Height="150" VerticalAlignment="Top" HorizontalAlignment="Center" Background="#707C3AED" BoxShadow="0 0 12 0 #507C3AED"/>
+                        </Grid>
+                     </Border>
+
+                     <!-- Center Receiving Station Node -->
+                     <Border Width="64" Height="64" Background="#7C3AED" CornerRadius="32" BoxShadow="0 0 32 0 #807C3AED" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Path Data="{StaticResource IconReceive}" Fill="#FFFFFF" Width="26" Height="26" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                      </Border>
                   </Panel>
 
@@ -740,7 +828,7 @@
 
                   <Border Background="#242424" CornerRadius="8" Padding="16">
                      <StackPanel Spacing="4">
-                        <TextBlock Text="AUTO-ACCEPT IS ENABLED" FontSize="11" FontWeight="Bold" Foreground="#1ED760" LetterSpacing="1" HorizontalAlignment="Center"/>
+                        <TextBlock Text="AUTO-ACCEPT IS ENABLED" FontSize="11" FontWeight="Bold" Foreground="#7C3AED" LetterSpacing="1" HorizontalAlignment="Center"/>
                         <TextBlock Text="Files will be stored directly into your Downloads directory." FontSize="11" Foreground="#7C7C7C" HorizontalAlignment="Center"/>
                      </StackPanel>
                   </Border>
@@ -760,18 +848,18 @@
                   <Grid RowDefinitions="Auto, 16, Auto, 12, Auto, 8, Auto">
                      <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
                         <StackPanel Spacing="4">
-                           <TextBlock Text="TRANSFERRING" FontSize="10" FontWeight="Bold" Foreground="#1ED760" LetterSpacing="1.5"/>
+                           <TextBlock Text="TRANSFERRING" FontSize="10" FontWeight="Bold" Foreground="#7C3AED" LetterSpacing="1.5"/>
                            <TextBlock x:Name="SendProgressFile" Text="document.pdf" FontSize="18" FontWeight="Bold" Foreground="#FFFFFF"/>
                         </StackPanel>
                         <Button Grid.Column="1" Content="CANCEL" Click="CancelActiveSend_Click" Classes="GhostBtn" Padding="14,6" FontSize="10"/>
                      </Grid>
 
                      <!-- Progress Bar -->
-                     <ProgressBar Grid.Row="2" x:Name="SendProgressBar" Height="8" CornerRadius="4" Foreground="#1ED760" Background="#333333"/>
+                     <ProgressBar Grid.Row="2" x:Name="SendProgressBar" Height="8" CornerRadius="4" Foreground="#7C3AED" Background="#333333"/>
 
                      <Grid Grid.Row="4" ColumnDefinitions="*, Auto">
                         <TextBlock x:Name="SendProgressSpeed" Text="Calculating speed..." FontSize="12" Foreground="#B3B3B3"/>
-                        <TextBlock Grid.Column="1" x:Name="SendProgressPct" Text="0%" FontSize="13" FontWeight="Bold" Foreground="#1ED760"/>
+                        <TextBlock Grid.Column="1" x:Name="SendProgressPct" Text="0%" FontSize="13" FontWeight="Bold" Foreground="#7C3AED"/>
                      </Grid>
                      <controls:SpeedGraphControl Grid.Row="6" x:Name="SendSpeedGraph" Height="40" Margin="0,8,0,0"/>
                   </Grid>
@@ -788,14 +876,14 @@
                                  <Border Classes="TrackRow" Padding="16,12" Margin="0,0,0,8" Background="#242424">
                                     <Grid ColumnDefinitions="Auto, *, Auto, Auto">
                                        <Border Grid.Column="0" Width="40" Height="40" Background="#181818" CornerRadius="4" Margin="0,0,16,0" VerticalAlignment="Center">
-                                          <Rectangle Width="18" Height="18" Fill="#1ED760"><Rectangle.OpacityMask><ImageBrush Source="/Assets/Icons/RECEIVE FILE.png"/></Rectangle.OpacityMask></Rectangle>
+                                          <Rectangle Width="18" Height="18" Fill="#7C3AED"><Rectangle.OpacityMask><ImageBrush Source="/Assets/Icons/RECEIVE FILE.png"/></Rectangle.OpacityMask></Rectangle>
                                        </Border>
                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
                                           <TextBlock Text="{Binding FileName}" FontSize="13" FontWeight="Bold" Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
-                                          <ProgressBar Height="4" Value="{Binding ProgressPercentage}" Foreground="#1ED760" Background="#333333" CornerRadius="2"/>
+                                          <ProgressBar Height="4" Value="{Binding ProgressPercentage}" Foreground="#7C3AED" Background="#333333" CornerRadius="2"/>
                                           <TextBlock Text="{Binding PeerName, StringFormat='From: {0}'}" FontSize="10" Foreground="#B3B3B3"/>
                                        </StackPanel>
-                                       <TextBlock Grid.Column="2" Text="{Binding SpeedMbPerSec, StringFormat='\{0:F1\} MB/s'}" FontSize="11" Foreground="#1ED760" VerticalAlignment="Center" Margin="16,0"/>
+                                       <TextBlock Grid.Column="2" Text="{Binding SpeedMbPerSec, StringFormat='\{0:F1\} MB/s'}" FontSize="11" Foreground="#7C3AED" VerticalAlignment="Center" Margin="16,0"/>
                                        <Button Grid.Column="3" Content="CANCEL" Click="CancelIncoming_Click" Classes="GhostBtn" Padding="10,6" FontSize="10" VerticalAlignment="Center"/>
                                     </Grid>
                                  </Border>
@@ -883,7 +971,7 @@
                               <Border Classes="TrackRow" Padding="8,6" Margin="0,2">
                                  <Grid ColumnDefinitions="Auto, *">
                                     <Border Width="28" Height="28" CornerRadius="14" Background="#242424" Margin="0,0,10,0" VerticalAlignment="Center">
-                                       <TextBlock Text="WEB" FontSize="8" FontWeight="Bold" Foreground="#1ED760" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                       <TextBlock Text="WEB" FontSize="8" FontWeight="Bold" Foreground="#7C3AED" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Border>
                                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                        <TextBlock Text="{Binding Name}" FontSize="12" FontWeight="Bold" Foreground="#FFFFFF"/>
@@ -928,6 +1016,101 @@
                   </Grid>
                </Border>
             </Grid>
+
+
+            <!-- ========================================== -->
+            <!-- 7.5 DEDICATED DEVICE SESSION (SEND & RECV)  -->
+            <!-- ========================================== -->
+            <Grid x:Name="DeviceSessionPanel" IsVisible="False" Classes="SignalPanel" RowDefinitions="Auto, 20, *">
+               <!-- Header Bar: Device Info & Session Status -->
+               <Border Grid.Row="0" Background="#75111422" BorderBrush="#283048" BorderThickness="1" CornerRadius="12" Padding="20,16">
+                  <Grid ColumnDefinitions="Auto, *, Auto">
+                     <Border Grid.Column="0" Width="44" Height="44" CornerRadius="22" Background="#1E2235" Margin="0,0,16,0" VerticalAlignment="Center">
+                        <Path Data="{StaticResource IconMobile}" Fill="#06B6D4" Width="20" Height="20" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                     </Border>
+                     <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
+                        <TextBlock x:Name="SessionDeviceTitle" Text="Device Session" FontSize="16" FontWeight="Bold" Foreground="#FFFFFF"/>
+                        <TextBlock x:Name="SessionDeviceSub" Text="Ready for bidirectional file exchange" FontSize="12" Foreground="#94A3B8"/>
+                     </StackPanel>
+                     <Border Grid.Column="2" Background="#80151828" BorderBrush="#2A334E" BorderThickness="1" CornerRadius="20" Padding="14,6" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                           <Border Width="8" Height="8" CornerRadius="4" Background="#10B981" BoxShadow="0 0 10 0 #10B981"/>
+                           <TextBlock Text="Active Session" FontSize="11" FontWeight="SemiBold" Foreground="#10B981"/>
+                        </StackPanel>
+                     </Border>
+                  </Grid>
+               </Border>
+
+               <!-- Body: Two Spacious Columns for Send & Receive -->
+               <Grid Grid.Row="2" ColumnDefinitions="*, 20, *">
+                  
+                  <!-- Left Column: Send Files to Device -->
+                  <Border Grid.Column="0" Background="#75111422" BorderBrush="#283048" BorderThickness="1" CornerRadius="14" Padding="24" ClipToBounds="False">
+                     <Grid RowDefinitions="Auto, 16, *, Auto">
+                        <StackPanel Grid.Row="0" Spacing="4">
+                           <TextBlock Text="SEND TO THIS DEVICE" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource BrandVioletBrush}" LetterSpacing="1"/>
+                           <TextBlock Text="Select or drop any files to transfer instantly" FontSize="12" Foreground="#94A3B8"/>
+                        </StackPanel>
+
+                        <!-- Large Drop Zone & File Selection Card -->
+                        <Border Grid.Row="2" Background="#80121626" BorderBrush="#2E3854" BorderThickness="1.5" CornerRadius="12" Padding="28" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                           <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="16">
+                              <Border Width="64" Height="64" CornerRadius="32" Background="#1E2338" HorizontalAlignment="Center">
+                                 <Path Data="{StaticResource IconSend}" Fill="#7C3AED" Width="24" Height="24" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                              </Border>
+                              <TextBlock Text="Transfer Any Files or Media" FontSize="14" FontWeight="Bold" Foreground="#FFFFFF" HorizontalAlignment="Center"/>
+                              <TextBlock Text="Send documents, images, 4K videos, or archives" FontSize="12" Foreground="#64748B" HorizontalAlignment="Center"/>
+                              <Button x:Name="SessionSendFilesBtn" Content="Choose Files to Send →" Click="SessionSendFiles_Click" Classes="PrimaryBtn" Padding="24,12" FontSize="13" HorizontalAlignment="Center"/>
+                           </StackPanel>
+                        </Border>
+
+                        <!-- Staged/Sent Summary in Session -->
+                        <Border Grid.Row="3" Margin="0,16,0,0" Padding="14,10" Background="#60151828" CornerRadius="8">
+                           <TextBlock x:Name="SessionSendStatusText" Text="Ready to transmit files" FontSize="11" Foreground="#94A3B8" HorizontalAlignment="Center"/>
+                        </Border>
+                     </Grid>
+                  </Border>
+
+                  <!-- Right Column: Incoming Files from Device -->
+                  <Border Grid.Column="2" Background="#75111422" BorderBrush="#283048" BorderThickness="1" CornerRadius="14" Padding="24" ClipToBounds="False">
+                     <Grid RowDefinitions="Auto, 16, *">
+                        <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
+                           <StackPanel Spacing="4">
+                              <TextBlock Text="INCOMING FROM THIS DEVICE" FontSize="11" FontWeight="Bold" Foreground="#06B6D4" LetterSpacing="1"/>
+                              <TextBlock Text="Files waiting for your approval" FontSize="12" Foreground="#94A3B8"/>
+                           </StackPanel>
+                           <TextBlock Grid.Column="1" x:Name="SessionIncomingCountText" Text="0 files" FontSize="11" Foreground="#10B981" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <Border Grid.Row="2" Background="#80121626" BorderBrush="#2E3854" BorderThickness="1" CornerRadius="12" Padding="16">
+                           <Grid>
+                              <TextBlock x:Name="SessionIncomingEmptyLabel" Text="No pending file requests from this device" FontSize="12" Foreground="#64748B" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center"/>
+                              <ScrollViewer>
+                                 <ItemsControl x:Name="SessionIncomingFilesList">
+                                    <ItemsControl.ItemTemplate>
+                                       <DataTemplate x:DataType="views:StagedWebFile">
+                                          <Border Classes="TrackRow" Padding="14,10" Margin="0,0,0,8" Background="#70151828" CornerRadius="8">
+                                             <Grid ColumnDefinitions="*, Auto, Auto">
+                                                <StackPanel VerticalAlignment="Center">
+                                                   <TextBlock Text="{Binding FileName}" FontSize="13" FontWeight="SemiBold" Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
+                                                   <TextBlock Text="{Binding SizeDisplay}" FontSize="11" Foreground="#94A3B8"/>
+                                                </StackPanel>
+                                                <Button Grid.Column="1" Content="Accept" Tag="{Binding}" Click="AcceptWebSharedFile_Click" Classes="PrimaryBtn" Padding="12,6" FontSize="10" Margin="0,0,8,0"/>
+                                                <Button Grid.Column="2" Content="Reject" Tag="{Binding}" Click="RejectWebSharedFile_Click" Classes="GhostBtn" Padding="10,6" FontSize="10"/>
+                                             </Grid>
+                                          </Border>
+                                       </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                 </ItemsControl>
+                              </ScrollViewer>
+                           </Grid>
+                        </Border>
+                     </Grid>
+                  </Border>
+
+               </Grid>
+            </Grid>
+
 
             <!-- ========================================== -->
             <!-- 8. SETTINGS PANEL                          -->
@@ -993,7 +1176,7 @@
                            <StackPanel x:Name="SettingsUpdateProgressPanel" IsVisible="False" Spacing="6">
                               <TextBlock x:Name="SettingsUpdateProgressText" Text="Downloading..." FontSize="11" Foreground="#B3B3B3"/>
                               <ProgressBar x:Name="SettingsUpdateProgressBar" Height="4"/>
-                              <TextBlock x:Name="SettingsUpdateProgressPct" Text="0%" FontSize="10" Foreground="#1ED760"/>
+                              <TextBlock x:Name="SettingsUpdateProgressPct" Text="0%" FontSize="10" Foreground="#7C3AED"/>
                            </StackPanel>
                         </StackPanel>
                      </Border>
@@ -1013,7 +1196,7 @@
                      </Border>
                      <StackPanel Spacing="4">
                         <TextBlock Text="WE SHARE" FontSize="24" FontWeight="Bold" Foreground="#FFFFFF" LetterSpacing="1"/>
-                        <TextBlock x:Name="AboutVersionText" Text="Version 1.1.0 (Spotify Edition)" FontSize="12" Foreground="#1ED760" FontWeight="Bold"/>
+                        <TextBlock x:Name="AboutVersionText" Text="Version 1.1.0 (Spotify Edition)" FontSize="12" Foreground="#7C3AED" FontWeight="Bold"/>
                      </StackPanel>
                      <TextBlock Text="High-speed, zero-cloud peer-to-peer file sharing for Windows, macOS, Android, and iOS. Direct socket engine, raw-TCP HTTP web portal, and ad-hoc Desert Mode." FontSize="13" Foreground="#B3B3B3" TextWrapping="Wrap" LineHeight="20"/>
                      <Button Content="VISIT GITHUB REPOSITORY" Click="OpenGitHub_Click" Classes="GhostBtn" HorizontalAlignment="Left"/>
@@ -1036,13 +1219,13 @@
           <!-- Left: Current Active File / Status -->
           <Grid Grid.Column="0" ColumnDefinitions="Auto, *" VerticalAlignment="Center">
              <Border Width="44" Height="44" CornerRadius="4" Background="#242424" Margin="0,0,14,0" VerticalAlignment="Center">
-                <Rectangle Width="20" Height="20" Fill="#1ED760">
+                <Rectangle Width="20" Height="20" Fill="#7C3AED">
                    <Rectangle.OpacityMask><ImageBrush Source="/Assets/Icons/SEND FILE.png"/></Rectangle.OpacityMask>
                 </Rectangle>
              </Border>
              <StackPanel Grid.Column="1" VerticalAlignment="Center">
                 <TextBlock x:Name="BottomPlayerFileName" Text="WeShare Engine" FontSize="13" FontWeight="Bold" Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
-                <TextBlock x:Name="BottomPlayerPeerName" Text="System Ready â€¢ Discoverable" FontSize="11" Foreground="#B3B3B3" TextTrimming="CharacterEllipsis"/>
+                <TextBlock x:Name="BottomPlayerPeerName" Text="System Ready · Discoverable" FontSize="11" Foreground="#B3B3B3" TextTrimming="CharacterEllipsis"/>
              </StackPanel>
           </Grid>
 
@@ -1050,7 +1233,7 @@
           <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="6" MaxWidth="440" Width="440">
              <!-- Circular Action Control & Speed Badge -->
              <Grid ColumnDefinitions="*, Auto, *">
-                <TextBlock Grid.Column="0" x:Name="BottomPlayerSpeed" Text="0.0 MB/s" FontSize="11" FontWeight="Bold" Foreground="#1ED760" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,16,0"/>
+                <TextBlock Grid.Column="0" x:Name="BottomPlayerSpeed" Text="0.0 MB/s" FontSize="11" FontWeight="Bold" Foreground="#7C3AED" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,16,0"/>
                 
                 <Button Grid.Column="1" x:Name="BottomPlayerCancelBtn" Click="CancelActiveSend_Click" Classes="CircularPlay" Width="36" Height="36" CornerRadius="18">
                    <Rectangle Width="12" Height="12" Fill="#000000">
@@ -1062,14 +1245,14 @@
              </Grid>
 
              <!-- Spotify Green Progress Bar -->
-             <ProgressBar x:Name="BottomPlayerProgress" Height="4" Value="0" CornerRadius="2" Foreground="#1ED760" Background="#333333"/>
+             <ProgressBar x:Name="BottomPlayerProgress" Height="4" Value="0" CornerRadius="2" Foreground="#7C3AED" Background="#333333"/>
           </StackPanel>
 
           <!-- Right: System Info & Folder Button -->
           <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right" VerticalAlignment="Center">
              <Button Content="OPEN FOLDER" Click="OpenDownloadFolder_Click" Classes="GhostBtn" Padding="14,8" FontSize="10"/>
              <Border Background="#242424" CornerRadius="9999" Padding="12,6" VerticalAlignment="Center">
-                <TextBlock Text="LOCAL NET" FontSize="10" FontWeight="Bold" Foreground="#1ED760" LetterSpacing="1"/>
+                <TextBlock Text="LOCAL NET" FontSize="10" FontWeight="Bold" Foreground="#7C3AED" LetterSpacing="1"/>
              </Border>
           </StackPanel>
 
@@ -1089,7 +1272,7 @@
              </Border>
              
              <StackPanel Spacing="4" HorizontalAlignment="Center">
-                <TextBlock Text="INCOMING TRANSFER" FontSize="11" FontWeight="Bold" Foreground="#1ED760" LetterSpacing="1.5" HorizontalAlignment="Center"/>
+                <TextBlock Text="INCOMING TRANSFER" FontSize="11" FontWeight="Bold" Foreground="#7C3AED" LetterSpacing="1.5" HorizontalAlignment="Center"/>
                 <TextBlock x:Name="IncomingFileName" Text="file.zip" FontSize="18" FontWeight="Bold" Foreground="#FFFFFF" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
                 <TextBlock x:Name="IncomingPeerName" Text="From: Peer" FontSize="12" Foreground="#B3B3B3" HorizontalAlignment="Center"/>
                 <TextBlock x:Name="IncomingFileSize" Text="0 MB" FontSize="11" Foreground="#7C7C7C" HorizontalAlignment="Center"/>
@@ -1107,7 +1290,7 @@
     <Grid x:Name="ManualIPDialog" IsVisible="False" Background="#90000000" ZIndex="4500">
        <Border Background="#242424" CornerRadius="8" Padding="28" Width="360" HorizontalAlignment="Center" VerticalAlignment="Center">
           <StackPanel Spacing="16">
-             <TextBlock Text="CONNECT BY IP" FontSize="12" FontWeight="Bold" Foreground="#1ED760" LetterSpacing="1.2"/>
+             <TextBlock Text="CONNECT BY IP" FontSize="12" FontWeight="Bold" Foreground="#7C3AED" LetterSpacing="1.2"/>
              <TextBox x:Name="ManualIPInput" Watermark="192.168.1.xxx"/>
              <Button Content="CONNECT" Classes="PrimaryBtn" HorizontalAlignment="Stretch"/>
           </StackPanel>
@@ -1116,7 +1299,7 @@
 
     <!-- Drag Overlay -->
     <Panel x:Name="DragOverlay" IsVisible="False" Background="#C0121212" ZIndex="6000">
-       <Border BorderBrush="#1ED760" BorderThickness="2" CornerRadius="8" Margin="24">
+       <Border BorderBrush="#7C3AED" BorderThickness="2" CornerRadius="8" Margin="24">
           <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="16">
              <Border Width="72" Height="72" CornerRadius="36" Background="#1ED760" HorizontalAlignment="Center">
                 <Rectangle Width="32" Height="32" Fill="#000000"><Rectangle.OpacityMask><ImageBrush Source="/Assets/Icons/SEND FILE.png"/></Rectangle.OpacityMask></Rectangle>

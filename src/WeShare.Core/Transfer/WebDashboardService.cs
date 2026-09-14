@@ -32,7 +32,8 @@ namespace WeShare.Core.Transfer
         private readonly Dictionary<string, WebClientInfo> _activeWebClients = new(StringComparer.OrdinalIgnoreCase);
         private readonly SemaphoreSlim _webClientsLock = new(1, 1);
         
-        public int Port { get; } = 8080;
+        public int Port { get; private set; } = 8080;
+        public event Action<int>? PortChanged;
         public byte[]? LogoBytes { get; set; }
         
         public event Action<string, string>? WebClientConnected;
@@ -214,17 +215,40 @@ namespace WeShare.Core.Transfer
         public void Start()
         {
             _cts = new CancellationTokenSource();
-            try
+            const int startPort = 8080;
+            const int maxPort = 8099;
+
+            for (int p = startPort; p <= maxPort; p++)
             {
-                _listener = new TcpListener(IPAddress.Any, Port);
-                _listener.Start();
-                Console.WriteLine($"[WebDashboard] Listening on all interfaces at port {Port}");
-                _ = Task.Run(() => AcceptLoop(_cts.Token));
+                try
+                {
+                    _listener = new TcpListener(IPAddress.Any, p);
+                    _listener.Start();
+                    if (Port != p)
+                    {
+                        Port = p;
+                        PortChanged?.Invoke(Port);
+                    }
+                    Console.WriteLine($"[WebDashboard] Successfully listening on all interfaces at port {Port}");
+                    _ = Task.Run(() => AcceptLoop(_cts.Token));
+                    return;
+                }
+                catch (SocketException ex) when (ex.SocketErrorCode == SocketError.AddressAlreadyInUse || ex.ErrorCode == 10048)
+                {
+                    Console.WriteLine($"[WebDashboard] Port {p} in use, trying next port...");
+                    try { _listener?.Stop(); } catch { }
+                    _listener = null;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[WebDashboard] Failed to bind to port {p}: {ex.Message}");
+                    try { _listener?.Stop(); } catch { }
+                    _listener = null;
+                    break;
+                }
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[WebDashboard] Failed to start: {ex.Message}");
-            }
+
+            Console.WriteLine($"[WebDashboard] CRITICAL: Could not find an open port between {startPort} and {maxPort}.");
         }
 
         public void Stop()

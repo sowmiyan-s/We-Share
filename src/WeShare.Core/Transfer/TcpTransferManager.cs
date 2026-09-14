@@ -13,6 +13,7 @@ namespace WeShare.Core.Transfer
 {
     public class TcpTransferManager
     {
+        private const int EnterpriseBufferSize = 1048576; // 1MB buffer for gigabit line-rate & 100GB+ large-file throughput
         private readonly int _listenPort;
         private TcpListener? _listener;
         private CancellationTokenSource? _listenerCts;
@@ -90,6 +91,10 @@ namespace WeShare.Core.Transfer
         // ── Receive ────────────────────────────────────────────────────────────
         private async Task HandleIncomingTransferAsync(TcpClient client, string saveDirectory)
         {
+            client.NoDelay = true;
+            client.SendBufferSize = EnterpriseBufferSize;
+            client.ReceiveBufferSize = EnterpriseBufferSize;
+
             using var clientOwner = client;
             using var rawStream = client.GetStream();
             using var sslStream = new System.Net.Security.SslStream(
@@ -135,10 +140,16 @@ namespace WeShare.Core.Transfer
                     accepted = await TransferRequestCallback(state).ConfigureAwait(false);
                 }
                 
-                await sslStream.WriteAsync(new byte[] { accepted ? (byte)1 : (byte)0 }, 0, 1).ConfigureAwait(false);
+                byte responseCode = accepted ? (byte)1 : (byte)2;
+                await sslStream.WriteAsync(new byte[] { responseCode }, 0, 1).ConfigureAwait(false);
                 await sslStream.FlushAsync().ConfigureAwait(false);
                 
-                if (!accepted) return;
+                if (!accepted)
+                {
+                    state.Status = TransferStatus.Failed;
+                    state.ErrorMessage = "Transfer declined.";
+                    return;
+                }
 
                 TransferStarted?.Invoke(state);
 
@@ -150,12 +161,12 @@ namespace WeShare.Core.Transfer
                 string dest = GetUniqueFilePath(targetDir, state.FileName);
                 state.FilePath = dest;
 
-                using var fs = new FileStream(dest, FileMode.Create, FileAccess.Write, FileShare.None, 81920, true);
+                using var fs = new FileStream(dest, FileMode.Create, FileAccess.Write, FileShare.None, EnterpriseBufferSize, true);
                 
                 // 4. Decrypt file data
                 using var fileCryptoReader = EncryptionHelper.CreateDecryptionStream(sslStream);
 
-                byte[] buffer = new byte[81920];
+                byte[] buffer = new byte[EnterpriseBufferSize];
                 long totalRead = 0;
                 long lastReportedBytes = 0;
                 DateTime lastReportTime = DateTime.UtcNow;
@@ -225,9 +236,10 @@ namespace WeShare.Core.Transfer
             try
             {
                 using var client = new TcpClient();
+                client.NoDelay = true;
                 _activeClients[state.FileId] = client;
-                client.SendBufferSize    = 81920;
-                client.ReceiveBufferSize = 81920;
+                client.SendBufferSize    = EnterpriseBufferSize;
+                client.ReceiveBufferSize = EnterpriseBufferSize;
 
                 // Apply a 30-second timeout ONLY for the connection handshake.
                 // Do NOT apply it to the entire transfer — large files would always time out.
@@ -258,9 +270,26 @@ namespace WeShare.Core.Transfer
                 // 2. Read response (unencrypted handshake response)
                 byte[] respBuffer = new byte[1];
                 int r = await sslStream.ReadAsync(respBuffer, 0, 1, cancellationToken).ConfigureAwait(false);
-                if (r == 0 || respBuffer[0] == 0)
+                if (r == 0)
                 {
                     state.Status = TransferStatus.Failed;
+                    state.ErrorMessage = "The recipient disconnected before the transfer could start.";
+                    TransferFailed?.Invoke(state);
+                    return;
+                }
+
+                if (respBuffer[0] == 2)
+                {
+                    state.Status = TransferStatus.Failed;
+                    state.ErrorMessage = $"{(!string.IsNullOrEmpty(state.PeerName) ? state.PeerName : "The recipient")} declined the transfer.";
+                    TransferFailed?.Invoke(state);
+                    return;
+                }
+
+                if (respBuffer[0] != 1)
+                {
+                    state.Status = TransferStatus.Failed;
+                    state.ErrorMessage = "The recipient was unable to accept the transfer.";
                     TransferFailed?.Invoke(state);
                     return;
                 }
@@ -268,7 +297,7 @@ namespace WeShare.Core.Transfer
                 // 3. Encrypt and send file data
                 using (var fileCryptoWriter = EncryptionHelper.CreateEncryptionStream(sslStream))
                 {
-                    byte[] buffer = new byte[81920];
+                    byte[] buffer = new byte[EnterpriseBufferSize];
                     int read;
                     long totalSent = 0;
                     long lastReportedBytes = 0;

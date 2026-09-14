@@ -312,6 +312,7 @@ namespace WeShare.UI.Views
             if (SendDiscoveryPanel != null) SendDiscoveryPanel.IsVisible = false;
             if (TransfersPanel != null) TransfersPanel.IsVisible = false;
             if (WebSharedPanel != null) WebSharedPanel.IsVisible = false;
+            if (DeviceSessionPanel != null) DeviceSessionPanel.IsVisible = false;
             if (SendStepWizard != null) SendStepWizard.IsVisible = false;
 
             bool wasReceiver = _localDevice.IsReceiver;
@@ -650,8 +651,6 @@ namespace WeShare.UI.Views
             }
 
             _sendTarget = device;
-            ShowToast($"Connecting to {device.Name}...");
-
             ShowPanel(TransfersPanel, "TRANSFERS", NavTransfersBtn);
             SendProgressBorder.IsVisible = true;
 
@@ -1887,9 +1886,7 @@ namespace WeShare.UI.Views
 
         private void OnWebClientConnected(string type, string remoteIp)
         {
-            Dispatcher.UIThread.Post(() => {
-                ShowToast($"Web client connected from {remoteIp}");
-            });
+            // Silent client registration - avoid spammy popup toasts
         }
 
         private void OnWebClientConnectedEx(WebDashboardService.WebClientInfo client)
@@ -2007,9 +2004,11 @@ namespace WeShare.UI.Views
 
         // CTS to cancel the previous toast's hide-delay when a new toast fires
         private CancellationTokenSource? _toastCts;
+        private bool _isCapturingScreenshots = false;
 
         private void ShowToast(string message)
         {
+            if (_isCapturingScreenshots) return;
             Dispatcher.UIThread.Post(async () =>
             {
                 _toastCts?.Cancel();
@@ -2229,7 +2228,14 @@ namespace WeShare.UI.Views
 
         private void WebClientsListBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
         {
-            UpdateWebSharedFilesList();
+            if (WebClientsListBox.SelectedItem is DeviceModel dev)
+            {
+                OpenDeviceSession(dev);
+            }
+            else
+            {
+                UpdateWebSharedFilesList();
+            }
         }
 
         private async void AcceptWebSharedFile_Click(object? sender, RoutedEventArgs e)
@@ -2314,6 +2320,54 @@ namespace WeShare.UI.Views
             catch { }
         }
 
+
+        // Dedicated Device Session Support
+        private DeviceModel? _sessionDevice;
+
+        public void OpenDeviceSession(DeviceModel device)
+        {
+            _sessionDevice = device;
+            _sendTarget = device;
+            if (SessionDeviceTitle != null) SessionDeviceTitle.Text = device.Name;
+            if (SessionDeviceSub != null) SessionDeviceSub.Text = $"{device.Type} • {device.IpAddress}";
+            UpdateDeviceSessionFiles();
+            ShowPanel(DeviceSessionPanel, "DEVICE SESSION", null);
+        }
+
+        private void UpdateDeviceSessionFiles()
+        {
+            if (_sessionDevice == null) return;
+            var files = StagedWebFiles.Where(f => f.ClientId == _sessionDevice.Id || f.ClientName == _sessionDevice.Name).ToList();
+            if (SessionIncomingFilesList != null) SessionIncomingFilesList.ItemsSource = files;
+            if (SessionIncomingCountText != null) SessionIncomingCountText.Text = $"{files.Count} file{(files.Count == 1 ? "" : "s")}";
+            if (SessionIncomingEmptyLabel != null) SessionIncomingEmptyLabel.IsVisible = files.Count == 0;
+        }
+
+        private async void SessionSendFiles_Click(object? sender, RoutedEventArgs e)
+        {
+            if (_sessionDevice == null) return;
+            var files = await PickFilesAsync();
+            if (files.Count == 0) return;
+            foreach (var f in files)
+            {
+                if (!SendQueue.Any(q => q.Name == f.Name))
+                    SendQueue.Add(f);
+            }
+            UpdateQueueUI();
+            if (SessionSendStatusText != null)
+                SessionSendStatusText.Text = $"{files.Count} file(s) ready to send";
+
+            StartSendSession(_sessionDevice);
+        }
+
+        private void SelectWebClient_Click(object? sender, RoutedEventArgs e)
+        {
+            if ((sender as Button)?.Tag is DeviceModel dev)
+            {
+                OpenDeviceSession(dev);
+            }
+        }
+
         private static string GetUniqueFilePath(string dir, string filename)
         {
             string baseName = Path.GetFileNameWithoutExtension(filename);
@@ -2326,6 +2380,113 @@ namespace WeShare.UI.Views
                 count++;
             }
             return dest;
+        }
+
+        public async Task CaptureScreenshotsForDocsAsync()
+        {
+            try
+            {
+                _isCapturingScreenshots = true;
+                string docsDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", "..", "docs", "screenshot");
+                docsDir = Path.GetFullPath(docsDir);
+                if (!Directory.Exists(docsDir))
+                {
+                    docsDir = @"d:\PROJECTS\WE SHARE\docs\screenshot";
+                }
+                Directory.CreateDirectory(docsDir);
+
+                if (Devices.Count == 0)
+                {
+                    Devices.Add(new DeviceModel { Id = "dev-1", Name = "MacBook Pro", Type = "Mac", IpAddress = "192.168.1.45" });
+                    Devices.Add(new DeviceModel { Id = "dev-2", Name = "iPhone 15", Type = "iOS", IpAddress = "192.168.1.82" });
+                    Devices.Add(new DeviceModel { Id = "dev-3", Name = "Galaxy S24", Type = "Android", IpAddress = "192.168.1.110" });
+                    Devices.Add(new DeviceModel { Id = "web-1", Name = "iPhone Safari", Type = "Web Client", IpAddress = "192.168.1.88" });
+                }
+
+                void HideOverlays()
+                {
+                    if (ToastBorder != null) ToastBorder.IsVisible = false;
+                }
+
+                // Screen 1: Home Dashboard
+                HideOverlays();
+                ShowPanel(HomePanel, "HOME", NavHomeBtn);
+                HideOverlays();
+                await Task.Delay(400);
+                SaveVisualToPng(Path.Combine(docsDir, "screenshot-1.png"));
+
+                // Screen 2: Send Files Staging
+                HideOverlays();
+                ShowPanel(SendFilesPanel, "SEND FILES", null);
+                HideOverlays();
+                await Task.Delay(400);
+                SaveVisualToPng(Path.Combine(docsDir, "screenshot-2.png"));
+
+                // Screen 3: Radar Peer Discovery
+                HideOverlays();
+                ShowPanel(SendDiscoveryPanel, "RADAR DISCOVERY", null);
+                HideOverlays();
+                await Task.Delay(400);
+                SaveVisualToPng(Path.Combine(docsDir, "screenshot-3.png"));
+
+                // Screen 4: Radar Receive Mode
+                HideOverlays();
+                ShowPanel(ReceiveModePanel, "RECEIVE MODE", null);
+                HideOverlays();
+                await Task.Delay(400);
+                SaveVisualToPng(Path.Combine(docsDir, "screenshot-4.png"));
+
+                // Screen 5: Dedicated Device Session
+                if (Devices.Count > 0)
+                {
+                    HideOverlays();
+                    OpenDeviceSession(Devices[0]);
+                    HideOverlays();
+                    await Task.Delay(400);
+                    SaveVisualToPng(Path.Combine(docsDir, "screenshot-5.png"));
+                }
+
+                // Screen 6: Web Transfer Hub
+                HideOverlays();
+                UpdateWebSharedClientsList();
+                ShowPanel(WebSharedPanel, "WEB TRANSFER", NavWebSharedBtn);
+                HideOverlays();
+                await Task.Delay(400);
+                SaveVisualToPng(Path.Combine(docsDir, "screenshot-6.png"));
+
+                // Also save app_updated.png
+                HideOverlays();
+                ShowPanel(HomePanel, "HOME", NavHomeBtn);
+                HideOverlays();
+                await Task.Delay(300);
+                SaveVisualToPng(Path.Combine(docsDir, "app_updated.png"));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[CaptureScreenshots] Error: {ex}");
+            }
+            finally
+            {
+                _isCapturingScreenshots = false;
+            }
+        }
+
+        private void SaveVisualToPng(string filePath)
+        {
+            try
+            {
+                int width = (int)Math.Max(960, Bounds.Width);
+                int height = (int)Math.Max(640, Bounds.Height);
+                var pixelSize = new Avalonia.PixelSize(width, height);
+                var dpi = new Avalonia.Vector(96, 96);
+                using var rtb = new Avalonia.Media.Imaging.RenderTargetBitmap(pixelSize, dpi);
+                rtb.Render(this);
+                rtb.Save(filePath);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[SaveVisualToPng] Error: {ex.Message}");
+            }
         }
     }
 
@@ -2372,7 +2533,7 @@ namespace WeShare.UI.Views
                 if (System.Linq.Enumerable.Contains(new[] { "mp4", "mkv", "avi", "mov", "webm", "flv", "wmv" }, ext)) return "#10b981";
                 if (System.Linq.Enumerable.Contains(new[] { "mp3", "wav", "flac", "ogg", "m4a", "aac" }, ext)) return "#ec4899";
                 if (System.Linq.Enumerable.Contains(new[] { "pdf", "doc", "docx", "txt", "rtf", "md", "xls", "xlsx", "csv", "ppt", "pptx" }, ext)) return "#3b82f6";
-                if (System.Linq.Enumerable.Contains(new[] { "zip", "rar", "tar", "gz", "7z" }, ext)) return "#f59e0b";
+                if (System.Linq.Enumerable.Contains(new[] { "zip", "rar", "tar", "gz", "7z" }, ext)) return "#8b5cf6";
                 if (System.Linq.Enumerable.Contains(new[] { "exe", "msi", "bat", "sh" }, ext)) return "#6366f1";
                 return "#64748b";
             }

@@ -32,17 +32,25 @@ dotnet publish $ProjectDir `
 if ($LASTEXITCODE -eq 0) {
     Write-Host "`nStep 1 Success! Standalone binary generated." -ForegroundColor Green
     
+    # Create portable zip
+    if (-not (Test-Path "setup")) { New-Item -ItemType Directory -Force -Path "setup" | Out-Null }
+    $ZipPath = "setup\WeShare_Portable_win-x64.zip"
+    if (Test-Path $ZipPath) { Remove-Item -Force $ZipPath }
+    Write-Host "`nCreating Zero-Install Portable ZIP at '$ZipPath'..." -ForegroundColor Yellow
+    Compress-Archive -Path "$PublishDir\*" -DestinationPath $ZipPath -Force
+    Write-Host "Portable ZIP created successfully!" -ForegroundColor Green
+
     if (Test-Path $ISCC) {
         Write-Host "`nStep 2: Building Professional Installer..." -ForegroundColor Yellow
         & $ISCC "installer.iss"
         if ($LASTEXITCODE -eq 0) {
-            Write-Host "`nStep 2 Success! Installer built at 'setup\WeShare_Setup.exe'." -ForegroundColor Green
+            Write-Host "`nStep 2 Success! Installer built in 'setup'." -ForegroundColor Green
         } else {
             Write-Host "`nStep 2 Failed." -ForegroundColor Red
         }
     } else {
         Write-Host "`nInno Setup Compiler (ISCC.exe) not found. Skipping Step 2." -ForegroundColor Gray
-        Write-Host "The standalone EXE in '$PublishDir' is still ready for use!" -ForegroundColor Green
+        Write-Host "The standalone binary in '$PublishDir' and '$ZipPath' are ready for distribution!" -ForegroundColor Green
     }
 } else {
     Write-Host "`nPublishing failed. Please check the errors above." -ForegroundColor Red

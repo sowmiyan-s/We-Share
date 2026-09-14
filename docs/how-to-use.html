@@ -4,12 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>How to Use — We Share</title>
-  <meta name="description" content="Learn how to share files between PC to PC, PC to mobile, and mobile to PC using We Share. Step-by-step guides for all scenarios." />
+  <meta name="description" content="Step-by-step simple guides for sending files between computers, sharing with phones via camera QR code, and sharing completely offline." />
   <link rel="icon" href="logo.png" type="image/png" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
+  <!-- Navigation -->
   <nav class="navbar" id="navbar">
     <div class="nav-inner">
       <a href="index.html" class="nav-logo">
@@ -22,224 +23,250 @@
         <a href="downloads.html" class="nav-link">Downloads</a>
         <a href="faq.html" class="nav-link">FAQ</a>
         <a href="patch-notes.html" class="nav-link">Patch Notes</a>
+        <a href="https://github.com/sowmiyan-s/We-Share/tree/main/assets/brand" target="_blank" rel="noopener" class="nav-link">Brand Assets</a>
       </div>
       <a href="downloads.html" class="btn-nav-cta" id="nav-dl-btn">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Download
+        Download Free
       </a>
-      <button class="nav-hamburger" id="hamburger" aria-label="Open menu">
+      <button class="nav-hamburger" id="hamburger" aria-label="Open navigation menu">
         <span></span><span></span><span></span>
       </button>
     </div>
   </nav>
 
+  <!-- Page Header -->
   <div class="page-hero has-image">
     <div class="page-hero-content">
-      <div class="tag">Documentation</div>
-      <h1>File Sharing Guide</h1>
-      <p>Follow these instructions to configure local PC-to-PC transfers, mobile sharing via the web portal, and offline hotspot configuration.</p>
+      <div class="tag">Simple Guide</div>
+      <h1>How to Share Anything with We Share</h1>
+      <p>Easy, step-by-step instructions for sharing files between laptops, sending to iPhone or Android phones using your camera, and sharing completely offline.</p>
     </div>
     <div class="page-hero-visual">
-      <img src="ASSERTS/2.png" alt="We Share Folder Robot" class="page-hero-img" />
+      <div class="figure-card" style="max-width: 340px; margin: 0 auto;">
+        <div class="figure-img-frame">
+          <img src="screenshot/screenshot-1.png" alt="We Share Main Screen" />
+        </div>
+        <div class="figure-caption">
+          <span>HOME COMMAND CENTER</span>
+          <span class="mono">VER 1.1.0</span>
+        </div>
+      </div>
     </div>
   </div>
 
   <div class="howto-section">
 
-    <!-- Quick nav tabs -->
+    <!-- Quick nav pills -->
     <div class="howto-nav">
-      <a href="#pc-to-pc"     class="howto-tab active" id="tab-pc-to-pc">PC to PC</a>
-      <a href="#pc-to-mobile" class="howto-tab" id="tab-pc-to-mobile">PC to Mobile</a>
-      <a href="#mobile-to-pc" class="howto-tab" id="tab-mobile-to-pc">Mobile to PC</a>
-      <a href="#desert-mode"  class="howto-tab" id="tab-desert">Offline Hotspot</a>
+      <a href="#between-pcs" class="howto-tab active" id="tab-pc-to-pc">Between Two Computers</a>
+      <a href="#web-transfer" class="howto-tab" id="tab-pc-to-mobile">Computer to Phone (Web Transfer)</a>
+      <a href="#phone-to-pc" class="howto-tab" id="tab-mobile-to-pc">Phone to Computer</a>
+      <a href="#offline-mode" class="howto-tab" id="tab-desert">Sharing Anywhere Offline</a>
     </div>
 
-    <!-- PC to PC -->
-    <div class="howto-block" id="pc-to-pc">
+    <!-- Scenario 1: Between Two Computers -->
+    <div class="howto-block" id="between-pcs">
       <h2>
         <span class="block-icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
         </span>
-        PC to PC (Local Subnet)
+        Sharing Between Two Computers
       </h2>
-      <p class="block-desc">Transfer files between two computers on the same local subnet (Wi-Fi or Ethernet). Devices discover each other automatically.</p>
+      <p class="block-desc">The fastest way to move movies, photos, and large folders between two Windows laptops or desktops on the same local network.</p>
+      
+      <div style="margin: 20px 0 28px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-subtle);">
+        <img src="screenshot/screenshot-3.png" alt="Radar Discovery Screen" style="width: 100%; height: auto; display: block;" />
+      </div>
+
       <div class="step-list">
         <div class="step-item">
           <div class="step-num-sm">1</div>
           <div class="step-item-text">
-            <h4>Start We Share on both devices</h4>
-            <p>Download and run the application on both computers. On startup, the utility scans the local subnet using UDP broadcasts and lists active peers on the radar visual.</p>
+            <h4>Open We Share on both computers</h4>
+            <p>Start the app on both computers. Devices on the same Wi-Fi or wired network automatically detect each other in seconds.</p>
           </div>
         </div>
+
         <div class="step-item">
           <div class="step-num-sm">2</div>
           <div class="step-item-text">
-            <h4>Stage files on the sending PC</h4>
-            <p>On the sending computer, drag and drop files/folders into the application window, or click the staging area to browse and select files.</p>
+            <h4>Pick the files you want to send</h4>
+            <p>Click the circular <strong>Send</strong> button and choose your files, or simply drag and drop files and folders right into the window.</p>
           </div>
         </div>
+
         <div class="step-item">
           <div class="step-num-sm">3</div>
           <div class="step-item-text">
-            <h4>Select the destination peer</h4>
-            <p>Look at the discovery radar visual and click the name of the target computer to select it as the destination peer.</p>
+            <h4>Select recipient on the Radar</h4>
+            <p>Discovered devices orbit the radar scanner. Click the name or icon of the computer you want to send files to.</p>
           </div>
         </div>
+
         <div class="step-item">
           <div class="step-num-sm">4</div>
           <div class="step-item-text">
-            <h4>Initiate the transfer</h4>
-            <p>Click the Send button. This initiates a TCP connection request to the receiver, triggering a notification on their screen.</p>
-          </div>
-        </div>
-        <div class="step-item">
-          <div class="step-num-sm">5</div>
-          <div class="step-item-text">
-            <h4>Accept the transfer on the receiving PC</h4>
-            <p>The receiver must click <strong>Accept</strong> on the prompt. The file transfer begins immediately over a direct TCP socket connection.</p>
+            <h4>The receiver clicks Accept</h4>
+            <p>The receiver sees an instant prompt with your computer's name and file metrics. As soon as they click <strong>Accept</strong>, files stream directly across at wire speed.</p>
           </div>
         </div>
       </div>
+
       <div class="info-box">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <p><strong>Note:</strong> Transfer speeds are limited only by your physical network link (e.g. Wi-Fi router bandwidth or Ethernet cabling).</p>
+        <p><strong>Zero Internet Used:</strong> Transfers stream directly through your local router via raw TCP sockets. Even if your ISP connection is down, transfers work at full hardware speeds with zero cellular data.</p>
       </div>
     </div>
 
-    <!-- PC to Mobile -->
-    <div class="howto-block" id="pc-to-mobile">
+    <!-- Scenario 2: Computer to Phone (Web Transfer) -->
+    <div class="howto-block" id="web-transfer">
       <h2>
         <span class="block-icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
         </span>
-        PC to Mobile (Web Portal)
+        Sending Files to iPhone or Android (Web Transfer)
       </h2>
-      <p class="block-desc">Access shared files from any phone, tablet, or secondary device using the built-in HTTP dashboard. No app install needed on the client.</p>
+      <p class="block-desc">Send photos, videos, or documents from your computer directly to any phone. The phone does not need any app installed!</p>
+
+      <div style="margin: 20px 0 28px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-subtle);">
+        <img src="screenshot/screenshot-5.png" alt="Web Transfer Device Session" style="width: 100%; height: auto; display: block;" />
+      </div>
+
       <div class="step-list">
         <div class="step-item">
           <div class="step-num-sm">1</div>
           <div class="step-item-text">
-            <h4>Open We Share on the host PC</h4>
-            <p>Start the app on your computer. The background HTTP server will automatically run on port 8080.</p>
+            <h4>Open Web Transfer on your PC</h4>
+            <p>Ensure your computer and phone are connected to the same Wi-Fi network.</p>
           </div>
         </div>
+
         <div class="step-item">
           <div class="step-num-sm">2</div>
           <div class="step-item-text">
-            <h4>Connect the mobile device to the same Wi-Fi</h4>
-            <p>Ensure that the receiving phone or tablet is connected to the same local Wi-Fi router as the host PC.</p>
+            <h4>Scan the QR code with phone camera</h4>
+            <p>Point your iPhone or Android camera at the QR code displayed on your PC screen. Tap the notification pill to open the local session in Safari, Chrome, or Firefox.</p>
           </div>
         </div>
+
         <div class="step-item">
           <div class="step-num-sm">3</div>
           <div class="step-item-text">
-            <h4>Retrieve the Web Portal IP address</h4>
-            <p>The host PC's interface displays the local access address. It typically looks like this:</p>
-            <code>http://192.168.1.104:8080</code>
+            <h4>Select the device and send files</h4>
+            <p>On your PC, select the phone card from the Web Transfer panel to open the dedicated Device Session. Click <strong>Choose Files to Send</strong> to push files directly to the mobile browser.</p>
           </div>
         </div>
+
         <div class="step-item">
           <div class="step-num-sm">4</div>
           <div class="step-item-text">
-            <h4>Navigate to the address on your mobile device</h4>
-            <p>Open a web browser on the mobile device and enter the IP address. The web dashboard will load.</p>
-          </div>
-        </div>
-        <div class="step-item">
-          <div class="step-num-sm">5</div>
-          <div class="step-item-text">
-            <h4>Select and download files</h4>
-            <p>Browse the files staged for web sharing on the host PC, and click download on the web interface to save them to your mobile storage.</p>
+            <h4>Save directly to your phone</h4>
+            <p>The files appear on the phone's browser view. Tap to download them straight to your camera roll or Downloads folder.</p>
           </div>
         </div>
       </div>
+
       <div class="info-box">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <p>This works on any device running a modern web browser (iOS, Android, macOS, Linux, or iPadOS).</p>
+        <p><strong>Universal Compatibility:</strong> Works seamlessly with Apple iPhones, iPads, Android smartphones, and tablets without requiring app downloads from the App Store or Google Play.</p>
       </div>
     </div>
 
-    <!-- Mobile to PC -->
-    <div class="howto-block" id="mobile-to-pc">
+    <!-- Scenario 3: Phone to Computer -->
+    <div class="howto-block" id="phone-to-pc">
       <h2>
         <span class="block-icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
         </span>
-        Mobile to PC (Upload via Web Portal)
+        Uploading Photos &amp; Files from Phone to Computer
       </h2>
-      <p class="block-desc">Send files from your phone or tablet directly to your computer using the local web dashboard.</p>
+      <p class="block-desc">Copy high-resolution photos and 4K videos from your smartphone over to your PC without cables or cloud subscription limits.</p>
+
       <div class="step-list">
         <div class="step-item">
           <div class="step-num-sm">1</div>
           <div class="step-item-text">
-            <h4>Open the Web Portal address on your mobile browser</h4>
-            <p>Access the portal using the host PC's local IP address (e.g. <code>http://192.168.1.104:8080</code>).</p>
+            <h4>Open the Web Portal on your phone</h4>
+            <p>Scan the PC's QR code to open the mobile upload dashboard.</p>
           </div>
         </div>
+
         <div class="step-item">
           <div class="step-num-sm">2</div>
           <div class="step-item-text">
-            <h4>Tap the upload button in the browser</h4>
-            <p>Click the Upload button on the mobile dashboard interface. This opens your device's native file/photo selector.</p>
+            <h4>Select photos or files on your phone</h4>
+            <p>Tap <strong>Choose Files</strong> on the phone screen to select media from your photo library or document storage.</p>
           </div>
         </div>
+
         <div class="step-item">
           <div class="step-num-sm">3</div>
           <div class="step-item-text">
-            <h4>Select files and transmit</h4>
-            <p>Select the photos, videos, or documents you want to transfer. The browser will transmit them directly to the PC over the local network.</p>
+            <h4>Approve the transfer on your PC</h4>
+            <p>Your PC displays the incoming file notification with filename and size metrics. Click <strong>Accept</strong> to permit the transfer.</p>
           </div>
         </div>
+
         <div class="step-item">
           <div class="step-num-sm">4</div>
           <div class="step-item-text">
-            <h4>Files are saved to your PC</h4>
-            <p>Uploaded files are written directly into the designated receive directory configured on your computer's We Share client.</p>
+            <h4>Files arrive directly in Downloads</h4>
+            <p>The files stream directly over your local network and are safely stored in your designated Downloads folder.</p>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Desert Mode -->
-    <div class="howto-block" id="desert-mode">
+    <!-- Scenario 4: Offline Anywhere (Desert Mode) -->
+    <div class="howto-block" id="offline-mode">
       <h2>
         <span class="block-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 0-9.95 9h11.64L9.74 16.6a5.43 5.43 0 0 0 2.26.4 5.5 5.5 0 1 0 0-11z"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
         </span>
-        Offline Hotspot (Desert Mode)
+        Sharing Anywhere Without Wi-Fi (Desert Mode)
       </h2>
-      <p class="block-desc">Transfer files when there is no active local network or Wi-Fi router nearby.</p>
+      <p class="block-desc">Transfer files when traveling on a train, plane, in a vehicle, or outdoors with no Wi-Fi router available.</p>
+
+      <div style="margin: 20px 0 28px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-subtle);">
+        <img src="screenshot/screenshot-4.png" alt="Radar Receive Mode Station" style="width: 100%; height: auto; display: block;" />
+      </div>
+
       <div class="step-list">
         <div class="step-item">
           <div class="step-num-sm">1</div>
           <div class="step-item-text">
-            <h4>Launch We Share on PC A (Host)</h4>
-            <p>When the application detects no active network connection, it automatically initializes a local, secure Wi-Fi hotspot named <code>WeShare</code>.</p>
+            <h4>Click Start Desert Hotspot on Laptop A</h4>
+            <p>When outside Wi-Fi range, click <strong>Start Desert Hotspot</strong>. We Share automatically configures an ad-hoc local Wi-Fi station.</p>
           </div>
         </div>
+
         <div class="step-item">
           <div class="step-num-sm">2</div>
           <div class="step-item-text">
-            <h4>Launch We Share on PC B (Client)</h4>
-            <p>PC B detects the background hotspot and connects to it automatically using native WLAN APIs, without requiring any manual password entry.</p>
+            <h4>Open We Share on Laptop B</h4>
+            <p>The second laptop detects the "WeShare" ad-hoc network and connects silently via native Windows APIs without password prompts.</p>
           </div>
         </div>
+
         <div class="step-item">
           <div class="step-num-sm">3</div>
           <div class="step-item-text">
-            <h4>Proceed with local transfer</h4>
-            <p>Once connected, both computers list each other on their radars and can transfer files directly over the ad-hoc connection.</p>
+            <h4>Share files immediately</h4>
+            <p>Both laptops appear on each other's radar. Pick your files, tap Send, and transfer at full wireless speed anywhere in the world.</p>
           </div>
         </div>
       </div>
+
       <div class="info-box">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <p>This flow is fully automated. No local configuration is changed, and the client will reconnect to its previous Wi-Fi network once the app is closed.</p>
+        <p><strong>Seamless Restoration:</strong> When you stop Desert Mode or close We Share, your computer automatically reverts to its standard Wi-Fi network with zero residual settings modified.</p>
       </div>
     </div>
 
   </div>
 
+  <!-- Footer -->
   <footer class="footer">
     <div class="footer-inner">
       <div class="footer-brand"><img src="logo.png" alt="We Share" class="footer-logo" /> We Share</div>
@@ -249,10 +276,11 @@
         <a href="downloads.html">Downloads</a>
         <a href="faq.html">FAQ</a>
         <a href="patch-notes.html">Patch Notes</a>
+        <a href="https://github.com/sowmiyan-s/We-Share/tree/main/assets/brand" target="_blank" rel="noopener">Brand Assets</a>
         <a href="https://github.com/sowmiyan-s/We-Share" target="_blank" rel="noopener">GitHub</a>
       </div>
       <p class="footer-copy">
-        © 2026 We Share &middot; Developed by <a href="https://github.com/sowmiyan-s" target="_blank" rel="noopener">Sowmiyan s</a>
+        &copy; 2026 We Share &middot; Designed for fast, private local file sharing by <a href="https://github.com/sowmiyan-s" target="_blank" rel="noopener">Sowmiyan s</a>
       </p>
     </div>
   </footer>

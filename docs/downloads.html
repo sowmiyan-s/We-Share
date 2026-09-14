@@ -4,12 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Downloads — We Share</title>
-  <meta name="description" content="Download We Share — the free, local file transfer app for Windows. Get the latest version or browse older releases." />
+  <meta name="description" content="Download We Share — the free, private, ultra-fast file transfer app for Windows. Ready to run in seconds with no accounts or setup." />
   <link rel="icon" href="logo.png" type="image/png" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
+  <!-- Navigation -->
   <nav class="navbar" id="navbar">
     <div class="nav-inner">
       <a href="index.html" class="nav-logo">
@@ -22,84 +23,105 @@
         <a href="downloads.html" class="nav-link active">Downloads</a>
         <a href="faq.html" class="nav-link">FAQ</a>
         <a href="patch-notes.html" class="nav-link">Patch Notes</a>
+        <a href="https://github.com/sowmiyan-s/We-Share/tree/main/assets/brand" target="_blank" rel="noopener" class="nav-link">Brand Assets</a>
       </div>
       <a href="downloads.html" class="btn-nav-cta" id="nav-dl-btn">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Download
+        Download Free
       </a>
-      <button class="nav-hamburger" id="hamburger" aria-label="Open menu">
+      <button class="nav-hamburger" id="hamburger" aria-label="Open navigation menu">
         <span></span><span></span><span></span>
       </button>
     </div>
   </nav>
 
+  <!-- Page Header -->
   <div class="page-hero">
-    <div class="tag">Downloads</div>
-    <h1>Application Releases</h1>
-    <p>Download the desktop client for Windows 10 and 11. The installer is fully self-contained and requires no external runtime dependencies.</p>
+    <div class="tag">Free Download</div>
+    <h1>Get We Share v1.1.0 for Windows</h1>
+    <p>Everything is self-contained in one quick installer. No registration, no extra software to install, and ready to share in seconds.</p>
   </div>
 
   <div class="downloads-section">
 
-    <!-- Latest -->
+    <!-- Latest Release Card -->
     <div class="dl-latest reveal">
       <div class="dl-app-icon">
         <img src="logo.png" alt="We Share" />
       </div>
       <div>
         <div class="dl-version-badge">
-          <span class="status-dot" style="width:6px;height:6px;display:inline-block;background:var(--primary);border-radius:0px;"></span>
-          Latest Release
+          <span class="status-dot" style="width:7px;height:7px;display:inline-block;background:var(--emerald);border-radius:50%;"></span>
+          Latest Stable Release &middot; v1.1.0
         </div>
-        <h2>We Share v1.1.0</h2>
-        <p>Bugfix and quality-of-life update. Adds active web client connection verification before sends, blocks navigation/page-leaves during active transfers, provides highly accurate server-received progress tracking in the web portal, and introduces grouped multi-file batch notifications.</p>
-        <a href="https://github.com/sowmiyan-s/We-Share/raw/main/setup/WeShare_Setup.exe" class="btn-primary" id="download-latest-btn" download="WeShare_Setup_1.1.0.exe">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Download WeShare_Setup.exe
-        </a>
+        <h2>We Share for Windows 10 &amp; 11</h2>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; margin-bottom: 20px; align-items: center;">
+          <a href="https://github.com/sowmiyan-s/We-Share/raw/main/setup/WeShare_Setup_1.1.0.exe" class="btn-primary btn-lg" id="download-latest-btn" download="WeShare_Setup_1.1.0.exe">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download Installer (.exe)
+          </a>
+          <a href="https://github.com/sowmiyan-s/We-Share/raw/main/setup/WeShare_Portable_win-x64.zip" class="btn-outline" id="download-portable-btn" download="WeShare_Portable_win-x64.zip" style="font-size: 14px; padding: 13px 20px; border-radius: 8px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+            Download Portable (.zip)
+          </a>
+        </div>
         <div class="dl-meta">
           <span class="dl-meta-item">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-            Windows 10 / 11 (x64)
-          </span>
-          <span class="dl-meta-item">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-            Self-contained
-          </span>
-          <span class="dl-meta-item">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            MIT License
+            Windows 10 &amp; 11 (64-bit)
           </span>
           <span class="dl-meta-item">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            July 2026
+            Standalone &middot; Zero Dependencies
+          </span>
+          <span class="dl-meta-item">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            100% Free &amp; Private (MIT)
+          </span>
+          <span class="dl-meta-item">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+            Web Transfer for Phones
           </span>
         </div>
       </div>
     </div>
 
-    <!-- System requirements -->
+    <!-- Specifications & Deployments -->
     <div class="sysreq reveal">
-      <h3>Specifications</h3>
+      <h3>System Specifications &amp; Deployment</h3>
       <div class="sysreq-grid">
-        <div class="sysreq-item"><strong>OS</strong><p>Windows 10 (build 19041+) or Windows 11</p></div>
-        <div class="sysreq-item"><strong>Dependencies</strong><p>None (packaged with .NET 8 embedded runtime)</p></div>
-        <div class="sysreq-item"><strong>Network</strong><p>UDP port 5353 (discovery), TCP port 8080 (web portal)</p></div>
-        <div class="sysreq-item"><strong>Architecture</strong><p>64-bit Intel/AMD (x64)</p></div>
+        <div class="sysreq-item">
+          <strong>Supported Operating Systems</strong>
+          <p>Windows 10 (Build 19041+) and Windows 11 (64-bit). No .NET runtime required.</p>
+        </div>
+        <div class="sysreq-item">
+          <strong>Installation Privileges</strong>
+          <p>Lowest user privileges supported. Installs cleanly to user local application directory.</p>
+        </div>
+        <div class="sysreq-item">
+          <strong>Silent Enterprise Deployment</strong>
+          <p>Automate deployment via CLI: <code>WeShare_Setup_1.1.0.exe /VERYSILENT /SUPPRESSMSGBOXES</code>.</p>
+        </div>
+        <div class="sysreq-item">
+          <strong>Zero-Install Portable Mode</strong>
+          <p>Extract <code>WeShare_Portable_win-x64.zip</code> to a USB flash drive or any folder and run immediately.</p>
+        </div>
       </div>
     </div>
 
-
-
-    <div style="margin-top: 48px; text-align: center;">
-      <p style="font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:14px;">Looking to compile from source?</p>
+    <div style="margin-top: 48px; text-align: center; display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
+      <a href="https://github.com/sowmiyan-s/We-Share/tree/main/assets/brand" target="_blank" rel="noopener" class="btn-outline" id="brand-assets-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        Download Brand Assets &amp; Logos &rarr;
+      </a>
       <a href="https://github.com/sowmiyan-s/We-Share" target="_blank" rel="noopener" class="btn-outline" id="github-source-btn">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
-        GitHub Repository →
+        View open-source project on GitHub &rarr;
       </a>
     </div>
   </div>
 
+  <!-- Footer -->
   <footer class="footer">
     <div class="footer-inner">
       <div class="footer-brand"><img src="logo.png" alt="We Share" class="footer-logo" /> We Share</div>
@@ -109,13 +131,15 @@
         <a href="downloads.html">Downloads</a>
         <a href="faq.html">FAQ</a>
         <a href="patch-notes.html">Patch Notes</a>
+        <a href="https://github.com/sowmiyan-s/We-Share/tree/main/assets/brand" target="_blank" rel="noopener">Brand Assets</a>
         <a href="https://github.com/sowmiyan-s/We-Share" target="_blank" rel="noopener">GitHub</a>
       </div>
       <p class="footer-copy">
-        © 2026 We Share &middot; Developed by <a href="https://github.com/sowmiyan-s" target="_blank" rel="noopener">Sowmiyan s</a>
+        &copy; 2026 We Share &middot; Designed for fast, private local file sharing by <a href="https://github.com/sowmiyan-s" target="_blank" rel="noopener">Sowmiyan s</a>
       </p>
     </div>
   </footer>
+
   <script src="main.js"></script>
 </body>
 </html>
