@@ -53,7 +53,7 @@ Whether sending 50 GB 4K video reels across an office, moving vacation photos fr
 
 ### Home Command Center & Transfer Staging
 <p align="center">
-  <img src="docs/screenshot/screenshot-1.png" width="48%" alt="Home Dashboard" />
+  <img src="docs/screenshot/app_updated.png" width="48%" alt="Home Dashboard (Obsidian Violet UI)" />
   <img src="docs/screenshot/screenshot-2.png" width="48%" alt="File Staging Queue" />
 </p>
 
@@ -63,10 +63,10 @@ Whether sending 50 GB 4K video reels across an office, moving vacation photos fr
   <img src="docs/screenshot/screenshot-4.png" width="48%" alt="Radar Receive Station" />
 </p>
 
-### Dedicated Device Session Hub & Web Transfer
+### Dedicated Device Session Hub & Universal Web Transfer
 <p align="center">
   <img src="docs/screenshot/screenshot-5.png" width="48%" alt="Device Session Hub" />
-  <img src="docs/screenshot/screenshot-6.png" width="48%" alt="Web Transfer Hub" />
+  <img src="docs/screenshot/web_portal.png" width="48%" alt="Universal Web Transfer Portal" />
 </p>
 
 </div>

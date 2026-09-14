@@ -7,7 +7,7 @@
              x:Class="WeShare.UI.Views.MainView"
              x:DataType="views:MainView"
              FontFamily="CircularSp, Inter, Plus Jakarta Sans, Segoe UI, sans-serif"
-             Background="#121212">
+             Background="#090A0F">
 
   <UserControl.Resources>
     <local:ProgressToWidthConverter x:Key="ProgressToWidthConverter"/>
@@ -30,9 +30,9 @@
     <SolidColorBrush x:Key="TextMutedBrush" Color="#64748B"/>
     
     <!-- Compatibility Aliases -->
-    <SolidColorBrush x:Key="SpotifyGreenBrush" Color="#7C3AED"/>
-    <SolidColorBrush x:Key="SpotifyGreenHoverBrush" Color="#8B5CF6"/>
-    <SolidColorBrush x:Key="SpotifyGreenPressedBrush" Color="#6D28D9"/>
+    <SolidColorBrush x:Key="ObsidianGreenBrush" Color="#7C3AED"/>
+    <SolidColorBrush x:Key="ObsidianGreenHoverBrush" Color="#8B5CF6"/>
+    <SolidColorBrush x:Key="ObsidianGreenPressedBrush" Color="#6D28D9"/>
     <SolidColorBrush x:Key="ElectricIndigoBrush" Color="#7C3AED"/>
     <SolidColorBrush x:Key="ElectricIndigoDimBrush" Color="#6D28D9"/>
     <SolidColorBrush x:Key="TealSuccessBrush" Color="#10B981"/>
@@ -40,7 +40,7 @@
   </UserControl.Resources>
 
   <UserControl.Styles>
-    <!-- Spotify Sidebar Navigation Item -->
+    <!-- Sidebar Navigation Item -->
     <Style Selector="Button.SidebarItem">
       <Setter Property="Background"          Value="Transparent"/>
       <Setter Property="Padding"             Value="16,10"/>
@@ -84,27 +84,29 @@
     </Style>
     <Style Selector="Button.SidebarItem.Active Rectangle.IconTint">
        <Setter Property="Opacity" Value="1"/>
-       <Setter Property="Fill" Value="#1ED760"/>
+       <Setter Property="Fill" Value="#7C3AED"/>
     </Style>
 
-    <!-- Spotify Card (Clean, Sharp 8px Radius, Hover Lighten) -->
+    <!-- Obsidian Violet Glassmorphic Card (Acrylic Glass & Glowing Borders) -->
     <Style Selector="Border.GlassCard">
-        <Setter Property="Background" Value="#11131C"/>
-        <Setter Property="BorderBrush" Value="#1C1F2E"/>
+        <Setter Property="Background" Value="#B0121420"/>
+        <Setter Property="BorderBrush" Value="#1E2336"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="CornerRadius" Value="12"/>
         <Setter Property="ClipToBounds" Value="False"/>
-        <Setter Property="BoxShadow" Value="0 8 24 0 #40000000"/>
+        <Setter Property="BoxShadow" Value="0 8 32 0 #50000000"/>
         <Setter Property="Transitions">
             <Transitions>
-                <BrushTransition Property="Background" Duration="0:0:0.2"/>
-                <BrushTransition Property="BorderBrush" Duration="0:0:0.2"/>
+                <BrushTransition Property="Background" Duration="0:0:0.25"/>
+                <BrushTransition Property="BorderBrush" Duration="0:0:0.25"/>
+                <BoxShadowsTransition Property="BoxShadow" Duration="0:0:0.25"/>
             </Transitions>
         </Setter>
     </Style>
     <Style Selector="Border.GlassCard:pointerover">
-        <Setter Property="Background" Value="#161824"/>
-        <Setter Property="BorderBrush" Value="#333333"/>
+        <Setter Property="Background" Value="#C5181B2C"/>
+        <Setter Property="BorderBrush" Value="#507C3AED"/>
+        <Setter Property="BoxShadow" Value="0 12 36 0 #257C3AED"/>
     </Style>
 
         <!-- Radar Continuous Animations -->
@@ -285,7 +287,7 @@
        <Setter Property="BoxShadow" Value="0 16 32 0 #60000000"/>
     </Style>
 
-    <!-- Spotify Filter Chips -->
+    <!-- Filter Chips -->
     <Style Selector="Button.FilterChip">
        <Setter Property="Background" Value="#161824"/>
        <Setter Property="Foreground" Value="#FFFFFF"/>
@@ -327,31 +329,30 @@
     </Style>
   </UserControl.Styles>
 
-  <Grid x:Name="RootBorder" Background="#121212" RowDefinitions="*, Auto">
+  <Grid x:Name="RootBorder" Background="#090A0F" RowDefinitions="*, Auto">
+    <!-- Ambient Cityscape & Starry Night Sky Background -->
+    <Image Grid.RowSpan="2" Source="avares://WeShare.UI/Assets/background.png" Stretch="UniformToFill" Opacity="0.38" IsHitTestVisible="False"/>
+    <Border Grid.RowSpan="2" Background="#D0090A0F" IsHitTestVisible="False"/>
     
     <!-- MAIN APPLICATION GRID (Sidebar + Main Content Canvas) -->
     <Grid Grid.Row="0" x:Name="MainLayout" ColumnDefinitions="260, *" Margin="8,8,8,0">
       
       <!-- ========================================== -->
-      <!-- SPOTIFY DUAL-CARD LEFT SIDEBAR             -->
+      <!-- WE SHARE DUAL-CARD LEFT SIDEBAR             -->
       <!-- ========================================== -->
       <Grid Grid.Column="0" x:Name="Sidebar" RowDefinitions="Auto, 8, *" Margin="0,0,8,0">
         
         <!-- CARD 1: MAIN NAVIGATION CARD -->
-        <Border Grid.Row="0" Background="#181818" CornerRadius="8" Padding="12,16" BoxShadow="0 4 16 0 #30000000">
+        <Border Grid.Row="0" Background="#C811131C" BorderBrush="#1E2232" BorderThickness="1" CornerRadius="12" Padding="12,14" BoxShadow="0 4 16 0 #40000000">
           <StackPanel Spacing="4">
-            <!-- Spotify-Inspired WeShare Brand Header -->
-            <Grid ColumnDefinitions="Auto, *" Margin="12,4,12,16">
-              <Border Width="32" Height="32" CornerRadius="16" Background="#1ED760" Margin="0,0,12,0" VerticalAlignment="Center">
-                <Rectangle Width="16" Height="16" Fill="#000000">
-                  <Rectangle.OpacityMask>
-                    <ImageBrush Source="/Assets/Icons/SCAN.png"/>
-                  </Rectangle.OpacityMask>
-                </Rectangle>
+            <!-- Obsidian We Share Brand Header -->
+            <Grid ColumnDefinitions="Auto, *" Margin="8,6,8,16">
+              <Border Width="34" Height="34" CornerRadius="10" Background="#161824" BorderBrush="#222638" BorderThickness="1" Margin="0,0,12,0" VerticalAlignment="Center" ClipToBounds="True">
+                <Image Source="avares://WeShare.UI/Assets/app-icon.png" Width="26" Height="26" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
               </Border>
-              <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                <TextBlock Text="WE SHARE" FontSize="15" FontWeight="Bold" Foreground="#FFFFFF" LetterSpacing="1"/>
-                <TextBlock Text="Local File Sharing" FontSize="10" Foreground="#B3B3B3" FontWeight="SemiBold"/>
+              <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+                <TextBlock Text="We Share" FontSize="17" FontWeight="Bold" Foreground="#FFFFFF" LetterSpacing="0.4"/>
+                <TextBlock Text="Local File Sharing" FontSize="10" Foreground="#94A3B8" FontWeight="SemiBold"/>
               </StackPanel>
             </Grid>
 
@@ -395,7 +396,7 @@
         </Border>
 
         <!-- CARD 2: NETWORK, DISCOVERED PEERS & UTILITIES -->
-        <Border Grid.Row="2" Background="#181818" CornerRadius="8" Padding="12,16" BoxShadow="0 4 16 0 #30000000">
+        <Border Grid.Row="2" Background="#C811131C" BorderBrush="#1E2232" BorderThickness="1" CornerRadius="12" Padding="12,14" BoxShadow="0 4 16 0 #40000000">
           <Grid RowDefinitions="Auto, *, Auto">
             
             <!-- Library Header -->
@@ -408,16 +409,17 @@
             <ScrollViewer Grid.Row="1" Margin="0,0,0,12">
               <StackPanel Spacing="4">
                 
-                <!-- Local Host Card -->
-                <Border Background="#242424" CornerRadius="6" Padding="12,10" Margin="4,2">
-                  <Grid ColumnDefinitions="Auto, *">
-                    <Border Width="28" Height="28" CornerRadius="14" Background="#10FFFFFF" Margin="0,0,10,0" VerticalAlignment="Center">
-                      <TextBlock Text="PC" FontSize="9" FontWeight="Bold" Foreground="#7C3AED" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <!-- Local Host Card with Profile Avatar -->
+                <Border Background="#161824" BorderBrush="#222638" BorderThickness="1" CornerRadius="10" Padding="10,8" Margin="2,2">
+                  <Grid ColumnDefinitions="Auto, *, Auto">
+                    <Border Grid.Column="0" Width="30" Height="30" CornerRadius="15" Margin="0,0,10,0" VerticalAlignment="Center" ClipToBounds="True">
+                      <Image Source="avares://WeShare.UI/Assets/profile.png" Width="30" Height="30" Stretch="Uniform"/>
                     </Border>
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
                       <TextBlock x:Name="SidebarDeviceName" Text="DESKTOP-PEER" FontSize="12" FontWeight="Bold" Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
-                      <TextBlock x:Name="SidebarNetworkInfo" Text="192.168.1.100" FontSize="10" Foreground="#B3B3B3"/>
+                      <TextBlock x:Name="SidebarNetworkInfo" Text="192.168.1.100" FontSize="10" Foreground="#94A3B8"/>
                     </StackPanel>
+                    <Border Grid.Column="2" Width="8" Height="8" CornerRadius="4" Background="#10B981" BoxShadow="0 0 8 0 #10B981" VerticalAlignment="Center" ToolTip.Tip="Network Online"/>
                   </Grid>
                 </Border>
 
@@ -427,15 +429,15 @@
                     <DataTemplate x:DataType="models:DeviceModel">
                       <Button Click="SendFile_Click" Background="Transparent" Padding="8,6" CornerRadius="6" HorizontalAlignment="Stretch">
                         <Grid ColumnDefinitions="Auto, *, Auto">
-                          <Border Grid.Column="0" Width="26" Height="26" CornerRadius="13" Background="#1A1ED760" Margin="0,0,10,0" VerticalAlignment="Center">
+                          <Border Grid.Column="0" Width="26" Height="26" CornerRadius="13" Background="#207C3AED" Margin="0,0,10,0" VerticalAlignment="Center">
                             <TextBlock Text="{Binding Name, Converter={StaticResource DeviceTypeToIconConverter}}" FontSize="9" FontWeight="Bold" Foreground="#7C3AED" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                           </Border>
                           <StackPanel Grid.Column="1" VerticalAlignment="Center">
                             <TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold" Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
                             <TextBlock Text="{Binding Type}" FontSize="9" Foreground="#B3B3B3"/>
                           </StackPanel>
-                          <Border Grid.Column="2" Background="#1ED760" CornerRadius="9999" Padding="6,2" VerticalAlignment="Center">
-                            <TextBlock Text="SEND" FontSize="8" FontWeight="Bold" Foreground="#000000"/>
+                          <Border Grid.Column="2" Background="#7C3AED" CornerRadius="9999" Padding="8,3" VerticalAlignment="Center">
+                            <TextBlock Text="SEND" FontSize="8" FontWeight="Bold" Foreground="#FFFFFF"/>
                           </Border>
                         </Grid>
                       </Button>
@@ -467,18 +469,18 @@
       </Grid>
 
       <!-- ========================================== -->
-      <!-- SPOTIFY MAIN CONTENT CANVAS                -->
+      <!-- WE SHARE MAIN CONTENT CANVAS                -->
       <!-- ========================================== -->
-      <Border Grid.Column="1" Background="#181818" CornerRadius="8" BoxShadow="0 4 24 0 #40000000" ClipToBounds="True">
+      <Border Grid.Column="1" Background="#B0090A0F" BorderBrush="#1E2232" BorderThickness="1" CornerRadius="12" BoxShadow="0 8 32 0 #50000000" ClipToBounds="True">
         <Grid RowDefinitions="Auto, *" x:Name="ContentArea">
           
-          <!-- Spotify Global Activity Progress Line -->
+          <!-- Global Activity Progress Line -->
           <Border x:Name="GlobalActivityBorder" IsVisible="False" Height="2" Background="Transparent" VerticalAlignment="Top" ZIndex="1000">
              <ProgressBar x:Name="GlobalProgressBar" IsIndeterminate="False" Height="2" Foreground="#7C3AED" Background="Transparent" BorderThickness="0"/>
           </Border>
 
           <!-- Top App Bar -->
-          <Border Grid.Row="0" Padding="32,20,32,16" Background="#181818" PointerPressed="TitleBar_PointerPressed" BorderBrush="#242424" BorderThickness="0,0,0,1">
+          <Border Grid.Row="0" Padding="32,18,32,14" Background="#B011131C" PointerPressed="TitleBar_PointerPressed" BorderBrush="#1E2232" BorderThickness="0,0,0,1">
              <Grid ColumnDefinitions="*, Auto">
                 
                 <!-- Page Title -->
@@ -488,7 +490,7 @@
 
                 <!-- Network Status Pill on Right -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                   <Border Background="#242424" CornerRadius="9999" Padding="12,6" VerticalAlignment="Center">
+                   <Border Classes="GlassCard" CornerRadius="9999" Padding="12,6" VerticalAlignment="Center">
                       <StackPanel Orientation="Horizontal" Spacing="8">
                          <Border Classes="NetworkSignalPulse" VerticalAlignment="Center"/>
                          <TextBlock x:Name="HomeNetworkInfoText" Text="Wi-Fi Ready" FontSize="11" FontWeight="Bold" Foreground="#B3B3B3"/>
@@ -496,7 +498,7 @@
                    </Border>
 
                    <!-- Live Transfer Speed Badge -->
-                    <Border IsVisible="{Binding #HomeSpeedBadge.IsVisible}" Background="#1ED760" CornerRadius="9999" Padding="12,6" VerticalAlignment="Center">
+                    <Border IsVisible="{Binding #HomeSpeedBadge.IsVisible}" Background="#7C3AED" CornerRadius="9999" Padding="12,6" VerticalAlignment="Center">
                        <TextBlock x:Name="HomeSpeedBadge" IsVisible="False" Text="↑ 0.0 MB/s" FontSize="11" FontWeight="Bold" Foreground="#000000"/>
                     </Border>
                 </StackPanel>
@@ -526,7 +528,7 @@
                   <Button Grid.Column="1" Classes="GhostBtn" Content="RADAR SCAN" Click="RefreshDiscovery_Click" VerticalAlignment="Center"/>
                </Grid>
 
-               <!-- Spotify-Style Action Cards Grid -->
+               <!-- Action Cards Grid -->
                <Grid Grid.Row="2" ColumnDefinitions="*, 24, 320">
                   
                   <!-- Left: Featured Action Cards + Recent Transfers -->
@@ -573,8 +575,8 @@
 
                      </Grid>
 
-                     <!-- Recent Transfers Table (Spotify Tracklist Style) -->
-                     <Border Grid.Row="2" Background="#181818" CornerRadius="8" Padding="20">
+                     <!-- Recent Transfers Table (Transfer Table Style) -->
+                     <Border Grid.Row="2" Classes="GlassCard" CornerRadius="8" Padding="20">
                         <Grid RowDefinitions="Auto, 12, *">
                            <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
                               <TextBlock Text="RECENT TRANSFERS" FontSize="11" FontWeight="Bold" Foreground="#B3B3B3" LetterSpacing="1.2" VerticalAlignment="Center"/>
@@ -591,7 +593,7 @@
                                     <DataTemplate x:DataType="models:FileTransferState">
                                        <Border Classes="TrackRow" Padding="12,8">
                                           <Grid ColumnDefinitions="Auto, *, Auto, Auto">
-                                             <Border Grid.Column="0" Width="36" Height="36" Background="#242424" CornerRadius="4" Margin="0,0,12,0" VerticalAlignment="Center">
+                                             <Border Grid.Column="0" Width="36" Height="36" Classes="GlassCard" CornerRadius="4" Margin="0,0,12,0" VerticalAlignment="Center">
                                                 <Rectangle Width="16" Height="16" Fill="#B3B3B3"><Rectangle.OpacityMask><ImageBrush Source="/Assets/Icons/LIBRARY.png"/></Rectangle.OpacityMask></Rectangle>
                                              </Border>
                                              <StackPanel Grid.Column="1" VerticalAlignment="Center">
@@ -612,12 +614,12 @@
                   </Grid>
 
                   <!-- Right Column: Web Portal & Hotspot Card -->
-                  <Border Grid.Column="2" Background="#181818" BorderBrush="#282828" BorderThickness="1" CornerRadius="8" Padding="20" BoxShadow="0 4 24 0 #30000000">
+                  <Border Grid.Column="2" Classes="GlassCard" BorderBrush="#252A3E" BorderThickness="1" CornerRadius="8" Padding="20" BoxShadow="0 4 24 0 #30000000">
                      <ScrollViewer>
                         <StackPanel Spacing="20">
                            <TextBlock Text="MOBILE WEB PORTAL" FontSize="11" FontWeight="Bold" Foreground="#7C3AED" LetterSpacing="1.2"/>
                            
-                           <!-- QR Code in Spotify-style card -->
+                           <!-- QR Code in Obsidian Card -->
                            <Border Background="#FFFFFF" CornerRadius="8" Padding="12" HorizontalAlignment="Center" Width="160" Height="160">
                               <Image x:Name="HomeQrImage" Stretch="Uniform"/>
                            </Border>
@@ -625,7 +627,7 @@
                            <TextBlock Text="Scan to open WeShare directly on your iPhone, Android, or tablet without installing any app." FontSize="11" Foreground="#B3B3B3" TextWrapping="Wrap" TextAlignment="Center"/>
 
                            <!-- Web Portal Address Pill -->
-                           <Border x:Name="HomeWebPortalPanel" Background="#242424" CornerRadius="9999" Padding="14,10">
+                           <Border x:Name="HomeWebPortalPanel" Classes="GlassCard" CornerRadius="9999" Padding="14,10">
                               <Grid ColumnDefinitions="*, Auto">
                                  <TextBlock x:Name="HomeWebPortalText" Text="http://192.168.1.100:8080" FontSize="11" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                                  <Button Grid.Column="1" x:Name="CopyWebLinkBtn" Content="COPY" Click="CopyWebLink_Click" Classes="GhostBtn" Padding="8,4" FontSize="9"/>
@@ -637,11 +639,11 @@
                               <TextBlock Text="DESERT MODE (HOTSPOT)" FontSize="10" FontWeight="Bold" Foreground="#7C7C7C" LetterSpacing="1"/>
                               <Button x:Name="StartHotspotBtn" Content="START DESERT HOTSPOT" Click="ManualStartHotspot_Click" Classes="PrimaryBtn" HorizontalAlignment="Stretch" Padding="16,10"/>
                               
-                              <Border x:Name="HomeWifiPasswordPanel" Background="#242424" CornerRadius="6" Padding="10,8" IsVisible="False">
+                              <Border x:Name="HomeWifiPasswordPanel" Classes="GlassCard" CornerRadius="6" Padding="10,8" IsVisible="False">
                                  <TextBlock x:Name="HomeWifiPasswordText" Text="Pass: weshare123" FontSize="11" Foreground="#B3B3B3"/>
                               </Border>
                               
-                              <Border x:Name="HomeWifiWebPortalPanel" Background="#242424" CornerRadius="6" Padding="10,8" IsVisible="False">
+                              <Border x:Name="HomeWifiWebPortalPanel" Classes="GlassCard" CornerRadius="6" Padding="10,8" IsVisible="False">
                                  <Grid ColumnDefinitions="*, Auto">
                                     <TextBlock x:Name="HomeWifiWebPortalText" Text="http://192.168.137.1:8080" FontSize="11" Foreground="#FFFFFF" VerticalAlignment="Center"/>
                                     <Button Grid.Column="1" x:Name="CopyWifiWebLinkBtn" Content="COPY" Click="CopyWifiWebLink_Click" Classes="GhostBtn" Padding="8,4" FontSize="9"/>
@@ -675,7 +677,7 @@
                   </Grid>
 
                   <!-- Queue List -->
-                  <Border Grid.Row="2" Background="#181818" CornerRadius="8" Padding="16">
+                  <Border Grid.Row="2" Classes="GlassCard" CornerRadius="8" Padding="16">
                      <Grid>
                         <ScrollViewer>
                            <ItemsControl x:Name="SendQueueList">
@@ -683,7 +685,7 @@
                                  <DataTemplate x:DataType="views:QueueItem">
                                     <Border Classes="TrackRow" Padding="12,10" Margin="0,0,0,4">
                                        <Grid ColumnDefinitions="Auto, *, Auto, Auto">
-                                          <Border Grid.Column="0" Width="40" Height="40" Background="#242424" CornerRadius="4" Margin="0,0,14,0" VerticalAlignment="Center">
+                                          <Border Grid.Column="0" Width="40" Height="40" Classes="GlassCard" CornerRadius="4" Margin="0,0,14,0" VerticalAlignment="Center">
                                              <Rectangle Width="18" Height="18" Fill="#7C3AED"><Rectangle.OpacityMask><ImageBrush Source="/Assets/Icons/SEND FILE.png"/></Rectangle.OpacityMask></Rectangle>
                                           </Border>
                                           <StackPanel Grid.Column="1" VerticalAlignment="Center">
@@ -708,7 +710,7 @@
                </Grid>
 
                <!-- Footer Actions -->
-               <Border Grid.Row="1" x:Name="SendFooter" Background="#181818" BorderBrush="#242424" BorderThickness="0,1,0,0" Padding="0,16,0,0" Margin="0,16,0,0">
+               <Border Grid.Row="1" x:Name="SendFooter" Classes="GlassCard" BorderBrush="#242424" BorderThickness="0,1,0,0" Padding="0,16,0,0" Margin="0,16,0,0">
                   <Grid ColumnDefinitions="*, Auto, Auto">
                      <TextBlock x:Name="SendSummaryText" Text="0 files selected" FontSize="13" FontWeight="SemiBold" Foreground="#B3B3B3" VerticalAlignment="Center"/>
                      <Button Grid.Column="1" x:Name="ZipSendBtn" Content="COMPRESS TO ZIP" Click="ZipSend_Click" Classes="GhostBtn" Margin="0,0,12,0" IsVisible="False"/>
@@ -722,7 +724,7 @@
             <!-- ========================================== -->
             <Grid x:Name="SendDiscoveryPanel" IsVisible="False" Classes="SignalPanel">
                <Grid>
-                  <!-- Concentric Spotify Green Radar Stage -->
+                  <!-- Concentric Violet Radar Stage -->
                   <Panel Width="480" Height="360" HorizontalAlignment="Center" VerticalAlignment="Center" ClipToBounds="False">
                      <!-- Radar Static Rings -->
                      <Ellipse Width="340" Height="340" Stroke="#157C3AED" StrokeThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -747,7 +749,7 @@
                         <Path Data="{StaticResource IconDiscovery}" Fill="#FFFFFF" Width="24" Height="24" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                      </Border>
 
-                     <!-- Floating Discovered Device Markers (Spotify Artist Avatar Style) -->
+                     <!-- Floating Discovered Device Markers (Device Avatar Style) -->
                      <ItemsControl ItemsSource="{Binding Devices, RelativeSource={RelativeSource AncestorType=views:MainView}}">
                         <ItemsControl.ItemsPanel>
                            <ItemsPanelTemplate><Canvas Width="520" Height="520" Background="Transparent"/></ItemsPanelTemplate>
@@ -756,7 +758,7 @@
                            <DataTemplate x:DataType="models:DeviceModel">
                               <Button Click="SendFile_Click" Background="Transparent" Padding="0" BorderThickness="0">
                                  <StackPanel Spacing="6" HorizontalAlignment="Center">
-                                    <Border Classes="DeviceMarker" Width="64" Height="64" Background="#242424" BorderBrush="#7C3AED" BorderThickness="2" CornerRadius="32" BoxShadow="0 8 24 0 #40000000">
+                                    <Border Classes="DeviceMarker GlassCard" Width="64" Height="64" BorderBrush="#7C3AED" BorderThickness="2" CornerRadius="32" BoxShadow="0 8 24 0 #40000000">
                                        <Rectangle Width="24" Height="24" Fill="#7C3AED">
                                           <Rectangle.OpacityMask><ImageBrush Source="/Assets/Icons/RECEIVE FILE.png"/></Rectangle.OpacityMask>
                                        </Rectangle>
@@ -826,7 +828,7 @@
                      <TextBlock Text="Other devices on the network can find you and send files directly." FontSize="13" Foreground="#B3B3B3" TextAlignment="Center"/>
                   </StackPanel>
 
-                  <Border Background="#242424" CornerRadius="8" Padding="16">
+                  <Border Classes="GlassCard" CornerRadius="8" Padding="16">
                      <StackPanel Spacing="4">
                         <TextBlock Text="AUTO-ACCEPT IS ENABLED" FontSize="11" FontWeight="Bold" Foreground="#7C3AED" LetterSpacing="1" HorizontalAlignment="Center"/>
                         <TextBlock Text="Files will be stored directly into your Downloads directory." FontSize="11" Foreground="#7C7C7C" HorizontalAlignment="Center"/>
@@ -844,7 +846,7 @@
             <Grid x:Name="TransfersPanel" IsVisible="False" Classes="SignalPanel" RowDefinitions="Auto, 16, *">
                
                <!-- Active Sending / Transfer Card -->
-               <Border Grid.Row="0" x:Name="SendProgressBorder" IsVisible="False" Background="#242424" CornerRadius="8" Padding="24" BoxShadow="0 8 24 0 #40000000">
+               <Border Grid.Row="0" x:Name="SendProgressBorder" IsVisible="False" Classes="GlassCard" CornerRadius="8" Padding="24" BoxShadow="0 8 24 0 #40000000">
                   <Grid RowDefinitions="Auto, 16, Auto, 12, Auto, 8, Auto">
                      <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
                         <StackPanel Spacing="4">
@@ -866,16 +868,16 @@
                </Border>
 
                <!-- Incoming Transfers List -->
-               <Border Grid.Row="2" Background="#181818" CornerRadius="8" Padding="20">
+               <Border Grid.Row="2" Classes="GlassCard" CornerRadius="8" Padding="20">
                   <Grid RowDefinitions="Auto, 16, *">
                      <TextBlock Text="ACTIVE SESSIONS" FontSize="11" FontWeight="Bold" Foreground="#B3B3B3" LetterSpacing="1.2"/>
                      <ScrollViewer Grid.Row="2">
                         <ItemsControl x:Name="IncomingList">
                            <ItemsControl.ItemTemplate>
                               <DataTemplate x:DataType="models:FileTransferState">
-                                 <Border Classes="TrackRow" Padding="16,12" Margin="0,0,0,8" Background="#242424">
+                                 <Border Classes="TrackRow GlassCard" Padding="16,12" Margin="0,0,0,8">
                                     <Grid ColumnDefinitions="Auto, *, Auto, Auto">
-                                       <Border Grid.Column="0" Width="40" Height="40" Background="#181818" CornerRadius="4" Margin="0,0,16,0" VerticalAlignment="Center">
+                                       <Border Grid.Column="0" Width="40" Height="40" Classes="GlassCard" CornerRadius="4" Margin="0,0,16,0" VerticalAlignment="Center">
                                           <Rectangle Width="18" Height="18" Fill="#7C3AED"><Rectangle.OpacityMask><ImageBrush Source="/Assets/Icons/RECEIVE FILE.png"/></Rectangle.OpacityMask></Rectangle>
                                        </Border>
                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
@@ -918,7 +920,7 @@
                </Grid>
 
                <!-- Received Files Tracklist -->
-               <Border Grid.Row="4" Background="#181818" CornerRadius="8" Padding="16">
+               <Border Grid.Row="4" Classes="GlassCard" CornerRadius="8" Padding="16">
                   <Grid>
                      <ScrollViewer>
                         <ItemsControl x:Name="ReceivedFilesList">
@@ -926,7 +928,7 @@
                               <DataTemplate x:DataType="models:FileTransferState">
                                  <Border Classes="TrackRow" Padding="12,10" Margin="0,0,0,4">
                                     <Grid ColumnDefinitions="Auto, *, Auto, Auto, Auto">
-                                       <Border Grid.Column="0" Width="36" Height="36" Background="#242424" CornerRadius="4" Margin="0,0,14,0" VerticalAlignment="Center">
+                                       <Border Grid.Column="0" Width="36" Height="36" Classes="GlassCard" CornerRadius="4" Margin="0,0,14,0" VerticalAlignment="Center">
                                           <Rectangle Width="16" Height="16" Fill="#B3B3B3"><Rectangle.OpacityMask><ImageBrush Source="/Assets/Icons/LIBRARY.png"/></Rectangle.OpacityMask></Rectangle>
                                        </Border>
                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
@@ -962,7 +964,7 @@
             <Grid x:Name="WebSharedPanel" IsVisible="False" Classes="SignalPanel" ColumnDefinitions="260, 16, *">
                
                <!-- Left Column: Web Clients -->
-               <Border Grid.Column="0" Background="#181818" CornerRadius="8" Padding="16">
+               <Border Grid.Column="0" Classes="GlassCard" CornerRadius="8" Padding="16">
                   <Grid RowDefinitions="Auto, 12, *">
                      <TextBlock Text="WEB CLIENTS" FontSize="11" FontWeight="Bold" Foreground="#B3B3B3" LetterSpacing="1.2"/>
                      <ListBox Grid.Row="2" x:Name="WebClientsListBox" Background="Transparent" BorderThickness="0" SelectionChanged="WebClientsListBox_SelectionChanged">
@@ -970,7 +972,7 @@
                            <DataTemplate x:DataType="models:DeviceModel">
                               <Border Classes="TrackRow" Padding="8,6" Margin="0,2">
                                  <Grid ColumnDefinitions="Auto, *">
-                                    <Border Width="28" Height="28" CornerRadius="14" Background="#242424" Margin="0,0,10,0" VerticalAlignment="Center">
+                                    <Border Width="28" Height="28" CornerRadius="14" Classes="GlassCard" Margin="0,0,10,0" VerticalAlignment="Center">
                                        <TextBlock Text="WEB" FontSize="8" FontWeight="Bold" Foreground="#7C3AED" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Border>
                                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
@@ -986,7 +988,7 @@
                </Border>
 
                <!-- Right Column: Staged Files -->
-               <Border Grid.Column="2" Background="#181818" CornerRadius="8" Padding="20">
+               <Border Grid.Column="2" Classes="GlassCard" CornerRadius="8" Padding="20">
                   <Grid RowDefinitions="Auto, 16, *">
                      <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
                         <TextBlock Text="STAGED WEB FILES" FontSize="11" FontWeight="Bold" Foreground="#B3B3B3" LetterSpacing="1.2" VerticalAlignment="Center"/>
@@ -999,7 +1001,7 @@
                         <ItemsControl x:Name="WebSharedFilesList">
                            <ItemsControl.ItemTemplate>
                               <DataTemplate x:DataType="views:StagedWebFile">
-                                 <Border Classes="TrackRow" Padding="16,12" Margin="0,0,0,8" Background="#242424">
+                                 <Border Classes="TrackRow GlassCard" Padding="16,12" Margin="0,0,0,8">
                                     <Grid ColumnDefinitions="*, Auto, Auto">
                                        <StackPanel VerticalAlignment="Center">
                                           <TextBlock Text="{Binding FileName}" FontSize="13" FontWeight="Bold" Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
@@ -1120,7 +1122,7 @@
                   <StackPanel Spacing="24" MaxWidth="640" HorizontalAlignment="Left">
                      
                      <!-- General Settings Card -->
-                     <Border Background="#181818" CornerRadius="8" Padding="28">
+                     <Border Classes="GlassCard" CornerRadius="8" Padding="28">
                         <StackPanel Spacing="24">
                            
                            <!-- Name Setting -->
@@ -1143,7 +1145,7 @@
                            <Grid ColumnDefinitions="*, Auto">
                               <StackPanel Spacing="4" VerticalAlignment="Center">
                                  <TextBlock Text="DARK MODE" FontSize="13" FontWeight="Bold" Foreground="#FFFFFF"/>
-                                 <TextBlock Text="Spotify-inspired immersive dark theme." FontSize="11" Foreground="#7C7C7C"/>
+                                 <TextBlock Text="Obsidian Violet signature dark theme." FontSize="11" Foreground="#7C7C7C"/>
                               </StackPanel>
                               <ToggleSwitch Grid.Column="1" x:Name="ThemeToggle" IsChecked="True" IsCheckedChanged="ThemeSwitch_Changed"/>
                            </Grid>
@@ -1161,7 +1163,7 @@
                      </Border>
 
                      <!-- Updates Card -->
-                     <Border Background="#181818" CornerRadius="8" Padding="28">
+                     <Border Classes="GlassCard" CornerRadius="8" Padding="28">
                         <StackPanel Spacing="16">
                            <TextBlock Text="APPLICATION UPDATES" FontSize="11" FontWeight="Bold" Foreground="#B3B3B3" LetterSpacing="1.2"/>
                            <Grid ColumnDefinitions="*, Auto">
@@ -1189,14 +1191,14 @@
             <!-- 9. ABOUT PANEL                             -->
             <!-- ========================================== -->
             <Grid x:Name="AboutPanel" IsVisible="False" Classes="SignalPanel">
-               <Border Background="#181818" CornerRadius="8" Padding="32" MaxWidth="560" HorizontalAlignment="Left" VerticalAlignment="Top">
+               <Border Classes="GlassCard" CornerRadius="8" Padding="32" MaxWidth="560" HorizontalAlignment="Left" VerticalAlignment="Top">
                   <StackPanel Spacing="20">
-                     <Border Width="48" Height="48" CornerRadius="24" Background="#1ED760" HorizontalAlignment="Left">
+                     <Border Width="48" Height="48" CornerRadius="24" Background="#7C3AED" HorizontalAlignment="Left">
                         <Rectangle Width="24" Height="24" Fill="#000000"><Rectangle.OpacityMask><ImageBrush Source="/Assets/Icons/SCAN.png"/></Rectangle.OpacityMask></Rectangle>
                      </Border>
                      <StackPanel Spacing="4">
                         <TextBlock Text="WE SHARE" FontSize="24" FontWeight="Bold" Foreground="#FFFFFF" LetterSpacing="1"/>
-                        <TextBlock x:Name="AboutVersionText" Text="Version 1.1.0 (Spotify Edition)" FontSize="12" Foreground="#7C3AED" FontWeight="Bold"/>
+                        <TextBlock x:Name="AboutVersionText" Text="Version 1.1.0" FontSize="12" Foreground="#7C3AED" FontWeight="Bold"/>
                      </StackPanel>
                      <TextBlock Text="High-speed, zero-cloud peer-to-peer file sharing for Windows, macOS, Android, and iOS. Direct socket engine, raw-TCP HTTP web portal, and ad-hoc Desert Mode." FontSize="13" Foreground="#B3B3B3" TextWrapping="Wrap" LineHeight="20"/>
                      <Button Content="VISIT GITHUB REPOSITORY" Click="OpenGitHub_Click" Classes="GhostBtn" HorizontalAlignment="Left"/>
@@ -1213,12 +1215,12 @@
     <!-- =================================================== -->
     <!-- SPOTIFY "NOW TRANSFERRING" PLAYER DOCK (BOTTOM BAR) -->
     <!-- =================================================== -->
-    <Border Grid.Row="1" Height="76" Background="#181818" BorderBrush="#282828" BorderThickness="0,1,0,0" Padding="24,0" ZIndex="2000">
+    <Border Grid.Row="1" Height="76" Classes="GlassCard" BorderBrush="#252A3E" BorderThickness="0,1,0,0" Padding="24,0" ZIndex="2000">
        <Grid ColumnDefinitions="280, *, 280">
           
           <!-- Left: Current Active File / Status -->
           <Grid Grid.Column="0" ColumnDefinitions="Auto, *" VerticalAlignment="Center">
-             <Border Width="44" Height="44" CornerRadius="4" Background="#242424" Margin="0,0,14,0" VerticalAlignment="Center">
+             <Border Width="44" Height="44" CornerRadius="4" Classes="GlassCard" Margin="0,0,14,0" VerticalAlignment="Center">
                 <Rectangle Width="20" Height="20" Fill="#7C3AED">
                    <Rectangle.OpacityMask><ImageBrush Source="/Assets/Icons/SEND FILE.png"/></Rectangle.OpacityMask>
                 </Rectangle>
@@ -1244,14 +1246,14 @@
                 <TextBlock Grid.Column="2" Text="Direct P2P" FontSize="10" Foreground="#7C7C7C" VerticalAlignment="Center" Margin="16,0,0,0"/>
              </Grid>
 
-             <!-- Spotify Green Progress Bar -->
+             <!-- Violet Accent Progress Bar -->
              <ProgressBar x:Name="BottomPlayerProgress" Height="4" Value="0" CornerRadius="2" Foreground="#7C3AED" Background="#333333"/>
           </StackPanel>
 
           <!-- Right: System Info & Folder Button -->
           <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right" VerticalAlignment="Center">
              <Button Content="OPEN FOLDER" Click="OpenDownloadFolder_Click" Classes="GhostBtn" Padding="14,8" FontSize="10"/>
-             <Border Background="#242424" CornerRadius="9999" Padding="12,6" VerticalAlignment="Center">
+             <Border Classes="GlassCard" CornerRadius="9999" Padding="12,6" VerticalAlignment="Center">
                 <TextBlock Text="LOCAL NET" FontSize="10" FontWeight="Bold" Foreground="#7C3AED" LetterSpacing="1"/>
              </Border>
           </StackPanel>
@@ -1263,11 +1265,11 @@
     <!-- OVERLAYS & MODALS                          -->
     <!-- ========================================== -->
 
-    <!-- Modal Incoming File Approval (Spotify Dialog) -->
+    <!-- Modal Incoming File Approval (Approval Dialog) -->
     <Grid x:Name="AcceptRejectPanel" IsVisible="False" Background="#90000000" ZIndex="5000">
-       <Border Background="#242424" CornerRadius="8" Padding="32" Width="400" HorizontalAlignment="Center" VerticalAlignment="Center" BoxShadow="0 16 48 0 #80000000">
+       <Border Classes="GlassCard" CornerRadius="8" Padding="32" Width="400" HorizontalAlignment="Center" VerticalAlignment="Center" BoxShadow="0 16 48 0 #80000000">
           <StackPanel Spacing="20">
-             <Border Width="56" Height="56" CornerRadius="28" Background="#1ED760" HorizontalAlignment="Center">
+             <Border Width="56" Height="56" CornerRadius="28" Background="#7C3AED" HorizontalAlignment="Center">
                 <Rectangle Width="24" Height="24" Fill="#000000"><Rectangle.OpacityMask><ImageBrush Source="/Assets/Icons/RECEIVE FILE.png"/></Rectangle.OpacityMask></Rectangle>
              </Border>
              
@@ -1288,7 +1290,7 @@
 
     <!-- Manual IP Dialog -->
     <Grid x:Name="ManualIPDialog" IsVisible="False" Background="#90000000" ZIndex="4500">
-       <Border Background="#242424" CornerRadius="8" Padding="28" Width="360" HorizontalAlignment="Center" VerticalAlignment="Center">
+       <Border Classes="GlassCard" CornerRadius="8" Padding="28" Width="360" HorizontalAlignment="Center" VerticalAlignment="Center">
           <StackPanel Spacing="16">
              <TextBlock Text="CONNECT BY IP" FontSize="12" FontWeight="Bold" Foreground="#7C3AED" LetterSpacing="1.2"/>
              <TextBox x:Name="ManualIPInput" Watermark="192.168.1.xxx"/>
@@ -1301,7 +1303,7 @@
     <Panel x:Name="DragOverlay" IsVisible="False" Background="#C0121212" ZIndex="6000">
        <Border BorderBrush="#7C3AED" BorderThickness="2" CornerRadius="8" Margin="24">
           <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="16">
-             <Border Width="72" Height="72" CornerRadius="36" Background="#1ED760" HorizontalAlignment="Center">
+             <Border Width="72" Height="72" CornerRadius="36" Background="#7C3AED" HorizontalAlignment="Center">
                 <Rectangle Width="32" Height="32" Fill="#000000"><Rectangle.OpacityMask><ImageBrush Source="/Assets/Icons/SEND FILE.png"/></Rectangle.OpacityMask></Rectangle>
              </Border>
              <TextBlock Text="DROP FILES ANYWHERE TO SHARE" FontSize="18" FontWeight="Bold" Foreground="#FFFFFF" LetterSpacing="1"/>
@@ -1310,7 +1312,7 @@
     </Panel>
 
     <!-- Toast Notification (Top Right Floating Pill) -->
-    <Border x:Name="ToastBorder" IsVisible="False" Background="#1ED760" CornerRadius="9999" Padding="20,10" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,24,0,0" ZIndex="7000" BoxShadow="0 8 24 0 #40000000">
+    <Border x:Name="ToastBorder" IsVisible="False" Background="#7C3AED" CornerRadius="9999" Padding="20,10" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,24,0,0" ZIndex="7000" BoxShadow="0 8 24 0 #40000000">
        <TextBlock x:Name="ToastMessage" Text="Action completed" FontSize="12" FontWeight="Bold" Foreground="#000000"/>
     </Border>
 
