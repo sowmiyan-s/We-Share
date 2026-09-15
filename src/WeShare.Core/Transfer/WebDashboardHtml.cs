@@ -29,7 +29,7 @@ namespace WeShare.Core.Transfer
   --primary: #7C3AED;
   --primary-light: #9333EA;
   --primary-gradient: linear-gradient(135deg, #7C3AED 0%, #9333EA 50%, #4F46E5 100%);
-  --primary-glow: rgba(124, 58, 237, 0.35);
+  --primary-glow: rgba(124, 58, 237, 0.1);
   --cyan: #06B6D4;
   --emerald: #10B981;
   --amber: #A855F7;
@@ -43,7 +43,7 @@ namespace WeShare.Core.Transfer
   --radius-md: 14px;
   --radius-lg: 20px;
   --radius-full: 9999px;
-  --shadow-glow: 0 8 32 0 rgba(124, 58, 237, 0.18);
+  --shadow-glow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
 html[data-theme=""light""] {
@@ -360,6 +360,74 @@ body::before {
 }
 
 /* ------------------------------------------------------------- */
+
+/* ------------------------------------------------------------- */
+/* 3-STEP WORKFLOW WIZARD                                        */
+/* ------------------------------------------------------------- */
+.web-step-wizard {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--panel);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+}
+.wsw-step {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  opacity: 0.45;
+  transition: all 0.25s ease;
+}
+.wsw-step.active {
+  opacity: 1;
+}
+.wsw-step.completed {
+  opacity: 0.9;
+}
+.wsw-badge {
+  width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  background: var(--card-solid);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-dim);
+}
+.wsw-step.active .wsw-badge {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+.wsw-step.completed .wsw-badge {
+  background: var(--emerald);
+  border-color: var(--emerald);
+  color: #fff;
+}
+.wsw-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+.wsw-connector {
+  width: 20px;
+  height: 2px;
+  background: var(--border-subtle);
+  border-radius: 1px;
+  transition: background 0.25s ease;
+}
+.wsw-connector.active {
+  background: var(--primary);
+}
+
 /* TARGET DEVICE SELECTOR STRIP                                  */
 /* ------------------------------------------------------------- */
 .device-select-card {
@@ -1442,25 +1510,25 @@ input[type=""file""] {
   </nav>
 
   <!-- ========================================================= -->
-  <!-- 1. SEND TAB VIEW                                          -->
+  <!-- 1. SEND TAB VIEW (3-STEP INTUITIVE SEQUENCE)                 -->
   <!-- ========================================================= -->
   <div class=""tab-view active"" id=""viewSend"">
 
-    <!-- Destination Device Selector -->
-    <div class=""device-select-card"">
-      <div class=""dsc-left"">
-        <div class=""dsc-icon"">
-          <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><rect x=""2"" y=""3"" width=""20"" height=""14"" rx=""2"" ry=""2""/><line x1=""8"" y1=""21"" x2=""16"" y2=""21""/><line x1=""12"" y1=""17"" x2=""12"" y2=""21""/></svg>
-        </div>
-        <div>
-          <div class=""dsc-label"">Sending Target</div>
-          <div style=""font-size:12px; font-weight:700; color:var(--text);"" id=""targetNameLabel"">Host PC</div>
-        </div>
+    <!-- 3-Step Sequence Wizard -->
+    <div class=""web-step-wizard"" id=""webStepWizard"">
+      <div class=""wsw-step active"" id=""wswStep1"">
+        <div class=""wsw-badge"">1</div>
+        <div class=""wsw-label"">Select Files</div>
       </div>
-      <div class=""dsc-select-wrap"">
-        <select id=""targetDeviceSelect"" onchange=""onTargetDeviceChanged()"">
-          <option value=""pc"">Host PC</option>
-        </select>
+      <div class=""wsw-connector"" id=""wswConn1""></div>
+      <div class=""wsw-step"" id=""wswStep2"">
+        <div class=""wsw-badge"">2</div>
+        <div class=""wsw-label"">Choose Device</div>
+      </div>
+      <div class=""wsw-connector"" id=""wswConn2""></div>
+      <div class=""wsw-step"" id=""wswStep3"">
+        <div class=""wsw-badge"">3</div>
+        <div class=""wsw-label"">Transfer</div>
       </div>
     </div>
 
@@ -1468,13 +1536,13 @@ input[type=""file""] {
     <input type=""file"" id=""multiFileInput"" multiple onchange=""onFilesSelected(this.files)"">
     <input type=""file"" id=""cameraInput"" accept=""image/*,video/*"" capture=""environment"" onchange=""onFilesSelected(this.files)"">
 
-    <!-- Interactive Dropzone -->
+    <!-- Step 1: Interactive Dropzone -->
     <div class=""dropzone-card"" id=""dropZone"" onclick=""document.getElementById('multiFileInput').click()"">
       <div class=""dz-icon-circle"">
         <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2.2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4""/><polyline points=""17 8 12 3 7 8""/><line x1=""12"" y1=""3"" x2=""12"" y2=""15""/></svg>
       </div>
-      <div class=""dz-title"">Tap or Drop Files to Send</div>
-      <div class=""dz-sub"">Select multiple photos, 4K videos, documents, or archives of any size.</div>
+      <div class=""dz-title"">Step 1: Select Files to Transfer</div>
+      <div class=""dz-sub"">Tap or drop photos, 4K videos, documents, or archives of any size.</div>
       <div class=""dz-btn-group"" onclick=""event.stopPropagation()"">
         <button class=""dz-action-btn"" onclick=""document.getElementById('multiFileInput').click()"">
           <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z""/><polyline points=""14 2 14 8 20 8""/><line x1=""12"" y1=""18"" x2=""12"" y2=""12""/><line x1=""9"" y1=""15"" x2=""15"" y2=""15""/></svg>
@@ -1487,11 +1555,29 @@ input[type=""file""] {
       </div>
     </div>
 
-    <!-- Staging Tray for Multiple Files -->
+    <!-- Step 2: Destination Device Selector -->
+    <div class=""device-select-card"" id=""deviceSelectCard"">
+      <div class=""dsc-left"">
+        <div class=""dsc-icon"">
+          <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><rect x=""2"" y=""3"" width=""20"" height=""14"" rx=""2"" ry=""2""/><line x1=""8"" y1=""21"" x2=""16"" y2=""21""/><line x1=""12"" y1=""17"" x2=""12"" y2=""21""/></svg>
+        </div>
+        <div>
+          <div class=""dsc-label"">Step 2: Choose Destination Device</div>
+          <div style=""font-size:12px; font-weight:700; color:var(--text);"" id=""targetNameLabel"">Host PC</div>
+        </div>
+      </div>
+      <div class=""dsc-select-wrap"">
+        <select id=""targetDeviceSelect"" onchange=""onTargetDeviceChanged()"">
+          <option value=""pc"">Host PC</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Step 3: Staging Tray & Transfer Action -->
     <div class=""staging-card"" id=""stagingTray"" style=""display: none;"">
       <div class=""staging-header"">
         <div class=""staging-title"">
-          <span>Staged for Transfer</span>
+          <span>Step 3: Ready to Transfer</span>
           <span class=""staging-badge"" id=""stagingCountBadge"">0 files</span>
         </div>
         <button class=""staging-clear-btn"" onclick=""clearStagingTray()"">Clear All</button>
@@ -1508,7 +1594,7 @@ input[type=""file""] {
         </div>
         <button class=""send-all-btn"" id=""sendAllBtn"" onclick=""startBatchSend()"">
           <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2.5"" stroke-linecap=""round"" stroke-linejoin=""round""><line x1=""22"" y1=""2"" x2=""11"" y2=""13""/><polygon points=""22 2 15 22 11 13 2 9 22 2""/></svg>
-          <span id=""sendAllBtnText"">Send All Files to PC</span>
+          <span id=""sendAllBtnText"">Start Transfer to Device →</span>
         </button>
       </div>
     </div>
@@ -1859,8 +1945,22 @@ function renderStagingTray() {
   if (stagedFiles.length === 0) {
     tray.style.display = 'none';
     tabBadge.style.display = 'none';
+    const s1 = document.getElementById('wswStep1'), s2 = document.getElementById('wswStep2'), s3 = document.getElementById('wswStep3');
+    const c1 = document.getElementById('wswConn1'), c2 = document.getElementById('wswConn2');
+    if (s1) s1.className = 'wsw-step active';
+    if (s2) s2.className = 'wsw-step';
+    if (s3) s3.className = 'wsw-step';
+    if (c1) c1.className = 'wsw-connector';
+    if (c2) c2.className = 'wsw-connector';
     return;
   }
+  const s1 = document.getElementById('wswStep1'), s2 = document.getElementById('wswStep2'), s3 = document.getElementById('wswStep3');
+  const c1 = document.getElementById('wswConn1'), c2 = document.getElementById('wswConn2');
+  if (s1) s1.className = 'wsw-step completed';
+  if (c1) c1.className = 'wsw-connector active';
+  if (s2) s2.className = 'wsw-step active';
+  if (c2) c2.className = 'wsw-connector';
+  if (s3) s3.className = 'wsw-step';
 
   tray.style.display = 'flex';
   tabBadge.style.display = 'inline-block';
@@ -1903,6 +2003,10 @@ async function startBatchSend() {
   if (stagedFiles.length === 0 || isUploading) return;
   isUploading = true;
   document.getElementById('sendAllBtn').disabled = true;
+  const s2 = document.getElementById('wswStep2'), s3 = document.getElementById('wswStep3'), c2 = document.getElementById('wswConn2');
+  if (s2) s2.className = 'wsw-step completed';
+  if (c2) c2.className = 'wsw-connector active';
+  if (s3) s3.className = 'wsw-step active';
 
   const total = stagedFiles.length;
   const hud = document.getElementById('transferHud');
