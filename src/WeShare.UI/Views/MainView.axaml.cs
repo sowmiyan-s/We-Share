@@ -7,6 +7,7 @@ using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using Avalonia.Styling;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -72,6 +73,11 @@ namespace WeShare.UI.Views
         private string? _currentSendingFileId;
         private string _currentDateFilter = "All";
         private bool _autoAcceptAllTransfers = false;
+        private bool _soundEffectsEnabled = true;
+        private string? _activePreviewFilePath;
+        private DeviceModel? _editingNicknameDevice;
+        private readonly Dictionary<string, string> _deviceNicknames = new();
+        private readonly HashSet<string> _favoriteDeviceIds = new();
 
 
         public MainView() : this(App.PlatformService) { }
@@ -137,6 +143,15 @@ namespace WeShare.UI.Views
             var autoAcceptVal = _dbHelper.GetSetting("AutoAcceptTransfers", "false");
             _autoAcceptAllTransfers = autoAcceptVal == "true";
             if (AutoAcceptToggle != null) AutoAcceptToggle.IsChecked = _autoAcceptAllTransfers;
+
+            var soundVal = _dbHelper.GetSetting("SoundEffects", "true");
+            _soundEffectsEnabled = soundVal == "true";
+            if (SoundToggle != null) SoundToggle.IsChecked = _soundEffectsEnabled;
+
+            var savedAccent = _dbHelper.GetSetting("AccentColor", "#7C3AED");
+            if (!string.IsNullOrEmpty(savedAccent)) ApplyAccentColor(savedAccent);
+
+            LoadDevicePreferences();
             
             // Transfer – listen for incoming file sends
             try
@@ -337,6 +352,170 @@ namespace WeShare.UI.Views
                 {
                     try { _platformService.StopBluetoothAdvertising(); } catch { }
                 }
+            }
+        }
+
+        private async void CopyFileToClipboard_Click(object sender, RoutedEventArgs e)
+        {
+            if ((sender as Button)?.Tag is FileTransferState s && !string.IsNullOrEmpty(s.FilePath) && File.Exists(s.FilePath))
+            {
+                var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
+                if (clipboard != null)
+                {
+                    var dataObject = new DataObject();
+                    dataObject.Set(DataFormats.Files, new[] { s.FilePath });
+                    dataObject.Set(DataFormats.Text, s.FilePath);
+                    await clipboard.SetDataObjectAsync(dataObject);
+                    ShowToast($"Copied '{s.FileName}' to clipboard");
+                }
+            }
+        }
+
+        private void FileRow_DoubleTapped(object? sender, Avalonia.Input.TappedEventArgs e)
+        {
+            if ((sender as Control)?.DataContext is FileTransferState s && !string.IsNullOrEmpty(s.FilePath) && File.Exists(s.FilePath))
+            {
+                var ext = Path.GetExtension(s.FilePath).ToLowerInvariant();
+                if (ext is ".png" or ".jpg" or ".jpeg" or ".bmp" or ".webp")
+                {
+                    ShowImagePreview(s);
+                    return;
+                }
+                _platformService.OpenFile(s.FilePath);
+            }
+        }
+
+        private void PreviewFile_Click(object sender, RoutedEventArgs e)
+        {
+            if ((sender as Button)?.Tag is FileTransferState s && !string.IsNullOrEmpty(s.FilePath) && File.Exists(s.FilePath))
+            {
+                var ext = Path.GetExtension(s.FilePath).ToLowerInvariant();
+                if (ext is ".png" or ".jpg" or ".jpeg" or ".bmp" or ".webp")
+                {
+                    ShowImagePreview(s);
+                }
+                else if (ext == ".txt")
+                {
+                    CheckAndShowIncomingNote(s);
+                }
+                else
+                {
+                    _platformService.OpenFile(s.FilePath);
+                }
+            }
+        }
+
+        private void ShowImagePreview(FileTransferState s)
+        {
+            try
+            {
+                using var stream = File.OpenRead(s.FilePath);
+                var bmp = new Avalonia.Media.Imaging.Bitmap(stream);
+                PreviewImageControl.Source = bmp;
+                PreviewFileName.Text = s.FileName;
+                PreviewFileSpecs.Text = $"{bmp.PixelSize.Width} × {bmp.PixelSize.Height} · {FileTransferState.FormatBytes(s.TotalBytes)}";
+                _activePreviewFilePath = s.FilePath;
+                MediaPreviewModal.IsVisible = true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Preview] Image decode failed: {ex.Message}");
+                _platformService.OpenFile(s.FilePath);
+            }
+        }
+
+        private async void CopyPreviewImage_Click(object sender, RoutedEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(_activePreviewFilePath) && File.Exists(_activePreviewFilePath))
+            {
+                var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
+                if (clipboard != null)
+                {
+                    var dataObject = new DataObject();
+                    dataObject.Set(DataFormats.Files, new[] { _activePreviewFilePath });
+                    dataObject.Set(DataFormats.Text, _activePreviewFilePath);
+                    await clipboard.SetDataObjectAsync(dataObject);
+                    ShowToast("Image copied to clipboard!");
+                }
+            }
+        }
+
+        private void OpenPreviewInApp_Click(object sender, RoutedEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(_activePreviewFilePath) && File.Exists(_activePreviewFilePath))
+            {
+                _platformService.OpenFile(_activePreviewFilePath);
+            }
+        }
+
+        private void ClosePreviewModal_Click(object sender, RoutedEventArgs e)
+        {
+            MediaPreviewModal.IsVisible = false;
+            PreviewImageControl.Source = null;
+            _activePreviewFilePath = null;
+        }
+
+        private void SoundSwitch_Changed(object? sender, RoutedEventArgs e)
+        {
+            _soundEffectsEnabled = SoundToggle?.IsChecked ?? true;
+            _dbHelper.SetSetting("SoundEffects", _soundEffectsEnabled ? "true" : "false");
+            ShowToast(_soundEffectsEnabled ? "Sound effects enabled" : "Sound effects muted");
+        }
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool MessageBeep(uint uType);
+
+        private void PlaySound(string soundType)
+        {
+            if (!_soundEffectsEnabled) return;
+            try
+            {
+                if (OperatingSystem.IsWindows())
+                {
+                    if (soundType == "complete")
+                        MessageBeep(0x00000040); // MB_ICONASTERISK
+                    else if (soundType == "request")
+                        MessageBeep(0x00000030); // MB_ICONEXCLAMATION
+                }
+            }
+            catch { }
+        }
+
+        private void AccentColor_Click(object? sender, RoutedEventArgs e)
+        {
+            if ((sender as Button)?.Tag is string hex && !string.IsNullOrEmpty(hex))
+            {
+                ApplyAccentColor(hex);
+                _dbHelper.SetSetting("AccentColor", hex);
+                ShowToast("Accent color updated");
+            }
+        }
+
+        private void ApplyAccentColor(string hex)
+        {
+            try
+            {
+                var color = Avalonia.Media.Color.Parse(hex);
+                var brush = new Avalonia.Media.SolidColorBrush(color);
+                this.Resources["BrandVioletBrush"] = brush;
+                this.Resources["ElectricIndigoBrush"] = brush;
+                this.Resources["SpotifyGreenBrush"] = brush;
+
+                byte rDim = (byte)Math.Max(0, color.R - 20);
+                byte gDim = (byte)Math.Max(0, color.G - 20);
+                byte bDim = (byte)Math.Max(0, color.B - 20);
+                var dimBrush = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.FromRgb(rDim, gDim, bDim));
+                this.Resources["BrandVioletDimBrush"] = dimBrush;
+
+                if (Application.Current != null)
+                {
+                    Application.Current.Resources["BrandVioletBrush"] = brush;
+                    Application.Current.Resources["BrandVioletDimBrush"] = dimBrush;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Accent] Apply color error: {ex.Message}");
             }
         }
 
@@ -809,6 +988,8 @@ namespace WeShare.UI.Views
 
         private async void OnDrop(object? sender, DragEventArgs e)
         {
+            DeviceModel? targetDevice = (e.Source as Avalonia.Visual)?.DataContext as DeviceModel;
+
             var files = e.Data.GetFiles();
             if (files != null)
             {
@@ -847,7 +1028,17 @@ namespace WeShare.UI.Views
                     }
                 }
                 UpdateQueueUI();
-                NavSendFiles_Click(this, new RoutedEventArgs());
+
+                if (targetDevice != null)
+                {
+                    _sendTarget = targetDevice;
+                    ShowToast($"Sending directly to {targetDevice.DisplayName}...");
+                    StartSendSession(targetDevice);
+                }
+                else
+                {
+                    NavSendFiles_Click(this, new RoutedEventArgs());
+                }
             }
         }
 
@@ -1235,6 +1426,265 @@ namespace WeShare.UI.Views
             ShowToast("Transfer history cleared");
         }
 
+        // ── Quick Note & Clipboard Sharing ────────────────────────────────────
+        private void OpenQuickText_Click(object? sender, RoutedEventArgs e)
+        {
+            QuickTextInput.Text = string.Empty;
+            QuickTextModal.IsVisible = true;
+            QuickTextInput.Focus();
+        }
+
+        private void CloseQuickText_Click(object? sender, RoutedEventArgs e)
+        {
+            QuickTextModal.IsVisible = false;
+        }
+
+        private async void PasteClipboardToText_Click(object? sender, RoutedEventArgs e)
+        {
+            var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
+            if (clipboard != null)
+            {
+                string? text = await clipboard.GetTextAsync();
+                if (!string.IsNullOrEmpty(text))
+                {
+                    QuickTextInput.Text = text;
+                    ShowToast("Pasted from clipboard");
+                }
+                else
+                {
+                    ShowToast("Clipboard is empty or contains non-text data");
+                }
+            }
+        }
+
+        private void SendQuickText_Click(object? sender, RoutedEventArgs e)
+        {
+            string text = QuickTextInput.Text?.Trim() ?? string.Empty;
+            if (string.IsNullOrEmpty(text))
+            {
+                ShowToast("Please enter or paste text to send");
+                return;
+            }
+
+            try
+            {
+                string notesDir = Path.Combine(Path.GetTempPath(), "WeShare_Notes");
+                if (!Directory.Exists(notesDir)) Directory.CreateDirectory(notesDir);
+
+                string fileName = $"Note_{DateTime.Now:yyyyMMdd_HHmmss}.txt";
+                string filePath = Path.Combine(notesDir, fileName);
+                File.WriteAllText(filePath, $"// WE-SHARE-NOTE\n{text}");
+
+                var fi = new FileInfo(filePath);
+                SendQueue.Clear();
+                SendQueue.Add(new QueueItem
+                {
+                    Name = fileName,
+                    Path = filePath,
+                    Size = fi.Length,
+                    OpenStream = () => Task.FromResult<Stream>(File.OpenRead(filePath)),
+                    Thumbnail = null
+                });
+
+                UpdateQueueUI();
+                QuickTextModal.IsVisible = false;
+
+                if (_sendTarget != null)
+                {
+                    ShowToast($"Sending note to {_sendTarget.DisplayName}...");
+                    StartSendSession(_sendTarget);
+                }
+                else
+                {
+                    ShowToast("Note ready! Select a recipient to send to.");
+                    ShowPanel(SendDiscoveryPanel, "CHOOSE RECIPIENT", null);
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowToast($"Failed to create note: {ex.Message}");
+            }
+        }
+
+        private void CheckAndShowIncomingNote(FileTransferState state)
+        {
+            if (string.IsNullOrEmpty(state.FilePath) || !File.Exists(state.FilePath)) return;
+            var ext = Path.GetExtension(state.FilePath).ToLowerInvariant();
+            if (ext != ".txt") return;
+
+            try
+            {
+                var fi = new FileInfo(state.FilePath);
+                if (fi.Length > 128 * 1024) return;
+                string content = File.ReadAllText(state.FilePath);
+                if (content.StartsWith("// WE-SHARE-NOTE\n") || state.FileName.StartsWith("Note_"))
+                {
+                    if (content.StartsWith("// WE-SHARE-NOTE\n"))
+                    {
+                        content = content.Substring("// WE-SHARE-NOTE\n".Length);
+                    }
+                    IncomingNoteSenderText.Text = $"From: {state.PeerName}";
+                    IncomingNoteContentText.Text = content.Trim();
+                    bool hasLink = content.Contains("http://") || content.Contains("https://");
+                    IncomingNoteOpenLinkBtn.IsVisible = hasLink;
+                    IncomingNoteModal.IsVisible = true;
+                }
+            }
+            catch { }
+        }
+
+        private async void CopyIncomingNote_Click(object? sender, RoutedEventArgs e)
+        {
+            string text = IncomingNoteContentText.Text ?? string.Empty;
+            var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
+            if (clipboard != null && !string.IsNullOrEmpty(text))
+            {
+                await clipboard.SetTextAsync(text);
+                ShowToast("Copied note to clipboard!");
+            }
+        }
+
+        private void OpenIncomingNoteLink_Click(object? sender, RoutedEventArgs e)
+        {
+            string text = IncomingNoteContentText.Text ?? string.Empty;
+            var match = System.Text.RegularExpressions.Regex.Match(text, @"https?://[^\s]+");
+            if (match.Success)
+            {
+                _platformService.OpenUrl(match.Value);
+            }
+            else
+            {
+                ShowToast("No valid URL found in note");
+            }
+        }
+
+        private void CloseIncomingNote_Click(object? sender, RoutedEventArgs e)
+        {
+            IncomingNoteModal.IsVisible = false;
+        }
+
+        // ── Device Preferences (Favorites & Custom Nicknames) ─────────────────
+        private void LoadDevicePreferences()
+        {
+            try
+            {
+                string? favsJson = _dbHelper.GetSetting("FavoriteDevices", "[]");
+                if (!string.IsNullOrEmpty(favsJson))
+                {
+                    var favList = System.Text.Json.JsonSerializer.Deserialize<List<string>>(favsJson);
+                    if (favList != null)
+                    {
+                        _favoriteDeviceIds.Clear();
+                        foreach (var id in favList) _favoriteDeviceIds.Add(id);
+                    }
+                }
+
+                string? nicksJson = _dbHelper.GetSetting("DeviceNicknames", "{}");
+                if (!string.IsNullOrEmpty(nicksJson))
+                {
+                    var nicks = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(nicksJson);
+                    if (nicks != null)
+                    {
+                        _deviceNicknames.Clear();
+                        foreach (var kvp in nicks) _deviceNicknames[kvp.Key] = kvp.Value;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Prefs] Load failed: {ex.Message}");
+            }
+        }
+
+        private void SaveDevicePreferences()
+        {
+            try
+            {
+                string favsJson = System.Text.Json.JsonSerializer.Serialize(_favoriteDeviceIds.ToList());
+                _dbHelper.SetSetting("FavoriteDevices", favsJson);
+
+                string nicksJson = System.Text.Json.JsonSerializer.Serialize(_deviceNicknames);
+                _dbHelper.SetSetting("DeviceNicknames", nicksJson);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Prefs] Save failed: {ex.Message}");
+            }
+        }
+
+        private void SortDevices()
+        {
+            var sorted = Devices.OrderByDescending(d => d.IsFavorite).ThenBy(d => d.DisplayName).ToList();
+            for (int i = 0; i < sorted.Count; i++)
+            {
+                int oldIndex = Devices.IndexOf(sorted[i]);
+                if (oldIndex != i && oldIndex >= 0)
+                {
+                    Devices.Move(oldIndex, i);
+                }
+            }
+        }
+
+        private void ToggleFavorite_Click(object? sender, RoutedEventArgs e)
+        {
+            var device = (sender as Button)?.Tag as DeviceModel 
+                      ?? ((sender as MenuItem)?.DataContext as DeviceModel) 
+                      ?? ((sender as Control)?.DataContext as DeviceModel);
+            if (device != null)
+            {
+                device.IsFavorite = !device.IsFavorite;
+                if (device.IsFavorite) _favoriteDeviceIds.Add(device.Id);
+                else _favoriteDeviceIds.Remove(device.Id);
+                SaveDevicePreferences();
+                SortDevices();
+                ShowToast(device.IsFavorite ? $"Pinned '{device.DisplayName}' as favorite" : $"Unpinned '{device.DisplayName}'");
+            }
+        }
+
+        private void EditDeviceNickname_Click(object? sender, RoutedEventArgs e)
+        {
+            var device = (sender as MenuItem)?.Tag as DeviceModel 
+                      ?? ((sender as MenuItem)?.DataContext as DeviceModel) 
+                      ?? ((sender as Control)?.DataContext as DeviceModel);
+            if (device != null)
+            {
+                _editingNicknameDevice = device;
+                NicknameInput.Text = device.CustomNickname ?? device.Name;
+                EditNicknameModal.IsVisible = true;
+                NicknameInput.Focus();
+            }
+        }
+
+        private void SaveNickname_Click(object? sender, RoutedEventArgs e)
+        {
+            if (_editingNicknameDevice != null)
+            {
+                string newName = NicknameInput.Text?.Trim() ?? string.Empty;
+                if (string.IsNullOrEmpty(newName) || newName == _editingNicknameDevice.Name)
+                {
+                    _editingNicknameDevice.CustomNickname = null;
+                    _deviceNicknames.Remove(_editingNicknameDevice.Id);
+                }
+                else
+                {
+                    _editingNicknameDevice.CustomNickname = newName;
+                    _deviceNicknames[_editingNicknameDevice.Id] = newName;
+                }
+
+                SaveDevicePreferences();
+                SortDevices();
+                ShowToast($"Device renamed to '{_editingNicknameDevice.DisplayName}'");
+            }
+            EditNicknameModal.IsVisible = false;
+            _editingNicknameDevice = null;
+        }
+
+        private void CloseNicknameModal_Click(object? sender, RoutedEventArgs e)
+        {
+            EditNicknameModal.IsVisible = false;
+            _editingNicknameDevice = null;
+        }
+
         // ── Incoming request ─────────────────────────────────────────────────
         private async void RefreshDiscovery_Click(object sender, RoutedEventArgs e)
         {
@@ -1476,6 +1926,7 @@ namespace WeShare.UI.Views
 
                 _acceptTcs = new TaskCompletionSource<bool>();
                 _platformService.ShowSystemToast("Incoming File Request", $"{state.PeerName} wants to send {state.FileName} ({FileTransferState.FormatBytes(state.TotalBytes)})");
+                PlaySound("request");
                 Dispatcher.UIThread.Post(() => {
                     AcceptRejectPanel.IsVisible = true;
                     IncomingFileName.Text = state.FileName;
@@ -1515,12 +1966,16 @@ namespace WeShare.UI.Views
         private void OnDeviceDiscovered(DeviceModel device)
         {
             Dispatcher.UIThread.Post(() => {
+                if (_favoriteDeviceIds.Contains(device.Id)) device.IsFavorite = true;
+                if (_deviceNicknames.TryGetValue(device.Id, out var nick)) device.CustomNickname = nick;
+
                 var existing = Devices.FirstOrDefault(d => d.Id == device.Id);
 
                 // Ensure we don't show the same device multiple times (match by unique ID)
                 if (existing == null) 
                 {
                     Devices.Add(device);
+                    SortDevices();
                     UpdateEmptyState();
                 }
                 else 
@@ -1532,6 +1987,8 @@ namespace WeShare.UI.Views
                     existing.Type = device.Type;
                     existing.IsReceiver = device.IsReceiver;
                     existing.LastSeen = DateTime.Now;
+                    if (_deviceNicknames.TryGetValue(existing.Id, out var existingNick)) existing.CustomNickname = existingNick;
+                    existing.IsFavorite = _favoriteDeviceIds.Contains(existing.Id);
                 }
             });
         }
@@ -1614,12 +2071,15 @@ namespace WeShare.UI.Views
                     await _dbHelper.SaveTransferAsync(state);
                     ReceivedFiles.Insert(0, state);
                     ShowToast($"Received: {state.FileName}");
+                    PlaySound("complete");
                     _platformService.ShowSystemToast("File Received", $"{state.FileName} from {state.PeerName}", state.FilePath);
                     _lastAcceptedIp = state.RemoteIp;
                     _lastAcceptedTime = DateTime.Now;
+                    CheckAndShowIncomingNote(state);
                 }
                 else
                 {
+                    PlaySound("complete");
                     _currentSendingFileId = null;
                     await _dbHelper.SaveTransferAsync(state);
                     CleanTempZipFile(state.FilePath);

@@ -46,7 +46,7 @@
                     <Color x:Key="TextSecondary">#94A3B8</Color>
                     <Color x:Key="TextMuted">#64748B</Color>
                     <Color x:Key="TextNegative">#EF4444</Color>
-                    <Color x:Key="TextWarning">#06B6D4</Color>
+                    <Color x:Key="TextWarning">#F59E0B</Color>
                     <Color x:Key="TextAnnouncement">#06B6D4</Color>
 
                     <!-- Brushes -->
@@ -168,7 +168,6 @@
             <StreamGeometry x:Key="IconDevice">M4,6 H20 A2,2 0 0,1 22,8 V16 A2,2 0 0,1 20,18 H4 A2,2 0 0,1 2,16 V8 A2,2 0 0,1 4,6 Z M2,18 H22</StreamGeometry>
         </ResourceDictionary>
     </Application.Resources>
-
     <Application.Styles>
         <FluentTheme />
 
@@ -226,26 +225,6 @@
                     </KeyFrame>
                 </Animation>
             </Style.Animations>
-        </Style>
-
-        <!-- Clean Obsidian Violet ListBox Selection -->
-        <Style Selector="ListBoxItem">
-            <Setter Property="Padding" Value="0"/>
-            <Setter Property="Margin" Value="0,2"/>
-            <Setter Property="CornerRadius" Value="6"/>
-            <Setter Property="Background" Value="Transparent"/>
-        </Style>
-        <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="#1FFFFFFF"/>
-        </Style>
-        <Style Selector="ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="#337C3AED"/>
-        </Style>
-        <Style Selector="ListBoxItem:selected:focus /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="#337C3AED"/>
-        </Style>
-        <Style Selector="ListBoxItem:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="#447C3AED"/>
         </Style>
 
         <!-- Enterprise Device Node Hover -->
