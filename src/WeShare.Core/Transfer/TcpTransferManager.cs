@@ -11,6 +11,19 @@ using WeShare.Core.Security;
 
 namespace WeShare.Core.Transfer
 {
+    public class TransferDeclinedException : Exception
+    {
+        public string PeerName { get; }
+        public string FileName { get; }
+
+        public TransferDeclinedException(string peerName, string fileName)
+            : base($"{(!string.IsNullOrEmpty(peerName) ? peerName : "The recipient")} declined the transfer request.")
+        {
+            PeerName = peerName;
+            FileName = fileName;
+        }
+    }
+
     public class TcpTransferManager
     {
         private const int EnterpriseBufferSize = 1048576; // 1MB buffer for gigabit line-rate & 100GB+ large-file throughput
@@ -275,7 +288,7 @@ namespace WeShare.Core.Transfer
                     state.Status = TransferStatus.Failed;
                     state.ErrorMessage = "The recipient disconnected before the transfer could start.";
                     TransferFailed?.Invoke(state);
-                    return;
+                    throw new IOException("The recipient disconnected before the transfer could start.");
                 }
 
                 if (respBuffer[0] == 2)
@@ -283,7 +296,7 @@ namespace WeShare.Core.Transfer
                     state.Status = TransferStatus.Failed;
                     state.ErrorMessage = $"{(!string.IsNullOrEmpty(state.PeerName) ? state.PeerName : "The recipient")} declined the transfer.";
                     TransferFailed?.Invoke(state);
-                    return;
+                    throw new TransferDeclinedException(state.PeerName ?? "", state.FileName);
                 }
 
                 if (respBuffer[0] != 1)
@@ -291,7 +304,7 @@ namespace WeShare.Core.Transfer
                     state.Status = TransferStatus.Failed;
                     state.ErrorMessage = "The recipient was unable to accept the transfer.";
                     TransferFailed?.Invoke(state);
-                    return;
+                    throw new IOException("The recipient was unable to accept the transfer.");
                 }
 
                 // 3. Encrypt and send file data
@@ -311,7 +324,7 @@ namespace WeShare.Core.Transfer
 
                         var now = DateTime.UtcNow;
                         var elapsed = (now - lastReportTime).TotalSeconds;
-                        if (elapsed >= 0.25)
+                        if (elapsed >= 0.2)
                         {
                             long bytesSinceLast = totalSent - lastReportedBytes;
                             state.SpeedMbPerSec = bytesSinceLast / elapsed / 1_000_000.0;
@@ -336,7 +349,7 @@ namespace WeShare.Core.Transfer
                 state.Status = TransferStatus.Failed;
                 state.ErrorMessage = ex.Message;
                 TransferFailed?.Invoke(state);
-                if (ex is OperationCanceledException) throw;
+                throw;
             }
             finally
             {

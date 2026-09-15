@@ -227,21 +227,42 @@
             </Style.Animations>
         </Style>
 
-        <!-- Enterprise Device Node Hover -->
+        <!-- Enterprise Device Node Pop-Up Scale & Glow -->
         <Style Selector="Border.DeviceMarker">
             <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
+            <Style.Animations>
+                <Animation Duration="0:0:0.45" FillMode="Forward" Easing="CubicEaseOut">
+                    <KeyFrame Cue="0%">
+                        <Setter Property="ScaleTransform.ScaleX" Value="0.0"/>
+                        <Setter Property="ScaleTransform.ScaleY" Value="0.0"/>
+                        <Setter Property="Opacity" Value="0.0"/>
+                    </KeyFrame>
+                    <KeyFrame Cue="70%">
+                        <Setter Property="ScaleTransform.ScaleX" Value="1.18"/>
+                        <Setter Property="ScaleTransform.ScaleY" Value="1.18"/>
+                        <Setter Property="Opacity" Value="1.0"/>
+                    </KeyFrame>
+                    <KeyFrame Cue="100%">
+                        <Setter Property="ScaleTransform.ScaleX" Value="1.0"/>
+                        <Setter Property="ScaleTransform.ScaleY" Value="1.0"/>
+                        <Setter Property="Opacity" Value="1.0"/>
+                    </KeyFrame>
+                </Animation>
+            </Style.Animations>
             <Setter Property="Transitions">
                 <Transitions>
                     <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.18" Easing="CubicEaseOut"/>
                     <BrushTransition Property="BorderBrush" Duration="0:0:0.18"/>
                     <BrushTransition Property="Background" Duration="0:0:0.18"/>
+                    <BoxShadowsTransition Property="BoxShadow" Duration="0:0:0.18"/>
                 </Transitions>
             </Setter>
         </Style>
         <Style Selector="Border.DeviceMarker:pointerover">
-            <Setter Property="RenderTransform" Value="scale(1.06)"/>
-            <Setter Property="BorderBrush" Value="#FF007F"/>
-            <Setter Property="Background" Value="#1F2033"/>
+            <Setter Property="RenderTransform" Value="scale(1.1) translateY(-2px)"/>
+            <Setter Property="BorderBrush" Value="#06B6D4"/>
+            <Setter Property="Background" Value="#1E2438"/>
+            <Setter Property="BoxShadow" Value="0 8 24 0 #6006B6D4"/>
         </Style>
 
         <!-- Enterprise Rounded TextBox Styling -->
@@ -375,16 +396,21 @@
             <Setter Property="ClipToBounds" Value="False"/>
             <Setter Property="Transitions">
                <Transitions>
-                  <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.12" Easing="CubicEaseOut"/>
+                  <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.15" Easing="CubicEaseOut"/>
                </Transitions>
             </Setter>
         </Style>
+        <Style Selector="Button.CyanBtn /template/ ContentPresenter">
+            <Setter Property="ClipToBounds" Value="False"/>
+        </Style>
+        <Style Selector="Button.CyanBtn:pointerover">
+            <Setter Property="RenderTransform" Value="scale(1.04) translateY(-1px)"/>
+        </Style>
         <Style Selector="Button.CyanBtn:pointerover /template/ ContentPresenter">
             <Setter Property="Background" Value="{StaticResource CyanGradientHBrush}"/>
-            <Setter Property="RenderTransform" Value="scale(1.02)"/>
         </Style>
         <Style Selector="Button.CyanBtn:pressed">
-            <Setter Property="RenderTransform" Value="scale(0.98)"/>
+            <Setter Property="RenderTransform" Value="scale(0.97)"/>
         </Style>
     </Application.Styles>
 </Application>

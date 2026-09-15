@@ -59,10 +59,12 @@ namespace WeShare.UI.Views
         // Observable collections
         public ObservableCollection<DeviceModel> Devices { get; } = new();
         public ObservableCollection<QueueItem> SendQueue { get; } = new();
+        public ObservableCollection<FileTransferState> ActiveSends { get; } = new();
         public ObservableCollection<FileTransferState> ActiveReceives { get; } = new();
         public ObservableCollection<FileTransferState> ReceivedFiles { get; } = new();
         public ObservableCollection<FileTransferState> LibraryFiles { get; } = new();
         public ObservableCollection<StagedWebFile> StagedWebFiles { get; } = new();
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<string, System.Collections.Generic.List<QueueItem>> _lastDeclinedItems = new();
         
         // Concurrency and Session Management
         private readonly System.Threading.SemaphoreSlim _uiRequestLock = new(1, 1);
@@ -96,16 +98,18 @@ namespace WeShare.UI.Views
             // Bind list sources
             SendQueueList.ItemsSource = SendQueue;
             IncomingList.ItemsSource  = ActiveReceives;
+            OutgoingList.ItemsSource  = ActiveSends;
             ReceivedFilesList.ItemsSource = LibraryFiles;
-
-
 
             Devices.CollectionChanged += (_, _) => UpdateEmptyState();
             SendQueue.CollectionChanged += (_, _) =>
                 Dispatcher.UIThread.Post(UpdateQueueUI);
+            ActiveSends.CollectionChanged += (_, _) =>
+                Dispatcher.UIThread.Post(UpdateTransfersVisibility);
             ActiveReceives.CollectionChanged += (_, _) =>
                 Dispatcher.UIThread.Post(() => {
                     RecvEmptyState.IsVisible = ActiveReceives.Count == 0;
+                    UpdateTransfersVisibility();
                     UpdateLibraryFilesList();
                 });
             ReceivedFiles.CollectionChanged += (_, _) => UpdateLibraryFilesList();
@@ -185,6 +189,22 @@ namespace WeShare.UI.Views
                 {
                     Console.WriteLine($"[WebDashboard] Failed to load logo asset: {ex.Message}");
                 }
+                try
+                {
+                    using var sendStream = Avalonia.Platform.AssetLoader.Open(new Uri("avares://WeShare.UI/Assets/send.png"));
+                    using var msSend = new MemoryStream();
+                    sendStream.CopyTo(msSend);
+                    _webDashboardService.SendIconBytes = msSend.ToArray();
+                }
+                catch { }
+                try
+                {
+                    using var recvStream = Avalonia.Platform.AssetLoader.Open(new Uri("avares://WeShare.UI/Assets/receive.png"));
+                    using var msRecv = new MemoryStream();
+                    recvStream.CopyTo(msRecv);
+                    _webDashboardService.ReceiveIconBytes = msRecv.ToArray();
+                }
+                catch { }
                 _webDashboardService.SetPeersProvider(() => Devices.ToList());
                 _webDashboardService.WebClientConnected += OnWebClientConnected;
                 _webDashboardService.WebClientConnectedEx += OnWebClientConnectedEx;
@@ -196,28 +216,9 @@ namespace WeShare.UI.Views
                 _webDashboardService.WebTransferProgress += OnTransferProgress;
                 _webDashboardService.WebTransferCompleted += OnWebTransferCompleted;
                 _webDashboardService.WebTransferFailed += OnTransferFailed;
-                _webDashboardService.IsSessionActiveFilter = (string targetIpOrId) =>
-                {
-                    var activeIpOrId = GetActiveSessionDeviceIpOrId();
-                    if (activeIpOrId != null && activeIpOrId != targetIpOrId)
-                    {
-                        return true;
-                    }
-                    return false;
-                };
-                _webDashboardService.IsSessionActiveFilterEx = (string clientId, string remoteIp) =>
-                {
-                    var activeIpOrId = GetActiveSessionDeviceIpOrId();
-                    if (activeIpOrId != null)
-                    {
-                        bool isSame = IsSameIpAddress(remoteIp, activeIpOrId) || clientId == activeIpOrId;
-                        if (!isSame)
-                        {
-                            return true;
-                        }
-                    }
-                    return false;
-                };
+                _webDashboardService.WebOfferDeclined += OnWebOfferDeclined;
+                _webDashboardService.IsSessionActiveFilter = null;
+                _webDashboardService.IsSessionActiveFilterEx = null;
                 _webDashboardService.Start();
             }
             catch (Exception ex)
@@ -771,29 +772,38 @@ namespace WeShare.UI.Views
 
 
 
+        private void UpdateTransfersVisibility()
+        {
+            bool hasSends = ActiveSends.Count > 0 || _isSending || (SendProgressBorder != null && SendProgressBorder.IsVisible);
+            bool hasReceives = ActiveReceives.Count > 0;
+            bool hasAny = hasSends || hasReceives;
+
+            if (NoActiveTransfersCard != null)
+                NoActiveTransfersCard.IsVisible = !hasAny;
+
+            if (OutgoingTransfersBorder != null)
+                OutgoingTransfersBorder.IsVisible = ActiveSends.Count > 1;
+
+            if (IncomingBorder != null)
+                IncomingBorder.IsVisible = hasReceives;
+        }
+
+        private void CancelOutgoingItem_Click(object sender, RoutedEventArgs e)
+        {
+            if ((sender as Button)?.Tag is FileTransferState state)
+            {
+                _transferManager.CancelTransfer(state.FileId);
+                ActiveSends.Remove(state);
+                UpdateTransfersVisibility();
+                ShowToast($"Transfer of {state.FileName} cancelled");
+            }
+        }
+
         private bool _isSending = false;
         private void SendFile_Click(object sender, RoutedEventArgs e)
         {
             var device = (sender as Button)?.DataContext as DeviceModel;
             if (device == null) return;
-
-            var activeIpOrId = GetActiveSessionDeviceIpOrId();
-            if (activeIpOrId != null)
-            {
-                bool isSame = (IsSameIpAddress(device.IpAddress, activeIpOrId) || device.Id == activeIpOrId);
-                if (!isSame)
-                {
-                    ShowToast("Session active: Can only send to/receive from the active device.");
-                    return;
-                }
-            }
-
-            // If we're already sending to this device, just add to the queue
-            if (_isSending && IsSameIpAddress(_sendTarget?.IpAddress, device.IpAddress))
-            {
-                ShowPanel(SendFilesPanel, "SEND FILES", null);
-                return;
-            }
 
             if (!string.IsNullOrEmpty(device.Ssid))
             {
@@ -821,153 +831,181 @@ namespace WeShare.UI.Views
             StartSendSession(device);
         }
 
+        private DeviceModel? _lastDeclinedDevice;
+
         private void StartSendSession(DeviceModel device)
         {
-            var activeIpOrId = GetActiveSessionDeviceIpOrId();
-            if (activeIpOrId != null)
+            var itemsToSend = SendQueue.ToList();
+            if (itemsToSend.Count == 0 && _lastDeclinedItems.TryGetValue(device.Id ?? device.IpAddress, out var saved))
             {
-                bool isSame = (IsSameIpAddress(device.IpAddress, activeIpOrId) || device.Id == activeIpOrId);
-                if (!isSame)
-                {
-                    ShowToast("Session active: Can only send to/receive from the active device.");
-                    return;
-                }
+                itemsToSend = saved.ToList();
             }
 
+            if (itemsToSend.Count == 0)
+            {
+                ShowToast("Please add files to send first");
+                ShowPanel(SendFilesPanel, "SEND FILES", null);
+                return;
+            }
+
+            // Snapshot staged items for this device send session
+            SendQueue.Clear();
+            UpdateQueueUI();
+
+            TransferDeclinedCard.IsVisible = false;
             _sendTarget = device;
             ShowPanel(TransfersPanel, "TRANSFERS", NavTransfersBtn);
             SendProgressBorder.IsVisible = true;
 
-            if (!_isSending)
-            {
-                _isSending = true;
-                _ = Task.Run(() => ProcessSendQueueAsync(device));
-            }
+            _isSending = true;
+            UpdateTransfersVisibility();
+            _ = Task.Run(() => ProcessSendSessionAsync(device, itemsToSend));
         }
 
-        private async Task ProcessSendQueueAsync(DeviceModel device)
+        private async Task ProcessSendSessionAsync(DeviceModel device, System.Collections.Generic.List<QueueItem> items)
         {
             try
             {
-                while (true)
+                for (int i = 0; i < items.Count; i++)
                 {
-                    // Peek at the first item WITHOUT removing it — we only dequeue after success.
-                    // If the transfer fails, the item stays in the queue so the user can retry.
-                    QueueItem? item = null;
+                    var item = items[i];
+                    var state = new FileTransferState
+                    {
+                        FileId = Guid.NewGuid().ToString("N"),
+                        FileName = item.Name,
+                        FilePath = item.Path,
+                        TotalBytes = item.Size,
+                        PeerName = device.DisplayName,
+                        Direction = TransferDirection.Sent,
+                        Status = TransferStatus.Sending,
+                        Timestamp = DateTime.UtcNow
+                    };
+
                     await Dispatcher.UIThread.InvokeAsync(() =>
                     {
-                        if (SendQueue.Count > 0)
-                            item = SendQueue[0];
-                    });
+                        if (!ActiveSends.Any(s => s.FilePath == item.Path && s.PeerName == device.DisplayName))
+                            ActiveSends.Add(state);
 
-                    if (item == null)
-                    {
-                        // Queue empty — wait briefly then check once more before exiting
-                        await Task.Delay(1000);
-                        bool hasMore = false;
-                        await Dispatcher.UIThread.InvokeAsync(() => hasMore = SendQueue.Count > 0);
-                        if (!hasMore)
-                        {
-                            _isSending = false;
-                            break;
-                        }
-                        continue;
-                    }
-
-                    Dispatcher.UIThread.Post(() =>
-                    {
                         SendProgressFile.Text = item.Name;
                         SendProgressBar.Value = 0;
+                        SendProgressSpeed.Text = "Initiating transfer...";
+                        SendProgressBorder.IsVisible = true;
+                        UpdateTransfersVisibility();
                     });
 
                     try
                     {
                         if (device.Type == "Web Client")
                         {
-                            // Batch all remaining web client files into a single notification
-                            var allPaths = new System.Collections.Generic.List<string>();
-                            var allItems = new System.Collections.Generic.List<QueueItem>();
-                            await Dispatcher.UIThread.InvokeAsync(() =>
+                            if (items.Count > 1 && i == 0)
                             {
-                                foreach (var qi in SendQueue)
-                                {
-                                    allPaths.Add(qi.Path);
-                                    allItems.Add(qi);
-                                }
-                            });
-
-                            if (allPaths.Count > 1)
-                            {
+                                var allPaths = items.Select(x => x.Path).ToList();
                                 bool sent = _webDashboardService?.ShareMultipleForWebClient(device.Id, allPaths) ?? false;
                                 if (!sent)
                                 {
                                     ShowToast("Web client disconnected — cannot send files");
-                                    _isSending = false;
                                     break;
                                 }
-                                await Dispatcher.UIThread.InvokeAsync(() =>
-                                {
-                                    SendQueue.Clear();
-                                    UpdateQueueUI();
-                                });
+                                await Task.Delay(500);
                             }
-                            else
+                            else if (items.Count == 1)
                             {
                                 bool sent = _webDashboardService?.ShareForWebClient(device.Id, item.Path) ?? false;
                                 if (!sent)
                                 {
                                     ShowToast("Web client disconnected — cannot send file");
-                                    _isSending = false;
                                     break;
                                 }
-                                await Dispatcher.UIThread.InvokeAsync(() =>
-                                {
-                                    if (SendQueue.Count > 0 && SendQueue[0] == item)
-                                        SendQueue.RemoveAt(0);
-                                    UpdateQueueUI();
-                                });
+                                await Task.Delay(500);
                             }
                         }
                         else
                         {
                             using var stream = await item.OpenStream();
                             await _transferManager.SendFileAsync(device.IpAddress, device.Port, item.Name, stream, item.Size, item.Path);
-
-                            // Transfer succeeded — now remove it from the queue
-                            await Dispatcher.UIThread.InvokeAsync(() =>
-                            {
-                                if (SendQueue.Count > 0 && SendQueue[0] == item)
-                                    SendQueue.RemoveAt(0);
-                                UpdateQueueUI();
-                            });
                         }
+
+                        await Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            ActiveSends.Remove(state);
+                            UpdateTransfersVisibility();
+                        });
                     }
                     catch (Exception ex) when (ex is not OperationCanceledException)
                     {
-                        // Transfer failed — item is still at position 0 so the user can retry.
-                        // Stop processing the rest of the queue for this session.
-                        ShowToast($"Transfer failed: {ex.Message}");
-                        _isSending = false;
+                        if (ex is TransferDeclinedException declinedEx)
+                        {
+                            _lastDeclinedDevice = device;
+                            _lastDeclinedItems[device.Id ?? device.IpAddress] = items;
+                            await Dispatcher.UIThread.InvokeAsync(() =>
+                            {
+                                ActiveSends.Remove(state);
+                                TransferDeclinedMessage.Text = $"'{device.DisplayName}' declined the file transfer request for '{declinedEx.FileName}'.";
+                                TransferDeclinedCard.IsVisible = true;
+                                SendProgressBorder.IsVisible = false;
+                                UpdateTransfersVisibility();
+                            });
+                            return;
+                        }
+                        else
+                        {
+                            await Dispatcher.UIThread.InvokeAsync(() =>
+                            {
+                                ActiveSends.Remove(state);
+                                UpdateTransfersVisibility();
+                                ShowToast($"Transfer failed: {ex.Message}");
+                            });
+                        }
                         break;
                     }
                 }
 
-                ShowToast("All transfers completed");
+                ShowToast("Transfer completed successfully");
             }
             catch (Exception ex)
             {
                 ShowToast($"Transfer error: {ex.Message}");
-                _isSending = false;
             }
             finally
             {
-                _isSending = false;
-                Dispatcher.UIThread.Post(() =>
+                await Dispatcher.UIThread.InvokeAsync(() =>
                 {
-                    SendProgressBorder.IsVisible = false;
-                    ShowPanel(HomePanel, "HOME", NavHomeBtn);
+                    if (ActiveSends.Count == 0)
+                    {
+                        _isSending = false;
+                        SendProgressBorder.IsVisible = false;
+                    }
+                    UpdateTransfersVisibility();
                 });
             }
+        }
+
+        private void RetryTransfer_Click(object sender, RoutedEventArgs e)
+        {
+            TransferDeclinedCard.IsVisible = false;
+            if (_lastDeclinedDevice != null)
+            {
+                StartSendSession(_lastDeclinedDevice);
+            }
+        }
+
+        private void DismissDeclined_Click(object sender, RoutedEventArgs e)
+        {
+            TransferDeclinedCard.IsVisible = false;
+        }
+
+        private void OnWebOfferDeclined(string clientId, string fileNameOrId, string clientName)
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                var dev = Devices.FirstOrDefault(d => d.Id == clientId) 
+                          ?? new DeviceModel { Id = clientId, Name = clientName, Type = "Web Client" };
+                _lastDeclinedDevice = dev;
+                string fname = string.IsNullOrEmpty(fileNameOrId) ? "the file" : fileNameOrId;
+                TransferDeclinedMessage.Text = $"Web client '{clientName}' declined the transfer request for '{fname}'.";
+                TransferDeclinedCard.IsVisible = true;
+                SendProgressBorder.IsVisible = false;
+            });
         }
 
         private async void BrowseFiles_Click(object sender, RoutedEventArgs e) => await BrowseFilesInternalAsync();
@@ -1712,13 +1750,11 @@ namespace WeShare.UI.Views
                     _hotspotService = new HotspotService();
                     if (await _hotspotService.IsSupportedAsync())
                     {
-                        ShowToast("Starting WeShare hotspot...");
                         var (started, _) = await _hotspotService.StartAsync();
                         if (started)
                         {
                             await Task.Delay(1000);
                             UpdateNetworkLabels();
-                            ShowToast($"Hotspot active — connect devices to \"{HotspotService.TargetSsid}\"");
                         }
                     }
                     return;
@@ -1727,18 +1763,15 @@ namespace WeShare.UI.Views
                 _wifiConnector = new WifiConnectorService();
 
                 // Step 1 — Try to JOIN an existing WeShare hotspot (client role)
-                ShowToast("No network — scanning for WeShare hotspot...");
                 bool found = await _wifiConnector.IsWeShareHotspotVisibleAsync();
 
                 if (found)
                 {
-                    ShowToast("WeShare hotspot found! Connecting automatically...");
                     var (ok, _) = await _wifiConnector.AutoConnectToWeShareAsync();
                     if (ok)
                     {
                         await Task.Delay(1500); // let DHCP settle
                         UpdateNetworkLabels();
-                        ShowToast("Connected! Scanning for devices...");
 
                         // Burst-broadcast so the host sees us immediately
                         for (int i = 0; i < 4; i++)
@@ -1754,17 +1787,14 @@ namespace WeShare.UI.Views
                 _hotspotService = new HotspotService();
                 if (!await _hotspotService.IsSupportedAsync())
                 {
-                    ShowToast("No network. Use \"CONNECT VIA IP\" to connect manually.");
                     return;
                 }
 
-                ShowToast("Starting WeShare hotspot...");
                 var (startedHost, _) = await _hotspotService.StartAsync();
                 if (startedHost)
                 {
                     await Task.Delay(1000);
                     UpdateNetworkLabels();
-                    ShowToast($"Hotspot active — other PC will auto-connect to \"{HotspotService.TargetSsid}\"");
                 }
             }
             catch (Exception ex)
@@ -1892,16 +1922,7 @@ namespace WeShare.UI.Views
         private TaskCompletionSource<bool>? _acceptTcs;
         private async Task<bool> OnTransferRequested(FileTransferState state)
         {
-            var activeIpOrId = GetActiveSessionDeviceIpOrId();
-            bool isSame = false;
-            if (activeIpOrId != null)
-            {
-                isSame = (IsSameIpAddress(state.RemoteIp, activeIpOrId) || state.FileId == activeIpOrId);
-                if (!isSame)
-                {
-                    return false;
-                }
-            }
+            bool isSame = (IsSameIpAddress(_lastAcceptedIp, state.RemoteIp) && (DateTime.Now - _lastAcceptedTime).TotalSeconds < 60);
 
             // 1. Auto-Accept Logic (Settings or active session) - check before lock
             if (_autoAcceptAllTransfers || isSame || (IsSameIpAddress(_lastAcceptedIp, state.RemoteIp) && (DateTime.Now - _lastAcceptedTime).TotalSeconds < 60))
@@ -2377,7 +2398,6 @@ namespace WeShare.UI.Views
                     });
                 }
                 UpdateEmptyState();
-                ShowToast($"Web client '{client.Name}' connected");
                 if (WebSharedPanel != null && WebSharedPanel.IsVisible)
                 {
                     UpdateWebSharedClientsList();
@@ -2393,7 +2413,6 @@ namespace WeShare.UI.Views
                 {
                     Devices.Remove(existing);
                     UpdateEmptyState();
-                    ShowToast($"Web client '{existing.Name}' disconnected");
                 }
 
                 // Cleanup staged files for this disconnected client

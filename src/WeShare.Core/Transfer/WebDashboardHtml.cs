@@ -11,10 +11,6 @@ namespace WeShare.Core.Transfer
 <meta name=""theme-color"" content=""#080A10"">
 <title>We Share | Web Portal</title>
 
-<link rel=""preconnect"" href=""https://fonts.googleapis.com"">
-<link rel=""preconnect"" href=""https://fonts.gstatic.com"" crossorigin>
-<link href=""https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"" rel=""stylesheet"">
-
 <style>
 :root {
   --bg: #07090E;
@@ -76,7 +72,7 @@ html[data-theme=""light""] {
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Segoe UI', system-ui, -apple-system, Roboto, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
   min-height: 100vh;
   padding-bottom: 120px;
   overflow-x: hidden;
@@ -1539,7 +1535,8 @@ input[type=""file""] {
     <!-- Step 1: Interactive Dropzone -->
     <div class=""dropzone-card"" id=""dropZone"" onclick=""document.getElementById('multiFileInput').click()"">
       <div class=""dz-icon-circle"">
-        <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2.2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4""/><polyline points=""17 8 12 3 7 8""/><line x1=""12"" y1=""3"" x2=""12"" y2=""15""/></svg>
+        <img src=""/api/assets/send.png"" onerror=""this.style.display='none'; this.nextElementSibling.style.display='block';"" alt=""Send"" style=""width:44px; height:44px; object-fit:contain; filter:drop-shadow(0 4px 12px rgba(124,58,237,0.45));"">
+        <svg style=""display:none;"" xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2.2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4""/><polyline points=""17 8 12 3 7 8""/><line x1=""12"" y1=""3"" x2=""12"" y2=""15""/></svg>
       </div>
       <div class=""dz-title"">Step 1: Select Files to Transfer</div>
       <div class=""dz-sub"">Tap or drop photos, 4K videos, documents, or archives of any size.</div>
@@ -1712,7 +1709,8 @@ input[type=""file""] {
 <div class=""modal-overlay"" id=""singleOfferModal"">
   <div class=""modal-sheet"">
     <div class=""modal-icon-disc"">
-      <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4""/><polyline points=""7 10 12 15 17 10""/><line x1=""12"" y1=""15"" x2=""12"" y2=""3""/></svg>
+      <img src=""/api/assets/receive.png"" onerror=""this.style.display='none'; this.nextElementSibling.style.display='block';"" alt=""Receive"" style=""width:44px; height:44px; object-fit:contain; filter:drop-shadow(0 4px 12px rgba(236,72,153,0.45));"">
+      <svg style=""display:none;"" xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4""/><polyline points=""7 10 12 15 17 10""/><line x1=""12"" y1=""15"" x2=""12"" y2=""3""/></svg>
     </div>
     <div class=""modal-title"">Incoming File</div>
     <div class=""modal-desc"" id=""singleOfferDesc"">The host PC is offering to send you a file.</div>
@@ -1729,7 +1727,8 @@ input[type=""file""] {
 <div class=""modal-overlay"" id=""batchOfferModal"">
   <div class=""modal-sheet"">
     <div class=""modal-icon-disc"">
-      <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z""/></svg>
+      <img src=""/api/assets/receive.png"" onerror=""this.style.display='none'; this.nextElementSibling.style.display='block';"" alt=""Receive"" style=""width:44px; height:44px; object-fit:contain; filter:drop-shadow(0 4px 12px rgba(236,72,153,0.45));"">
+      <svg style=""display:none;"" xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z""/></svg>
     </div>
     <div class=""modal-title"" id=""batchOfferTitle"">Incoming Batch</div>
     <div class=""modal-desc"" id=""batchOfferDesc"">Multiple files incoming from PC.</div>
@@ -2435,7 +2434,9 @@ function acceptSingleOffer() {
   const modal = document.getElementById('singleOfferModal');
   modal.classList.remove('active');
   if (pendingSingleOffer) {
-    window.location.href = `/download?file=${encodeURIComponent(pendingSingleOffer.name)}&fileId=${pendingSingleOffer.fileId}`;
+    const fid = pendingSingleOffer.id || pendingSingleOffer.fileId || '';
+    const cid = getClientId();
+    window.location.href = `/download?id=${encodeURIComponent(fid)}&file=${encodeURIComponent(pendingSingleOffer.name)}&clientId=${encodeURIComponent(cid)}`;
     showToast('Download started');
   }
 }
@@ -2444,7 +2445,10 @@ function declineSingleOffer() {
   const modal = document.getElementById('singleOfferModal');
   modal.classList.remove('active');
   if (pendingSingleOffer) {
-    fetch('/api/decline?id=' + pendingSingleOffer.fileId, { method: 'POST' }).catch(() => {});
+    const fid = pendingSingleOffer.id || pendingSingleOffer.fileId || '';
+    const cid = getClientId();
+    fetch(`/api/decline?id=${encodeURIComponent(fid)}&clientId=${encodeURIComponent(cid)}`, { method: 'POST' }).catch(() => {});
+    showToast('Transfer declined');
   }
 }
 
@@ -2452,10 +2456,12 @@ function acceptBatchOffer() {
   const modal = document.getElementById('batchOfferModal');
   modal.classList.remove('active');
   if (pendingBatchOffer && Array.isArray(pendingBatchOffer.files)) {
+    const cid = getClientId();
     pendingBatchOffer.files.forEach((f, idx) => {
       setTimeout(() => {
+        const fid = f.id || f.fileId || '';
         const link = document.createElement('a');
-        link.href = `/download?file=${encodeURIComponent(f.name)}&fileId=${f.fileId || ''}`;
+        link.href = `/download?id=${encodeURIComponent(fid)}&file=${encodeURIComponent(f.name)}&clientId=${encodeURIComponent(cid)}`;
         link.download = f.name;
         document.body.appendChild(link);
         link.click();
@@ -2470,7 +2476,10 @@ function declineBatchOffer() {
   const modal = document.getElementById('batchOfferModal');
   modal.classList.remove('active');
   if (pendingBatchOffer) {
-    fetch('/api/decline?id=' + (pendingBatchOffer.batchId || ''), { method: 'POST' }).catch(() => {});
+    const fid = pendingBatchOffer.id || pendingBatchOffer.batchId || '';
+    const cid = getClientId();
+    fetch(`/api/decline?id=${encodeURIComponent(fid)}&clientId=${encodeURIComponent(cid)}`, { method: 'POST' }).catch(() => {});
+    showToast('Batch transfer declined');
   }
 }
 

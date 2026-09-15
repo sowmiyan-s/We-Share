@@ -35,6 +35,8 @@ namespace WeShare.Core.Transfer
         public int Port { get; private set; } = 8080;
         public event Action<int>? PortChanged;
         public byte[]? LogoBytes { get; set; }
+        public byte[]? SendIconBytes { get; set; }
+        public byte[]? ReceiveIconBytes { get; set; }
         
         public event Action<string, string>? WebClientConnected;
         public event Action<WebClientInfo>? WebClientConnectedEx;
@@ -45,6 +47,7 @@ namespace WeShare.Core.Transfer
         public event Action<FileTransferState>? WebTransferCompleted;
         public event Action<FileTransferState>? WebTransferFailed;
         public event Action<string>? WebClientHeartbeat;
+        public event Action<string, string, string>? WebOfferDeclined;
         public Func<FileTransferState, Task<bool>>? WebFileSharedCallback { get; set; }
         public Func<string, bool>? IsSessionActiveFilter { get; set; }
         public Func<string, string, bool>? IsSessionActiveFilterEx { get; set; }
@@ -457,22 +460,85 @@ namespace WeShare.Core.Transfer
                         }
                     }
 
+                    else if (method == "GET" && (path == "/api/assets/send.png" || path == "/assets/send.png"))
+                    {
+                        if (SendIconBytes != null)
+                        {
+                            var header = $"HTTP/1.1 200 OK\r\n" +
+                                         $"Content-Type: image/png\r\n" +
+                                         $"Content-Length: {SendIconBytes.Length}\r\n" +
+                                         "Connection: close\r\n" +
+                                         "Access-Control-Allow-Origin: *\r\n" +
+                                         "\r\n";
+                            await stream.WriteAsync(Encoding.ASCII.GetBytes(header));
+                            await stream.WriteAsync(SendIconBytes);
+                            await stream.FlushAsync();
+                        }
+                        else
+                        {
+                            var header = "HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n";
+                            await stream.WriteAsync(Encoding.ASCII.GetBytes(header));
+                            await stream.FlushAsync();
+                        }
+                    }
+
+                    else if (method == "GET" && (path == "/api/assets/receive.png" || path == "/assets/receive.png"))
+                    {
+                        if (ReceiveIconBytes != null)
+                        {
+                            var header = $"HTTP/1.1 200 OK\r\n" +
+                                         $"Content-Type: image/png\r\n" +
+                                         $"Content-Length: {ReceiveIconBytes.Length}\r\n" +
+                                         "Connection: close\r\n" +
+                                         "Access-Control-Allow-Origin: *\r\n" +
+                                         "\r\n";
+                            await stream.WriteAsync(Encoding.ASCII.GetBytes(header));
+                            await stream.WriteAsync(ReceiveIconBytes);
+                            await stream.FlushAsync();
+                        }
+                        else
+                        {
+                            var header = "HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n";
+                            await stream.WriteAsync(Encoding.ASCII.GetBytes(header));
+                            await stream.FlushAsync();
+                        }
+                    }
+
                     else if (method == "POST" && path == "/api/decline")
                     {
                         string? clientId = queryParams.GetValueOrDefault("clientId");
                         string? fileId = queryParams.GetValueOrDefault("id");
-                        if (!string.IsNullOrEmpty(clientId) && !string.IsNullOrEmpty(fileId))
+                        string clientName = "Web Client";
+                        string fileName = "";
+
+                        if (!string.IsNullOrEmpty(clientId))
                         {
-                            await _filesLock.WaitAsync();
+                            await _webClientsLock.WaitAsync();
                             try
                             {
-                                if (_clientSpecificFiles.TryGetValue(clientId, out var list))
-                                {
-                                    var item = list.FirstOrDefault(f => string.Equals(f.Id, fileId, StringComparison.OrdinalIgnoreCase));
-                                    if (item != null) list.Remove(item);
-                                }
+                                if (_activeWebClients.TryGetValue(clientId, out var clientInfo))
+                                    clientName = clientInfo.Name;
                             }
-                            finally { _filesLock.Release(); }
+                            finally { _webClientsLock.Release(); }
+
+                            if (!string.IsNullOrEmpty(fileId))
+                            {
+                                await _filesLock.WaitAsync();
+                                try
+                                {
+                                    if (_clientSpecificFiles.TryGetValue(clientId, out var list))
+                                    {
+                                        var item = list.FirstOrDefault(f => string.Equals(f.Id, fileId, StringComparison.OrdinalIgnoreCase));
+                                        if (item != null)
+                                        {
+                                            fileName = item.Name;
+                                            list.Remove(item);
+                                        }
+                                    }
+                                }
+                                finally { _filesLock.Release(); }
+                            }
+                            WebOfferDeclined?.Invoke(clientId, string.IsNullOrEmpty(fileName) ? (fileId ?? "") : fileName, clientName);
                         }
                         await SendResponse(stream, 200, "text/plain", "OK");
                     }
@@ -491,21 +557,6 @@ namespace WeShare.Core.Transfer
                             WebClientHeartbeat?.Invoke(clientId);
                         }
 
-                        bool isBlocked = false;
-                        if (IsSessionActiveFilterEx != null)
-                        {
-                            isBlocked = IsSessionActiveFilterEx(clientId ?? "", remoteIp);
-                        }
-                        else if (IsSessionActiveFilter != null)
-                        {
-                            isBlocked = IsSessionActiveFilter(remoteIp);
-                        }
-
-                        if (isBlocked)
-                        {
-                            await SendResponse(stream, 400, "application/json", "{\"accepted\":false,\"error\":\"Another device session is currently active\"}");
-                            return;
-                        }
 
                         string uploaderName = "Mobile Web";
                         if (!string.IsNullOrEmpty(clientId))
@@ -654,24 +705,23 @@ namespace WeShare.Core.Transfer
 
                     else if (method == "GET" && path == "/download")
                     {
-                        string? id = queryParams.GetValueOrDefault("id");
+                        string? id = queryParams.GetValueOrDefault("id") ?? queryParams.GetValueOrDefault("fileId");
                         string? clientId = queryParams.GetValueOrDefault("clientId");
 
-                        if (!string.IsNullOrEmpty(clientId) && IsSessionActiveFilter != null && IsSessionActiveFilter(clientId))
-                        {
-                            await SendResponse(stream, 403, "text/plain", "Another device session is active");
-                            return;
-                        }
 
                         SharedFile? file = null;
                         await _filesLock.WaitAsync();
                         try 
                         { 
-                            if (!string.IsNullOrEmpty(id) && !string.IsNullOrEmpty(clientId))
+                            if (!string.IsNullOrEmpty(id))
                             {
-                                if (_clientSpecificFiles.TryGetValue(clientId, out var list))
+                                if (!string.IsNullOrEmpty(clientId) && _clientSpecificFiles.TryGetValue(clientId, out var list))
                                 {
                                     file = list.FirstOrDefault(f => string.Equals(f.Id, id, StringComparison.OrdinalIgnoreCase));
+                                }
+                                if (file == null)
+                                {
+                                    file = _sharedFiles.FirstOrDefault(f => string.Equals(f.Id, id, StringComparison.OrdinalIgnoreCase));
                                 }
                             }
                         }
@@ -688,9 +738,60 @@ namespace WeShare.Core.Transfer
                                          "Access-Control-Allow-Origin: *\r\n" +
                                          "\r\n";
                             await stream.WriteAsync(Encoding.ASCII.GetBytes(header));
+
+                            string clientName = "Web Client";
+                            if (!string.IsNullOrEmpty(clientId))
+                            {
+                                await _webClientsLock.WaitAsync();
+                                try
+                                {
+                                    if (_activeWebClients.TryGetValue(clientId, out var cInfo))
+                                        clientName = cInfo.Name;
+                                }
+                                finally { _webClientsLock.Release(); }
+                            }
+
+                            var state = new FileTransferState
+                            {
+                                FileId = file.Id,
+                                FileName = file.Name,
+                                FilePath = file.Path,
+                                TotalBytes = info.Length,
+                                TransferredBytes = 0,
+                                PeerName = clientName,
+                                Direction = TransferDirection.Sent,
+                                Status = TransferStatus.Sending,
+                                Timestamp = DateTime.UtcNow
+                            };
+                            WebTransferStarted?.Invoke(state);
+
                             using var fs = new FileStream(file.Path, FileMode.Open, FileAccess.Read, FileShare.Read);
-                            await fs.CopyToAsync(stream);
+                            byte[] buf = new byte[65536];
+                            int r;
+                            long sent = 0;
+                            long lastReported = 0;
+                            DateTime lastTime = DateTime.UtcNow;
+
+                            while ((r = await fs.ReadAsync(buf, 0, buf.Length)) > 0)
+                            {
+                                await stream.WriteAsync(buf, 0, r);
+                                sent += r;
+                                state.TransferredBytes = sent;
+
+                                var now = DateTime.UtcNow;
+                                var elapsed = (now - lastTime).TotalSeconds;
+                                if (elapsed >= 0.25)
+                                {
+                                    state.SpeedMbPerSec = (sent - lastReported) / elapsed / 1_000_000.0;
+                                    lastReported = sent;
+                                    lastTime = now;
+                                    WebTransferProgress?.Invoke(state);
+                                }
+                            }
                             await stream.FlushAsync();
+                            state.TransferredBytes = info.Length;
+                            state.Status = TransferStatus.Done;
+                            WebTransferCompleted?.Invoke(state);
                         }
                         else
                             await SendResponse(stream, 404, "text/plain", "File Not Found");
