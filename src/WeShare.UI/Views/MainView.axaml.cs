@@ -574,7 +574,10 @@ namespace WeShare.UI.Views
 
         private void HomeSend_Click(object sender, RoutedEventArgs e)
         {
+            _sendTarget = null;
             SendStepWizard.IsVisible = true;
+            Step1Indicator.Foreground = SolidColorBrush.Parse("#7C3AED");
+            Step2Indicator.Foreground = SolidColorBrush.Parse("#64748B");
             ShowPanel(SendFilesPanel, "SEND FILES", NavHomeBtn);
         }
 
@@ -582,10 +585,11 @@ namespace WeShare.UI.Views
 
         private void NavSendFiles_Click(object sender, RoutedEventArgs e)
         {
+            _sendTarget = null;
             ShowPanel(SendFilesPanel, "SEND FILES", null);
             SendStepWizard.IsVisible = true;
-            Step1Indicator.Foreground = SolidColorBrush.Parse("#6366F1");
-            Step2Indicator.Foreground = SolidColorBrush.Parse("#40FFFFFF");
+            Step1Indicator.Foreground = SolidColorBrush.Parse("#7C3AED");
+            Step2Indicator.Foreground = SolidColorBrush.Parse("#64748B");
             UpdateQueueUI();
         }
 
@@ -596,10 +600,11 @@ namespace WeShare.UI.Views
                 ShowToast("Please add some files first");
                 return;
             }
-            ShowPanel(SendDiscoveryPanel, "SEND FILES", null);
+            _sendTarget = null;
+            ShowPanel(SendDiscoveryPanel, "CHOOSE RECIPIENT", null);
             SendStepWizard.IsVisible = true;
-            Step1Indicator.Foreground = SolidColorBrush.Parse("#40FFFFFF");
-            Step2Indicator.Foreground = SolidColorBrush.Parse("#6366F1");
+            Step1Indicator.Foreground = SolidColorBrush.Parse("#64748B");
+            Step2Indicator.Foreground = SolidColorBrush.Parse("#7C3AED");
 
             // Update the "LOOKING FOR DEVICES..." hint immediately, then trigger a
             // fresh broadcast so newly-arrived receivers appear on the radar quickly.
@@ -1115,7 +1120,7 @@ namespace WeShare.UI.Views
             if (SendQueue.Count == 0) return;
             if (_sendTarget == null)
             {
-                ShowToast("Please select a receiver from the radar first");
+                NavSendDiscovery_Click(sender, e);
                 return;
             }
 
