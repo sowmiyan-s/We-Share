@@ -176,7 +176,7 @@ namespace WeShare.UI.Views
                 _webDashboardService = new WebDashboardService(_saveDirectory, _localDevice);
                 try
                 {
-                    using var assetStream = Avalonia.Platform.AssetLoader.Open(new Uri("avares://WeShare.UI/Assets/logo.png"));
+                    using var assetStream = Avalonia.Platform.AssetLoader.Open(new Uri("avares://WeShare.UI/Assets/app_logo.png"));
                     using var ms = new MemoryStream();
                     assetStream.CopyTo(ms);
                     _webDashboardService.LogoBytes = ms.ToArray();

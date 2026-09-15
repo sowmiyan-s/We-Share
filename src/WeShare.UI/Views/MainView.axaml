@@ -285,7 +285,7 @@
           
           <!-- Brand Header with Pure White Vector Logo (No Borders) -->
           <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center" Margin="6,6,0,0">
-             <Image Source="avares://WeShare.UI/Assets/brand_symbol.png" Width="28" Height="28" Stretch="Uniform" VerticalAlignment="Center"/>
+             <Image Source="avares://WeShare.UI/Assets/app_logo.png" Width="30" Height="30" Stretch="Uniform" VerticalAlignment="Center"/>
              <TextBlock Text="We Share" FontSize="19" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center" LetterSpacing="0.4"/>
           </StackPanel>
 

@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="src/WeShare.UI/Assets/logo.png" width="96" height="96" alt="We Share Logo" />
+<img src="src/WeShare.UI/Assets/app_logo.png" width="96" height="96" alt="We Share Logo" />
 
 # We Share
 

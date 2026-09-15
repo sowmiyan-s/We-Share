@@ -3,7 +3,7 @@
         xmlns:views="using:WeShare.UI.Views"
         x:Class="WeShare.UI.MainWindow"
         Title="We Share"
-        Icon="/Assets/app-icon.png"
+        Icon="/Assets/app_logo.png"
         Width="1180" Height="760"
         MinWidth="960" MinHeight="640"
         CanResize="True"

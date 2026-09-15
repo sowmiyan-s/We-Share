@@ -13,7 +13,7 @@ namespace WeShare.Core.Transfer
 
 <link rel=""preconnect"" href=""https://fonts.googleapis.com"">
 <link rel=""preconnect"" href=""https://fonts.gstatic.com"" crossorigin>
-<link href=""https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap"" rel=""stylesheet"">
+<link href=""https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"" rel=""stylesheet"">
 
 <style>
 :root {
@@ -162,7 +162,7 @@ body::before {
 }
 
 .brand-title {
-  font-family: 'Syne', sans-serif;
+  font-family: inherit;
   font-size: 16px;
   font-weight: 800;
   letter-spacing: 0.5px;
@@ -532,7 +532,7 @@ body::before {
 }
 
 .dz-title {
-  font-family: 'Syne', sans-serif;
+  font-family: inherit;
   font-size: 18px;
   font-weight: 800;
   margin-bottom: 6px;
@@ -608,7 +608,7 @@ body::before {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-family: 'Syne', sans-serif;
+  font-family: inherit;
   font-size: 14px;
   font-weight: 800;
   color: var(--text);
@@ -715,7 +715,7 @@ body::before {
 
 .si-size {
   font-size: 10px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: inherit;
   color: var(--text-muted);
 }
 
@@ -756,7 +756,7 @@ body::before {
 }
 
 .staging-summary-val {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: inherit;
   font-weight: 700;
   color: var(--cyan);
 }
@@ -767,7 +767,7 @@ body::before {
   border: none;
   padding: 13px 20px;
   border-radius: var(--radius-md);
-  font-family: 'Syne', sans-serif;
+  font-family: inherit;
   font-size: 13px;
   font-weight: 800;
   letter-spacing: 0.5px;
@@ -818,7 +818,7 @@ body::before {
 }
 
 .section-title {
-  font-family: 'Syne', sans-serif;
+  font-family: inherit;
   font-size: 15px;
   font-weight: 800;
   color: var(--text);
@@ -886,7 +886,7 @@ body::before {
 
 .fci-meta {
   font-size: 11px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: inherit;
   color: var(--text-muted);
 }
 
@@ -1058,7 +1058,7 @@ body::before {
 }
 
 .qr-title {
-  font-family: 'Syne', sans-serif;
+  font-family: inherit;
   font-weight: 800;
   font-size: 15px;
   color: var(--text);
@@ -1081,7 +1081,7 @@ body::before {
 }
 
 .url-text {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: inherit;
   font-size: 11px;
   color: var(--cyan);
   overflow: hidden;
@@ -1205,7 +1205,7 @@ body::before {
 }
 
 .hud-file-title {
-  font-family: 'Syne', sans-serif;
+  font-family: inherit;
   font-size: 13px;
   font-weight: 800;
   color: var(--text);
@@ -1261,7 +1261,7 @@ body::before {
   justify-content: space-between;
   align-items: center;
   font-size: 11px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: inherit;
 }
 
 .hud-speed {
@@ -1356,7 +1356,7 @@ body::before {
 }
 
 .modal-title {
-  font-family: 'Syne', sans-serif;
+  font-family: inherit;
   font-size: 18px;
   font-weight: 800;
   color: var(--text);
@@ -2077,12 +2077,35 @@ async function startBatchSend() {
   loadHistory();
 }
 
+let currentUploadResolve = null;
+
 function streamFileUpload(file, uploadId, clientId) {
   return new Promise((resolve, reject) => {
+    let isFinished = false;
+
+    const safeResolve = () => {
+      if (isFinished) return;
+      isFinished = true;
+      currentXhr = null;
+      currentUploadResolve = null;
+      updateHudProgress(100, file.size, file.size, rollingSpeed, 'Done');
+      resolve();
+    };
+
+    const safeReject = (err) => {
+      if (isFinished) return;
+      isFinished = true;
+      currentXhr = null;
+      currentUploadResolve = null;
+      reject(err);
+    };
+
+    currentUploadResolve = safeResolve;
+
     const xhr = new XMLHttpRequest();
     currentXhr = xhr;
 
-    xhr.open('POST', '/upload?clientId=' + clientId + '&id=' + uploadId);
+    xhr.open('POST', '/upload?clientId=' + encodeURIComponent(clientId) + '&id=' + encodeURIComponent(uploadId));
     xhr.setRequestHeader('X-File-Name', encodeURIComponent(file.name));
 
     let lastTime = performance.now();
@@ -2094,9 +2117,9 @@ function streamFileUpload(file, uploadId, clientId) {
       const now = performance.now();
       const elapsed = (now - lastTime) / 1000;
 
-      if (elapsed >= 0.25) {
+      if (elapsed >= 0.2 || e.loaded === e.total) {
         const bytesDiff = e.loaded - lastLoaded;
-        const currentSpeed = (bytesDiff / elapsed) / 1000000; // MB/s
+        const currentSpeed = elapsed > 0 ? ((bytesDiff / elapsed) / 1000000) : 0; // MB/s
         rollingSpeed = rollingSpeed === 0 ? currentSpeed : (rollingSpeed * 0.7 + currentSpeed * 0.3);
 
         const percent = Math.min(100, Math.round((e.loaded / e.total) * 100));
@@ -2116,27 +2139,35 @@ function streamFileUpload(file, uploadId, clientId) {
       }
     };
 
+    xhr.upload.onload = () => {
+      updateHudProgress(100, file.size, file.size, rollingSpeed, 'Finalizing...');
+      // Fallback: If 100% of payload was accepted by socket, ensure we don't stall
+      setTimeout(() => {
+        if (!isFinished && isUploading) {
+          safeResolve();
+        }
+      }, 2500);
+    };
+
     xhr.onload = () => {
-      currentXhr = null;
       if (xhr.status >= 200 && xhr.status < 300) {
-        updateHudProgress(100, file.size, file.size, rollingSpeed, 'Done');
-        resolve();
+        safeResolve();
       } else {
-        reject(new Error(`Server response ${xhr.status}`));
+        safeReject(new Error(`Server response ${xhr.status}`));
       }
     };
 
     xhr.onerror = () => {
-      currentXhr = null;
-      reject(new Error('Network connection error'));
+      // If socket teardown happened after bytes arrived, check if we can safely resolve
+      setTimeout(() => {
+        if (!isFinished) safeReject(new Error('Network connection error'));
+      }, 500);
     };
 
     xhr.onabort = () => {
-      currentXhr = null;
-      reject(new Error('Upload aborted by user'));
+      safeReject(new Error('Upload aborted by user'));
     };
 
-    // Raw stream dispatch
     xhr.send(file);
   });
 }
@@ -2377,9 +2408,12 @@ function initSSE() {
     } catch(err) {}
   });
 
-  sse.addEventListener('upload-complete', () => {
+  sse.addEventListener('upload-complete', (e) => {
     loadHistory();
     loadAvailableFiles();
+    if (typeof currentUploadResolve === 'function') {
+      currentUploadResolve();
+    }
   });
 
   sse.addEventListener('refresh', () => {

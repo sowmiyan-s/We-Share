@@ -785,7 +785,7 @@ namespace WeShare.Core.Transfer
                             // Notify web client that upload is complete
                             if (!string.IsNullOrEmpty(clientId))
                             {
-                                NotifyClient(clientId, $"upload-complete:{{\"id\":\"{transferState.FileId}\"}}");
+                                NotifyClient(clientId, $"upload-complete:{{\"id\":\"{transferState.FileId}\",\"name\":\"{Uri.EscapeDataString(transferState.FileName)}\",\"bytes\":{contentLength}}}");
                             }
 
                             if (contentLength > 0)
@@ -805,6 +805,7 @@ namespace WeShare.Core.Transfer
                             }
 
                             await SendJson(stream, new { success = true, saved = Path.GetFileName(transferState.FilePath), bytes = contentLength });
+                            try { client.Client.Shutdown(System.Net.Sockets.SocketShutdown.Send); } catch { }
                         }
                         catch (Exception ex)
                         {
