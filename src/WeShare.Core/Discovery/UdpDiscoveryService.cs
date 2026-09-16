@@ -68,17 +68,24 @@ namespace WeShare.Core.Discovery
         {
             try
             {
+                // Ignore packets sent from this machine's own network interfaces or loopback
+                if (IsOwnAddress(result.RemoteEndPoint.Address)) return;
+
                 var json   = Encoding.UTF8.GetString(result.Buffer);
                 var device = JsonSerializer.Deserialize<DeviceModel>(json,
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                 if (device == null) return;
 
-                // Ignore packets from ourselves (match by Id)
+                // Ignore packets from ourselves (match by Id or MachineName)
                 if (device.Id == _localDevice.Id) return;
+                if (string.Equals(device.Name, _localDevice.Name, StringComparison.OrdinalIgnoreCase) && IsOwnAddress(result.RemoteEndPoint.Address)) return;
 
                 // Always set IP from the packet's real source address
                 device.IpAddress = result.RemoteEndPoint.Address.ToString();
+
+                // Also double check if the reported device IP belongs to ourselves
+                if (IsOwnAddress(device.IpAddress)) return;
 
                 Console.WriteLine($"[Discovery] Found: {device.Name} @ {device.IpAddress}");
                 DeviceDiscovered?.Invoke(device);
@@ -223,7 +230,7 @@ namespace WeShare.Core.Discovery
         }
 
         /// <summary>Returns true if the address belongs to this machine.</summary>
-        private static bool IsOwnAddress(IPAddress address)
+        public static bool IsOwnAddress(IPAddress address)
         {
             if (IPAddress.IsLoopback(address)) return true;
             foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
@@ -232,6 +239,17 @@ namespace WeShare.Core.Discovery
                 foreach (var ua in ni.GetIPProperties().UnicastAddresses)
                     if (ua.Address.Equals(address)) return true;
             }
+            return false;
+        }
+
+        /// <summary>Returns true if the string IP address or localhost belongs to this machine.</summary>
+        public static bool IsOwnAddress(string? ipString)
+        {
+            if (string.IsNullOrWhiteSpace(ipString)) return false;
+            if (ipString.Equals("localhost", StringComparison.OrdinalIgnoreCase)) return true;
+            if (ipString.Equals("::1", StringComparison.OrdinalIgnoreCase)) return true;
+            if (IPAddress.TryParse(ipString, out var parsed))
+                return IsOwnAddress(parsed);
             return false;
         }
 

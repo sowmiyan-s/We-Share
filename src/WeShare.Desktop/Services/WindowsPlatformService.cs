@@ -206,8 +206,11 @@ namespace WeShare.Desktop.Services
                         }
                     }
 
-                    if (!string.IsNullOrEmpty(ip))
+                    if (!string.IsNullOrEmpty(ip) && !WeShare.Core.Discovery.UdpDiscoveryService.IsOwnAddress(ip))
                     {
+                        if (!string.IsNullOrEmpty(name) && string.Equals(name, Environment.MachineName, StringComparison.OrdinalIgnoreCase))
+                            return;
+
                         onDeviceFound?.Invoke(new DeviceModel
                         {
                             Id       = args.BluetoothAddress.ToString(),

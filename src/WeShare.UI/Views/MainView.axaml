@@ -14,6 +14,7 @@
     <local:FileSizeConverter x:Key="FileSizeConverter"/>
     <local:RadarPositionConverter x:Key="RadarPos"/>
     <local:DeviceTypeToIconConverter x:Key="DeviceTypeToIconConverter"/>
+    <local:TransferDirectionLabelConverter x:Key="TransferDirLabel"/>
 
     <!-- Design Tokens -->
     <SolidColorBrush x:Key="BrandVioletBrush" Color="#7C3AED"/>
@@ -56,11 +57,20 @@
         </Transitions>
       </Setter>
     </Style>
-    <Style Selector="Button.SidebarItem:pointerover /template/ ContentPresenter">
-      <Setter Property="Background" Value="#1A1D2B"/>
+    <Style Selector="Button.SidebarItem /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="CornerRadius" Value="8"/>
     </Style>
-    <Style Selector="Button.SidebarItem.Active /template/ ContentPresenter">
+    <Style Selector="Button.SidebarItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#1A1D2B"/>
+      <Setter Property="CornerRadius" Value="8"/>
+    </Style>
+    <Style Selector="Button.SidebarItem:pressed /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#252A3E"/>
+      <Setter Property="CornerRadius" Value="8"/>
+    </Style>
+    <Style Selector="Button.SidebarItem.Active /template/ ContentPresenter#PART_ContentPresenter">
       <Setter Property="Background" Value="#1E2235"/>
+      <Setter Property="CornerRadius" Value="8"/>
     </Style>
     <Style Selector="Button.SidebarItem TextBlock">
        <Setter Property="Foreground" Value="#94A3B8"/>
@@ -168,37 +178,47 @@
        </Style.Animations>
     </Style>
 
-    <!-- Primary Action Button (Smooth Unclipped Hover Animation) -->
+    <!-- Primary Action Button (Smooth Tactile Animation, Protected CornerRadius) -->
     <Style Selector="Button.PrimaryBtn">
        <Setter Property="Background" Value="{StaticResource BrandGradientHBrush}"/>
        <Setter Property="Foreground" Value="#FFFFFF"/>
+       <Setter Property="BorderThickness" Value="0"/>
        <Setter Property="Padding" Value="20,11"/>
        <Setter Property="CornerRadius" Value="8"/>
        <Setter Property="FontWeight" Value="SemiBold"/>
        <Setter Property="FontSize" Value="13"/>
        <Setter Property="Cursor" Value="Hand"/>
-       <Setter Property="ClipToBounds" Value="False"/>
+       <Setter Property="ClipToBounds" Value="True"/>
        <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
        <Setter Property="Transitions">
           <Transitions>
-             <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.16" Easing="CubicEaseOut"/>
+             <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.12" Easing="CubicEaseOut"/>
+             <DoubleTransition Property="Opacity" Duration="0:0:0.12"/>
           </Transitions>
        </Setter>
     </Style>
-    <Style Selector="Button.PrimaryBtn /template/ ContentPresenter">
-       <Setter Property="ClipToBounds" Value="False"/>
-    </Style>
-    <Style Selector="Button.PrimaryBtn:pointerover">
-       <Setter Property="RenderTransform" Value="scale(1.03) translateY(-1px)"/>
-    </Style>
-    <Style Selector="Button.PrimaryBtn:pointerover /template/ ContentPresenter">
+    <Style Selector="Button.PrimaryBtn /template/ ContentPresenter#PART_ContentPresenter">
+       <Setter Property="CornerRadius" Value="8"/>
        <Setter Property="Background" Value="{StaticResource BrandGradientHBrush}"/>
     </Style>
+    <Style Selector="Button.PrimaryBtn:pointerover">
+       <Setter Property="RenderTransform" Value="translateY(-1px)"/>
+    </Style>
+    <Style Selector="Button.PrimaryBtn:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+       <Setter Property="Background" Value="{StaticResource BrandGradientHBrush}"/>
+       <Setter Property="CornerRadius" Value="8"/>
+       <Setter Property="Opacity" Value="0.92"/>
+    </Style>
     <Style Selector="Button.PrimaryBtn:pressed">
-       <Setter Property="RenderTransform" Value="scale(0.97)"/>
+       <Setter Property="RenderTransform" Value="translateY(1px)"/>
+    </Style>
+    <Style Selector="Button.PrimaryBtn:pressed /template/ ContentPresenter#PART_ContentPresenter">
+       <Setter Property="Background" Value="{StaticResource BrandGradientHBrush}"/>
+       <Setter Property="CornerRadius" Value="8"/>
+       <Setter Property="Opacity" Value="0.80"/>
     </Style>
 
-    <!-- Ghost / Secondary Button (Smooth Unclipped Hover Animation) -->
+    <!-- Ghost / Secondary Button (Smooth Tactile Animation, Protected CornerRadius) -->
     <Style Selector="Button.GhostBtn">
        <Setter Property="Background" Value="#161824"/>
        <Setter Property="Foreground" Value="#E2E8F0"/>
@@ -209,29 +229,36 @@
        <Setter Property="FontWeight" Value="Medium"/>
        <Setter Property="FontSize" Value="12"/>
        <Setter Property="Cursor" Value="Hand"/>
-       <Setter Property="ClipToBounds" Value="False"/>
+       <Setter Property="ClipToBounds" Value="True"/>
        <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
        <Setter Property="Transitions">
           <Transitions>
-             <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.16" Easing="CubicEaseOut"/>
-             <BrushTransition Property="BorderBrush" Duration="0:0:0.16"/>
-             <BrushTransition Property="Background" Duration="0:0:0.16"/>
+             <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.12" Easing="CubicEaseOut"/>
+             <BrushTransition Property="BorderBrush" Duration="0:0:0.12"/>
+             <BrushTransition Property="Background" Duration="0:0:0.12"/>
+             <DoubleTransition Property="Opacity" Duration="0:0:0.12"/>
           </Transitions>
        </Setter>
     </Style>
-    <Style Selector="Button.GhostBtn /template/ ContentPresenter">
-       <Setter Property="ClipToBounds" Value="False"/>
+    <Style Selector="Button.GhostBtn /template/ ContentPresenter#PART_ContentPresenter">
+       <Setter Property="CornerRadius" Value="8"/>
     </Style>
     <Style Selector="Button.GhostBtn:pointerover">
-       <Setter Property="RenderTransform" Value="scale(1.03) translateY(-1px)"/>
+       <Setter Property="RenderTransform" Value="translateY(-1px)"/>
     </Style>
-    <Style Selector="Button.GhostBtn:pointerover /template/ ContentPresenter">
+    <Style Selector="Button.GhostBtn:pointerover /template/ ContentPresenter#PART_ContentPresenter">
        <Setter Property="BorderBrush" Value="#7C3AED"/>
        <Setter Property="Background" Value="#1E2336"/>
+       <Setter Property="CornerRadius" Value="8"/>
     </Style>
     <Style Selector="Button.GhostBtn:pressed">
-       <Setter Property="RenderTransform" Value="scale(0.97)"/>
+       <Setter Property="RenderTransform" Value="translateY(1px)"/>
+    </Style>
+    <Style Selector="Button.GhostBtn:pressed /template/ ContentPresenter#PART_ContentPresenter">
+       <Setter Property="BorderBrush" Value="#6D28D9"/>
        <Setter Property="Background" Value="#141722"/>
+       <Setter Property="CornerRadius" Value="8"/>
+       <Setter Property="Opacity" Value="0.85"/>
     </Style>
 
     <!-- Hero Big Action Card Button -->
@@ -262,13 +289,28 @@
        <Setter Property="FontSize" Value="12"/>
        <Setter Property="FontWeight" Value="Medium"/>
     </Style>
-    <Style Selector="Button.FilterChip:pointerover /template/ ContentPresenter">
+    <Style Selector="Button.FilterChip /template/ ContentPresenter#PART_ContentPresenter">
+       <Setter Property="CornerRadius" Value="6"/>
+    </Style>
+    <Style Selector="Button.FilterChip:pointerover /template/ ContentPresenter#PART_ContentPresenter">
        <Setter Property="Background" Value="#1E2235"/>
        <Setter Property="Foreground" Value="#FFFFFF"/>
+       <Setter Property="CornerRadius" Value="6"/>
     </Style>
-    <Style Selector="Button.FilterChip.ActiveChip /template/ ContentPresenter">
+    <Style Selector="Button.FilterChip:pressed /template/ ContentPresenter#PART_ContentPresenter">
+       <Setter Property="Background" Value="#252A3E"/>
+       <Setter Property="Foreground" Value="#FFFFFF"/>
+       <Setter Property="CornerRadius" Value="6"/>
+    </Style>
+    <Style Selector="Button.FilterChip.ActiveChip /template/ ContentPresenter#PART_ContentPresenter">
        <Setter Property="Background" Value="#7C3AED"/>
        <Setter Property="Foreground" Value="#FFFFFF"/>
+       <Setter Property="CornerRadius" Value="6"/>
+    </Style>
+    <Style Selector="Button.FilterChip.ActiveChip:pressed /template/ ContentPresenter#PART_ContentPresenter">
+       <Setter Property="Background" Value="#6D28D9"/>
+       <Setter Property="Foreground" Value="#FFFFFF"/>
+       <Setter Property="CornerRadius" Value="6"/>
     </Style>
     <Style Selector="Button.FilterChip.ActiveChip TextBlock">
        <Setter Property="Foreground" Value="#FFFFFF"/>
@@ -322,6 +364,20 @@
                 </StackPanel>
               </Button>
 
+              <Button Classes="SidebarItem" x:Name="NavSendBtn" Click="NavSendFiles_Click">
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                  <Path Classes="NavIcon" Data="{StaticResource IconSend}" Width="15" Height="15" Stretch="Uniform" VerticalAlignment="Center"/>
+                  <TextBlock Text="Send Files" VerticalAlignment="Center"/>
+                </StackPanel>
+              </Button>
+
+              <Button Classes="SidebarItem" x:Name="NavReceiveBtn" Click="NavReceiveMode_Click">
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                  <Path Classes="NavIcon" Data="{StaticResource IconReceive}" Width="15" Height="15" Stretch="Uniform" VerticalAlignment="Center"/>
+                  <TextBlock Text="Receive Mode" VerticalAlignment="Center"/>
+                </StackPanel>
+              </Button>
+
               <Button Classes="SidebarItem" x:Name="NavTransfersBtn" Click="NavTransfers_Click">
                 <StackPanel Orientation="Horizontal" Spacing="12">
                   <Path Classes="NavIcon" Data="{StaticResource IconTransfers}" Width="15" Height="15" Stretch="Uniform" VerticalAlignment="Center"/>
@@ -358,7 +414,7 @@
                       </Button.ContextMenu>
                       <Grid ColumnDefinitions="Auto, *, Auto, Auto">
                         <Border Grid.Column="0" Width="22" Height="22" CornerRadius="11" Background="#1E2235" Margin="0,0,8,0" VerticalAlignment="Center">
-                          <TextBlock Text="{Binding Name, Converter={StaticResource DeviceTypeToIconConverter}}" FontSize="9" FontWeight="Bold" Foreground="#06B6D4" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                          <TextBlock Text="{Binding Type, Converter={StaticResource DeviceTypeToIconConverter}}" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
                           <TextBlock Text="{Binding DisplayName}" FontSize="11" FontWeight="Medium" Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
@@ -375,6 +431,7 @@
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
+              <TextBlock x:Name="SidebarDevicesEmpty" Text="Scanning network..." FontSize="10" Foreground="#475569" FontStyle="Italic" Margin="8,4"/>
             </StackPanel>
           </ScrollViewer>
 
@@ -545,17 +602,37 @@
             <!-- 2. SEND QUEUE: FILE SELECTION              -->
             <!-- ========================================== -->
             <Grid x:Name="SendFilesPanel" IsVisible="False" Classes="SignalPanel" RowDefinitions="*, Auto" DragDrop.AllowDrop="True">
-               <Grid Grid.Row="0" RowDefinitions="Auto, 16, *">
-                  <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
+               <Grid Grid.Row="0" RowDefinitions="Auto, Auto, 14, *">
+                  
+                  <!-- Target Recipient Banner (Shown when a peer is selected) -->
+                  <Border Grid.Row="0" x:Name="SendTargetCard" IsVisible="False" Background="#161824" BorderBrush="#7C3AED" BorderThickness="1.2" CornerRadius="10" Padding="14,10" Margin="0,0,0,14" BoxShadow="0 4 16 0 #307C3AED">
+                     <Grid ColumnDefinitions="Auto, *, Auto, Auto">
+                        <Border Grid.Column="0" Width="36" Height="36" CornerRadius="18" Background="#261A3F" Margin="0,0,12,0" VerticalAlignment="Center">
+                           <TextBlock x:Name="SendTargetIcon" Text="💻" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                           <StackPanel Orientation="Horizontal" Spacing="6">
+                              <TextBlock Text="SENDING TO:" FontSize="10" FontWeight="Bold" Foreground="#7C3AED" LetterSpacing="0.8"/>
+                              <TextBlock x:Name="SendTargetName" Text="Selected Device" FontSize="13" FontWeight="Bold" Foreground="#FFFFFF"/>
+                           </StackPanel>
+                           <TextBlock x:Name="SendTargetDetails" Text="PC • 192.168.1.50" FontSize="11" Foreground="#94A3B8"/>
+                        </StackPanel>
+                        <Button Grid.Column="2" Content="Change Recipient" Click="NavSendDiscovery_Click" Classes="GhostBtn" Padding="10,6" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                        <Button Grid.Column="3" Content="✕" Click="ClearSendTarget_Click" Classes="GhostBtn" Padding="8,6" FontSize="11" VerticalAlignment="Center" ToolTip.Tip="Clear selected recipient"/>
+                     </Grid>
+                  </Border>
+
+                  <Grid Grid.Row="1" ColumnDefinitions="*, Auto">
                      <TextBlock Text="Files to Send" FontSize="16" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
                      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                        <Button Classes="GhostBtn" Content="✕ Clear All" Click="ClearQueue_Click" x:Name="ClearQueueBtn" IsVisible="False"/>
                         <Button Classes="GhostBtn" Content="+ Add Folder" Click="BrowseFolder_Click"/>
                         <Button Classes="PrimaryBtn" Content="+ Add Files" Click="BrowseFiles_Click"/>
                      </StackPanel>
                   </Grid>
 
                   <!-- Queue File List -->
-                  <Border Grid.Row="2" Classes="GlassCard" Padding="16">
+                  <Border Grid.Row="3" Classes="GlassCard" Padding="16">
                      <Grid>
                         <ScrollViewer>
                            <ItemsControl x:Name="SendQueueList">
@@ -592,10 +669,11 @@
 
                <!-- Footer Actions -->
                <Border Grid.Row="1" x:Name="SendFooter" Classes="GlassCard" Padding="18,14" Margin="0,16,0,0">
-                  <Grid ColumnDefinitions="*, Auto, Auto">
+                  <Grid ColumnDefinitions="*, Auto, Auto, Auto">
                      <TextBlock x:Name="SendSummaryText" Text="0 files selected" FontSize="13" FontWeight="Medium" Foreground="#94A3B8" VerticalAlignment="Center"/>
                      <Button Grid.Column="1" x:Name="ZipSendBtn" Content="Compress to ZIP" Click="ZipSend_Click" Classes="GhostBtn" Margin="0,0,10,0" IsVisible="False"/>
-                     <Button Grid.Column="2" Content="Choose Recipient →" Click="NavSendDiscovery_Click" Classes="PrimaryBtn"/>
+                     <Button Grid.Column="2" x:Name="ChooseRecipientBtn" Content="Choose Recipient →" Click="NavSendDiscovery_Click" Classes="PrimaryBtn" Margin="0,0,10,0"/>
+                     <Button Grid.Column="3" x:Name="SendToTargetBtn" Content="Send Files →" Click="SendToSelectedTarget_Click" Classes="PrimaryBtn" IsVisible="False"/>
                   </Grid>
                </Border>
             </Grid>
@@ -674,7 +752,7 @@
                                     <Button Click="SendFile_Click" Background="Transparent" Padding="0" BorderThickness="0">
                                        <StackPanel Spacing="4" HorizontalAlignment="Center">
                                           <Border Classes="DeviceMarker" Width="48" Height="48" Background="#161824" BorderBrush="#7C3AED" BorderThickness="2" CornerRadius="24" BoxShadow="0 4 14 0 #40000000">
-                                             <TextBlock Text="{Binding Name, Converter={StaticResource DeviceTypeToIconConverter}}" FontSize="11" FontWeight="Bold" Foreground="#06B6D4" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                             <TextBlock Text="{Binding Type, Converter={StaticResource DeviceTypeToIconConverter}}" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                           </Border>
                                           <TextBlock Text="{Binding DisplayName}" FontSize="11" FontWeight="SemiBold" Foreground="#FFFFFF" HorizontalAlignment="Center" MaxWidth="80" TextTrimming="CharacterEllipsis"/>
                                        </StackPanel>
@@ -706,7 +784,7 @@
                            <Button Click="SendFile_Click" Classes="GhostBtn" Padding="14,8" CornerRadius="8">
                               <StackPanel Orientation="Horizontal" Spacing="8">
                                  <Border Width="22" Height="22" CornerRadius="11" Background="#1E2235" VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding Name, Converter={StaticResource DeviceTypeToIconConverter}}" FontSize="9" FontWeight="Bold" Foreground="#06B6D4" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding Type, Converter={StaticResource DeviceTypeToIconConverter}}" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                  </Border>
                                  <TextBlock Text="{Binding DisplayName}" FontSize="12" FontWeight="SemiBold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
                                  <TextBlock Text="→ Send" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource BrandVioletBrush}" VerticalAlignment="Center"/>
@@ -728,19 +806,44 @@
             <!-- 4. RECEIVE MODE (DISCOVERABLE BEACON)      -->
             <!-- ========================================== -->
             <Grid x:Name="ReceiveModePanel" IsVisible="False" Classes="SignalPanel">
-               <Border Classes="GlassCard" Padding="44,36" MaxWidth="440" HorizontalAlignment="Center" VerticalAlignment="Center">
-                  <StackPanel Spacing="22" HorizontalAlignment="Center">
+               <Border Classes="GlassCard" Padding="44,36" MaxWidth="500" HorizontalAlignment="Center" VerticalAlignment="Center">
+                  <StackPanel Spacing="20" HorizontalAlignment="Center">
                      
-                     <Border Width="80" Height="80" CornerRadius="40" Background="#0D2028" BorderBrush="#4006B6D4" BorderThickness="2" HorizontalAlignment="Center" >
-                        <Path Data="{StaticResource IconReceive}" Fill="#22D3EE" Width="32" Height="32" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                     </Border>
+                     <!-- Glowing Radar Beacon Disc -->
+                     <Panel Width="90" Height="90" HorizontalAlignment="Center">
+                        <Ellipse Width="90" Height="90" Stroke="#3006B6D4" StrokeThickness="2" Classes="RadarPulseRing1" IsHitTestVisible="False"/>
+                        <Border Width="76" Height="76" CornerRadius="38" Background="#0D2028" BorderBrush="#4006B6D4" BorderThickness="2" HorizontalAlignment="Center" VerticalAlignment="Center">
+                           <Path Data="{StaticResource IconReceive}" Fill="#22D3EE" Width="34" Height="34" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Border>
+                     </Panel>
 
                      <StackPanel Spacing="4" HorizontalAlignment="Center">
                         <TextBlock Text="Ready to Receive" FontSize="20" FontWeight="Bold" Foreground="#FFFFFF" HorizontalAlignment="Center"/>
-                        <TextBlock Text="Your device is discoverable on the local Wi-Fi network" FontSize="12" Foreground="#94A3B8" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Your device is broadcasting high-visibility beacon to all senders" FontSize="12" Foreground="#94A3B8" HorizontalAlignment="Center"/>
                      </StackPanel>
 
-                     <Button Content="View Active Transfers" Click="NavTransfers_Click" Classes="GhostBtn" HorizontalAlignment="Center" Padding="16,8"/>
+                     <!-- Device Identity Card -->
+                     <Border Background="#161824" BorderBrush="#222638" BorderThickness="1" CornerRadius="10" Padding="16,12" HorizontalAlignment="Stretch">
+                        <Grid ColumnDefinitions="*, Auto">
+                           <StackPanel Spacing="2">
+                              <TextBlock Text="THIS DEVICE" FontSize="10" FontWeight="Bold" Foreground="#06B6D4" LetterSpacing="0.8"/>
+                              <TextBlock x:Name="ReceiveDeviceNameText" Text="My PC" FontSize="14" FontWeight="Bold" Foreground="#FFFFFF"/>
+                              <TextBlock x:Name="ReceiveDeviceIpText" Text="192.168.1.100" FontSize="11" Foreground="#94A3B8"/>
+                           </StackPanel>
+                           <Border Grid.Column="1" Background="#0E2E28" BorderBrush="#10B981" BorderThickness="1" CornerRadius="12" Padding="10,4" VerticalAlignment="Center">
+                              <StackPanel Orientation="Horizontal" Spacing="6">
+                                 <Ellipse Width="6" Height="6" Fill="#10B981"/>
+                                 <TextBlock Text="ONLINE" FontSize="10" FontWeight="Bold" Foreground="#10B981"/>
+                              </StackPanel>
+                           </Border>
+                        </Grid>
+                     </Border>
+
+                     <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center">
+                        <Button Content="Scan for Senders" Click="RefreshDiscovery_Click" Classes="GhostBtn" Padding="14,8"/>
+                        <Button Content="View Active Transfers" Click="NavTransfers_Click" Classes="PrimaryBtn" Padding="16,8"/>
+                     </StackPanel>
+
                      <TextBlock x:Name="RecvEmptyState" IsVisible="False"/>
                   </StackPanel>
                </Border>
@@ -863,7 +966,7 @@
 
                <!-- Filter Chips & Ledger Stats -->
                <Grid Grid.Row="2" ColumnDefinitions="*, Auto">
-                  <TextBlock x:Name="LibraryStatsText" Text="Total Received: 0 files (0 B)" FontSize="12" Foreground="#94A3B8" VerticalAlignment="Center"/>
+                  <TextBlock x:Name="LibraryStatsText" Text="0 transfers" FontSize="12" Foreground="#94A3B8" VerticalAlignment="Center"/>
                   <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
                      <Button x:Name="FilterAllBtn" Content="All" Click="FilterDate_Click" Tag="All" Classes="FilterChip ActiveChip"/>
                      <Button x:Name="FilterTodayBtn" Content="Today" Click="FilterDate_Click" Tag="Today" Classes="FilterChip"/>
@@ -885,7 +988,14 @@
                                        </Border>
                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
                                           <TextBlock Text="{Binding FileName}" FontSize="13" FontWeight="SemiBold" Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
-                                          <TextBlock Text="{Binding PeerName, StringFormat='Source: {0}'}" FontSize="11" Foreground="#64748B"/>
+                                          <TextBlock FontSize="11" Foreground="#64748B">
+                                             <TextBlock.Text>
+                                                <MultiBinding Converter="{StaticResource TransferDirLabel}">
+                                                   <Binding Path="PeerName"/>
+                                                   <Binding Path="Direction"/>
+                                                </MultiBinding>
+                                             </TextBlock.Text>
+                                          </TextBlock>
                                        </StackPanel>
                                        <TextBlock Grid.Column="2" Text="{Binding FileSizeDisplay}" FontSize="12" Foreground="#94A3B8" VerticalAlignment="Center" Margin="16,0"/>
                                        

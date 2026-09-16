@@ -1,3 +1,4 @@
 *.apk filter=lfs diff=lfs merge=lfs -text
 *.exe filter=lfs diff=lfs merge=lfs -text
 setup/*.exe filter=lfs diff=lfs merge=lfs -text
+setup/*.zip filter=lfs diff=lfs merge=lfs -text

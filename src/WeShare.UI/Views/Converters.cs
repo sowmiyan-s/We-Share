@@ -82,23 +82,21 @@ namespace WeShare.UI.Views
     {
         public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
-            if (value is string name)
+            if (value is string type && !string.IsNullOrEmpty(type))
             {
-                string lower = name.ToLowerInvariant();
-                if (lower.Contains("iphone") || lower.Contains("ipad") || lower.Contains("ios"))
-                    return "MOB";
-                if (lower.Contains("android"))
-                    return "MOB";
-                if (lower.Contains("mac") || lower.Contains("os x") || lower.Contains("osx"))
-                    return "MAC";
-                if (lower.Contains("linux"))
-                    return "LNX";
-                if (lower.Contains("windows") || lower.Contains("win"))
-                    return "PC";
-                if (lower.Contains("web"))
-                    return "WEB";
+                string lower = type.ToLowerInvariant();
+                return lower switch
+                {
+                    "phone" or "android" or "ios" or "mobile" => "📱",
+                    "mac" or "apple" or "macos" => "💻",
+                    "linux" => "🐧",
+                    "web client" or "web" or "browser" => "🌐",
+                    "tablet" or "ipad" => "📱",
+                    _ when lower.Contains("windows") || lower.Contains("pc") || lower.Contains("desktop") => "💻",
+                    _ => "💻"
+                };
             }
-            return "DEV";
+            return "💻";
         }
 
         public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
@@ -106,4 +104,22 @@ namespace WeShare.UI.Views
             throw new NotImplementedException();
         }
     }
+
+    public class TransferDirectionLabelConverter : IMultiValueConverter
+    {
+        public object? Convert(System.Collections.Generic.IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
+        {
+            if (values.Count >= 2 && values[0] is string peerName && values[1] is WeShare.Core.Models.TransferDirection direction)
+            {
+                string prefix = direction == WeShare.Core.Models.TransferDirection.Sent ? "To" : "From";
+                return $"{prefix}: {peerName}";
+            }
+            if (values.Count >= 1 && values[0] is string name)
+                return $"From: {name}";
+            return "Unknown";
+        }
+
+        public object?[] ConvertBack(object? value, Type[] targetTypes, object? parameter, CultureInfo culture) => throw new NotImplementedException();
+    }
+
 }

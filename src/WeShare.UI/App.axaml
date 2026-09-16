@@ -328,15 +328,15 @@
                 </Transitions>
             </Setter>
         </Style>
-        <Style Selector="Button.CircleActionBtn /template/ ContentPresenter">
+        <Style Selector="Button.CircleActionBtn /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="ClipToBounds" Value="False"/>
         </Style>
-        <Style Selector="Button.CircleActionBtn:pointerover /template/ ContentPresenter">
+        <Style Selector="Button.CircleActionBtn:pointerover /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="ClipToBounds" Value="False"/>
         </Style>
-        <Style Selector="Button.CircleActionBtn:pressed /template/ ContentPresenter">
+        <Style Selector="Button.CircleActionBtn:pressed /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="ClipToBounds" Value="False"/>
         </Style>
@@ -393,24 +393,34 @@
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
-            <Setter Property="ClipToBounds" Value="False"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="ClipToBounds" Value="True"/>
             <Setter Property="Transitions">
                <Transitions>
-                  <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.15" Easing="CubicEaseOut"/>
+                  <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.12" Easing="CubicEaseOut"/>
+                  <DoubleTransition Property="Opacity" Duration="0:0:0.12"/>
                </Transitions>
             </Setter>
         </Style>
-        <Style Selector="Button.CyanBtn /template/ ContentPresenter">
-            <Setter Property="ClipToBounds" Value="False"/>
-        </Style>
-        <Style Selector="Button.CyanBtn:pointerover">
-            <Setter Property="RenderTransform" Value="scale(1.04) translateY(-1px)"/>
-        </Style>
-        <Style Selector="Button.CyanBtn:pointerover /template/ ContentPresenter">
+        <Style Selector="Button.CyanBtn /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="CornerRadius" Value="8"/>
             <Setter Property="Background" Value="{StaticResource CyanGradientHBrush}"/>
         </Style>
+        <Style Selector="Button.CyanBtn:pointerover">
+            <Setter Property="RenderTransform" Value="translateY(-1px)"/>
+        </Style>
+        <Style Selector="Button.CyanBtn:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{StaticResource CyanGradientHBrush}"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Opacity" Value="0.92"/>
+        </Style>
         <Style Selector="Button.CyanBtn:pressed">
-            <Setter Property="RenderTransform" Value="scale(0.97)"/>
+            <Setter Property="RenderTransform" Value="translateY(1px)"/>
+        </Style>
+        <Style Selector="Button.CyanBtn:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{StaticResource CyanGradientHBrush}"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Opacity" Value="0.80"/>
         </Style>
     </Application.Styles>
 </Application>
