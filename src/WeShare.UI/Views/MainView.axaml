@@ -381,57 +381,16 @@
               <Button Classes="SidebarItem" x:Name="NavTransfersBtn" Click="NavTransfers_Click">
                 <StackPanel Orientation="Horizontal" Spacing="12">
                   <Path Classes="NavIcon" Data="{StaticResource IconTransfers}" Width="15" Height="15" Stretch="Uniform" VerticalAlignment="Center"/>
-                  <TextBlock Text="Active Transfers" VerticalAlignment="Center"/>
+                  <TextBlock Text="Transfers &amp; History" VerticalAlignment="Center"/>
                 </StackPanel>
               </Button>
 
-              <Button Classes="SidebarItem" x:Name="NavFilesBtn" Click="NavFiles_Click">
-                <StackPanel Orientation="Horizontal" Spacing="12">
-                  <Path Classes="NavIcon" Data="{StaticResource IconHistory}" Width="15" Height="15" Stretch="Uniform" VerticalAlignment="Center"/>
-                  <TextBlock Text="File History" VerticalAlignment="Center"/>
-                </StackPanel>
-              </Button>
-
-              <Button Classes="SidebarItem" x:Name="NavWebSharedBtn" Click="NavWebShared_Click">
-                <StackPanel Orientation="Horizontal" Spacing="12">
-                  <Path Classes="NavIcon" Data="{StaticResource IconMobile}" Width="15" Height="15" Stretch="Uniform" VerticalAlignment="Center"/>
-                  <TextBlock Text="Web Transfer" VerticalAlignment="Center"/>
-                </StackPanel>
-              </Button>
-
-              <!-- Nearby Devices Quick List -->
-              <TextBlock Text="NEARBY DEVICES" FontSize="10" FontWeight="Bold" Foreground="#475569" LetterSpacing="1" Margin="8,20,8,4"/>
-              <ItemsControl ItemsSource="{Binding Devices, RelativeSource={RelativeSource AncestorType=views:MainView}}">
-                <ItemsControl.ItemTemplate>
-                  <DataTemplate x:DataType="models:DeviceModel">
-                    <Button Click="SendFile_Click" Background="Transparent" Padding="8,6" CornerRadius="6" HorizontalAlignment="Stretch" ToolTip.Tip="Click or drop files to send">
-                      <Button.ContextMenu>
-                        <ContextMenu Background="#161824" BorderBrush="#222638">
-                          <MenuItem Header="Send Files to Device" Click="SendFile_Click"/>
-                          <MenuItem Header="Set Custom Nickname" Click="EditDeviceNickname_Click"/>
-                          <MenuItem Header="Toggle Favorite Pin" Click="ToggleFavorite_Click"/>
-                        </ContextMenu>
-                      </Button.ContextMenu>
-                      <Grid ColumnDefinitions="Auto, *, Auto, Auto">
-                        <Border Grid.Column="0" Width="22" Height="22" CornerRadius="11" Background="#1E2235" Margin="0,0,8,0" VerticalAlignment="Center">
-                          <TextBlock Text="{Binding Type, Converter={StaticResource DeviceTypeToIconConverter}}" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
-                          <TextBlock Text="{Binding DisplayName}" FontSize="11" FontWeight="Medium" Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
-                        </StackPanel>
-                        <Button Grid.Column="2" Click="ToggleFavorite_Click" Background="Transparent" Padding="4,2" Margin="0,0,4,0" ToolTip.Tip="Pin as Favorite">
-                          <Panel>
-                            <TextBlock Text="★" FontSize="11" Foreground="#F59E0B" IsVisible="{Binding IsFavorite}"/>
-                            <TextBlock Text="☆" FontSize="11" Foreground="#475569" IsVisible="{Binding !IsFavorite}"/>
-                          </Panel>
-                        </Button>
-                        <TextBlock Grid.Column="3" Text="Send" FontSize="10" FontWeight="SemiBold" Foreground="#F59E0B" VerticalAlignment="Center"/>
-                      </Grid>
-                    </Button>
-                  </DataTemplate>
-                </ItemsControl.ItemTemplate>
-              </ItemsControl>
-              <TextBlock x:Name="SidebarDevicesEmpty" Text="Scanning network..." FontSize="10" Foreground="#475569" FontStyle="Italic" Margin="8,4"/>
+              <!-- Compatibility Anchors for code-behind references -->
+              <StackPanel IsVisible="False">
+                 <Button x:Name="NavFilesBtn" Click="NavFiles_Click"/>
+                 <Button x:Name="NavWebSharedBtn" Click="NavWebShared_Click"/>
+                 <TextBlock x:Name="SidebarDevicesEmpty"/>
+              </StackPanel>
             </StackPanel>
           </ScrollViewer>
 
@@ -742,8 +701,8 @@
                               <Image Source="avares://WeShare.UI/Assets/find.png" Width="36" Height="36" Stretch="Uniform"/>
                            </Border>
 
-                           <!-- Discovered Peer Nodes -->
-                           <ItemsControl ItemsSource="{Binding Devices, RelativeSource={RelativeSource AncestorType=views:MainView}}">
+                           <!-- Discovered Peer Nodes (Active Receivers Only) -->
+                           <ItemsControl ItemsSource="{Binding ActiveReceivers, RelativeSource={RelativeSource AncestorType=views:MainView}}">
                               <ItemsControl.ItemsPanel>
                                  <ItemsPanelTemplate><Canvas Width="480" Height="380" Background="Transparent"/></ItemsPanelTemplate>
                               </ItemsControl.ItemsPanel>
@@ -762,10 +721,10 @@
                               <ItemsControl.Styles>
                                  <Style Selector="ContentPresenter">
                                     <Setter Property="Canvas.Left">
-                                       <MultiBinding Converter="{StaticResource RadarPos}"><Binding /><Binding Path="Devices" RelativeSource="{RelativeSource AncestorType=views:MainView}"/><Binding Source="X"/></MultiBinding>
+                                       <MultiBinding Converter="{StaticResource RadarPos}"><Binding /><Binding Path="ActiveReceivers" RelativeSource="{RelativeSource AncestorType=views:MainView}"/><Binding Source="X"/></MultiBinding>
                                     </Setter>
                                     <Setter Property="Canvas.Top">
-                                       <MultiBinding Converter="{StaticResource RadarPos}"><Binding /><Binding Path="Devices" RelativeSource="{RelativeSource AncestorType=views:MainView}"/><Binding Source="Y"/></MultiBinding>
+                                       <MultiBinding Converter="{StaticResource RadarPos}"><Binding /><Binding Path="ActiveReceivers" RelativeSource="{RelativeSource AncestorType=views:MainView}"/><Binding Source="Y"/></MultiBinding>
                                     </Setter>
                                  </Style>
                               </ItemsControl.Styles>
@@ -775,7 +734,7 @@
                   </Border>
 
                   <!-- Discovered Devices Quick Selection Row -->
-                  <ItemsControl Grid.Row="1" ItemsSource="{Binding Devices, RelativeSource={RelativeSource AncestorType=views:MainView}}" HorizontalAlignment="Center" Margin="0,16,0,0">
+                  <ItemsControl Grid.Row="1" ItemsSource="{Binding ActiveReceivers, RelativeSource={RelativeSource AncestorType=views:MainView}}" HorizontalAlignment="Center" Margin="0,16,0,0">
                      <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center"/></ItemsPanelTemplate>
                      </ItemsControl.ItemsPanel>
@@ -803,50 +762,145 @@
             </Grid>
 
             <!-- ========================================== -->
-            <!-- 4. RECEIVE MODE (DISCOVERABLE BEACON)      -->
+            <!-- 4. RECEIVE MODE (RADAR SCANNER STATION)    -->
             <!-- ========================================== -->
             <Grid x:Name="ReceiveModePanel" IsVisible="False" Classes="SignalPanel">
-               <Border Classes="GlassCard" Padding="44,36" MaxWidth="500" HorizontalAlignment="Center" VerticalAlignment="Center">
-                  <StackPanel Spacing="20" HorizontalAlignment="Center">
-                     
-                     <!-- Glowing Radar Beacon Disc -->
-                     <Panel Width="90" Height="90" HorizontalAlignment="Center">
-                        <Ellipse Width="90" Height="90" Stroke="#3006B6D4" StrokeThickness="2" Classes="RadarPulseRing1" IsHitTestVisible="False"/>
-                        <Border Width="76" Height="76" CornerRadius="38" Background="#0D2028" BorderBrush="#4006B6D4" BorderThickness="2" HorizontalAlignment="Center" VerticalAlignment="Center">
-                           <Path Data="{StaticResource IconReceive}" Fill="#22D3EE" Width="34" Height="34" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                        </Border>
-                     </Panel>
-
-                     <StackPanel Spacing="4" HorizontalAlignment="Center">
-                        <TextBlock Text="Ready to Receive" FontSize="20" FontWeight="Bold" Foreground="#FFFFFF" HorizontalAlignment="Center"/>
-                        <TextBlock Text="Your device is broadcasting high-visibility beacon to all senders" FontSize="12" Foreground="#94A3B8" HorizontalAlignment="Center"/>
+               <Grid RowDefinitions="Auto, *, Auto">
+                  <!-- Header bar -->
+                  <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto" Margin="0,0,0,16">
+                     <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                        <Border Width="8" Height="8" CornerRadius="4" Background="#06B6D4" VerticalAlignment="Center"/>
+                        <TextBlock Text="RECEIVE RADAR — Discovered Senders:" FontSize="14" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
                      </StackPanel>
+                     <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                        <Button Content="Refresh Radar" Click="RefreshDiscovery_Click" Classes="GhostBtn" Padding="14,6" FontSize="11"/>
+                        <Button Content="View Active Transfers" Click="NavTransfers_Click" Classes="PrimaryBtn" Padding="16,6" FontSize="11"/>
+                     </StackPanel>
+                  </Grid>
 
-                     <!-- Device Identity Card -->
-                     <Border Background="#161824" BorderBrush="#222638" BorderThickness="1" CornerRadius="10" Padding="16,12" HorizontalAlignment="Stretch">
-                        <Grid ColumnDefinitions="*, Auto">
-                           <StackPanel Spacing="2">
-                              <TextBlock Text="THIS DEVICE" FontSize="10" FontWeight="Bold" Foreground="#06B6D4" LetterSpacing="0.8"/>
-                              <TextBlock x:Name="ReceiveDeviceNameText" Text="My PC" FontSize="14" FontWeight="Bold" Foreground="#FFFFFF"/>
-                              <TextBlock x:Name="ReceiveDeviceIpText" Text="192.168.1.100" FontSize="11" Foreground="#94A3B8"/>
-                           </StackPanel>
-                           <Border Grid.Column="1" Background="#0E2E28" BorderBrush="#10B981" BorderThickness="1" CornerRadius="12" Padding="10,4" VerticalAlignment="Center">
-                              <StackPanel Orientation="Horizontal" Spacing="6">
-                                 <Ellipse Width="6" Height="6" Fill="#10B981"/>
-                                 <TextBlock Text="ONLINE" FontSize="10" FontWeight="Bold" Foreground="#10B981"/>
+                  <!-- Radar Stage Card -->
+                  <Border Grid.Row="1" Classes="GlassCard" Padding="28,20">
+                     <Grid RowDefinitions="*">
+                        <Panel Width="480" Height="380" HorizontalAlignment="Center" VerticalAlignment="Center">
+                           <!-- Concentric Rings -->
+                           <Ellipse Width="380" Height="380" Stroke="#2006B6D4" StrokeThickness="1"/>
+                           <Ellipse Width="280" Height="280" Stroke="#1806B6D4" StrokeThickness="1" StrokeDashArray="3,3"/>
+                           <Ellipse Width="180" Height="180" Stroke="#2206B6D4" StrokeThickness="1"/>
+                           <Ellipse Width="80" Height="80" Stroke="#2806B6D4" StrokeThickness="1"/>
+
+                           <!-- Crosshair Guides -->
+                           <Line StartPoint="0,190" EndPoint="380,190" Stroke="#1406B6D4" StrokeThickness="1"/>
+                           <Line StartPoint="190,0" EndPoint="190,380" Stroke="#1406B6D4" StrokeThickness="1"/>
+
+                           <!-- Sonar Waves -->
+                           <Ellipse Width="380" Height="380" Stroke="#5506B6D4" StrokeThickness="1.5" Classes="RadarPulseRing1" IsHitTestVisible="False"/>
+                           <Ellipse Width="380" Height="380" Stroke="#457C3AED" StrokeThickness="1.5" Classes="RadarPulseRing2" IsHitTestVisible="False"/>
+
+                           <!-- Sweep Beam -->
+                           <Panel Width="380" Height="380" Classes="RadarSweep" IsHitTestVisible="False">
+                              <Rectangle Width="190" Height="2" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                 <Rectangle.Fill>
+                                    <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,0%">
+                                       <GradientStop Offset="0.0" Color="#0006B6D4"/>
+                                       <GradientStop Offset="0.7" Color="#9006B6D4"/>
+                                       <GradientStop Offset="1.0" Color="#C022D3EE"/>
+                                    </LinearGradientBrush>
+                                 </Rectangle.Fill>
+                              </Rectangle>
+                              <Polygon Points="190,190 380,150 380,190" Opacity="0.18">
+                                 <Polygon.Fill>
+                                    <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+                                       <GradientStop Offset="0.0" Color="#0006B6D4"/>
+                                       <GradientStop Offset="1.0" Color="#7006B6D4"/>
+                                    </LinearGradientBrush>
+                                 </Polygon.Fill>
+                              </Polygon>
+                           </Panel>
+
+                           <!-- Center Local Node (This Receiver) -->
+                           <Border Width="56" Height="56" CornerRadius="28" Background="#111522" BorderBrush="#06B6D4" BorderThickness="2" HorizontalAlignment="Center" VerticalAlignment="Center" BoxShadow="0 0 20 0 #4006B6D4">
+                              <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                 <Path Data="{StaticResource IconReceive}" Fill="#22D3EE" Width="22" Height="22" Stretch="Uniform" HorizontalAlignment="Center"/>
                               </StackPanel>
                            </Border>
-                        </Grid>
+
+                           <!-- Discovered Senders orbiting on Radar Canvas -->
+                           <ItemsControl ItemsSource="{Binding ActiveSenders, RelativeSource={RelativeSource AncestorType=views:MainView}}">
+                              <ItemsControl.ItemsPanel>
+                                 <ItemsPanelTemplate><Canvas Width="480" Height="380" Background="Transparent"/></ItemsPanelTemplate>
+                              </ItemsControl.ItemsPanel>
+                              <ItemsControl.ItemTemplate>
+                                 <DataTemplate x:DataType="models:DeviceModel">
+                                    <Button Click="ConnectToPeer_Click" Background="Transparent" Padding="0" BorderThickness="0" ToolTip.Tip="Tap to connect and receive files">
+                                       <StackPanel Spacing="4" HorizontalAlignment="Center">
+                                          <Border Classes="DeviceMarker" Width="48" Height="48" Background="#161824" BorderBrush="#06B6D4" BorderThickness="2" CornerRadius="24" BoxShadow="0 4 14 0 #40000000">
+                                             <TextBlock Text="{Binding Type, Converter={StaticResource DeviceTypeToIconConverter}}" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                          </Border>
+                                          <TextBlock Text="{Binding DisplayName}" FontSize="11" FontWeight="SemiBold" Foreground="#FFFFFF" HorizontalAlignment="Center" MaxWidth="80" TextTrimming="CharacterEllipsis"/>
+                                          <TextBlock Text="{Binding RoleDisplay}" FontSize="9" Foreground="#94A3B8" HorizontalAlignment="Center" MaxWidth="80" TextTrimming="CharacterEllipsis"/>
+                                       </StackPanel>
+                                    </Button>
+                                 </DataTemplate>
+                              </ItemsControl.ItemTemplate>
+                              <ItemsControl.Styles>
+                                 <Style Selector="ContentPresenter">
+                                    <Setter Property="Canvas.Left">
+                                       <MultiBinding Converter="{StaticResource RadarPos}"><Binding /><Binding Path="ActiveSenders" RelativeSource="{RelativeSource AncestorType=views:MainView}"/><Binding Source="X"/></MultiBinding>
+                                    </Setter>
+                                    <Setter Property="Canvas.Top">
+                                       <MultiBinding Converter="{StaticResource RadarPos}"><Binding /><Binding Path="ActiveSenders" RelativeSource="{RelativeSource AncestorType=views:MainView}"/><Binding Source="Y"/></MultiBinding>
+                                    </Setter>
+                                 </Style>
+                              </ItemsControl.Styles>
+                           </ItemsControl>
+                        </Panel>
+                     </Grid>
+                  </Border>
+
+                  <!-- Discovered Senders Roster & Device Identity Footer -->
+                  <Grid Grid.Row="2" ColumnDefinitions="*, Auto" Margin="0,16,0,0">
+                     <!-- Discovered devices quick connect list -->
+                     <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                        <ItemsControl ItemsSource="{Binding ActiveSenders, RelativeSource={RelativeSource AncestorType=views:MainView}}">
+                           <ItemsControl.ItemsPanel>
+                              <ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="10"/></ItemsPanelTemplate>
+                           </ItemsControl.ItemsPanel>
+                           <ItemsControl.ItemTemplate>
+                              <DataTemplate x:DataType="models:DeviceModel">
+                                 <Button Click="ConnectToPeer_Click" Classes="GhostBtn" Padding="14,8" CornerRadius="8">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                       <TextBlock Text="{Binding Type, Converter={StaticResource DeviceTypeToIconConverter}}" FontSize="14" VerticalAlignment="Center"/>
+                                       <StackPanel Spacing="1" VerticalAlignment="Center">
+                                          <TextBlock Text="{Binding DisplayName}" FontSize="12" FontWeight="SemiBold" Foreground="#FFFFFF"/>
+                                          <TextBlock Text="Tap to Connect" FontSize="10" Foreground="#06B6D4"/>
+                                       </StackPanel>
+                                    </StackPanel>
+                                 </Button>
+                              </DataTemplate>
+                           </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                     </ScrollViewer>
+
+                     <!-- Device Identity Badge -->
+                     <Border Grid.Column="1" Background="#161824" BorderBrush="#222638" BorderThickness="1" CornerRadius="10" Padding="14,8" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                           <StackPanel Spacing="1">
+                              <TextBlock Text="THIS RECEIVER" FontSize="9" FontWeight="Bold" Foreground="#06B6D4"/>
+                              <TextBlock x:Name="ReceiveDeviceNameText" Text="My PC" FontSize="12" FontWeight="Bold" Foreground="#FFFFFF"/>
+                              <TextBlock x:Name="ReceiveDeviceIpText" Text="192.168.1.100" FontSize="10" Foreground="#94A3B8"/>
+                           </StackPanel>
+                           <Border Background="#0E2E28" BorderBrush="#10B981" BorderThickness="1" CornerRadius="10" Padding="8,4" VerticalAlignment="Center">
+                              <StackPanel Orientation="Horizontal" Spacing="4">
+                                 <Ellipse Width="6" Height="6" Fill="#10B981"/>
+                                 <TextBlock Text="RADAR ON" FontSize="9" FontWeight="Bold" Foreground="#10B981"/>
+                              </StackPanel>
+                           </Border>
+                        </StackPanel>
                      </Border>
+                  </Grid>
 
-                     <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center">
-                        <Button Content="Scan for Senders" Click="RefreshDiscovery_Click" Classes="GhostBtn" Padding="14,8"/>
-                        <Button Content="View Active Transfers" Click="NavTransfers_Click" Classes="PrimaryBtn" Padding="16,8"/>
-                     </StackPanel>
-
-                     <TextBlock x:Name="RecvEmptyState" IsVisible="False"/>
-                  </StackPanel>
-               </Border>
+                  <TextBlock x:Name="RecvEmptyState" IsVisible="False"/>
+               </Grid>
             </Grid>
 
             <!-- ========================================== -->
@@ -950,75 +1004,78 @@
                      </ScrollViewer>
                   </Grid>
                </Border>
-            </Grid>
 
-            <!-- ========================================== -->
-            <!-- 6. FILE HISTORY (COMPREHENSIVE LEDGER)     -->
-            <!-- ========================================== -->
-            <Grid x:Name="FilesPanel" IsVisible="False" Classes="SignalPanel" RowDefinitions="Auto, 16, Auto, 16, *">
-               
-               <!-- Search Bar & Folder Actions -->
-               <Grid Grid.Row="0" ColumnDefinitions="*, Auto, Auto">
-                  <TextBox x:Name="FileSearchBox" Watermark="Search transferred files..." TextChanged="FileSearch_TextChanged" Width="280" HorizontalAlignment="Left"/>
-                  <Button Grid.Column="1" Content="Clear Completed" Click="ClearCompletedTransfers_Click" Classes="GhostBtn" Margin="0,0,10,0"/>
-                  <Button Grid.Column="2" Content="Open Downloads Folder" Click="OpenDownloadFolder_Click" Classes="PrimaryBtn"/>
-               </Grid>
+               <!-- Completed Transfers & History Ledger -->
+               <Border Grid.Row="3" Classes="GlassCard" Padding="20" Margin="0,16,0,0">
+                  <Grid RowDefinitions="Auto, 14, Auto, 14, *">
+                     <!-- Search Bar & Folder Actions -->
+                     <Grid Grid.Row="0" ColumnDefinitions="*, Auto, Auto">
+                        <TextBox x:Name="FileSearchBox" Watermark="Search transferred files..." TextChanged="FileSearch_TextChanged" Width="280" HorizontalAlignment="Left"/>
+                        <Button Grid.Column="1" Content="Clear Completed" Click="ClearCompletedTransfers_Click" Classes="GhostBtn" Margin="0,0,10,0"/>
+                        <Button Grid.Column="2" Content="Open Downloads Folder" Click="OpenDownloadFolder_Click" Classes="PrimaryBtn"/>
+                     </Grid>
 
-               <!-- Filter Chips & Ledger Stats -->
-               <Grid Grid.Row="2" ColumnDefinitions="*, Auto">
-                  <TextBlock x:Name="LibraryStatsText" Text="0 transfers" FontSize="12" Foreground="#94A3B8" VerticalAlignment="Center"/>
-                  <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
-                     <Button x:Name="FilterAllBtn" Content="All" Click="FilterDate_Click" Tag="All" Classes="FilterChip ActiveChip"/>
-                     <Button x:Name="FilterTodayBtn" Content="Today" Click="FilterDate_Click" Tag="Today" Classes="FilterChip"/>
-                     <Button x:Name="FilterWeekBtn" Content="This Week" Click="FilterDate_Click" Tag="Week" Classes="FilterChip"/>
-                  </StackPanel>
-               </Grid>
+                     <!-- Filter Chips & Ledger Stats -->
+                     <Grid Grid.Row="2" ColumnDefinitions="*, Auto">
+                        <TextBlock x:Name="LibraryStatsText" Text="0 transfers" FontSize="12" Foreground="#94A3B8" VerticalAlignment="Center"/>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                           <Button x:Name="FilterAllBtn" Content="All" Click="FilterDate_Click" Tag="All" Classes="FilterChip ActiveChip"/>
+                           <Button x:Name="FilterTodayBtn" Content="Today" Click="FilterDate_Click" Tag="Today" Classes="FilterChip"/>
+                           <Button x:Name="FilterWeekBtn" Content="This Week" Click="FilterDate_Click" Tag="Week" Classes="FilterChip"/>
+                        </StackPanel>
+                     </Grid>
 
-               <!-- Received Files Data Grid -->
-               <Border Grid.Row="4" Classes="GlassCard" Padding="16">
-                  <Grid>
-                     <ScrollViewer>
-                        <ItemsControl x:Name="ReceivedFilesList">
-                           <ItemsControl.ItemTemplate>
-                              <DataTemplate x:DataType="models:FileTransferState">
-                                 <Border Classes="TrackRow" Padding="12,10" Margin="0,0,0,4">
-                                    <Grid ColumnDefinitions="Auto, *, Auto, Auto, Auto">
-                                       <Border Grid.Column="0" Width="34" Height="34" Background="#1E2235" CornerRadius="6" Margin="0,0,12,0" VerticalAlignment="Center">
-                                          <Path Data="{StaticResource IconFile}" Fill="#7C3AED" Width="15" Height="15" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                     <!-- Received Files Data Grid -->
+                     <Border Grid.Row="4" Background="#161824" CornerRadius="8" Padding="12">
+                        <Grid>
+                           <ScrollViewer MaxHeight="300">
+                              <ItemsControl x:Name="ReceivedFilesList">
+                                 <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="models:FileTransferState">
+                                       <Border Classes="TrackRow" Padding="12,10" Margin="0,0,0,4">
+                                          <Grid ColumnDefinitions="Auto, *, Auto, Auto">
+                                             <Border Grid.Column="0" Width="34" Height="34" Background="#1E2235" CornerRadius="6" Margin="0,0,12,0" VerticalAlignment="Center">
+                                                <Path Data="{StaticResource IconFile}" Fill="#7C3AED" Width="15" Height="15" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                             </Border>
+                                             <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                                                <TextBlock Text="{Binding FileName}" FontSize="13" FontWeight="SemiBold" Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock FontSize="11" Foreground="#64748B">
+                                                   <TextBlock.Text>
+                                                      <MultiBinding Converter="{StaticResource TransferDirLabel}">
+                                                         <Binding Path="PeerName"/>
+                                                         <Binding Path="Direction"/>
+                                                      </MultiBinding>
+                                                   </TextBlock.Text>
+                                                </TextBlock>
+                                             </StackPanel>
+                                             <TextBlock Grid.Column="2" Text="{Binding FileSizeDisplay}" FontSize="12" Foreground="#94A3B8" VerticalAlignment="Center" Margin="16,0"/>
+                                             
+                                             <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center" IsVisible="{Binding IsCompleted}">
+                                                <Button Content="Open" Click="OpenFileInList_Click" Tag="{Binding}" Classes="PrimaryBtn" Padding="12,5" FontSize="10"/>
+                                                <Button Content="Show in Folder" Click="OpenFolderInList_Click" Tag="{Binding}" Classes="GhostBtn" Padding="10,5" FontSize="10"/>
+                                                <Button Content="Resend" Click="RequestResendForFile_Click" Tag="{Binding}" Classes="GhostBtn" Padding="10,5" FontSize="10" TextElement.Foreground="#06B6D4"/>
+                                                <Button Content="✕" Click="DeleteFileInList_Click" Tag="{Binding}" Background="Transparent" Foreground="#EF4444" FontSize="12" Padding="6"/>
+                                             </StackPanel>
+
+                                             <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center" IsVisible="{Binding !IsCompleted}">
+                                                <Button Content="Cancel" Click="CancelIncoming_Click" Classes="GhostBtn" Padding="10,5" FontSize="10"/>
+                                             </StackPanel>
+                                          </Grid>
                                        </Border>
-                                       <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
-                                          <TextBlock Text="{Binding FileName}" FontSize="13" FontWeight="SemiBold" Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
-                                          <TextBlock FontSize="11" Foreground="#64748B">
-                                             <TextBlock.Text>
-                                                <MultiBinding Converter="{StaticResource TransferDirLabel}">
-                                                   <Binding Path="PeerName"/>
-                                                   <Binding Path="Direction"/>
-                                                </MultiBinding>
-                                             </TextBlock.Text>
-                                          </TextBlock>
-                                       </StackPanel>
-                                       <TextBlock Grid.Column="2" Text="{Binding FileSizeDisplay}" FontSize="12" Foreground="#94A3B8" VerticalAlignment="Center" Margin="16,0"/>
-                                       
-                                       <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center" IsVisible="{Binding IsCompleted}">
-                                          <Button Content="Open" Click="OpenFileInList_Click" Tag="{Binding}" Classes="PrimaryBtn" Padding="12,5" FontSize="10"/>
-                                          <Button Content="Show in Folder" Click="OpenFolderInList_Click" Tag="{Binding}" Classes="GhostBtn" Padding="10,5" FontSize="10"/>
-                                          <Button Content="✕" Click="DeleteFileInList_Click" Tag="{Binding}" Background="Transparent" Foreground="#EF4444" FontSize="12" Padding="6"/>
-                                       </StackPanel>
+                                    </DataTemplate>
+                                 </ItemsControl.ItemTemplate>
+                              </ItemsControl>
+                           </ScrollViewer>
 
-                                       <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center" IsVisible="{Binding !IsCompleted}">
-                                          <Button Content="Cancel" Click="CancelIncoming_Click" Classes="GhostBtn" Padding="10,5" FontSize="10"/>
-                                       </StackPanel>
-                                    </Grid>
-                                 </Border>
-                              </DataTemplate>
-                           </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                     </ScrollViewer>
-
-                     <TextBlock x:Name="HistoryEmptyState" Text="No transfers recorded yet" FontSize="13" FontWeight="Medium" Foreground="#64748B" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                           <TextBlock x:Name="HistoryEmptyState" Text="No transfers recorded yet" FontSize="13" FontWeight="Medium" Foreground="#64748B" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>
+                     </Border>
                   </Grid>
                </Border>
             </Grid>
+
+            <!-- Collapsed Compatibility Anchor for FilesPanel -->
+            <Grid x:Name="FilesPanel" IsVisible="False"/>
 
             <!-- ========================================== -->
             <!-- 7. WEB TRANSFER & CONNECT (DEDICATED SCREEN) -->
@@ -1133,94 +1190,16 @@
             <!-- ========================================== -->
             <!-- 7.5 DEDICATED DEVICE SESSION (SEND & RECV)  -->
             <!-- ========================================== -->
-            <Grid x:Name="DeviceSessionPanel" IsVisible="False" Classes="SignalPanel" RowDefinitions="Auto, 20, *">
-               <!-- Header Bar: Device Info & Session Status -->
-               <Border Grid.Row="0" Background="#75111422" BorderBrush="#283048" BorderThickness="1" CornerRadius="12" Padding="20,16">
-                  <Grid ColumnDefinitions="Auto, *, Auto">
-                     <Border Grid.Column="0" Width="44" Height="44" CornerRadius="22" Background="#1E2235" Margin="0,0,16,0" VerticalAlignment="Center">
-                        <Path Data="{StaticResource IconMobile}" Fill="#06B6D4" Width="20" Height="20" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                     </Border>
-                     <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
-                        <TextBlock x:Name="SessionDeviceTitle" Text="Device Session" FontSize="16" FontWeight="Bold" Foreground="#FFFFFF"/>
-                        <TextBlock x:Name="SessionDeviceSub" Text="Ready for bidirectional file exchange" FontSize="12" Foreground="#94A3B8"/>
-                     </StackPanel>
-                     <Border Grid.Column="2" Background="#80151828" BorderBrush="#2A334E" BorderThickness="1" CornerRadius="20" Padding="14,6" VerticalAlignment="Center">
-                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                           <Border Width="8" Height="8" CornerRadius="4" Background="#10B981" />
-                           <TextBlock Text="Active Session" FontSize="11" FontWeight="SemiBold" Foreground="#10B981"/>
-                        </StackPanel>
-                     </Border>
-                  </Grid>
-               </Border>
-
-               <!-- Body: Two Spacious Columns for Send & Receive -->
-               <Grid Grid.Row="2" ColumnDefinitions="*, 20, *">
-                  
-                  <!-- Left Column: Send Files to Device -->
-                  <Border Grid.Column="0" Background="#75111422" BorderBrush="#283048" BorderThickness="1" CornerRadius="14" Padding="24" ClipToBounds="False">
-                     <Grid RowDefinitions="Auto, 16, *, Auto">
-                        <StackPanel Grid.Row="0" Spacing="4">
-                           <TextBlock Text="SEND TO THIS DEVICE" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource BrandVioletBrush}" LetterSpacing="1"/>
-                           <TextBlock Text="Select or drop any files to transfer instantly" FontSize="12" Foreground="#94A3B8"/>
-                        </StackPanel>
-
-                        <!-- Large Drop Zone & File Selection Card -->
-                        <Border Grid.Row="2" Background="#80121626" BorderBrush="#2E3854" BorderThickness="1.5" CornerRadius="12" Padding="28" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                           <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="16">
-                              <Border Width="64" Height="64" CornerRadius="32" Background="#1E2338" HorizontalAlignment="Center">
-                                 <Path Data="{StaticResource IconSend}" Fill="#7C3AED" Width="24" Height="24" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                              </Border>
-                              <TextBlock Text="Transfer Any Files or Media" FontSize="14" FontWeight="Bold" Foreground="#FFFFFF" HorizontalAlignment="Center"/>
-                              <TextBlock Text="Send documents, images, 4K videos, or archives" FontSize="12" Foreground="#64748B" HorizontalAlignment="Center"/>
-                              <Button x:Name="SessionSendFilesBtn" Content="Choose Files to Send" Click="SessionSendFiles_Click" Classes="PrimaryBtn" Padding="24,12" FontSize="13" HorizontalAlignment="Center"/>
-                           </StackPanel>
-                        </Border>
-
-                        <!-- Staged/Sent Summary in Session -->
-                        <Border Grid.Row="3" Margin="0,16,0,0" Padding="14,10" Background="#60151828" CornerRadius="8">
-                           <TextBlock x:Name="SessionSendStatusText" Text="Ready to transmit files" FontSize="11" Foreground="#94A3B8" HorizontalAlignment="Center"/>
-                        </Border>
-                     </Grid>
-                  </Border>
-
-                  <!-- Right Column: Incoming Files from Device -->
-                  <Border Grid.Column="2" Background="#75111422" BorderBrush="#283048" BorderThickness="1" CornerRadius="14" Padding="24" ClipToBounds="False">
-                     <Grid RowDefinitions="Auto, 16, *">
-                        <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
-                           <StackPanel Spacing="4">
-                              <TextBlock Text="INCOMING FROM THIS DEVICE" FontSize="11" FontWeight="Bold" Foreground="#06B6D4" LetterSpacing="1"/>
-                              <TextBlock Text="Files waiting for your approval" FontSize="12" Foreground="#94A3B8"/>
-                           </StackPanel>
-                           <TextBlock Grid.Column="1" x:Name="SessionIncomingCountText" Text="0 files" FontSize="11" Foreground="#10B981" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                        </Grid>
-
-                        <Border Grid.Row="2" Background="#80121626" BorderBrush="#2E3854" BorderThickness="1" CornerRadius="12" Padding="16">
-                           <Grid>
-                              <TextBlock x:Name="SessionIncomingEmptyLabel" Text="No pending file requests from this device" FontSize="12" Foreground="#64748B" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center"/>
-                              <ScrollViewer>
-                                 <ItemsControl x:Name="SessionIncomingFilesList">
-                                    <ItemsControl.ItemTemplate>
-                                       <DataTemplate x:DataType="views:StagedWebFile">
-                                          <Border Classes="TrackRow" Padding="14,10" Margin="0,0,0,8" Background="#70151828" CornerRadius="8">
-                                             <Grid ColumnDefinitions="*, Auto, Auto">
-                                                <StackPanel VerticalAlignment="Center">
-                                                   <TextBlock Text="{Binding FileName}" FontSize="13" FontWeight="SemiBold" Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
-                                                   <TextBlock Text="{Binding SizeDisplay}" FontSize="11" Foreground="#94A3B8"/>
-                                                </StackPanel>
-                                                <Button Grid.Column="1" Content="Accept" Tag="{Binding}" Click="AcceptWebSharedFile_Click" Classes="PrimaryBtn" Padding="12,6" FontSize="10" Margin="0,0,8,0"/>
-                                                <Button Grid.Column="2" Content="Reject" Tag="{Binding}" Click="RejectWebSharedFile_Click" Classes="GhostBtn" Padding="10,6" FontSize="10"/>
-                                             </Grid>
-                                          </Border>
-                                       </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                 </ItemsControl>
-                              </ScrollViewer>
-                           </Grid>
-                        </Border>
-                     </Grid>
-                  </Border>
-
-               </Grid>
+            <!-- Collapsed Compatibility Anchor for DeviceSessionPanel -->
+            <Grid x:Name="DeviceSessionPanel" IsVisible="False">
+               <TextBlock x:Name="SessionDeviceTitle"/>
+               <TextBlock x:Name="SessionDeviceSub"/>
+               <Button x:Name="SessionSendFilesBtn" Click="SessionSendFiles_Click"/>
+               <Button x:Name="SessionSendFolderBtn" Click="SessionSendFolder_Click"/>
+               <TextBlock x:Name="SessionSendStatusText"/>
+               <TextBlock x:Name="SessionIncomingCountText"/>
+               <TextBlock x:Name="SessionIncomingEmptyLabel"/>
+               <ItemsControl x:Name="SessionIncomingFilesList"/>
             </Grid>
 
             <!-- 8. SETTINGS PANEL                          -->
@@ -1455,6 +1434,29 @@
     <!-- OVERLAYS & MODALS                          -->
     <!-- ========================================== -->
 
+    <!-- Mutual Connection Request Modal -->
+    <Grid x:Name="ConnectionRequestPanel" IsVisible="False" Background="#A0000000" ZIndex="5200">
+       <Border Background="#11131C" BorderBrush="#7C3AED" BorderThickness="1.5" CornerRadius="16" Padding="32" Width="400" HorizontalAlignment="Center" VerticalAlignment="Center" BoxShadow="0 20 60 0 #A0000000">
+          <StackPanel Spacing="18">
+             <Border Width="60" Height="60" CornerRadius="30" Background="{StaticResource BrandGradientHBrush}" HorizontalAlignment="Center">
+                <Path Data="{StaticResource IconSend}" Fill="#FFFFFF" Width="26" Height="26" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+             </Border>
+             
+             <StackPanel Spacing="6" HorizontalAlignment="Center">
+                <TextBlock Text="INCOMING CONNECTION REQUEST" FontSize="11" FontWeight="Bold" Foreground="#7C3AED" LetterSpacing="1" HorizontalAlignment="Center"/>
+                <TextBlock x:Name="ConnectionRequestPeerName" Text="Device Name" FontSize="18" FontWeight="Bold" Foreground="#FFFFFF" HorizontalAlignment="Center" TextAlignment="Center"/>
+                <TextBlock x:Name="ConnectionRequestDetails" Text="PC • 192.168.1.100" FontSize="12" Foreground="#94A3B8" HorizontalAlignment="Center"/>
+                <TextBlock x:Name="ConnectionRequestRoleDesc" Text="wants to connect with you to share files." FontSize="12" Foreground="#64748B" HorizontalAlignment="Center"/>
+             </StackPanel>
+
+             <Grid ColumnDefinitions="*, 14, *">
+                <Button Grid.Column="0" Content="Decline" Click="DeclineConnection_Click" Classes="GhostBtn" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" TextElement.Foreground="#EF4444" Padding="14,10"/>
+                <Button Grid.Column="2" Content="Accept &amp; Connect" Click="AcceptConnection_Click" Classes="PrimaryBtn" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="14,10" FontWeight="Bold"/>
+             </Grid>
+          </StackPanel>
+       </Border>
+    </Grid>
+
     <!-- Incoming File Approval Modal -->
     <Grid x:Name="AcceptRejectPanel" IsVisible="False" Background="#A0000000" ZIndex="5000">
        <Border Background="#11131C" BorderBrush="#222638" BorderThickness="1" CornerRadius="14" Padding="32" Width="380" HorizontalAlignment="Center" VerticalAlignment="Center" BoxShadow="0 16 48 0 #80000000">
@@ -1473,6 +1475,120 @@
              <Grid ColumnDefinitions="*, 12, *">
                 <Button Grid.Column="0" Content="Decline" Click="RejectTransfer_Click" Classes="GhostBtn" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" TextElement.Foreground="#EF4444"/>
                 <Button Grid.Column="2" Content="Accept" Click="AcceptTransfer_Click" Classes="PrimaryBtn" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+             </Grid>
+          </StackPanel>
+       </Border>
+    </Grid>
+
+    <!-- 0.1 Batch Manifest Checklist Modal -->
+    <Grid x:Name="BatchManifestModal" IsVisible="False" Background="#B0000000" ZIndex="5300">
+       <Border Background="#11131C" BorderBrush="#7C3AED" BorderThickness="1.5" CornerRadius="16" Padding="28" Width="480" MaxHeight="600" HorizontalAlignment="Center" VerticalAlignment="Center" BoxShadow="0 20 60 0 #A0000000">
+          <Grid RowDefinitions="Auto, 14, Auto, 10, *, 18, Auto">
+             <!-- Header with Icon -->
+             <Grid Grid.Row="0" ColumnDefinitions="Auto, *">
+                <Border Width="46" Height="46" CornerRadius="23" Background="{StaticResource BrandGradientHBrush}" Margin="0,0,14,0" VerticalAlignment="Center">
+                   <Path Data="{StaticResource IconReceive}" Fill="#FFFFFF" Width="20" Height="20" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </Border>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                   <TextBlock x:Name="BatchManifestTitle" Text="Incoming Batch (0 Files)" FontSize="16" FontWeight="Bold" Foreground="#FFFFFF"/>
+                   <TextBlock x:Name="BatchManifestSubtitle" Text="From: Device · Total: 0 MB" FontSize="11" Foreground="#94A3B8"/>
+                </StackPanel>
+             </Grid>
+
+             <Separator Grid.Row="1" Height="1" Background="#222638"/>
+
+             <!-- Select All Bar -->
+             <Grid Grid.Row="2" ColumnDefinitions="Auto, *, Auto" Background="#161824">
+                <Border CornerRadius="8" Padding="10,6" Grid.ColumnSpan="3" Background="#161824">
+                   <Grid ColumnDefinitions="Auto, *, Auto">
+                      <CheckBox x:Name="BatchSelectAllCheckBox" Content="Select All Files" IsChecked="True" Click="BatchSelectAll_Click" Foreground="#F8FAFC" FontSize="12" FontWeight="SemiBold"/>
+                      <TextBlock Grid.Column="2" x:Name="BatchManifestSelectedSummary" Text="0 files selected (0 MB)" FontSize="11" Foreground="#7C3AED" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                   </Grid>
+                </Border>
+             </Grid>
+
+             <!-- Scrollable Checklist -->
+             <Border Grid.Row="4" Background="#0D0F18" BorderBrush="#222638" BorderThickness="1" CornerRadius="8" Padding="6">
+                <ScrollViewer MaxHeight="260">
+                   <ItemsControl x:Name="BatchManifestList">
+                      <ItemsControl.ItemTemplate>
+                         <DataTemplate x:DataType="views:BatchCheckItem">
+                            <Border Classes="TrackRow" Padding="10,8" Margin="0,2" Background="#141724" CornerRadius="6">
+                               <Grid ColumnDefinitions="Auto, *, Auto">
+                                  <CheckBox IsChecked="{Binding IsSelected}" Click="BatchItemCheck_Click" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                  <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                                     <TextBlock Text="{Binding FileName}" FontSize="12" FontWeight="SemiBold" Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
+                                     <TextBlock Text="{Binding RelativePath}" FontSize="10" Foreground="#64748B" TextTrimming="CharacterEllipsis"/>
+                                  </StackPanel>
+                                  <TextBlock Grid.Column="2" Text="{Binding FormattedSize}" FontSize="11" Foreground="#94A3B8" VerticalAlignment="Center" Margin="8,0,4,0"/>
+                               </Grid>
+                            </Border>
+                         </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                   </ItemsControl>
+                </ScrollViewer>
+             </Border>
+
+             <!-- Actions -->
+             <Grid Grid.Row="6" ColumnDefinitions="*, 14, *">
+                <Button Grid.Column="0" Content="Decline All" Click="DeclineBatchManifest_Click" Classes="GhostBtn" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" TextElement.Foreground="#EF4444" Padding="14,10"/>
+                <Button Grid.Column="2" x:Name="BatchAcceptBtn" Content="Accept Selected" Click="AcceptBatchManifest_Click" Classes="PrimaryBtn" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="14,10" FontWeight="Bold"/>
+             </Grid>
+          </Grid>
+       </Border>
+    </Grid>
+
+    <!-- 0.2 Celebratory Transfer Success Modal -->
+    <Grid x:Name="TransferSuccessModal" IsVisible="False" Background="#B0000000" ZIndex="5400">
+       <Border Background="#11131C" BorderBrush="#10B981" BorderThickness="1.5" CornerRadius="16" Padding="32" Width="400" HorizontalAlignment="Center" VerticalAlignment="Center" BoxShadow="0 20 60 0 #A0000000">
+          <StackPanel Spacing="16">
+             <Border Width="64" Height="64" CornerRadius="32" Background="#1810B981" BorderBrush="#4010B981" BorderThickness="1.5" HorizontalAlignment="Center">
+                <TextBlock Text="✓" FontSize="32" FontWeight="Bold" Foreground="#10B981" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+             </Border>
+
+             <StackPanel Spacing="4" HorizontalAlignment="Center">
+                <TextBlock x:Name="TransferSuccessTitle" Text="Transfer Completed! 🎉" FontSize="18" FontWeight="Bold" Foreground="#10B981" HorizontalAlignment="Center"/>
+                <TextBlock x:Name="TransferSuccessSubtitle" Text="All files were delivered successfully." FontSize="12" Foreground="#94A3B8" HorizontalAlignment="Center"/>
+             </StackPanel>
+
+             <!-- Transfer Stats Card -->
+             <Border Background="#161824" BorderBrush="#222638" BorderThickness="1" CornerRadius="10" Padding="16,12">
+                <Grid RowDefinitions="Auto, Auto, Auto" ColumnDefinitions="*, Auto">
+                   <TextBlock Grid.Row="0" Grid.Column="0" Text="Transferred Files:" FontSize="12" Foreground="#64748B" Margin="0,3"/>
+                   <TextBlock Grid.Row="0" Grid.Column="1" x:Name="TransferSuccessFileCount" Text="0 files" FontSize="12" FontWeight="Bold" Foreground="#FFFFFF" Margin="0,3"/>
+
+                   <TextBlock Grid.Row="1" Grid.Column="0" Text="Payload Size:" FontSize="12" Foreground="#64748B" Margin="0,3"/>
+                   <TextBlock Grid.Row="1" Grid.Column="1" x:Name="TransferSuccessTotalSize" Text="0 MB" FontSize="12" FontWeight="Bold" Foreground="#FFFFFF" Margin="0,3"/>
+
+                   <TextBlock Grid.Row="2" Grid.Column="0" Text="Remote Device:" FontSize="12" Foreground="#64748B" Margin="0,3"/>
+                   <TextBlock Grid.Row="2" Grid.Column="1" x:Name="TransferSuccessPeerName" Text="Peer" FontSize="12" FontWeight="Bold" Foreground="#7C3AED" Margin="0,3"/>
+                </Grid>
+             </Border>
+
+             <Grid ColumnDefinitions="*, 12, *">
+                <Button Grid.Column="0" Content="Open Downloads" Click="OpenDownloadFolder_Click" Classes="GhostBtn" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="14,10"/>
+                <Button Grid.Column="2" Content="Done" Click="CloseTransferSuccessModal_Click" Classes="PrimaryBtn" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="14,10" FontWeight="Bold"/>
+             </Grid>
+          </StackPanel>
+       </Border>
+    </Grid>
+
+    <!-- 0.3 Peer Resend Request Modal -->
+    <Grid x:Name="ResendRequestModal" IsVisible="False" Background="#B0000000" ZIndex="5450">
+       <Border Background="#11131C" BorderBrush="#06B6D4" BorderThickness="1.5" CornerRadius="16" Padding="28" Width="380" HorizontalAlignment="Center" VerticalAlignment="Center" BoxShadow="0 20 60 0 #A0000000">
+          <StackPanel Spacing="16">
+             <Border Width="56" Height="56" CornerRadius="28" Background="#1806B6D4" BorderBrush="#4006B6D4" BorderThickness="1.5" HorizontalAlignment="Center">
+                <TextBlock Text="↻" FontSize="26" FontWeight="Bold" Foreground="#06B6D4" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+             </Border>
+
+             <StackPanel Spacing="6" HorizontalAlignment="Center">
+                <TextBlock Text="RESEND REQUEST" FontSize="10" FontWeight="Bold" Foreground="#06B6D4" LetterSpacing="1" HorizontalAlignment="Center"/>
+                <TextBlock x:Name="ResendRequestMessage" Text="Peer requested to resend file." FontSize="13" Foreground="#FFFFFF" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
+             </StackPanel>
+
+             <Grid ColumnDefinitions="*, 12, *">
+                <Button Grid.Column="0" Content="Decline" Click="DeclineResendRequest_Click" Classes="GhostBtn" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" TextElement.Foreground="#EF4444" Padding="12,9"/>
+                <Button Grid.Column="2" Content="Accept &amp; Resend" Click="AcceptResendRequest_Click" Classes="PrimaryBtn" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="12,9" FontWeight="Bold"/>
              </Grid>
           </StackPanel>
        </Border>

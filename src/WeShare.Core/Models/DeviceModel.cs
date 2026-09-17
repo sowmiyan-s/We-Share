@@ -92,10 +92,47 @@ namespace WeShare.Core.Models
             set => SetProperty(ref _lastSeen, value);
         }
 
+        private string _role = "Idle";
+        private string _connectionStatus = "Disconnected";
+
+        public string Role
+        {
+            get => _role;
+            set
+            {
+                if (SetProperty(ref _role, value))
+                {
+                    OnPropertyChanged(nameof(RoleDisplay));
+                }
+            }
+        }
+
+        public string RoleDisplay => _role switch
+        {
+            "Receiver" => "Ready to Receive",
+            "Sender" => "Ready to Send",
+            _ => "Available"
+        };
+
+        public string ConnectionStatus
+        {
+            get => _connectionStatus;
+            set => SetProperty(ref _connectionStatus, value);
+        }
+
         public bool IsReceiver
         {
-            get => _isReceiver;
-            set => SetProperty(ref _isReceiver, value);
+            get => _isReceiver || _role == "Receiver";
+            set
+            {
+                if (SetProperty(ref _isReceiver, value))
+                {
+                    if (value && _role != "Receiver") _role = "Receiver";
+                    else if (!value && _role == "Receiver") _role = "Sender";
+                    OnPropertyChanged(nameof(Role));
+                    OnPropertyChanged(nameof(RoleDisplay));
+                }
+            }
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

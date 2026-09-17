@@ -43,6 +43,20 @@ namespace WeShare.Core.Models
             set { if (_sessionId != value) { _sessionId = value; OnPropertyChanged(); } } 
         }
 
+        private string _batchId = string.Empty;
+        public string BatchId 
+        { 
+            get => _batchId; 
+            set { if (_batchId != value) { _batchId = value; OnPropertyChanged(); } } 
+        }
+
+        private string _relativePath = string.Empty;
+        public string RelativePath 
+        { 
+            get => _relativePath; 
+            set { if (_relativePath != value) { _relativePath = value; OnPropertyChanged(); } } 
+        }
+
         private string _fileName = string.Empty;
         public string FileName 
         { 

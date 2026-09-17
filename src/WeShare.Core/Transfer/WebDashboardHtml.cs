@@ -372,6 +372,87 @@ body::before {
   border-radius: var(--radius-md);
   padding: 10px 16px;
 }
+
+/* SHAREIT WEB RADAR SCANNER */
+.web-radar-container {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 12px auto;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.web-radar-ring {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.web-radar-sweep {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg at 50% 50%, rgba(124, 58, 237, 0.3) 0deg, transparent 60deg, transparent 360deg);
+  animation: webRadarSpin 3s linear infinite;
+  pointer-events: none;
+}
+@keyframes webRadarSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.web-radar-pulse {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 1.5px solid rgba(124, 58, 237, 0.6);
+  animation: webRadarPulse 2.5s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes webRadarPulse {
+  0% { transform: scale(0.2); opacity: 0.9; }
+  70% { transform: scale(1.0); opacity: 0; }
+  100% { transform: scale(1.0); opacity: 0; }
+}
+.web-radar-center {
+  position: relative;
+  z-index: 2;
+  width: 48px;
+  height: 48px;
+  border-radius: 24px;
+  background: var(--card-solid);
+  border: 2px solid var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 16px rgba(124, 58, 237, 0.5);
+}
+.web-radar-node {
+  position: absolute;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.web-radar-node:hover {
+  transform: scale(1.08);
+}
+.web-radar-node-disc {
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  background: var(--card-solid);
+  border: 2px solid var(--cyan);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(6, 182, 212, 0.35);
+}
+
 .wsw-step {
   display: flex;
   align-items: center;
@@ -1393,6 +1474,48 @@ body::before {
   box-shadow: 0 4px 14px var(--primary-glow);
 }
 
+.batch-chk-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+.batch-chk-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+.batch-chk-item input[type=""checkbox""] {
+  display: inline-block !important;
+  accent-color: var(--primary);
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.batch-chk-info {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.batch-chk-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.batch-chk-meta {
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
 /* ------------------------------------------------------------- */
 /* TOAST NOTIFICATION                                            */
 /* ------------------------------------------------------------- */
@@ -1510,6 +1633,55 @@ input[type=""file""] {
   <!-- ========================================================= -->
   <div class=""tab-view active"" id=""viewSend"">
 
+    <!-- SHAREit Style Radar Discovery & Connection Card -->
+    <div class=""radar-connect-card"" id=""radarConnectCard"" style=""background:var(--panel); border:1px solid var(--border); border-radius:var(--radius-md); padding:16px; text-align:center; margin-bottom:16px;"">
+      <div style=""display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;"">
+        <div style=""display:flex; align-items:center; gap:8px;"">
+          <div style=""width:8px; height:8px; border-radius:4px; background:var(--primary);""></div>
+          <span style=""font-size:13px; font-weight:700; color:var(--text);"">Nearby Share Radar</span>
+        </div>
+        <div id=""sessionStatusBadge"" style=""font-size:11px; font-weight:700; padding:4px 10px; border-radius:20px; background:#1e2338; color:#94A3B8;"">
+          DISCONNECTED
+        </div>
+      </div>
+
+      <!-- Rotating Sonar Radar -->
+      <div class=""web-radar-container"" id=""webRadarContainer"">
+        <div class=""web-radar-ring"" style=""width:200px; height:200px; border:1px solid rgba(124,58,237,0.2);""></div>
+        <div class=""web-radar-ring"" style=""width:130px; height:130px; border:1px dashed rgba(124,58,237,0.25);""></div>
+        <div class=""web-radar-ring"" style=""width:70px; height:70px; border:1px solid rgba(124,58,237,0.3);""></div>
+        <div class=""web-radar-sweep""></div>
+        <div class=""web-radar-pulse""></div>
+        
+        <!-- Center Phone Node -->
+        <div class=""web-radar-center"">
+          <svg style=""width:22px; height:22px; stroke:#A855F7; fill:none;"" viewBox=""0 0 24 24"" stroke-width=""2""><rect x=""5"" y=""2"" width=""14"" height=""20"" rx=""2"" ry=""2""/><line x1=""12"" y1=""18"" x2=""12.01"" y2=""18""/></svg>
+        </div>
+
+        <!-- Discovered Host PC Node on Radar -->
+        <div class=""web-radar-node"" id=""hostRadarNode"" onclick=""connectToHost('Sender')"" style=""top:20px; right:25px;"">
+          <div class=""web-radar-node-disc"">
+            <svg style=""width:18px; height:18px; stroke:#06B6D4; fill:none;"" viewBox=""0 0 24 24"" stroke-width=""2""><rect x=""2"" y=""3"" width=""20"" height=""14"" rx=""2"" ry=""2""/><line x1=""8"" y1=""21"" x2=""16"" y2=""21""/><line x1=""12"" y1=""17"" x2=""12"" y2=""21""/></svg>
+          </div>
+          <span id=""radarHostName"" style=""font-size:10px; font-weight:700; color:#fff; margin-top:3px; max-width:70px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"">Host PC</span>
+        </div>
+      </div>
+
+      <!-- Connect Action Button / Status -->
+      <div id=""connectActionSection"" style=""margin-top:8px;"">
+        <button id=""connectHostBtn"" onclick=""connectToHost('Sender')"" style=""width:100%; padding:11px 16px; border-radius:10px; background:linear-gradient(135deg, #7C3AED, #9333EA); border:none; color:#fff; font-size:13px; font-weight:700; cursor:pointer; box-shadow:0 4px 14px rgba(124,58,237,0.35);"">
+          🔗 Connect to Host PC to Share Files
+        </button>
+      </div>
+      <div id=""connectedActiveSection"" style=""display:none; margin-top:8px; align-items:center; justify-content:space-between; background:#0E2E28; border:1px solid #10B981; border-radius:10px; padding:8px 12px;"">
+        <div style=""display:flex; align-items:center; gap:8px;"">
+          <div style=""width:8px; height:8px; border-radius:4px; background:#10B981;""></div>
+          <span id=""connectedDeviceLabel"" style=""font-size:12px; font-weight:700; color:#10B981;"">Connected with Host PC</span>
+        </div>
+        <button onclick=""disconnectFromHost()"" style=""padding:5px 10px; border-radius:6px; background:#1e2338; border:1px solid #333d5a; color:#EF4444; font-size:11px; font-weight:600; cursor:pointer;"">Disconnect</button>
+      </div>
+    </div>
+
     <!-- 3-Step Sequence Wizard -->
     <div class=""web-step-wizard"" id=""webStepWizard"">
       <div class=""wsw-step active"" id=""wswStep1"">
@@ -1528,8 +1700,9 @@ input[type=""file""] {
       </div>
     </div>
 
-    <!-- Hidden Multi-File and Camera Inputs -->
+    <!-- Hidden Multi-File, Folder and Camera Inputs -->
     <input type=""file"" id=""multiFileInput"" multiple onchange=""onFilesSelected(this.files)"">
+    <input type=""file"" id=""folderInput"" webkitdirectory directory multiple onchange=""onFolderSelected(this.files)"">
     <input type=""file"" id=""cameraInput"" accept=""image/*,video/*"" capture=""environment"" onchange=""onFilesSelected(this.files)"">
 
     <!-- Step 1: Interactive Dropzone -->
@@ -1539,11 +1712,15 @@ input[type=""file""] {
         <svg style=""display:none;"" xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2.2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4""/><polyline points=""17 8 12 3 7 8""/><line x1=""12"" y1=""3"" x2=""12"" y2=""15""/></svg>
       </div>
       <div class=""dz-title"">Step 1: Select Files to Transfer</div>
-      <div class=""dz-sub"">Tap or drop photos, 4K videos, documents, or archives of any size.</div>
+      <div class=""dz-sub"">Tap or drop photos, 4K videos, documents, or entire folders of any size.</div>
       <div class=""dz-btn-group"" onclick=""event.stopPropagation()"">
         <button class=""dz-action-btn"" onclick=""document.getElementById('multiFileInput').click()"">
           <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z""/><polyline points=""14 2 14 8 20 8""/><line x1=""12"" y1=""18"" x2=""12"" y2=""12""/><line x1=""9"" y1=""15"" x2=""15"" y2=""15""/></svg>
           Browse Files
+        </button>
+        <button class=""dz-action-btn"" onclick=""document.getElementById('folderInput').click()"">
+          <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z""/></svg>
+          Add Folder
         </button>
         <button class=""dz-action-btn"" onclick=""document.getElementById('cameraInput').click()"">
           <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z""/><circle cx=""12"" cy=""13"" r=""4""/></svg>
@@ -1722,19 +1899,103 @@ input[type=""file""] {
 </div>
 
 <!-- =========================================================== -->
-<!-- INCOMING TRANSFER BOTTOM MODAL (BATCH FILES)                -->
+<!-- INCOMING TRANSFER BOTTOM MODAL (BATCH MANIFEST CHECKLIST)   -->
 <!-- =========================================================== -->
 <div class=""modal-overlay"" id=""batchOfferModal"">
-  <div class=""modal-sheet"">
-    <div class=""modal-icon-disc"">
-      <img src=""/api/assets/receive.png"" onerror=""this.style.display='none'; this.nextElementSibling.style.display='block';"" alt=""Receive"" style=""width:44px; height:44px; object-fit:contain; filter:drop-shadow(0 4px 12px rgba(236,72,153,0.45));"">
-      <svg style=""display:none;"" xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z""/></svg>
+  <div class=""modal-sheet"" style=""max-width:440px; max-height:85vh; display:flex; flex-direction:column; text-align:left;"">
+    <div style=""display:flex; align-items:center; gap:12px; margin-bottom:12px;"">
+      <div class=""modal-icon-disc"" style=""margin:0; width:44px; height:44px; background:rgba(124,58,237,0.15); color:var(--primary-light);"">
+        <img src=""/api/assets/receive.png"" onerror=""this.style.display='none'; this.nextElementSibling.style.display='block';"" alt=""Receive"" style=""width:36px; height:36px; object-fit:contain;"">
+        <svg style=""display:none;"" xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z""/></svg>
+      </div>
+      <div style=""flex:1; overflow:hidden;"">
+        <div class=""modal-title"" id=""batchOfferTitle"" style=""font-size:16px;"">Incoming Batch (0 Files)</div>
+        <div class=""modal-desc"" id=""batchOfferDesc"" style=""font-size:11px;"">Select the files you want to receive.</div>
+      </div>
     </div>
-    <div class=""modal-title"" id=""batchOfferTitle"">Incoming Batch</div>
-    <div class=""modal-desc"" id=""batchOfferDesc"">Multiple files incoming from PC.</div>
+
+    <!-- Select All / Count Bar -->
+    <div style=""display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:rgba(255,255,255,0.04); border:1px solid var(--border-subtle); border-radius:8px; margin-bottom:8px;"">
+      <label style=""display:flex; align-items:center; gap:8px; cursor:pointer; font-size:12px; font-weight:700; color:var(--text);"">
+        <input type=""checkbox"" id=""batchSelectAllCheck"" onchange=""toggleBatchSelectAll(this.checked)"" checked style=""accent-color:var(--primary); width:16px; height:16px; cursor:pointer;"">
+        Select All (<span id=""batchSelectedCount"">0</span>/<span id=""batchTotalCount"">0</span>)
+      </label>
+      <span id=""batchSelectedSize"" style=""font-size:11px; font-weight:700; color:var(--primary-light);"">0 MB</span>
+    </div>
+
+    <!-- Scrollable Checklist -->
+    <div id=""batchOfferFileList"" style=""flex:1; overflow-y:auto; max-height:260px; display:flex; flex-direction:column; gap:6px; margin-bottom:12px; padding-right:4px;"">
+      <!-- Generated dynamically -->
+    </div>
+
     <div class=""modal-actions"">
       <button class=""modal-btn modal-btn-decline"" onclick=""declineBatchOffer()"">Decline All</button>
-      <button class=""modal-btn modal-btn-accept"" onclick=""acceptBatchOffer()"">Accept All</button>
+      <button class=""modal-btn modal-btn-accept"" id=""batchAcceptBtn"" onclick=""acceptSelectedBatchOffer()"">Accept Selected</button>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================== -->
+<!-- TRANSFER SUCCESS CELEBRATION MODAL                          -->
+<!-- =========================================================== -->
+<div class=""modal-overlay"" id=""transferSuccessModal"">
+  <div class=""modal-sheet"" style=""max-width:380px; text-align:center;"">
+    <div class=""modal-icon-disc"" style=""background:rgba(16, 185, 129, 0.15); color:var(--emerald); width:64px; height:64px;"">
+      <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2.5"" stroke-linecap=""round"" stroke-linejoin=""round"" style=""width:32px; height:32px;""><path d=""M20 6L9 17l-5-5""/></svg>
+    </div>
+    <div class=""modal-title"" style=""color:var(--emerald); font-size:18px; margin-top:4px;"">Transfer Completed! 🎉</div>
+    <div class=""modal-desc"" id=""transferSuccessDesc"">All selected files were transferred successfully.</div>
+
+    <div style=""background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); border-radius:10px; padding:12px; margin:4px 0; text-align:left; font-size:12px;"">
+      <div style=""display:flex; justify-content:space-between; margin-bottom:6px;"">
+        <span style=""color:var(--text-dim);"">Files Transferred:</span>
+        <span id=""successFileCount"" style=""font-weight:700; color:var(--text);"">0 files</span>
+      </div>
+      <div style=""display:flex; justify-content:space-between; margin-bottom:6px;"">
+        <span style=""color:var(--text-dim);"">Payload Volume:</span>
+        <span id=""successTotalSize"" style=""font-weight:700; color:var(--text);"">0 MB</span>
+      </div>
+      <div style=""display:flex; justify-content:space-between;"">
+        <span style=""color:var(--text-dim);"">Connected Peer:</span>
+        <span id=""successPeerName"" style=""font-weight:700; color:var(--primary-light);"">Host PC</span>
+      </div>
+    </div>
+
+    <div class=""modal-actions"" style=""margin-top:8px;"">
+      <button class=""modal-btn modal-btn-accept"" onclick=""closeSuccessModal()"">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================== -->
+<!-- RESEND REQUEST MODAL                                        -->
+<!-- =========================================================== -->
+<div class=""modal-overlay"" id=""resendRequestModal"">
+  <div class=""modal-sheet"" style=""max-width:360px; text-align:center;"">
+    <div class=""modal-icon-disc"" style=""background:rgba(6, 182, 212, 0.15); color:var(--cyan);"">
+      <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round"" style=""width:28px;height:28px;""><polyline points=""1 4 1 10 7 10""/><polyline points=""23 20 23 14 17 14""/><path d=""M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15""/></svg>
+    </div>
+    <div class=""modal-title"">Resend Request</div>
+    <div class=""modal-desc"" id=""resendRequestDesc"">The recipient requested to resend a file.</div>
+    <div class=""modal-actions"" style=""margin-top:10px;"">
+      <button class=""modal-btn modal-btn-decline"" onclick=""respondResendRequest(false)"">Decline</button>
+      <button class=""modal-btn modal-btn-accept"" onclick=""respondResendRequest(true)"">Accept & Resend</button>
+    </div>
+  </div>
+</div>
+<!-- =========================================================== -->
+<!-- INCOMING CONNECTION REQUEST MODAL                           -->
+<!-- =========================================================== -->
+<div class=""modal-overlay"" id=""incomingConnectModal"">
+  <div class=""modal-sheet"" style=""max-width:340px; text-align:center;"">
+    <div class=""modal-icon-disc"" style=""background:linear-gradient(135deg, #7C3AED, #06B6D4);"">
+      <svg style=""width:28px; height:28px; stroke:#fff; fill:none;"" viewBox=""0 0 24 24"" stroke-width=""2""><path d=""M4 17l6-6-6-6M12 19h8""/></svg>
+    </div>
+    <div class=""modal-title"" style=""margin-top:10px;"">Connect Request</div>
+    <div class=""modal-desc"" id=""incomingConnectDesc"">Host PC wants to connect with you to share files.</div>
+    <div class=""modal-actions"" style=""margin-top:16px;"">
+      <button class=""modal-btn modal-btn-decline"" onclick=""respondConnectRequest(false)"">Decline</button>
+      <button class=""modal-btn modal-btn-accept"" onclick=""respondConnectRequest(true)"">Accept & Connect</button>
     </div>
   </div>
 </div>
@@ -1757,6 +2018,83 @@ let speedHistory = [];
 const MAX_SPEED_POINTS = 36;
 let pendingSingleOffer = null;
 let pendingBatchOffer = null;
+let isSessionPaired = false;
+let pairedHostName = 'Host PC';
+
+async function connectToHost(role = 'Sender') {
+  const btn = document.getElementById('connectHostBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Connecting to Host PC...'; }
+  try {
+    const res = await fetch(`/api/connect?clientId=${encodeURIComponent(getClientId())}&name=${encodeURIComponent(getSavedNickname())}&role=${role}`, { method: 'POST' }).then(r => r.json());
+    if (res.accepted) {
+      setConnectedState(true, res.pcName || 'Host PC');
+      showToast('Connected with ' + (res.pcName || 'Host PC') + '!');
+    } else {
+      showToast('Connection request was declined.');
+      setConnectedState(false);
+    }
+  } catch (err) {
+    showToast('Failed to connect: ' + err.message);
+    setConnectedState(false);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '🔗 Connect to Host PC to Share Files'; }
+  }
+}
+
+async function disconnectFromHost() {
+  await fetch(`/api/disconnect?clientId=${encodeURIComponent(getClientId())}`, { method: 'POST' }).catch(() => {});
+  setConnectedState(false);
+  showToast('Disconnected.');
+}
+
+function setConnectedState(connected, hostName = 'Host PC') {
+  isSessionPaired = connected;
+  pairedHostName = hostName;
+  const statusBadge = document.getElementById('sessionStatusBadge');
+  const actionSection = document.getElementById('connectActionSection');
+  const activeSection = document.getElementById('connectedActiveSection');
+  const label = document.getElementById('connectedDeviceLabel');
+  const hostStatusText = document.getElementById('hostStatusText');
+  const radarHostName = document.getElementById('radarHostName');
+
+  if (radarHostName && hostName) radarHostName.textContent = hostName;
+
+  if (connected) {
+    if (statusBadge) {
+      statusBadge.textContent = 'CONNECTED';
+      statusBadge.style.background = '#0E2E28';
+      statusBadge.style.color = '#10B981';
+      statusBadge.style.border = '1px solid #10B981';
+    }
+    if (actionSection) actionSection.style.display = 'none';
+    if (activeSection) activeSection.style.display = 'flex';
+    if (label) label.textContent = 'Connected with ' + hostName;
+    if (hostStatusText) hostStatusText.textContent = 'CONNECTED: ' + hostName.toUpperCase();
+  } else {
+    if (statusBadge) {
+      statusBadge.textContent = 'DISCONNECTED';
+      statusBadge.style.background = '#1e2338';
+      statusBadge.style.color = '#94A3B8';
+      statusBadge.style.border = 'none';
+    }
+    if (actionSection) actionSection.style.display = 'block';
+    if (activeSection) activeSection.style.display = 'none';
+    if (hostStatusText) hostStatusText.textContent = 'ONLINE';
+  }
+}
+
+async function respondConnectRequest(accept) {
+  const modal = document.getElementById('incomingConnectModal');
+  if (modal) modal.classList.remove('active');
+  await fetch(`/api/connect-respond?clientId=${encodeURIComponent(getClientId())}&accept=${accept}`, { method: 'POST' }).catch(() => {});
+  if (accept) {
+    setConnectedState(true, pairedHostName);
+    showToast('Connected with ' + pairedHostName + '!');
+  } else {
+    setConnectedState(false);
+    showToast('Connection declined.');
+  }
+}
 
 function getClientId() {
   try {
@@ -1907,18 +2245,31 @@ function getFileCategorySvg(name) {
 }
 
 /* ------------------------------------------------------------- */
-/* STAGING TRAY HANDLER (MULTIPLE FILES)                         */
+/* STAGING TRAY HANDLER (MULTIPLE FILES & FOLDERS)               */
 /* ------------------------------------------------------------- */
 function onFilesSelected(fileList) {
   if (!fileList || fileList.length === 0) return;
   for (let i = 0; i < fileList.length; i++) {
-    stagedFiles.push(fileList[i]);
+    const f = fileList[i];
+    f.customRelativePath = f.webkitRelativePath || f.name;
+    stagedFiles.push(f);
   }
-  // Reset input values so picking the same file again triggers change event
   document.getElementById('multiFileInput').value = '';
   document.getElementById('cameraInput').value = '';
   renderStagingTray();
   showToast('Added ' + fileList.length + ' file(s) to queue');
+}
+
+function onFolderSelected(fileList) {
+  if (!fileList || fileList.length === 0) return;
+  for (let i = 0; i < fileList.length; i++) {
+    const f = fileList[i];
+    f.customRelativePath = f.webkitRelativePath || f.name;
+    stagedFiles.push(f);
+  }
+  document.getElementById('folderInput').value = '';
+  renderStagingTray();
+  showToast('Added folder with ' + fileList.length + ' file(s)');
 }
 
 function removeStagedFile(idx) {
@@ -1974,6 +2325,7 @@ function renderStagingTray() {
     const item = document.createElement('div');
     item.className = 'staging-item';
     item.id = 'stagedItem_' + idx;
+    const relDisp = (f.customRelativePath && f.customRelativePath !== f.name) ? `<div style=""font-size:10px; color:var(--text-muted); text-overflow:ellipsis; overflow:hidden;"">${f.customRelativePath}</div>` : '';
     item.innerHTML = `
       <div class=""si-left"">
         <div class=""si-icon"">
@@ -1981,6 +2333,7 @@ function renderStagingTray() {
         </div>
         <div class=""si-info"">
           <span class=""si-name"" title=""${f.name}"">${f.name}</span>
+          ${relDisp}
           <span class=""si-size"">${formatBytes(f.size)}</span>
         </div>
       </div>
@@ -1996,7 +2349,7 @@ function renderStagingTray() {
 }
 
 /* ------------------------------------------------------------- */
-/* BATCH FILE STREAMING UPLOADER                                 */
+/* BATCH FILE STREAMING UPLOADER WITH MANIFEST NEGOTIATION      */
 /* ------------------------------------------------------------- */
 async function startBatchSend() {
   if (stagedFiles.length === 0 || isUploading) return;
@@ -2007,21 +2360,74 @@ async function startBatchSend() {
   if (c2) c2.className = 'wsw-connector active';
   if (s3) s3.className = 'wsw-step active';
 
-  const total = stagedFiles.length;
+  const clientId = getClientId();
+  const targetId = document.getElementById('targetDeviceSelect').value || 'pc';
+  const batchId = 'wb_' + Date.now();
+
+  let filesToSend = stagedFiles.slice();
+
+  // If connected with Host PC, negotiate batch manifest so recipient can review/choose files
+  if (isSessionPaired && targetId === 'pc') {
+    try {
+      showToast('Sending transfer manifest to recipient...');
+      const manifestPayload = {
+        senderId: clientId,
+        senderName: getSavedNickname(),
+        batchId: batchId,
+        files: stagedFiles.map((f, idx) => ({
+          fileId: 'wf_' + idx + '_' + Date.now(),
+          fileName: f.name,
+          relativePath: f.customRelativePath || f.webkitRelativePath || f.name,
+          size: f.size
+        }))
+      };
+
+      const manifestRes = await fetch('/api/batch-manifest?clientId=' + encodeURIComponent(clientId), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(manifestPayload)
+      }).then(r => r.json());
+
+      if (!manifestRes || !manifestRes.acceptedFileIds || manifestRes.acceptedFileIds.length === 0) {
+        showToast('Recipient declined file transfer');
+        isUploading = false;
+        document.getElementById('sendAllBtn').disabled = false;
+        return;
+      }
+
+      const acceptedIdSet = new Set(manifestRes.acceptedFileIds);
+      filesToSend = [];
+      manifestPayload.files.forEach((mf, idx) => {
+        if (acceptedIdSet.has(mf.fileId)) {
+          filesToSend.push(stagedFiles[idx]);
+        }
+      });
+    } catch (e) {
+      console.warn('Batch manifest negotiation warning:', e);
+    }
+  }
+
+  const total = filesToSend.length;
+  if (total === 0) {
+    showToast('No files were accepted by recipient');
+    isUploading = false;
+    document.getElementById('sendAllBtn').disabled = false;
+    return;
+  }
+
   const hud = document.getElementById('transferHud');
   hud.classList.add('active');
 
-  const clientId = getClientId();
-  const targetId = document.getElementById('targetDeviceSelect').value || 'pc';
-
   let successCount = 0;
+  let totalBytesTransferred = 0;
   let failMessage = '';
 
-  for (let i = 0; i < stagedFiles.length; i++) {
-    const file = stagedFiles[i];
+  for (let i = 0; i < filesToSend.length; i++) {
+    const file = filesToSend[i];
     
     // Highlight staged item in list
-    const itemEl = document.getElementById('stagedItem_' + i);
+    const originalIdx = stagedFiles.indexOf(file);
+    const itemEl = originalIdx >= 0 ? document.getElementById('stagedItem_' + originalIdx) : null;
     if (itemEl) itemEl.style.borderColor = 'var(--cyan)';
 
     // Update HUD titles
@@ -2031,17 +2437,16 @@ async function startBatchSend() {
     drawSpeedGraph();
 
     try {
-      // 1. Request permission
-      const askUrl = '/api/ask-receive?clientId=' + clientId + '&targetId=' + targetId + '&name=' + encodeURIComponent(file.name) + '&size=' + file.size;
-      const askRes = await fetch(askUrl, { method: 'POST' }).then(r => r.json());
-
-      if (!askRes.accepted) {
-        throw new Error(askRes.error || 'Transfer declined by recipient');
+      if (isSessionPaired && targetId === 'pc') {
+        await streamFileUpload(file, '', clientId, batchId, file.customRelativePath || file.webkitRelativePath || '');
+      } else {
+        const askUrl = '/api/ask-receive?clientId=' + clientId + '&targetId=' + targetId + '&name=' + encodeURIComponent(file.name) + '&size=' + file.size;
+        const askRes = await fetch(askUrl, { method: 'POST' }).then(r => r.json());
+        if (!askRes.accepted) throw new Error(askRes.error || 'Transfer declined by recipient');
+        await streamFileUpload(file, askRes.id, clientId, batchId, file.customRelativePath || file.webkitRelativePath || '');
       }
-
-      // 2. Stream raw file body chunk by chunk without memory bloat
-      await streamFileUpload(file, askRes.id, clientId);
       successCount++;
+      totalBytesTransferred += file.size;
 
       if (itemEl) {
         itemEl.style.borderColor = 'var(--emerald)';
@@ -2051,9 +2456,7 @@ async function startBatchSend() {
       console.error('File upload failed:', err);
       failMessage = err.message || 'Upload error';
       if (itemEl) itemEl.style.borderColor = 'var(--rose)';
-      if (failMessage.includes('declined') || failMessage.includes('aborted')) {
-        break;
-      }
+      if (failMessage.includes('declined') || failMessage.includes('aborted')) break;
     }
   }
 
@@ -2061,13 +2464,11 @@ async function startBatchSend() {
   document.getElementById('sendAllBtn').disabled = false;
   hud.classList.remove('active');
 
-  if (successCount === total) {
-    showToast(`Successfully transferred all ${total} files!`);
+  if (successCount > 0) {
+    // Notify server of batch complete
+    fetch(`/api/batch-complete?clientId=${encodeURIComponent(clientId)}&count=${successCount}&bytes=${totalBytesTransferred}`, { method: 'POST' }).catch(() => {});
+    showTransferSuccessModal(true, pairedHostName, successCount, totalBytesTransferred);
     stagedFiles = [];
-    renderStagingTray();
-  } else if (successCount > 0) {
-    showToast(`Transferred ${successCount} of ${total} files. (${failMessage})`);
-    stagedFiles.splice(0, successCount);
     renderStagingTray();
   } else {
     showToast(`Upload failed: ${failMessage}`);
@@ -2078,7 +2479,7 @@ async function startBatchSend() {
 
 let currentUploadResolve = null;
 
-function streamFileUpload(file, uploadId, clientId) {
+function streamFileUpload(file, uploadId, clientId, batchId, relativePath) {
   return new Promise((resolve, reject) => {
     let isFinished = false;
 
@@ -2104,8 +2505,15 @@ function streamFileUpload(file, uploadId, clientId) {
     const xhr = new XMLHttpRequest();
     currentXhr = xhr;
 
-    xhr.open('POST', '/upload?clientId=' + encodeURIComponent(clientId) + '&id=' + encodeURIComponent(uploadId));
+    let uploadUrl = uploadId 
+      ? '/upload?clientId=' + encodeURIComponent(clientId) + '&id=' + encodeURIComponent(uploadId)
+      : '/upload?clientId=' + encodeURIComponent(clientId) + '&name=' + encodeURIComponent(file.name);
+    if (batchId) uploadUrl += '&batchId=' + encodeURIComponent(batchId);
+    if (relativePath) uploadUrl += '&relativePath=' + encodeURIComponent(relativePath);
+
+    xhr.open('POST', uploadUrl);
     xhr.setRequestHeader('X-File-Name', encodeURIComponent(file.name));
+    if (relativePath) xhr.setRequestHeader('X-Relative-Path', encodeURIComponent(relativePath));
 
     let lastTime = performance.now();
     let lastLoaded = 0;
@@ -2368,8 +2776,9 @@ async function loadHistory() {
             <span class=""hi-sub"">${formatBytes(h.totalBytes)} • ${isRecv ? 'From PC' : 'Sent to PC'} • ${dateStr}</span>
           </div>
         </div>
-        <div class=""hi-right"">
+        <div class=""hi-right"" style=""display:flex; align-items:center; gap:8px;"">
           <span class=""hi-status ${isDone ? 'completed' : 'failed'}"">${isDone ? 'COMPLETED' : 'FAILED'}</span>
+          <button onclick=""requestFileResend('${h.fileId || ''}', '${encodeURIComponent(h.fileName || '')}')"" style=""padding:4px 8px; border-radius:6px; background:rgba(6,182,212,0.12); border:1px solid rgba(6,182,212,0.3); color:var(--cyan); font-size:10px; font-weight:700; cursor:pointer;"">Resend</button>
         </div>
       `;
       list.appendChild(item);
@@ -2381,6 +2790,35 @@ function initSSE() {
   const cid = getClientId();
   const sse = new EventSource('/api/events?clientId=' + cid);
 
+  sse.addEventListener('connect-request', (e) => {
+    try {
+      const data = JSON.parse(e.data);
+      pairedHostName = data.name || 'Host PC';
+      const desc = document.getElementById('incomingConnectDesc');
+      if (desc) desc.textContent = `${pairedHostName} (${data.type || 'PC'}) wants to connect with you to share files.`;
+      const modal = document.getElementById('incomingConnectModal');
+      if (modal) modal.classList.add('active');
+    } catch(err) {}
+  });
+
+  sse.addEventListener('connect-accepted', (e) => {
+    try {
+      const data = JSON.parse(e.data);
+      setConnectedState(true, data.name || 'Host PC');
+      showToast('Connected with ' + (data.name || 'Host PC') + '!');
+    } catch(err) {}
+  });
+
+  sse.addEventListener('connect-declined', () => {
+    setConnectedState(false);
+    showToast('Host PC declined connection.');
+  });
+
+  sse.addEventListener('disconnected', () => {
+    setConnectedState(false);
+    showToast('Disconnected from session.');
+  });
+
   sse.addEventListener('offer', (e) => {
     try {
       pendingSingleOffer = JSON.parse(e.data);
@@ -2389,12 +2827,31 @@ function initSSE() {
     } catch(err) {}
   });
 
+  sse.addEventListener('batch-manifest', (e) => {
+    try {
+      const manifest = JSON.parse(e.data);
+      showIncomingBatchChecklist(manifest);
+    } catch(err) {}
+  });
+
   sse.addEventListener('batch-offer', (e) => {
     try {
-      pendingBatchOffer = JSON.parse(e.data);
-      document.getElementById('batchOfferTitle').textContent = `Incoming Batch (${pendingBatchOffer.files?.length || 0} Files)`;
-      document.getElementById('batchOfferDesc').textContent = `Total size: ${formatBytes(pendingBatchOffer.totalSize)} from ${pendingBatchOffer.from || 'Host PC'}`;
-      document.getElementById('batchOfferModal').classList.add('active');
+      const manifest = JSON.parse(e.data);
+      showIncomingBatchChecklist(manifest);
+    } catch(err) {}
+  });
+
+  sse.addEventListener('batch-complete', (e) => {
+    try {
+      const data = JSON.parse(e.data);
+      showTransferSuccessModal(false, pairedHostName, data.count || 1, data.bytes || 0);
+    } catch(err) {}
+  });
+
+  sse.addEventListener('resend-request', (e) => {
+    try {
+      const data = JSON.parse(e.data);
+      showResendRequestPrompt(data);
     } catch(err) {}
   });
 
@@ -2402,7 +2859,7 @@ function initSSE() {
     try {
       const p = JSON.parse(e.data);
       if (isUploading && p.percent) {
-        // Can be used to sync server-side progress
+        // Server side progress sync
       }
     } catch(err) {}
   });
@@ -2452,34 +2909,190 @@ function declineSingleOffer() {
   }
 }
 
-function acceptBatchOffer() {
+let pendingBatchManifest = null;
+
+function showIncomingBatchChecklist(manifest) {
+  pendingBatchManifest = manifest;
+  const modal = document.getElementById('batchOfferModal');
+  const title = document.getElementById('batchOfferTitle');
+  const desc = document.getElementById('batchOfferDesc');
+  const list = document.getElementById('batchOfferFileList');
+  const allChk = document.getElementById('batchSelectAllCheck');
+
+  const files = manifest.files || manifest.Files || [];
+  title.textContent = `Incoming Batch (${files.length} Files)`;
+  desc.textContent = `From ${manifest.senderName || manifest.SenderName || 'Host PC'} • Total: ${formatBytes(manifest.totalSize || manifest.TotalSize || files.reduce((a, b) => a + (b.size || b.Size || 0), 0))}`;
+
+  allChk.checked = true;
+  list.innerHTML = '';
+
+  files.forEach((f, idx) => {
+    const fid = f.fileId || f.FileId || ('f_' + idx);
+    const fname = f.fileName || f.FileName || 'file';
+    const frel = f.relativePath || f.RelativePath || '';
+    const fsize = f.size || f.Size || 0;
+
+    const row = document.createElement('label');
+    row.className = 'batch-chk-item';
+    row.innerHTML = `
+      <input type=""checkbox"" class=""batch-file-chk"" data-file-id=""${fid}"" data-size=""${fsize}"" checked onchange=""updateBatchChecklistStats()"">
+      <div class=""batch-chk-info"">
+        <span class=""batch-chk-name"" title=""${fname}"">${fname}</span>
+        ${frel && frel !== fname ? `<span style=""font-size:10px;color:var(--text-muted);"">${frel}</span>` : ''}
+        <span class=""batch-chk-meta"">${formatBytes(fsize)}</span>
+      </div>
+    `;
+    list.appendChild(row);
+  });
+
+  updateBatchChecklistStats();
+  modal.classList.add('active');
+}
+
+function toggleBatchSelectAll(checked) {
+  document.querySelectorAll('.batch-file-chk').forEach(c => c.checked = checked);
+  updateBatchChecklistStats();
+}
+
+function updateBatchChecklistStats() {
+  const chks = document.querySelectorAll('.batch-file-chk');
+  let selected = 0;
+  let totalBytes = 0;
+  chks.forEach(c => {
+    if (c.checked) {
+      selected++;
+      totalBytes += parseInt(c.getAttribute('data-size') || '0', 10);
+    }
+  });
+
+  document.getElementById('batchSelectedCount').textContent = selected;
+  document.getElementById('batchTotalCount').textContent = chks.length;
+  document.getElementById('batchSelectedSize').textContent = formatBytes(totalBytes);
+
+  const acceptBtn = document.getElementById('batchAcceptBtn');
+  if (acceptBtn) {
+    acceptBtn.textContent = `Accept Selected (${selected})`;
+    acceptBtn.disabled = selected === 0;
+  }
+}
+
+async function acceptSelectedBatchOffer() {
   const modal = document.getElementById('batchOfferModal');
   modal.classList.remove('active');
-  if (pendingBatchOffer && Array.isArray(pendingBatchOffer.files)) {
-    const cid = getClientId();
-    pendingBatchOffer.files.forEach((f, idx) => {
-      setTimeout(() => {
-        const fid = f.id || f.fileId || '';
-        const link = document.createElement('a');
-        link.href = `/download?id=${encodeURIComponent(fid)}&file=${encodeURIComponent(f.name)}&clientId=${encodeURIComponent(cid)}`;
-        link.download = f.name;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }, idx * 600);
-    });
-    showToast(`Downloading ${pendingBatchOffer.files.length} files...`);
+
+  if (!pendingBatchManifest) return;
+
+  const acceptedIds = [];
+  document.querySelectorAll('.batch-file-chk:checked').forEach(c => {
+    acceptedIds.push(c.getAttribute('data-file-id'));
+  });
+
+  const batchId = pendingBatchManifest.batchId || pendingBatchManifest.BatchId || '';
+  await fetch('/api/batch-response', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      batchId: batchId,
+      accepted: acceptedIds.length > 0,
+      acceptedFileIds: acceptedIds
+    })
+  }).catch(() => {});
+
+  if (acceptedIds.length > 0) {
+    showToast(`Accepted ${acceptedIds.length} files. Receiving...`);
+  } else {
+    showToast('Batch transfer declined');
   }
 }
 
 function declineBatchOffer() {
   const modal = document.getElementById('batchOfferModal');
   modal.classList.remove('active');
-  if (pendingBatchOffer) {
-    const fid = pendingBatchOffer.id || pendingBatchOffer.batchId || '';
-    const cid = getClientId();
-    fetch(`/api/decline?id=${encodeURIComponent(fid)}&clientId=${encodeURIComponent(cid)}`, { method: 'POST' }).catch(() => {});
+  if (pendingBatchManifest) {
+    const batchId = pendingBatchManifest.batchId || pendingBatchManifest.BatchId || '';
+    fetch('/api/batch-response', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        batchId: batchId,
+        accepted: false,
+        acceptedFileIds: []
+      })
+    }).catch(() => {});
     showToast('Batch transfer declined');
+  }
+}
+
+function showTransferSuccessModal(isSender, peerName, fileCount, totalBytes) {
+  const modal = document.getElementById('transferSuccessModal');
+  const countEl = document.getElementById('successFileCount');
+  const sizeEl = document.getElementById('successTotalSize');
+  const peerEl = document.getElementById('successPeerName');
+  const descEl = document.getElementById('transferSuccessDesc');
+
+  if (countEl) countEl.textContent = `${fileCount} file${fileCount > 1 ? 's' : ''}`;
+  if (sizeEl) sizeEl.textContent = formatBytes(totalBytes);
+  if (peerEl) peerEl.textContent = peerName || 'Host PC';
+  if (descEl) descEl.textContent = isSender ? 'Your files were sent successfully!' : 'All files were received successfully!';
+
+  if (modal) modal.classList.add('active');
+  showToast('Transfer completed successfully!');
+}
+
+function closeSuccessModal() {
+  const modal = document.getElementById('transferSuccessModal');
+  if (modal) modal.classList.remove('active');
+}
+
+let pendingResendRequest = null;
+
+function showResendRequestPrompt(req) {
+  pendingResendRequest = req;
+  const modal = document.getElementById('resendRequestModal');
+  const desc = document.getElementById('resendRequestDesc');
+  if (desc) desc.textContent = `${req.requesterName || 'Recipient'} requested to resend ""${req.fileName}"".`;
+  if (modal) modal.classList.add('active');
+}
+
+async function respondResendRequest(accept) {
+  const modal = document.getElementById('resendRequestModal');
+  if (modal) modal.classList.remove('active');
+
+  if (pendingResendRequest) {
+    await fetch('/api/resend-response', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fileId: pendingResendRequest.fileId || '',
+        fileName: pendingResendRequest.fileName || '',
+        accepted: accept
+      })
+    }).catch(() => {});
+
+    if (accept) {
+      showToast('Resend accepted. Starting upload...');
+      const match = stagedFiles.find(f => f.name === pendingResendRequest.fileName);
+      if (match) {
+        streamFileUpload(match, '', getClientId(), '', match.customRelativePath || '');
+      }
+    } else {
+      showToast('Resend request declined');
+    }
+  }
+}
+
+async function requestFileResend(fileId, fileName) {
+  try {
+    const unescapedName = decodeURIComponent(fileName);
+    showToast(`Requesting resend of ""${unescapedName}""...`);
+    const res = await fetch(`/api/resend-request?clientId=${encodeURIComponent(getClientId())}&fileId=${encodeURIComponent(fileId)}&fileName=${encodeURIComponent(unescapedName)}`, { method: 'POST' }).then(r => r.json());
+    if (res && res.accepted) {
+      showToast(`Sender accepted resend request for ""${unescapedName}""!`);
+    } else {
+      showToast('Sender declined or unavailable for resend.');
+    }
+  } catch (err) {
+    showToast('Failed to request resend: ' + err.message);
   }
 }
 

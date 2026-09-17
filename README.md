@@ -51,22 +51,16 @@ Whether sending 50 GB 4K video reels across an office, moving vacation photos fr
 
 <div align="center">
 
-### Home Command Center & Transfer Staging
+### Home Command Center & File Staging Queue
 <p align="center">
-  <img src="docs/screenshot/app_updated.png" width="48%" alt="Home Dashboard (Obsidian Violet UI)" />
-  <img src="docs/screenshot/screenshot-2.png" width="48%" alt="File Staging Queue" />
+  <img src="docs/screenshot/Home.png" width="48%" alt="Home Dashboard (Obsidian Violet UI)" />
+  <img src="docs/screenshot/sending_file.png" width="48%" alt="File Staging Queue" />
 </p>
 
-### AirDrop-Style Radar Discovery & Listening Station
+### Universal Web Transfer & Radar Discovery
 <p align="center">
-  <img src="docs/screenshot/screenshot-3.png" width="48%" alt="Radar Discovery" />
-  <img src="docs/screenshot/screenshot-4.png" width="48%" alt="Radar Receive Station" />
-</p>
-
-### Dedicated Device Session Hub & Universal Web Transfer
-<p align="center">
-  <img src="docs/screenshot/screenshot-5.png" width="48%" alt="Device Session Hub" />
   <img src="docs/screenshot/web_portal.png" width="48%" alt="Universal Web Transfer Portal" />
+  <img src="docs/screenshot/radar_discovery.png" width="48%" alt="AirDrop-Style Radar Discovery" />
 </p>
 
 </div>

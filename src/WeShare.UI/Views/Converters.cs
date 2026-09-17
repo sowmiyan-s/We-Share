@@ -50,7 +50,7 @@ namespace WeShare.UI.Views
     {
         public object? Convert(System.Collections.Generic.IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
         {
-            if (values.Count < 3 || values[0] is not WeShare.Core.Models.DeviceModel device || values[1] is not System.Collections.ObjectModel.ObservableCollection<WeShare.Core.Models.DeviceModel> devices || values[2] is not string type) 
+            if (values.Count < 3 || values[0] is not WeShare.Core.Models.DeviceModel device || values[1] is not System.Collections.IList devices || values[2] is not string type) 
                 return 0.0;
             
             int index = devices.IndexOf(device);

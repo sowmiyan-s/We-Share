@@ -29,10 +29,36 @@ namespace WeShare.UI.Views
     {
         public string Name { get; set; } = "";
         public string Path { get; set; } = "";
+        public string RelativePath { get; set; } = "";
         public long Size { get; set; }
         public string SizeDisplay => FileTransferState.FormatBytes(Size);
         public Func<Task<Stream>> OpenStream { get; set; } = null!;
         public Avalonia.Media.Imaging.Bitmap? Thumbnail { get; set; }
+    }
+
+    public class BatchCheckItem : System.ComponentModel.INotifyPropertyChanged
+    {
+        private bool _isSelected = true;
+        public string FileId { get; set; } = "";
+        public string FileName { get; set; } = "";
+        public string RelativePath { get; set; } = "";
+        public long Size { get; set; }
+        public string FormattedSize => FileTransferState.FormatBytes(Size);
+
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set
+            {
+                if (_isSelected != value)
+                {
+                    _isSelected = value;
+                    PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(nameof(IsSelected)));
+                }
+            }
+        }
+
+        public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
     }
 
     public partial class MainView : UserControl
@@ -58,13 +84,19 @@ namespace WeShare.UI.Views
 
         // Observable collections
         public ObservableCollection<DeviceModel> Devices { get; } = new();
+        public ObservableCollection<DeviceModel> ActiveReceivers { get; } = new();
+        public ObservableCollection<DeviceModel> ActiveSenders { get; } = new();
         public ObservableCollection<QueueItem> SendQueue { get; } = new();
         public ObservableCollection<FileTransferState> ActiveSends { get; } = new();
         public ObservableCollection<FileTransferState> ActiveReceives { get; } = new();
         public ObservableCollection<FileTransferState> ReceivedFiles { get; } = new();
         public ObservableCollection<FileTransferState> LibraryFiles { get; } = new();
         public ObservableCollection<StagedWebFile> StagedWebFiles { get; } = new();
+        public ObservableCollection<BatchCheckItem> BatchManifestItems { get; } = new();
         private readonly System.Collections.Concurrent.ConcurrentDictionary<string, System.Collections.Generic.List<QueueItem>> _lastDeclinedItems = new();
+        private TaskCompletionSource<System.Collections.Generic.List<string>>? _batchManifestTcs;
+        private TaskCompletionSource<bool>? _resendRequestTcs;
+        private ResendRequest? _currentResendRequest;
         
         // Concurrency and Session Management
         private readonly System.Threading.SemaphoreSlim _uiRequestLock = new(1, 1);
@@ -101,7 +133,9 @@ namespace WeShare.UI.Views
             OutgoingList.ItemsSource  = ActiveSends;
             ReceivedFilesList.ItemsSource = LibraryFiles;
 
-            Devices.CollectionChanged += (_, _) => UpdateEmptyState();
+            Devices.CollectionChanged += (_, _) => Dispatcher.UIThread.Post(UpdateEmptyState);
+            ActiveReceivers.CollectionChanged += (_, _) => Dispatcher.UIThread.Post(UpdateEmptyState);
+            ActiveSenders.CollectionChanged += (_, _) => Dispatcher.UIThread.Post(UpdateEmptyState);
             SendQueue.CollectionChanged += (_, _) =>
                 Dispatcher.UIThread.Post(UpdateQueueUI);
             ActiveSends.CollectionChanged += (_, _) =>
@@ -132,11 +166,14 @@ namespace WeShare.UI.Views
             {
                 _discoveryService = new UdpDiscoveryService(_localDevice);
                 _discoveryService.DeviceDiscovered += OnDeviceDiscovered;
+                _discoveryService.DeviceLost += OnDeviceLost;
                 _discoveryService.StartListening();
             }
             catch (Exception ex)
             {
                 _discoveryService = new UdpDiscoveryService(_localDevice); // Ensure it's not null
+                _discoveryService.DeviceDiscovered += OnDeviceDiscovered;
+                _discoveryService.DeviceLost += OnDeviceLost;
                 ShowToast($"Discovery failed: {ex.Message}");
             }
 
@@ -216,7 +253,23 @@ namespace WeShare.UI.Views
                 _webDashboardService.WebTransferProgress += OnTransferProgress;
                 _webDashboardService.WebTransferCompleted += OnWebTransferCompleted;
                 _webDashboardService.WebTransferFailed += OnTransferFailed;
-                _webDashboardService.WebOfferDeclined += OnWebOfferDeclined;
+                _webDashboardService.ConnectionRequestCallback = OnConnectionRequested;
+                _webDashboardService.BatchManifestCallback = OnBatchManifestRequested;
+                _webDashboardService.ResendRequestCallback = OnResendRequested;
+                _webDashboardService.BatchTransferCompleted += OnBatchTransferCompleted;
+                _webDashboardService.WebSessionEstablished += OnDeviceConnected;
+                _webDashboardService.WebSessionTerminated += (clientId) => {
+                    Dispatcher.UIThread.Post(() => {
+                        if (_sendTarget != null && _sendTarget.Id == clientId) {
+                            _sendTarget = null;
+                            _sessionDevice = null;
+                            ShowToast("Web client disconnected.");
+                            if (DeviceSessionPanel.IsVisible) {
+                                ShowPanel(HomePanel, "COMMAND CENTER", NavHomeBtn);
+                            }
+                        }
+                    });
+                };
                 _webDashboardService.IsSessionActiveFilter = null;
                 _webDashboardService.IsSessionActiveFilterEx = null;
                 _webDashboardService.Start();
@@ -307,11 +360,9 @@ namespace WeShare.UI.Views
         // ── Empty state ───────────────────────────────────────────────────────
         private void UpdateEmptyState()
         {
-            // Show "LOOKING FOR DEVICES..." hint on the send-discovery radar when empty.
-            // RadarEmptyHint lives inside SendDiscoveryPanel so it only renders when visible.
-            RadarEmptyHint.IsVisible = Devices.Count == 0;
+            if (RadarEmptyHint != null)
+                RadarEmptyHint.IsVisible = ActiveReceivers.Count == 0;
 
-            // Sidebar empty device hint
             if (SidebarDevicesEmpty != null)
                 SidebarDevicesEmpty.IsVisible = Devices.Count == 0;
         }
@@ -335,28 +386,36 @@ namespace WeShare.UI.Views
             if (DeviceSessionPanel != null) DeviceSessionPanel.IsVisible = false;
             if (SendStepWizard != null) SendStepWizard.IsVisible = false;
 
-            bool wasReceiver = _localDevice.IsReceiver;
-            _localDevice.IsReceiver = (panel == ReceiveModePanel);
+            string targetRole = "Idle";
+            if (panel == ReceiveModePanel)
+            {
+                targetRole = "Receiver";
+            }
+            else if (panel == SendFilesPanel || panel == SendDiscoveryPanel)
+            {
+                targetRole = "Sender";
+            }
+
+            string oldRole = _localDevice.Role;
+            _localDevice.Role = targetRole;
+            _localDevice.IsReceiver = (targetRole == "Receiver");
 
             panel.IsVisible = true;
             PageTitle.Text = title;
             SetActiveNav(navBtn);
 
-            if (wasReceiver != _localDevice.IsReceiver)
+            if (_discoveryService != null && !string.Equals(oldRole, targetRole, StringComparison.OrdinalIgnoreCase))
             {
-                if (_discoveryService != null)
-                {
-                    _ = _discoveryService.BroadcastPresenceAsync();
-                }
+                _ = _discoveryService.BroadcastRoleAsync(targetRole);
+            }
 
-                if (_localDevice.IsReceiver)
-                {
-                    try { _platformService.StartBluetoothAdvertising(_localDevice); } catch { }
-                }
-                else
-                {
-                    try { _platformService.StopBluetoothAdvertising(); } catch { }
-                }
+            if (targetRole == "Receiver")
+            {
+                try { _platformService.StartBluetoothAdvertising(_localDevice); } catch { }
+            }
+            else
+            {
+                try { _platformService.StopBluetoothAdvertising(); } catch { }
             }
         }
 
@@ -540,12 +599,7 @@ namespace WeShare.UI.Views
         }
         private void NavFiles_Click(object? sender, RoutedEventArgs e)
         {
-            if (HasActiveTransfer())
-            {
-                ShowToast("Active transfer in progress — please wait");
-                return;
-            }
-            ShowPanel(FilesPanel, "LIBRARY", NavFilesBtn);
+            NavTransfers_Click(sender, e);
         }
         private void NavTransfers_Click(object? sender, RoutedEventArgs e) => ShowPanel(TransfersPanel, "TRANSFERS", NavTransfersBtn);
         private void NavWebShared_Click(object? sender, RoutedEventArgs e)
@@ -970,6 +1024,60 @@ namespace WeShare.UI.Views
         {
             try
             {
+                string batchId = Guid.NewGuid().ToString("N");
+
+                // If sending to a desktop peer, negotiate batch manifest first so receiver gets checkbox manifest
+                if (device.Type != "Web Client" && items.Count > 0)
+                {
+                    try
+                    {
+                        var manifestItems = items.Select((item, idx) => new BatchFileItem
+                        {
+                            FileId = "bf_" + idx + "_" + Guid.NewGuid().ToString("N")[..8],
+                            FileName = item.Name,
+                            RelativePath = string.IsNullOrEmpty(item.RelativePath) ? item.Name : item.RelativePath,
+                            FileSize = item.Size
+                        }).ToList();
+
+                        var manifest = new BatchManifest
+                        {
+                            BatchId = batchId,
+                            SenderName = _localDevice.DisplayName,
+                            SenderIp = _localDevice.IpAddress,
+                            Files = manifestItems,
+                            TotalBytes = items.Sum(x => x.Size)
+                        };
+
+                        var resp = await _transferManager.SendBatchManifestAsync(device.IpAddress, device.Port, manifest);
+                        if (!resp.AnyAccepted || resp.AcceptedFileIds.Count == 0)
+                        {
+                            await Dispatcher.UIThread.InvokeAsync(() =>
+                            {
+                                TransferDeclinedMessage.Text = $"'{device.DisplayName}' declined the transfer request.";
+                                TransferDeclinedCard.IsVisible = true;
+                                SendProgressBorder.IsVisible = false;
+                                UpdateTransfersVisibility();
+                            });
+                            return;
+                        }
+
+                        var acceptedSet = new HashSet<string>(resp.AcceptedFileIds);
+                        var acceptedItems = new System.Collections.Generic.List<QueueItem>();
+                        for (int j = 0; j < manifestItems.Count; j++)
+                        {
+                            if (acceptedSet.Contains(manifestItems[j].FileId))
+                            {
+                                acceptedItems.Add(items[j]);
+                            }
+                        }
+                        items = acceptedItems;
+                    }
+                    catch (Exception ex)
+                    {
+                        DebugLog($"Batch manifest negotiation warning: {ex.Message}");
+                    }
+                }
+
                 for (int i = 0; i < items.Count; i++)
                 {
                     var item = items[i];
@@ -978,6 +1086,8 @@ namespace WeShare.UI.Views
                         FileId = Guid.NewGuid().ToString("N"),
                         FileName = item.Name,
                         FilePath = item.Path,
+                        RelativePath = item.RelativePath,
+                        BatchId = batchId,
                         TotalBytes = item.Size,
                         PeerName = device.DisplayName,
                         Direction = TransferDirection.Sent,
@@ -1031,7 +1141,7 @@ namespace WeShare.UI.Views
                         else
                         {
                             using var stream = await item.OpenStream();
-                            await _transferManager.SendFileAsync(device.IpAddress, device.Port, item.Name, stream, item.Size, item.Path);
+                            await _transferManager.SendFileAsync(device.IpAddress, device.Port, item.Name, stream, item.Size, item.Path, item.RelativePath, batchId);
 
                             await Dispatcher.UIThread.InvokeAsync(() =>
                             {
@@ -1069,18 +1179,21 @@ namespace WeShare.UI.Views
                     }
                 }
 
-                if (device.Type != "Web Client")
+                if (device.Type != "Web Client" && items.Count > 0)
                 {
-                    // Show lingering success state for 3 seconds before resetting
+                    _transferManager.NotifyBatchCompleted(new BatchManifest
+                    {
+                        SenderName = _localDevice.DisplayName,
+                        TotalBytes = items.Sum(x => x.Size)
+                    }, items.Count, items.Sum(x => x.Size));
+
                     await Dispatcher.UIThread.InvokeAsync(() =>
                     {
                         SendProgressBar.Value = 100;
                         SendProgressSpeed.Text = "✓ All files delivered successfully!";
                         SendProgressPct.Text = "Done";
-                        PlaySound("success");
+                        ShowTransferSuccessModal(true, device.DisplayName, items.Count, items.Sum(x => x.Size));
                     });
-                    await Task.Delay(3000);
-                    ShowToast("Transfer completed successfully");
                 }
             }
             catch (Exception ex)
@@ -2121,6 +2234,154 @@ namespace WeShare.UI.Views
             _acceptTcs?.TrySetResult(false);
         }
 
+        // ── Mutual Connection Management (SHAREit / Quick Share Model) ───────
+        private TaskCompletionSource<bool>? _connectionTcs;
+
+        private async Task<bool> OnConnectionRequested(ConnectionRequest req)
+        {
+            return await Dispatcher.UIThread.InvokeAsync(async () =>
+            {
+                _connectionTcs?.TrySetResult(false);
+                _connectionTcs = new TaskCompletionSource<bool>();
+
+                if (ConnectionRequestPeerName != null) ConnectionRequestPeerName.Text = req.PeerName;
+                if (ConnectionRequestDetails != null) ConnectionRequestDetails.Text = $"{req.PeerType} • {req.PeerIp}";
+                if (ConnectionRequestRoleDesc != null)
+                {
+                    ConnectionRequestRoleDesc.Text = req.Role == "Receiver"
+                        ? "wants to connect to receive files from you."
+                        : "wants to connect to share files with you.";
+                }
+
+                if (ConnectionRequestPanel != null) ConnectionRequestPanel.IsVisible = true;
+                PlaySound("request");
+
+                bool accepted = await _connectionTcs.Task;
+                if (ConnectionRequestPanel != null) ConnectionRequestPanel.IsVisible = false;
+                return accepted;
+            });
+        }
+
+        private void AcceptConnection_Click(object sender, RoutedEventArgs e)
+        {
+            if (ConnectionRequestPanel != null) ConnectionRequestPanel.IsVisible = false;
+            _connectionTcs?.TrySetResult(true);
+        }
+
+        private void DeclineConnection_Click(object sender, RoutedEventArgs e)
+        {
+            if (ConnectionRequestPanel != null) ConnectionRequestPanel.IsVisible = false;
+            _connectionTcs?.TrySetResult(false);
+        }
+
+        private void ConnectToPeer_Click(object sender, RoutedEventArgs e)
+        {
+            var device = (sender as Button)?.DataContext as DeviceModel
+                      ?? ((sender as Control)?.DataContext as DeviceModel);
+            if (device == null) return;
+
+            InitiateConnectionToDevice(device);
+        }
+
+        public void InitiateConnectionToDevice(DeviceModel device)
+        {
+            _sendTarget = device;
+            _sessionDevice = device;
+            string role = _localDevice.IsReceiver ? "Receiver" : "Sender";
+            ShowToast($"Sending connection request to '{device.DisplayName}'...");
+
+            if (device.Type == "Web Client")
+            {
+                _webDashboardService?.ConnectClientFromHost(device.Id, _localDevice.DisplayName);
+                ShowToast($"Connection request sent to '{device.DisplayName}' via Web Portal");
+            }
+            else
+            {
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        var resp = await _transferManager.SendConnectRequestAsync(device.IpAddress, device.Port, role);
+                        await Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            if (resp.Accepted)
+                            {
+                                OnDeviceConnected(device);
+                            }
+                            else
+                            {
+                                ShowToast($"'{device.DisplayName}' declined the connection request.");
+                            }
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        await Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            ShowToast($"Connection failed: {ex.Message}");
+                        });
+                    }
+                });
+            }
+        }
+
+        private void OnDeviceConnected(DeviceModel peer)
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                _sendTarget = peer;
+                _sessionDevice = peer;
+                peer.ConnectionStatus = "Connected";
+                if (SessionDeviceTitle != null) SessionDeviceTitle.Text = peer.DisplayName;
+                if (SessionDeviceSub != null) SessionDeviceSub.Text = $"{peer.Type} • {peer.IpAddress}";
+                PlaySound("success");
+                ShowToast($"✓ Connected with {peer.DisplayName}!");
+
+                if (_localDevice.Role == "Sender" || (SendDiscoveryPanel != null && SendDiscoveryPanel.IsVisible))
+                {
+                    ShowPanel(SendFilesPanel, "SEND FILES", NavSendBtn);
+                }
+                else if (_localDevice.Role == "Receiver")
+                {
+                    ShowPanel(ReceiveModePanel, "RECEIVE MODE", NavReceiveBtn);
+                }
+            });
+        }
+
+        private void OnDeviceDisconnected(DeviceModel peer)
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                peer.ConnectionStatus = "Disconnected";
+                ShowToast($"{peer.DisplayName} disconnected.");
+                if (_sendTarget != null && _sendTarget.Id == peer.Id)
+                {
+                    _sendTarget = null;
+                    _sessionDevice = null;
+                }
+            });
+        }
+
+        private async void DisconnectSession_Click(object sender, RoutedEventArgs e)
+        {
+            if (_sendTarget != null)
+            {
+                var target = _sendTarget;
+                _sendTarget = null;
+                _sessionDevice = null;
+                if (target.Type == "Web Client")
+                {
+                    _webDashboardService?.DisconnectWebClient(target.Id);
+                }
+                else
+                {
+                    await _transferManager.SendDisconnectAsync(target.IpAddress, target.Port);
+                }
+                ShowToast($"Disconnected from {target.DisplayName}.");
+            }
+            ShowPanel(HomePanel, "COMMAND CENTER", NavHomeBtn);
+        }
+
         // ── Discovery callbacks ───────────────────────────────────────────────
         private void OnDeviceDiscovered(DeviceModel device)
         {
@@ -2142,7 +2403,6 @@ namespace WeShare.UI.Views
                 {
                     Devices.Add(device);
                     SortDevices();
-                    UpdateEmptyState();
                 }
                 else 
                 {
@@ -2151,11 +2411,89 @@ namespace WeShare.UI.Views
                     existing.Port = device.Port;
                     existing.Name = device.Name;
                     existing.Type = device.Type;
+                    existing.Role = device.Role;
                     existing.IsReceiver = device.IsReceiver;
                     existing.LastSeen = DateTime.Now;
                     if (_deviceNicknames.TryGetValue(existing.Id, out var existingNick)) existing.CustomNickname = existingNick;
                     existing.IsFavorite = _favoriteDeviceIds.Contains(existing.Id);
                 }
+
+                var targetDevice = existing ?? device;
+                bool isReceiver = string.Equals(device.Role, "Receiver", StringComparison.OrdinalIgnoreCase) || device.IsReceiver;
+                bool isSender = string.Equals(device.Role, "Sender", StringComparison.OrdinalIgnoreCase);
+
+                if (isReceiver)
+                {
+                    var rExisting = ActiveReceivers.FirstOrDefault(d => d.Id == device.Id);
+                    if (rExisting == null)
+                    {
+                        ActiveReceivers.Add(targetDevice);
+                    }
+                    else
+                    {
+                        rExisting.IpAddress = device.IpAddress;
+                        rExisting.Port = device.Port;
+                        rExisting.Name = device.Name;
+                        rExisting.Role = device.Role;
+                        rExisting.IsReceiver = device.IsReceiver;
+                        rExisting.LastSeen = DateTime.Now;
+                    }
+
+                    var sExisting = ActiveSenders.FirstOrDefault(d => d.Id == device.Id);
+                    if (sExisting != null) ActiveSenders.Remove(sExisting);
+                }
+                else if (isSender)
+                {
+                    var sExisting = ActiveSenders.FirstOrDefault(d => d.Id == device.Id);
+                    if (sExisting == null)
+                    {
+                        ActiveSenders.Add(targetDevice);
+                    }
+                    else
+                    {
+                        sExisting.IpAddress = device.IpAddress;
+                        sExisting.Port = device.Port;
+                        sExisting.Name = device.Name;
+                        sExisting.Role = device.Role;
+                        sExisting.IsReceiver = device.IsReceiver;
+                        sExisting.LastSeen = DateTime.Now;
+                    }
+
+                    var rExisting = ActiveReceivers.FirstOrDefault(d => d.Id == device.Id);
+                    if (rExisting != null) ActiveReceivers.Remove(rExisting);
+                }
+                else // Idle or unknown
+                {
+                    var rExisting = ActiveReceivers.FirstOrDefault(d => d.Id == device.Id);
+                    if (rExisting != null) ActiveReceivers.Remove(rExisting);
+
+                    var sExisting = ActiveSenders.FirstOrDefault(d => d.Id == device.Id);
+                    if (sExisting != null) ActiveSenders.Remove(sExisting);
+                }
+
+                UpdateEmptyState();
+            });
+        }
+
+        private void OnDeviceLost(DeviceModel device)
+        {
+            if (device == null) return;
+            string deviceId = device.Id;
+            Dispatcher.UIThread.Post(() =>
+            {
+                var recv = ActiveReceivers.FirstOrDefault(d => d.Id == deviceId);
+                if (recv != null) ActiveReceivers.Remove(recv);
+
+                var snd = ActiveSenders.FirstOrDefault(d => d.Id == deviceId);
+                if (snd != null) ActiveSenders.Remove(snd);
+
+                var dev = Devices.FirstOrDefault(d => d.Id == deviceId);
+                if (dev != null)
+                {
+                    Devices.Remove(dev);
+                }
+
+                UpdateEmptyState();
             });
         }
 
@@ -2296,12 +2634,18 @@ namespace WeShare.UI.Views
 
         private void ConfigureTransferManager(TcpTransferManager manager)
         {
-            manager.LocalName = _localDevice.Name;
+            manager.LocalName = _localDevice.DisplayName;
+            manager.LocalType = _localDevice.Type;
             manager.TransferStarted   += OnTransferStarted;
             manager.TransferProgress  += OnTransferProgress;
             manager.TransferCompleted += OnTransferCompleted;
-            manager.TransferFailed    += OnTransferFailed;
             manager.TransferRequestCallback = OnTransferRequested;
+            manager.ConnectionRequestCallback = OnConnectionRequested;
+            manager.BatchManifestCallback = OnBatchManifestRequested;
+            manager.ResendRequestCallback = OnResendRequested;
+            manager.BatchTransferCompleted += OnBatchTransferCompleted;
+            manager.DeviceConnected += OnDeviceConnected;
+            manager.DeviceDisconnected += OnDeviceDisconnected;
         }
 
         private async void CheckForUpdate_Click(object sender, RoutedEventArgs e)
@@ -2965,11 +3309,7 @@ namespace WeShare.UI.Views
         public void OpenDeviceSession(DeviceModel device)
         {
             _sessionDevice = device;
-            _sendTarget = device;
-            if (SessionDeviceTitle != null) SessionDeviceTitle.Text = device.Name;
-            if (SessionDeviceSub != null) SessionDeviceSub.Text = $"{device.Type} • {device.IpAddress}";
-            UpdateDeviceSessionFiles();
-            ShowPanel(DeviceSessionPanel, "DEVICE SESSION", null);
+            SelectSendTarget(device);
         }
 
         private void UpdateDeviceSessionFiles()
@@ -2996,6 +3336,291 @@ namespace WeShare.UI.Views
                 SessionSendStatusText.Text = $"{files.Count} file(s) ready to send";
 
             StartSendSession(_sessionDevice);
+        }
+
+        private async void SessionSendFolder_Click(object? sender, RoutedEventArgs e)
+        {
+            if (_sessionDevice == null) return;
+            var files = await PickFolderAsync();
+            if (files.Count == 0) return;
+            foreach (var f in files)
+            {
+                if (!SendQueue.Any(q => q.Path == f.Path))
+                    SendQueue.Add(f);
+            }
+            UpdateQueueUI();
+            if (SessionSendStatusText != null)
+                SessionSendStatusText.Text = $"{files.Count} file(s) from folder ready to send";
+
+            StartSendSession(_sessionDevice);
+        }
+
+        private async Task<System.Collections.Generic.List<QueueItem>> PickFolderAsync()
+        {
+            var topLevel = TopLevel.GetTopLevel(this);
+            if (topLevel == null) return new();
+            var folders = await topLevel.StorageProvider.OpenFolderPickerAsync(
+                new FolderPickerOpenOptions { Title = "Select folder to send", AllowMultiple = false });
+
+            if (folders.Count == 0) return new();
+            var folder = folders[0];
+            var folderPath = folder.Path.LocalPath;
+            if (string.IsNullOrEmpty(folderPath) || !Directory.Exists(folderPath)) return new();
+
+            var list = new System.Collections.Generic.List<QueueItem>();
+            var rootParent = Path.GetDirectoryName(folderPath) ?? folderPath;
+
+            var allFiles = Directory.GetFiles(folderPath, "*", SearchOption.AllDirectories);
+            foreach (var filePath in allFiles)
+            {
+                var rel = Path.GetRelativePath(rootParent, filePath);
+                var fi = new FileInfo(filePath);
+                list.Add(new QueueItem
+                {
+                    Name = Path.GetFileName(filePath),
+                    Path = filePath,
+                    RelativePath = rel.Replace('\\', '/'),
+                    Size = fi.Length,
+                    OpenStream = () => Task.FromResult<Stream>(File.OpenRead(filePath))
+                });
+            }
+            return list;
+        }
+
+        // ── Batch Manifest Review Checklist Modal ────────────────────────────────
+        private async Task<System.Collections.Generic.List<string>> OnBatchManifestRequested(BatchManifest manifest)
+        {
+            var tcs = new TaskCompletionSource<System.Collections.Generic.List<string>>(TaskCreationOptions.RunContinuationsAsynchronously);
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                _batchManifestTcs?.TrySetCanceled();
+                _batchManifestTcs = tcs;
+
+                BatchManifestItems.Clear();
+                foreach (var f in manifest.Files)
+                {
+                    BatchManifestItems.Add(new BatchCheckItem
+                    {
+                        FileId = f.FileId,
+                        FileName = f.FileName,
+                        RelativePath = f.RelativePath != f.FileName ? f.RelativePath : "",
+                        Size = f.FileSize,
+                        IsSelected = true
+                    });
+                }
+
+                if (BatchManifestList != null) BatchManifestList.ItemsSource = BatchManifestItems;
+                if (BatchManifestTitle != null) BatchManifestTitle.Text = $"Incoming Batch ({manifest.Files.Count} Files)";
+                if (BatchManifestSubtitle != null) BatchManifestSubtitle.Text = $"From: {manifest.SenderName} · Total: {FileTransferState.FormatBytes(manifest.TotalBytes)}";
+                if (BatchSelectAllCheckBox != null) BatchSelectAllCheckBox.IsChecked = true;
+                UpdateBatchManifestSummary();
+
+                if (BatchManifestModal != null) BatchManifestModal.IsVisible = true;
+                PlaySound("request");
+                ShowToast($"Incoming file batch ({manifest.Files.Count} files) from {manifest.SenderName}");
+            });
+
+            return await tcs.Task;
+        }
+
+        private void BatchSelectAll_Click(object? sender, RoutedEventArgs e)
+        {
+            bool isChecked = BatchSelectAllCheckBox?.IsChecked ?? true;
+            foreach (var item in BatchManifestItems)
+            {
+                item.IsSelected = isChecked;
+            }
+            UpdateBatchManifestSummary();
+        }
+
+        private void BatchItemCheck_Click(object? sender, RoutedEventArgs e)
+        {
+            UpdateBatchManifestSummary();
+        }
+
+        private void UpdateBatchManifestSummary()
+        {
+            int selectedCount = BatchManifestItems.Count(x => x.IsSelected);
+            long selectedBytes = BatchManifestItems.Where(x => x.IsSelected).Sum(x => x.Size);
+            if (BatchManifestSelectedSummary != null)
+            {
+                BatchManifestSelectedSummary.Text = $"{selectedCount} of {BatchManifestItems.Count} selected ({FileTransferState.FormatBytes(selectedBytes)})";
+            }
+            if (BatchAcceptBtn != null)
+            {
+                BatchAcceptBtn.Content = selectedCount > 0 ? $"Accept Selected ({selectedCount})" : "Accept Selected";
+                BatchAcceptBtn.IsEnabled = selectedCount > 0;
+            }
+            if (BatchSelectAllCheckBox != null)
+            {
+                BatchSelectAllCheckBox.IsChecked = selectedCount == BatchManifestItems.Count;
+            }
+        }
+
+        private void AcceptBatchManifest_Click(object? sender, RoutedEventArgs e)
+        {
+            if (BatchManifestModal != null) BatchManifestModal.IsVisible = false;
+            var acceptedIds = BatchManifestItems.Where(x => x.IsSelected).Select(x => x.FileId).ToList();
+            _batchManifestTcs?.TrySetResult(acceptedIds);
+            ShowToast($"Accepted {acceptedIds.Count} files for transfer.");
+        }
+
+        private void DeclineBatchManifest_Click(object? sender, RoutedEventArgs e)
+        {
+            if (BatchManifestModal != null) BatchManifestModal.IsVisible = false;
+            _batchManifestTcs?.TrySetResult(new System.Collections.Generic.List<string>());
+            ShowToast("Batch transfer declined.");
+        }
+
+        // ── Celebratory Transfer Success Modal ────────────────────────────────────
+        private void OnBatchTransferCompleted(BatchManifest manifest, int fileCount, long totalBytes)
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                ShowTransferSuccessModal(false, manifest.SenderName, fileCount, totalBytes);
+            });
+        }
+
+        public void ShowTransferSuccessModal(bool isSender, string peerName, int fileCount, long totalBytes)
+        {
+            if (TransferSuccessModal != null)
+            {
+                if (TransferSuccessTitle != null)
+                    TransferSuccessTitle.Text = isSender ? "Files Sent Successfully! 🎉" : "Files Received Successfully! 🎉";
+                if (TransferSuccessSubtitle != null)
+                    TransferSuccessSubtitle.Text = isSender 
+                        ? $"All {fileCount} files were delivered to {peerName}." 
+                        : $"All {fileCount} files from {peerName} are saved in your Downloads.";
+                if (TransferSuccessFileCount != null)
+                    TransferSuccessFileCount.Text = $"{fileCount} file{(fileCount == 1 ? "" : "s")}";
+                if (TransferSuccessTotalSize != null)
+                    TransferSuccessTotalSize.Text = FileTransferState.FormatBytes(totalBytes);
+                if (TransferSuccessPeerName != null)
+                    TransferSuccessPeerName.Text = string.IsNullOrEmpty(peerName) ? "Nearby Device" : peerName;
+
+                TransferSuccessModal.IsVisible = true;
+                PlaySound("success");
+                ShowToast("✓ Transfer completed successfully!");
+            }
+        }
+
+        private void CloseTransferSuccessModal_Click(object? sender, RoutedEventArgs e)
+        {
+            if (TransferSuccessModal != null) TransferSuccessModal.IsVisible = false;
+        }
+
+        // ── Resend Request Handlers ───────────────────────────────────────────────
+        private async Task<bool> OnResendRequested(ResendRequest req)
+        {
+            var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                _resendRequestTcs?.TrySetCanceled();
+                _resendRequestTcs = tcs;
+                _currentResendRequest = req;
+
+                if (ResendRequestMessage != null)
+                {
+                    ResendRequestMessage.Text = $"'{req.RequesterName}' requested you to resend '{req.FileName}'.";
+                }
+                if (ResendRequestModal != null) ResendRequestModal.IsVisible = true;
+                PlaySound("request");
+                ShowToast($"Resend requested for '{req.FileName}' by {req.RequesterName}");
+            });
+
+            bool accepted = await tcs.Task;
+            if (accepted)
+            {
+                _ = Task.Run(async () =>
+                {
+                    var matched = LibraryFiles.FirstOrDefault(f => f.FileName.Equals(req.FileName, StringComparison.OrdinalIgnoreCase))
+                               ?? ReceivedFiles.FirstOrDefault(f => f.FileName.Equals(req.FileName, StringComparison.OrdinalIgnoreCase));
+                    string? filePath = matched?.FilePath;
+                    if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
+                    {
+                        string candidate = Path.Combine(_saveDirectory, req.FileName);
+                        if (File.Exists(candidate)) filePath = candidate;
+                    }
+
+                    if (!string.IsNullOrEmpty(filePath) && File.Exists(filePath) && _sendTarget != null)
+                    {
+                        var fi = new FileInfo(filePath);
+                        var queueItem = new QueueItem
+                        {
+                            Name = Path.GetFileName(filePath),
+                            Path = filePath,
+                            Size = fi.Length,
+                            OpenStream = () => Task.FromResult<Stream>(File.OpenRead(filePath))
+                        };
+                        await Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            SendQueue.Add(queueItem);
+                            UpdateQueueUI();
+                            StartSendSession(_sendTarget);
+                        });
+                    }
+                });
+            }
+            return accepted;
+        }
+
+        private void AcceptResendRequest_Click(object? sender, RoutedEventArgs e)
+        {
+            if (ResendRequestModal != null) ResendRequestModal.IsVisible = false;
+            _resendRequestTcs?.TrySetResult(true);
+            ShowToast("Accepted resend request. Resending file...");
+        }
+
+        private void DeclineResendRequest_Click(object? sender, RoutedEventArgs e)
+        {
+            if (ResendRequestModal != null) ResendRequestModal.IsVisible = false;
+            _resendRequestTcs?.TrySetResult(false);
+            ShowToast("Declined resend request.");
+        }
+
+        private async void RequestResendForFile_Click(object? sender, RoutedEventArgs e)
+        {
+            var transfer = (sender as Button)?.Tag as FileTransferState;
+            if (transfer == null || _sendTarget == null)
+            {
+                ShowToast("Cannot request resend: no active peer connection.");
+                return;
+            }
+
+            ShowToast($"Requesting resend of '{transfer.FileName}'...");
+            if (_sendTarget.Type == "Web Client")
+            {
+                _webDashboardService?.PushResendRequestToWeb(_sendTarget.Id, new ResendRequest
+                {
+                    FileId = transfer.FileId,
+                    FileName = transfer.FileName,
+                    RequesterName = _localDevice.DisplayName
+                });
+            }
+            else
+            {
+                try
+                {
+                    var res = await _transferManager.SendResendRequestAsync(_sendTarget.IpAddress, _sendTarget.Port, new ResendRequest
+                    {
+                        FileId = transfer.FileId,
+                        FileName = transfer.FileName,
+                        RequesterName = _localDevice.DisplayName
+                    });
+                    if (res)
+                    {
+                        ShowToast($"✓ {_sendTarget.DisplayName} accepted resend request for '{transfer.FileName}'!");
+                    }
+                    else
+                    {
+                        ShowToast($"{_sendTarget.DisplayName} declined or could not resend file.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ShowToast($"Resend request failed: {ex.Message}");
+                }
+            }
         }
 
         private void SelectWebClient_Click(object? sender, RoutedEventArgs e)
@@ -3051,28 +3676,27 @@ namespace WeShare.UI.Views
                 ShowPanel(HomePanel, "HOME", NavHomeBtn);
                 HideOverlays();
                 await Task.Delay(400);
-                SaveVisualToPng(Path.Combine(docsDir, "screenshot-1.png"));
+                SaveVisualToPng(Path.Combine(docsDir, "Home.png"));
 
                 // Screen 2: Send Files Staging
                 HideOverlays();
                 ShowPanel(SendFilesPanel, "SEND FILES", null);
                 HideOverlays();
                 await Task.Delay(400);
-                SaveVisualToPng(Path.Combine(docsDir, "screenshot-2.png"));
+                SaveVisualToPng(Path.Combine(docsDir, "sending_file.png"));
 
                 // Screen 3: Radar Peer Discovery
                 HideOverlays();
                 ShowPanel(SendDiscoveryPanel, "RADAR DISCOVERY", null);
                 HideOverlays();
                 await Task.Delay(400);
-                SaveVisualToPng(Path.Combine(docsDir, "screenshot-3.png"));
+                SaveVisualToPng(Path.Combine(docsDir, "radar_discovery.png"));
 
                 // Screen 4: Radar Receive Mode
                 HideOverlays();
                 ShowPanel(ReceiveModePanel, "RECEIVE MODE", null);
                 HideOverlays();
                 await Task.Delay(400);
-                SaveVisualToPng(Path.Combine(docsDir, "screenshot-4.png"));
 
                 // Screen 5: Dedicated Device Session
                 if (Devices.Count > 0)
@@ -3081,7 +3705,7 @@ namespace WeShare.UI.Views
                     OpenDeviceSession(Devices[0]);
                     HideOverlays();
                     await Task.Delay(400);
-                    SaveVisualToPng(Path.Combine(docsDir, "screenshot-5.png"));
+                    SaveVisualToPng(Path.Combine(docsDir, "device_session.png"));
                 }
 
                 // Screen 6: Web Transfer Hub
@@ -3090,14 +3714,7 @@ namespace WeShare.UI.Views
                 ShowPanel(WebSharedPanel, "WEB TRANSFER", NavWebSharedBtn);
                 HideOverlays();
                 await Task.Delay(400);
-                SaveVisualToPng(Path.Combine(docsDir, "screenshot-6.png"));
-
-                // Also save app_updated.png
-                HideOverlays();
-                ShowPanel(HomePanel, "HOME", NavHomeBtn);
-                HideOverlays();
-                await Task.Delay(300);
-                SaveVisualToPng(Path.Combine(docsDir, "app_updated.png"));
+                SaveVisualToPng(Path.Combine(docsDir, "web_portal.png"));
             }
             catch (Exception ex)
             {

@@ -18,8 +18,10 @@ namespace WeShare.Core.Discovery
         private readonly DeviceModel _localDevice;
         private UdpClient? _listener;
         private CancellationTokenSource? _cts;
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<string, DeviceModel> _trackedDevices = new();
 
         public event Action<DeviceModel>? DeviceDiscovered;
+        public event Action<DeviceModel>? DeviceLost;
 
         public UdpDiscoveryService(DeviceModel localDevice)
         {
@@ -38,12 +40,37 @@ namespace WeShare.Core.Discovery
             _listener.EnableBroadcast = true;
 
             _ = Task.Run(() => ListenLoop(_cts.Token));
+            _ = Task.Run(() => PruneLoop(_cts.Token));
         }
 
         public void StopListening()
         {
             _cts?.Cancel();
             try { _listener?.Close(); } catch { }
+        }
+
+        private async Task PruneLoop(CancellationToken token)
+        {
+            while (!token.IsCancellationRequested)
+            {
+                try
+                {
+                    await Task.Delay(2000, token);
+                    var now = DateTime.UtcNow;
+                    foreach (var kvp in _trackedDevices)
+                    {
+                        if (now - kvp.Value.LastSeen > TimeSpan.FromSeconds(4.5))
+                        {
+                            if (_trackedDevices.TryRemove(kvp.Key, out var lost))
+                            {
+                                DeviceLost?.Invoke(lost);
+                            }
+                        }
+                    }
+                }
+                catch (OperationCanceledException) { break; }
+                catch { }
+            }
         }
 
         private async Task ListenLoop(CancellationToken token)
@@ -64,6 +91,36 @@ namespace WeShare.Core.Discovery
             }
         }
 
+        public void ProcessPacket(string json, string remoteIp)
+        {
+            try
+            {
+                var device = JsonSerializer.Deserialize<DeviceModel>(json,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (device == null) return;
+                if (device.Id == _localDevice.Id) return;
+
+                device.IpAddress = remoteIp;
+                device.LastSeen = DateTime.UtcNow;
+
+                if (string.Equals(device.Role, "Idle", StringComparison.OrdinalIgnoreCase))
+                {
+                    _trackedDevices.TryRemove(device.Id, out _);
+                    DeviceLost?.Invoke(device);
+                    return;
+                }
+
+                _trackedDevices[device.Id] = device;
+                Console.WriteLine($"[Discovery] Found: {device.Name} @ {device.IpAddress} (Role: {device.Role})");
+                DeviceDiscovered?.Invoke(device);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Discovery] Parse error: {ex.Message}");
+            }
+        }
+
         private void ProcessPacket(UdpReceiveResult result)
         {
             try
@@ -71,29 +128,19 @@ namespace WeShare.Core.Discovery
                 // Ignore packets sent from this machine's own network interfaces or loopback
                 if (IsOwnAddress(result.RemoteEndPoint.Address)) return;
 
-                var json   = Encoding.UTF8.GetString(result.Buffer);
-                var device = JsonSerializer.Deserialize<DeviceModel>(json,
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                if (device == null) return;
-
-                // Ignore packets from ourselves (match by Id or MachineName)
-                if (device.Id == _localDevice.Id) return;
-                if (string.Equals(device.Name, _localDevice.Name, StringComparison.OrdinalIgnoreCase) && IsOwnAddress(result.RemoteEndPoint.Address)) return;
-
-                // Always set IP from the packet's real source address
-                device.IpAddress = result.RemoteEndPoint.Address.ToString();
-
-                // Also double check if the reported device IP belongs to ourselves
-                if (IsOwnAddress(device.IpAddress)) return;
-
-                Console.WriteLine($"[Discovery] Found: {device.Name} @ {device.IpAddress}");
-                DeviceDiscovered?.Invoke(device);
+                var json = Encoding.UTF8.GetString(result.Buffer);
+                ProcessPacket(json, result.RemoteEndPoint.Address.ToString());
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"[Discovery] Parse error: {ex.Message}");
             }
+        }
+
+        public async Task BroadcastRoleAsync(string newRole)
+        {
+            _localDevice.Role = newRole;
+            await BroadcastPresenceAsync();
         }
 
         // ── Broadcast ────────────────────────────────────────────────────────

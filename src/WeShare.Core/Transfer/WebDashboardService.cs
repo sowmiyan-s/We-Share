@@ -49,6 +49,68 @@ namespace WeShare.Core.Transfer
         public event Action<string>? WebClientHeartbeat;
         public event Action<string, string, string>? WebOfferDeclined;
         public Func<FileTransferState, Task<bool>>? WebFileSharedCallback { get; set; }
+        public Func<ConnectionRequest, Task<bool>>? ConnectionRequestCallback { get; set; }
+        public Func<BatchManifest, Task<System.Collections.Generic.List<string>>>? BatchManifestCallback { get; set; }
+        public Func<ResendRequest, Task<bool>>? ResendRequestCallback { get; set; }
+        public event Action<BatchManifest, int, long>? BatchTransferCompleted;
+        public event Action<DeviceModel>? WebSessionEstablished;
+        public event Action<string>? WebSessionTerminated;
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<string, bool> _connectedWebSessions = new(StringComparer.OrdinalIgnoreCase);
+        public bool IsClientSessionConnected(string clientId) => !string.IsNullOrEmpty(clientId) && _connectedWebSessions.ContainsKey(clientId);
+        public void ConnectClientFromHost(string clientId, string hostName)
+        {
+            _connectedWebSessions[clientId] = true;
+            NotifyClient(clientId, $"connect-request:{{\"name\":\"{Uri.EscapeDataString(hostName)}\",\"type\":\"PC\"}}");
+        }
+        public void DisconnectWebClient(string clientId)
+        {
+            _connectedWebSessions.TryRemove(clientId, out _);
+            NotifyClient(clientId, "disconnected:{}");
+            WebSessionTerminated?.Invoke(clientId);
+        }
+        public void PushBatchManifestToWeb(string clientId, BatchManifest manifest)
+        {
+            var json = JsonSerializer.Serialize(manifest);
+            NotifyClient(clientId, $"batch-manifest:{json}");
+        }
+        public void PushBatchCompletedToWeb(string clientId, int count, long totalBytes)
+        {
+            NotifyClient(clientId, $"batch-complete:{{\"count\":{count},\"bytes\":{totalBytes}}}");
+        }
+        public void PushResendRequestToWeb(string clientId, ResendRequest req)
+        {
+            var json = JsonSerializer.Serialize(req);
+            NotifyClient(clientId, $"resend-request:{json}");
+        }
+
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<string, TaskCompletionSource<BatchResponse>> _pendingBatchResponses = new();
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<string, TaskCompletionSource<ResendResponse>> _pendingResendResponses = new();
+
+        public async Task<BatchResponse?> RequestWebBatchManifestAsync(string clientId, BatchManifest manifest, int timeoutSeconds = 60)
+        {
+            var tcs = new TaskCompletionSource<BatchResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
+            _pendingBatchResponses[manifest.BatchId] = tcs;
+            PushBatchManifestToWeb(clientId, manifest);
+
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds));
+            using (cts.Token.Register(() =>
+            {
+                if (_pendingBatchResponses.TryRemove(manifest.BatchId, out var timedOutTcs))
+                {
+                    timedOutTcs.TrySetCanceled();
+                }
+            }))
+            {
+                try
+                {
+                    return await tcs.Task;
+                }
+                catch (TaskCanceledException)
+                {
+                    return null;
+                }
+            }
+        }
         public Func<string, bool>? IsSessionActiveFilter { get; set; }
         public Func<string, string, bool>? IsSessionActiveFilterEx { get; set; }
         private Func<IReadOnlyList<FileTransferState>>? _getHistory;
@@ -279,7 +341,7 @@ namespace WeShare.Core.Transfer
             {
                 try
                 {
-                    using var stream = new BufferedStream(client.GetStream(), 65536);
+                    using var stream = client.GetStream();
                     
                     byte[] headerBuffer = new byte[8192];
                     int totalHeaderRead = 0;
@@ -338,6 +400,43 @@ namespace WeShare.Core.Transfer
                                 queryParams[k] = v;
                             }
                         }
+                    }
+
+                    // --- Read Request Body for Non-Upload POSTs ---
+                    string bodyString = string.Empty;
+                    JsonElement? jsonBody = null;
+                    if (method == "POST" && path != "/api/upload" &&
+                        headers.TryGetValue("Content-Length", out var clStr) && int.TryParse(clStr, out int contentLen) && contentLen > 0 && contentLen < 1048576)
+                    {
+                        byte[] bodyBuf = new byte[contentLen];
+                        int totalReadBody = 0;
+                        while (totalReadBody < contentLen)
+                        {
+                            int r = await stream.ReadAsync(bodyBuf.AsMemory(totalReadBody, contentLen - totalReadBody));
+                            if (r <= 0) break;
+                            totalReadBody += r;
+                        }
+                        bodyString = Encoding.UTF8.GetString(bodyBuf, 0, totalReadBody);
+                        try
+                        {
+                            using var jDoc = JsonDocument.Parse(bodyString);
+                            jsonBody = jDoc.RootElement.Clone();
+                        }
+                        catch { }
+                    }
+
+                    string? GetParam(string key, string? defaultValue = null)
+                    {
+                        if (queryParams.TryGetValue(key, out var qVal) && !string.IsNullOrEmpty(qVal)) return qVal;
+                        if (jsonBody.HasValue && jsonBody.Value.ValueKind == JsonValueKind.Object)
+                        {
+                            if (jsonBody.Value.TryGetProperty(key, out var prop))
+                            {
+                                var s = prop.GetString();
+                                if (!string.IsNullOrEmpty(s)) return s;
+                            }
+                        }
+                        return defaultValue;
                     }
 
                     // --- CORS + route dispatch ---
@@ -541,6 +640,213 @@ namespace WeShare.Core.Transfer
                             WebOfferDeclined?.Invoke(clientId, string.IsNullOrEmpty(fileName) ? (fileId ?? "") : fileName, clientName);
                         }
                         await SendResponse(stream, 200, "text/plain", "OK");
+                    }
+
+                    else if (method == "POST" && path == "/api/connect")
+                    {
+                        string? clientId = GetParam("clientId");
+                        string? name = GetParam("deviceName", GetParam("name", "Mobile Web"));
+                        string? role = GetParam("role", "Sender");
+                        string? devType = GetParam("deviceType", "Phone");
+                        string remoteIp = client.Client.RemoteEndPoint is System.Net.IPEndPoint rep ? rep.Address.ToString() : "unknown";
+
+                        if (string.IsNullOrEmpty(clientId)) clientId = Guid.NewGuid().ToString("n");
+
+                        var req = new ConnectionRequest
+                        {
+                            ClientId = clientId,
+                            PeerName = Uri.UnescapeDataString(name ?? "Mobile Web"),
+                            PeerIp = remoteIp,
+                            PeerType = devType ?? "Phone",
+                            Role = role ?? "Sender"
+                        };
+
+                        bool accepted = true;
+                        if (ConnectionRequestCallback != null)
+                        {
+                            accepted = await ConnectionRequestCallback(req);
+                        }
+
+                        if (accepted)
+                        {
+                            _connectedWebSessions[clientId] = true;
+                            var peer = new DeviceModel
+                            {
+                                Id = clientId,
+                                Name = req.PeerName,
+                                Type = req.PeerType,
+                                IpAddress = remoteIp,
+                                ConnectionStatus = "Connected",
+                                Role = role ?? "Sender"
+                            };
+                            WebSessionEstablished?.Invoke(peer);
+                            NotifyClient(clientId, $"connect-accepted:{{\"name\":\"{Uri.EscapeDataString(_localDevice.DisplayName)}\",\"type\":\"{_localDevice.Type}\"}}");
+                        }
+
+                        await SendJson(stream, new
+                        {
+                            accepted = accepted,
+                            pcName = _localDevice.DisplayName,
+                            pcType = _localDevice.Type,
+                            clientId = clientId
+                        });
+                    }
+
+                    else if (method == "POST" && path == "/api/connect-respond")
+                    {
+                        string? clientId = GetParam("clientId");
+                        string? acceptedStr = GetParam("accept", "false");
+                        bool accepted = string.Equals(acceptedStr, "true", StringComparison.OrdinalIgnoreCase);
+
+                        if (!string.IsNullOrEmpty(clientId))
+                        {
+                            if (accepted)
+                            {
+                                _connectedWebSessions[clientId] = true;
+                                string clientName = "Mobile Web";
+                                await _webClientsLock.WaitAsync();
+                                try
+                                {
+                                    if (_activeWebClients.TryGetValue(clientId, out var winfo))
+                                        clientName = winfo.Name;
+                                }
+                                finally { _webClientsLock.Release(); }
+
+                                string remoteIp = client.Client.RemoteEndPoint is System.Net.IPEndPoint rep ? rep.Address.ToString() : "unknown";
+                                var peer = new DeviceModel
+                                {
+                                    Id = clientId,
+                                    Name = clientName,
+                                    Type = "Phone",
+                                    IpAddress = remoteIp,
+                                    ConnectionStatus = "Connected"
+                                };
+                                WebSessionEstablished?.Invoke(peer);
+                            }
+                            else
+                            {
+                                _connectedWebSessions.TryRemove(clientId, out _);
+                            }
+                        }
+                        await SendJson(stream, new { success = true });
+                    }
+
+                    else if (method == "POST" && path == "/api/disconnect")
+                    {
+                        string? clientId = GetParam("clientId");
+                        if (!string.IsNullOrEmpty(clientId))
+                        {
+                            _connectedWebSessions.TryRemove(clientId, out _);
+                            WebSessionTerminated?.Invoke(clientId);
+                        }
+                        else
+                        {
+                            _connectedWebSessions.Clear();
+                        }
+                        await SendJson(stream, new { success = true });
+                    }
+
+                    else if (method == "GET" && path == "/api/connect-status")
+                    {
+                        string? clientId = GetParam("clientId");
+                        bool isConn = !string.IsNullOrEmpty(clientId)
+                            ? _connectedWebSessions.ContainsKey(clientId)
+                            : !_connectedWebSessions.IsEmpty;
+                        await SendJson(stream, new { connected = isConn, hostName = _localDevice.DisplayName, hostType = _localDevice.Type });
+                    }
+
+                    else if (method == "POST" && path == "/api/batch-manifest")
+                    {
+                        string? clientId = GetParam("clientId");
+                        BatchManifest? manifest = null;
+                        if (!string.IsNullOrEmpty(bodyString))
+                        {
+                            try { manifest = JsonSerializer.Deserialize<BatchManifest>(bodyString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }); } catch { }
+                        }
+
+                        if (manifest == null)
+                        {
+                            await SendJson(stream, new { success = false, error = "Invalid manifest" });
+                        }
+                        else
+                        {
+                            string remoteIp = client.Client.RemoteEndPoint is System.Net.IPEndPoint rep ? rep.Address.ToString() : "unknown";
+                            manifest.SenderIp = remoteIp;
+                            manifest.SenderName = !string.IsNullOrEmpty(manifest.SenderName) ? manifest.SenderName : remoteIp;
+
+                            System.Collections.Generic.List<string> acceptedIds = new();
+                            if (BatchManifestCallback != null)
+                            {
+                                acceptedIds = await BatchManifestCallback(manifest);
+                            }
+                            else
+                            {
+                                acceptedIds = manifest.Files.Select(f => f.FileId).ToList();
+                            }
+
+                            await SendJson(stream, new
+                            {
+                                success = true,
+                                batchId = manifest.BatchId,
+                                acceptedFileIds = acceptedIds,
+                                allAccepted = acceptedIds.Count == manifest.Files.Count
+                            });
+                        }
+                    }
+
+                    else if (method == "POST" && path == "/api/batch-complete")
+                    {
+                        string? clientId = GetParam("clientId");
+                        string? countStr = GetParam("count", "1");
+                        string? bytesStr = GetParam("bytes", "0");
+                        int.TryParse(countStr, out int cnt);
+                        long.TryParse(bytesStr, out long bts);
+                        BatchTransferCompleted?.Invoke(new BatchManifest(), cnt, bts);
+                        if (!string.IsNullOrEmpty(clientId))
+                        {
+                            NotifyClient(clientId, $"batch-complete:{{\"count\":{cnt},\"bytes\":{bts}}}");
+                        }
+                        await SendJson(stream, new { success = true });
+                    }
+
+                    else if (method == "POST" && path == "/api/resend-request")
+                    {
+                        string? clientId = GetParam("clientId");
+                        string? fileId = GetParam("fileId");
+                        string? fileName = GetParam("fileName");
+                        bool accepted = false;
+                        if (ResendRequestCallback != null)
+                        {
+                            accepted = await ResendRequestCallback(new ResendRequest
+                            {
+                                FileId = fileId ?? "",
+                                FileName = fileName ?? "",
+                                RequesterName = "Web Client"
+                            });
+                        }
+                        await SendJson(stream, new { success = true, accepted = accepted });
+                    }
+
+                    else if (method == "POST" && path == "/api/batch-response")
+                    {
+                        var jsonOpt = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                        var resp = !string.IsNullOrEmpty(bodyString) ? JsonSerializer.Deserialize<BatchResponse>(bodyString, jsonOpt) : null;
+                        if (resp != null && !string.IsNullOrEmpty(resp.BatchId) && _pendingBatchResponses.TryRemove(resp.BatchId, out var tcs))
+                        {
+                            tcs.TrySetResult(resp);
+                        }
+                        await SendJson(stream, new { success = true });
+                    }
+
+                    else if (method == "POST" && path == "/api/resend-response")
+                    {
+                        var jsonOpt = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                        var resp = !string.IsNullOrEmpty(bodyString) ? JsonSerializer.Deserialize<ResendResponse>(bodyString, jsonOpt) : null;
+                        if (resp != null && !string.IsNullOrEmpty(resp.FileId) && _pendingResendResponses.TryRemove(resp.FileId, out var tcs))
+                        {
+                            tcs.TrySetResult(resp);
+                        }
+                        await SendJson(stream, new { success = true });
                     }
 
                     else if (method == "POST" && path == "/api/ask-receive")
@@ -797,10 +1103,11 @@ namespace WeShare.Core.Transfer
                             await SendResponse(stream, 404, "text/plain", "File Not Found");
                     }
 
-                    else if (method == "POST" && path == "/upload")
+                    else if (method == "POST" && (path == "/upload" || path == "/api/upload"))
                     {
-                        string? clientId = queryParams.GetValueOrDefault("clientId");
-                        string? fileId = queryParams.GetValueOrDefault("id");
+                        string? clientId = GetParam("clientId");
+                        string? fileId = GetParam("id");
+                        bool isSessionConnected = (!string.IsNullOrEmpty(clientId) && _connectedWebSessions.ContainsKey(clientId)) || !_connectedWebSessions.IsEmpty;
 
                         FileTransferState? transferState = null;
                         if (!string.IsNullOrEmpty(fileId))
@@ -808,14 +1115,70 @@ namespace WeShare.Core.Transfer
                             _approvedUploads.TryGetValue(fileId, out transferState);
                         }
 
-                        if (transferState == null)
+                        if (!isSessionConnected && transferState == null)
                         {
                             await SendResponse(stream, 400, "application/json", "{\"success\":false,\"error\":\"Upload not pre-approved or invalid id\"}");
                             return;
                         }
 
-                        // Remove from approved uploads so it can't be reused
-                        _approvedUploads.TryRemove(fileId!, out _);
+                        if (transferState != null && !string.IsNullOrEmpty(fileId))
+                        {
+                            // Remove from approved uploads so it can't be reused
+                            _approvedUploads.TryRemove(fileId, out _);
+                        }
+                        else if (transferState == null)
+                        {
+                            string rawName = headers.GetValueOrDefault("X-File-Name") ?? queryParams.GetValueOrDefault("name") ?? "upload.dat";
+                            string filename = Path.GetFileName(Uri.UnescapeDataString(rawName));
+                            string rawRelPath = headers.GetValueOrDefault("X-Relative-Path") ?? queryParams.GetValueOrDefault("relativePath") ?? "";
+                            string destPath;
+                            if (!string.IsNullOrEmpty(rawRelPath))
+                            {
+                                string relPath = Uri.UnescapeDataString(rawRelPath);
+                                string relDir = Path.GetDirectoryName(relPath) ?? "";
+                                string targetDir = Path.Combine(_saveDirectory, "web_shared", relDir);
+                                Directory.CreateDirectory(targetDir);
+                                destPath = Path.Combine(targetDir, Path.GetFileName(relPath));
+                            }
+                            else
+                            {
+                                string webSharedDir = Path.Combine(_saveDirectory, "web_shared");
+                                Directory.CreateDirectory(webSharedDir);
+                                destPath = GetUniqueFilePath(webSharedDir, filename);
+                            }
+
+                            long cl = 0;
+                            if (headers.TryGetValue("Content-Length", out var clH) && long.TryParse(clH, out var parsedClH))
+                                cl = parsedClH;
+
+                            string clientName = "Mobile Web";
+                            if (!string.IsNullOrEmpty(clientId))
+                            {
+                                await _webClientsLock.WaitAsync();
+                                try
+                                {
+                                    if (_activeWebClients.TryGetValue(clientId, out var winfo))
+                                        clientName = winfo.Name;
+                                }
+                                finally { _webClientsLock.Release(); }
+                            }
+
+                            string remoteIp = client.Client.RemoteEndPoint is System.Net.IPEndPoint rep ? rep.Address.ToString() : "unknown";
+
+                            transferState = new FileTransferState
+                            {
+                                FileId = Guid.NewGuid().ToString("n"),
+                                FileName = filename,
+                                FilePath = destPath,
+                                TotalBytes = cl,
+                                TransferredBytes = 0,
+                                Status = TransferStatus.Receiving,
+                                Direction = TransferDirection.Received,
+                                PeerName = clientName,
+                                RemoteIp = remoteIp,
+                                Timestamp = DateTime.UtcNow
+                            };
+                        }
 
                         string uploaderName = transferState.PeerName;
                         string dest = transferState.FilePath;
@@ -906,7 +1269,6 @@ namespace WeShare.Core.Transfer
                             }
 
                             await SendJson(stream, new { success = true, saved = Path.GetFileName(transferState.FilePath), bytes = contentLength });
-                            try { client.Client.Shutdown(System.Net.Sockets.SocketShutdown.Send); } catch { }
                         }
                         catch (Exception ex)
                         {
