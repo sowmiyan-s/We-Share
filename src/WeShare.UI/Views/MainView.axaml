@@ -378,17 +378,28 @@
                 </StackPanel>
               </Button>
 
+              <Button Classes="SidebarItem" x:Name="NavWebSharedBtn" Click="NavWebShared_Click">
+                <Grid ColumnDefinitions="*, Auto">
+                  <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12">
+                    <Path Classes="NavIcon" Data="{StaticResource IconGlobe}" Width="15" Height="15" Stretch="Uniform" VerticalAlignment="Center"/>
+                    <TextBlock Text="Web Portal" VerticalAlignment="Center"/>
+                  </StackPanel>
+                  <Border Grid.Column="1" x:Name="SidebarWebClientBadge" Background="#7C3AED" CornerRadius="8" Padding="6,1" Margin="6,0,0,0" IsVisible="False" VerticalAlignment="Center">
+                    <TextBlock x:Name="SidebarWebClientBadgeCount" Text="0" FontSize="10" FontWeight="Bold" Foreground="#FFFFFF"/>
+                  </Border>
+                </Grid>
+              </Button>
+
               <Button Classes="SidebarItem" x:Name="NavTransfersBtn" Click="NavTransfers_Click">
                 <StackPanel Orientation="Horizontal" Spacing="12">
-                  <Path Classes="NavIcon" Data="{StaticResource IconTransfers}" Width="15" Height="15" Stretch="Uniform" VerticalAlignment="Center"/>
-                  <TextBlock Text="Transfers &amp; History" VerticalAlignment="Center"/>
+                  <Path Classes="NavIcon" Data="{StaticResource IconHistory}" Width="15" Height="15" Stretch="Uniform" VerticalAlignment="Center"/>
+                  <TextBlock Text="Transfer History" VerticalAlignment="Center"/>
                 </StackPanel>
               </Button>
 
               <!-- Compatibility Anchors for code-behind references -->
               <StackPanel IsVisible="False">
                  <Button x:Name="NavFilesBtn" Click="NavFiles_Click"/>
-                 <Button x:Name="NavWebSharedBtn" Click="NavWebShared_Click"/>
                  <TextBlock x:Name="SidebarDevicesEmpty"/>
               </StackPanel>
             </StackPanel>
@@ -1080,126 +1091,265 @@
             <!-- ========================================== -->
             <!-- 7. WEB TRANSFER & CONNECT (DEDICATED SCREEN) -->
             <!-- ========================================== -->
-            <Grid x:Name="WebSharedPanel" IsVisible="False" Classes="SignalPanel" ColumnDefinitions="320, 20, *">
+            <!-- ========================================== -->
+            <!-- 7. REMADE WEB PORTAL MANAGEMENT PAGE       -->
+            <!-- ========================================== -->
+            <Grid x:Name="WebSharedPanel" IsVisible="False" Classes="SignalPanel" RowDefinitions="Auto, Auto, *">
                
-               <!-- Left Pane: QR Code & Connection Info -->
-               <Border Grid.Column="0" Classes="GlassCard" Padding="24">
-                  <ScrollViewer>
-                     <StackPanel Spacing="16">
-                         <TextBlock Text="CONNECT BY WEB PORTAL" FontSize="11" FontWeight="Bold" Foreground="#7C3AED" LetterSpacing="1"/>
-                        
-                        <!-- Styled QR Code Card -->
-                        <Border Background="#FFFFFF" CornerRadius="12" Padding="12" HorizontalAlignment="Center" Width="160" Height="160" BoxShadow="0 4 20 0 #30000000">
-                           <Image x:Name="HomeQrImage" Stretch="Uniform"/>
-                        </Border>
-
-                        <TextBlock Text="Scan QR code or open URL in any browser" FontSize="12" Foreground="#94A3B8" HorizontalAlignment="Center" TextAlignment="Center"/>
-
-                        <!-- Web Link Box -->
-                        <Border x:Name="HomeWebPortalPanel" Background="#161824" BorderBrush="#222638" BorderThickness="1" CornerRadius="8" Padding="12,10">
-                           <Grid ColumnDefinitions="*, Auto">
-                              <TextBlock x:Name="HomeWebPortalText" Text="http://192.168.1.100:8080" FontSize="11" FontWeight="SemiBold" Foreground="#FFFFFF" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-                              <Button Grid.Column="1" x:Name="CopyWebLinkBtn" Content="Copy" Click="CopyWebLink_Click" Classes="GhostBtn" Padding="10,4" FontSize="10"/>
-                           </Grid>
-                        </Border>
-
-                        <!-- Hotspot Trigger -->
-                        <StackPanel Spacing="8" Margin="0,6,0,0">
-                           <TextBlock Text="WI-FI HOTSPOT" FontSize="10" FontWeight="Bold" Foreground="#64748B" LetterSpacing="0.8"/>
-                           <Button x:Name="StartHotspotBtn" Content="Start Wi-Fi Hotspot" Click="ManualStartHotspot_Click" Classes="PrimaryBtn" HorizontalAlignment="Stretch" Padding="14,10"/>
-                           
-                           <Border x:Name="HomeWifiPasswordPanel" Background="#161824" BorderBrush="#222638" BorderThickness="1" CornerRadius="6" Padding="10,8" IsVisible="False">
-                              <TextBlock x:Name="HomeWifiPasswordText" Text="Pass: weshare123" FontSize="11" Foreground="#94A3B8"/>
-                           </Border>
-                           
-                           <Border x:Name="HomeWifiWebPortalPanel" Background="#161824" BorderBrush="#222638" BorderThickness="1" CornerRadius="6" Padding="10,8" IsVisible="False">
-                              <Grid ColumnDefinitions="*, Auto">
-                                 <TextBlock x:Name="HomeWifiWebPortalText" Text="http://192.168.137.1:8080" FontSize="11" Foreground="#FFFFFF" VerticalAlignment="Center"/>
-                                 <Button Grid.Column="1" x:Name="CopyWifiWebLinkBtn" Content="Copy" Click="CopyWifiWebLink_Click" Classes="GhostBtn" Padding="8,4" FontSize="10"/>
-                              </Grid>
-                           </Border>
-
-                           <!-- Compatibility anchors -->
-                           <Rectangle x:Name="HomeWifiWebPortalSeparator" IsVisible="False"/>
-                           <Rectangle x:Name="HomeWifiPasswordSeparator" IsVisible="False"/>
-                           <TextBlock x:Name="WebPortalLabel" IsVisible="False"/>
+               <!-- 7.1 TOP HUB: CONNECTION BAR & SMART HOTSPOT -->
+               <Border Grid.Row="0" Classes="GlassCard" Padding="20,16" Margin="0,0,0,16">
+                  <Grid ColumnDefinitions="*, Auto">
+                     <!-- Left: Server URL & Status -->
+                     <StackPanel Grid.Column="0" Spacing="6" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                           <Border Width="8" Height="8" CornerRadius="4" Background="#10B981"/>
+                           <TextBlock Text="WEB PORTAL SERVER ACTIVE" FontSize="11" FontWeight="Bold" Foreground="#10B981" LetterSpacing="0.8"/>
+                           <TextBlock x:Name="WebPortalNetworkInfo" Text="• High-Speed Local Daemon" FontSize="11" Foreground="#64748B"/>
                         </StackPanel>
-
+                        
+                        <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                           <Border Background="#161824" BorderBrush="#222638" BorderThickness="1" CornerRadius="8" Padding="12,8">
+                              <TextBlock x:Name="HomeWebPortalText" Text="http://192.168.1.100:8080" FontSize="13" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
+                           </Border>
+                           <Button x:Name="CopyWebLinkBtn" Content="Copy Link" Click="CopyWebLink_Click" Classes="GhostBtn" Padding="12,8" FontSize="11"/>
+                           <Button Content="Open in Browser" Click="OpenWebPortalBrowser_Click" Classes="GhostBtn" Padding="12,8" FontSize="11"/>
+                           <Button x:Name="ToggleQrBtn" Content="📷 QR Code" Click="ToggleQrCode_Click" Classes="GhostBtn" Padding="12,8" FontSize="11"/>
+                        </StackPanel>
                      </StackPanel>
-                  </ScrollViewer>
-               </Border>
 
-               <!-- Right Pane: Active Clients & Staged Uploads -->
-               <Border Grid.Column="2" Classes="GlassCard" Padding="22">
-                  <Grid RowDefinitions="Auto, 12, Auto, 16, *">
-                     
-                     <TextBlock Grid.Row="0" Text="Connected Web Clients" FontSize="14" FontWeight="Bold" Foreground="#FFFFFF"/>
-                     <ListBox Grid.Row="2" x:Name="WebClientsListBox" Background="Transparent" BorderThickness="0" MaxHeight="120" SelectionChanged="WebClientsListBox_SelectionChanged">
-                        <ListBox.ItemTemplate>
-                           <DataTemplate x:DataType="models:DeviceModel">
-                              <Border Classes="TrackRow" Padding="10,8" Margin="0,2">
-                                 <Grid ColumnDefinitions="Auto, *">
-                                    <Border Width="24" Height="24" CornerRadius="12" Background="#1E2235" Margin="0,0,10,0" VerticalAlignment="Center">
-                                       <Path Data="{StaticResource IconMobile}" Fill="#06B6D4" Width="12" Height="12" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                                    </Border>
-                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                       <TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold" Foreground="#FFFFFF"/>
-                                       <TextBlock Text="{Binding IpAddress}" FontSize="10" Foreground="#64748B"/>
-                                    </StackPanel>
-                                 </Grid>
-                              </Border>
-                           </DataTemplate>
-                        </ListBox.ItemTemplate>
-                     </ListBox>
-
-                     <!-- Staged Uploads Section -->
-                     <Grid Grid.Row="4" RowDefinitions="Auto, 12, *">
-                        <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
-                           <TextBlock Text="Incoming Web Uploads" FontSize="14" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
-                           <TextBlock Grid.Column="1" x:Name="WebFilesCountText" Text="0 files" FontSize="11" Foreground="#64748B" VerticalAlignment="Center"/>
-                        </Grid>
-
-                        <TextBlock x:Name="WebFilesEmptyLabel" Grid.Row="2" Text="No incoming web uploads yet" FontSize="12" Foreground="#64748B" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-
-                        <ScrollViewer Grid.Row="2">
-                           <ItemsControl x:Name="WebSharedFilesList">
-                              <ItemsControl.ItemTemplate>
-                                 <DataTemplate x:DataType="views:StagedWebFile">
-                                    <Border Classes="TrackRow" Padding="14,10" Margin="0,0,0,6" Background="#161824" CornerRadius="8">
-                                       <Grid ColumnDefinitions="*, Auto, Auto">
-                                          <StackPanel VerticalAlignment="Center">
-                                             <TextBlock Text="{Binding FileName}" FontSize="13" FontWeight="SemiBold" Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
-                                             <TextBlock Text="{Binding SizeDisplay}" FontSize="11" Foreground="#94A3B8"/>
-                                          </StackPanel>
-                                          <Button Grid.Column="1" Content="Accept" Tag="{Binding}" Click="AcceptWebSharedFile_Click" Classes="PrimaryBtn" Padding="12,6" FontSize="10" Margin="0,0,8,0"/>
-                                          <Button Grid.Column="2" Content="Reject" Tag="{Binding}" Click="RejectWebSharedFile_Click" Classes="GhostBtn" Padding="10,6" FontSize="10"/>
-                                       </Grid>
-                                    </Border>
-                                 </DataTemplate>
-                              </ItemsControl.ItemTemplate>
-                           </ItemsControl>
-                        </ScrollViewer>
-                     </Grid>
-
+                     <!-- Right: Smart Hotspot Controls with Clear Explanation -->
+                     <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center" HorizontalAlignment="Right">
+                        <Button x:Name="StartHotspotBtn" Content="⚡ Direct Hotspot" Click="ManualStartHotspot_Click" Classes="PrimaryBtn" Padding="16,9" FontSize="12" ToolTip.Tip="Creates a private local Wi-Fi network directly from this PC when no router exists or devices cannot see each other."/>
+                        <TextBlock Text="Use if devices are on different networks" FontSize="10" Foreground="#64748B" HorizontalAlignment="Right"/>
+                     </StackPanel>
                   </Grid>
                </Border>
-            </Grid>
 
-            <!-- ========================================== -->
+               <!-- 7.2 COLLAPSIBLE QR CODE DRAWER -->
+               <Border Grid.Row="1" x:Name="WebPortalQrDrawer" IsVisible="False" Classes="GlassCard" Padding="20" Margin="0,0,0,16" HorizontalAlignment="Center">
+                  <StackPanel Spacing="12" HorizontalAlignment="Center">
+                     <Border Background="#FFFFFF" CornerRadius="12" Padding="12" HorizontalAlignment="Center" Width="170" Height="170" BoxShadow="0 6 24 0 #40000000">
+                        <Image x:Name="HomeQrImage" Stretch="Uniform"/>
+                     </Border>
+                     <TextBlock Text="Scan with phone camera to connect instantly without installing an app" FontSize="12" Foreground="#94A3B8" HorizontalAlignment="Center"/>
+                  </StackPanel>
+               </Border>
 
-            <!-- ========================================== -->
-            <!-- 7.5 DEDICATED DEVICE SESSION (SEND & RECV)  -->
-            <!-- ========================================== -->
-            <!-- Collapsed Compatibility Anchor for DeviceSessionPanel -->
-            <Grid x:Name="DeviceSessionPanel" IsVisible="False">
-               <TextBlock x:Name="SessionDeviceTitle"/>
-               <TextBlock x:Name="SessionDeviceSub"/>
-               <Button x:Name="SessionSendFilesBtn" Click="SessionSendFiles_Click"/>
-               <Button x:Name="SessionSendFolderBtn" Click="SessionSendFolder_Click"/>
-               <TextBlock x:Name="SessionSendStatusText"/>
-               <TextBlock x:Name="SessionIncomingCountText"/>
-               <TextBlock x:Name="SessionIncomingEmptyLabel"/>
-               <ItemsControl x:Name="SessionIncomingFilesList"/>
+               <!-- 7.3 MAIN MANAGEMENT DECK: ACTIVE DEVICES RAIL + DEVICE WORKSPACE -->
+               <Grid Grid.Row="2" RowDefinitions="Auto, *">
+                  
+                  <!-- ACTIVE DEVICES RAIL HEADER & CARDS -->
+                  <Border Grid.Row="0" Classes="GlassCard" Padding="16,14" Margin="0,0,0,16">
+                     <Grid RowDefinitions="Auto, Auto">
+                        <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto" Margin="0,0,0,10">
+                           <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                              <Border Width="7" Height="7" CornerRadius="3.5" Background="#7C3AED"/>
+                              <TextBlock Text="ACTIVE CONNECTED DEVICES" FontSize="12" FontWeight="Bold" Foreground="#FFFFFF" LetterSpacing="0.6"/>
+                           </StackPanel>
+                           <TextBlock Grid.Column="2" x:Name="WebClientsRailCountText" Text="0 devices connected" FontSize="11" Foreground="#94A3B8" VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <!-- Devices Selection Horizontal List -->
+                        <ListBox Grid.Row="1" x:Name="WebClientsListBox" Background="Transparent" BorderThickness="0" SelectionChanged="WebClientsListBox_SelectionChanged" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                           <ListBox.ItemsPanel>
+                              <ItemsPanelTemplate>
+                                 <StackPanel Orientation="Horizontal" Spacing="10"/>
+                              </ItemsPanelTemplate>
+                           </ListBox.ItemsPanel>
+                           <ListBox.ItemTemplate>
+                              <DataTemplate x:DataType="models:DeviceModel">
+                                 <Border Background="#161824" BorderBrush="#262D44" BorderThickness="1.5" CornerRadius="10" Padding="14,10" MinWidth="170">
+                                    <Grid ColumnDefinitions="Auto, *">
+                                       <Border Grid.Column="0" Width="32" Height="32" CornerRadius="16" Background="#207C3AED" Margin="0,0,10,0" VerticalAlignment="Center">
+                                          <TextBlock Text="{Binding Type, Converter={StaticResource DeviceTypeToIconConverter}}" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                       </Border>
+                                       <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                                          <TextBlock Text="{Binding Name}" FontSize="12" FontWeight="Bold" Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
+                                          <StackPanel Orientation="Horizontal" Spacing="5">
+                                             <Border Width="6" Height="6" CornerRadius="3" Background="#10B981" VerticalAlignment="Center"/>
+                                             <TextBlock Text="{Binding IpAddress}" FontSize="10" Foreground="#64748B"/>
+                                          </StackPanel>
+                                       </StackPanel>
+                                    </Grid>
+                                 </Border>
+                              </DataTemplate>
+                           </ListBox.ItemTemplate>
+                        </ListBox>
+                     </Grid>
+                  </Border>
+
+                  <!-- WORKSPACE BODY: (A) DEVICE SESSION WORKSTATION or (B) NO DEVICES WELCOME -->
+                  <Grid Grid.Row="1">
+                     
+                     <!-- (A) DEVICE SESSION WORKSTATION (Shown when a device is selected) -->
+                     <Border x:Name="WebDeviceSessionView" Classes="GlassCard" Padding="20" IsVisible="True">
+                        <Grid RowDefinitions="Auto, 16, *">
+                           
+                           <!-- Selected Device Context Header -->
+                           <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto">
+                              <Border Grid.Column="0" Width="40" Height="40" CornerRadius="20" Background="#261A3F" Margin="0,0,12,0" VerticalAlignment="Center">
+                                 <TextBlock x:Name="SelectedWebClientIcon" Text="📱" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                              </Border>
+                              <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                                 <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="DEVICE WORKSPACE:" FontSize="10" FontWeight="Bold" Foreground="#7C3AED" LetterSpacing="0.8"/>
+                                    <TextBlock x:Name="SelectedWebClientName" Text="Selected Device" FontSize="14" FontWeight="Bold" Foreground="#FFFFFF"/>
+                                 </StackPanel>
+                                 <TextBlock x:Name="SelectedWebClientDetails" Text="IP: 192.168.1.88 • Connected via Web Portal" FontSize="11" Foreground="#94A3B8"/>
+                              </StackPanel>
+                              <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                 <Button Content="Disconnect Client" Click="DisconnectCurrentWebClient_Click" Classes="GhostBtn" Padding="12,6" FontSize="11" Foreground="#EF4444"/>
+                              </StackPanel>
+                           </Grid>
+
+                           <!-- Dual Panes: Left = Send To Device, Right = Received From Device -->
+                           <Grid Grid.Row="2" ColumnDefinitions="*, 16, *">
+                              
+                              <!-- LEFT PANE: SEND TO THIS DEVICE -->
+                              <Border Grid.Column="0" Background="#121420" BorderBrush="#222638" BorderThickness="1" CornerRadius="10" Padding="16">
+                                 <Grid RowDefinitions="Auto, 12, Auto, 12, *, 14, Auto">
+                                    <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
+                                       <TextBlock Text="Send to this Device" FontSize="13" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
+                                       <TextBlock Grid.Column="1" x:Name="WebSendStagedCountText" Text="0 files ready" FontSize="11" Foreground="#64748B" VerticalAlignment="Center"/>
+                                    </Grid>
+
+                                    <!-- Action Buttons -->
+                                    <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8">
+                                       <Button Classes="PrimaryBtn" Content="+ Add Files" Click="WebAddFiles_Click" Padding="14,7" FontSize="11"/>
+                                       <Button Classes="GhostBtn" Content="+ Add Folder" Click="WebAddFolder_Click" Padding="12,7" FontSize="11"/>
+                                       <Button Classes="GhostBtn" Content="Clear" Click="WebClearSendQueue_Click" Padding="10,7" FontSize="11"/>
+                                    </StackPanel>
+
+                                    <!-- Dropzone & Staged Items Queue -->
+                                    <Border Grid.Row="4" Background="#161824" BorderBrush="#323850" BorderThickness="1" CornerRadius="8" Padding="8">
+                                       <Grid>
+                                          <ScrollViewer>
+                                             <ItemsControl x:Name="WebClientSendQueueList">
+                                                <ItemsControl.ItemTemplate>
+                                                   <DataTemplate x:DataType="views:QueueItem">
+                                                      <Border Classes="TrackRow" Padding="10,7" Margin="0,2" Background="#1B1F30" CornerRadius="6">
+                                                         <Grid ColumnDefinitions="Auto, *, Auto">
+                                                            <Path Grid.Column="0" Data="{StaticResource IconFile}" Fill="#7C3AED" Width="14" Height="14" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                               <TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold" Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
+                                                               <TextBlock Text="{Binding SizeDisplay}" FontSize="10" Foreground="#94A3B8"/>
+                                                            </StackPanel>
+                                                            <Button Grid.Column="2" Content="✕" Click="WebRemoveStagedItem_Click" Background="Transparent" Foreground="#EF4444" FontSize="10" Padding="6"/>
+                                                         </Grid>
+                                                      </Border>
+                                                   </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                             </ItemsControl>
+                                          </ScrollViewer>
+
+                                          <StackPanel x:Name="WebSendQueueEmptyLabel" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6">
+                                             <Path Data="{StaticResource IconSend}" Fill="#3E4562" Width="20" Height="20" Stretch="Uniform" HorizontalAlignment="Center"/>
+                                             <TextBlock Text="No files staged. Click Add Files" FontSize="12" Foreground="#64748B" HorizontalAlignment="Center"/>
+                                          </StackPanel>
+                                       </Grid>
+                                    </Border>
+
+                                    <!-- Send Action Button -->
+                                    <Button Grid.Row="6" x:Name="WebSendToDeviceBtn" Content="🚀 Send Files to Device" Click="WebSendToDevice_Click" Classes="PrimaryBtn" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="14,10" FontSize="13" FontWeight="Bold"/>
+                                 </Grid>
+                              </Border>
+
+                              <!-- RIGHT PANE: RECEIVED FROM THIS DEVICE -->
+                              <Border Grid.Column="2" Background="#121420" BorderBrush="#222638" BorderThickness="1" CornerRadius="10" Padding="16">
+                                 <Grid RowDefinitions="Auto, 12, *, 12, Auto">
+                                    <Grid Grid.Row="0" ColumnDefinitions="*, Auto, Auto">
+                                       <TextBlock Text="Received from this Device" FontSize="13" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
+                                       <TextBlock Grid.Column="1" x:Name="WebFilesCountText" Text="0 files" FontSize="11" Foreground="#64748B" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                       <Button Grid.Column="2" x:Name="WebAcceptAllBtn" Content="Accept All" Click="WebAcceptAllFiles_Click" Classes="PrimaryBtn" Padding="10,5" FontSize="11"/>
+                                    </Grid>
+
+                                    <!-- Staged Incoming Files List -->
+                                    <Border Grid.Row="2" Background="#161824" BorderBrush="#323850" BorderThickness="1" CornerRadius="8" Padding="8">
+                                       <Grid>
+                                          <ScrollViewer>
+                                             <ItemsControl x:Name="WebSharedFilesList">
+                                                <ItemsControl.ItemTemplate>
+                                                   <DataTemplate x:DataType="views:StagedWebFile">
+                                                      <Border Classes="TrackRow" Padding="10,8" Margin="0,2" Background="#1B1F30" CornerRadius="6">
+                                                         <Grid ColumnDefinitions="*, Auto, Auto">
+                                                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                               <TextBlock Text="{Binding FileName}" FontSize="12" FontWeight="SemiBold" Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
+                                                               <TextBlock Text="{Binding SizeDisplay}" FontSize="10" Foreground="#94A3B8"/>
+                                                            </StackPanel>
+                                                            <Button Grid.Column="1" Content="Accept" Tag="{Binding}" Click="AcceptWebSharedFile_Click" Classes="PrimaryBtn" Padding="10,5" FontSize="10" Margin="0,0,6,0"/>
+                                                            <Button Grid.Column="2" Content="Reject" Tag="{Binding}" Click="RejectWebSharedFile_Click" Classes="GhostBtn" Padding="8,5" FontSize="10"/>
+                                                         </Grid>
+                                                      </Border>
+                                                   </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                             </ItemsControl>
+                                          </ScrollViewer>
+
+                                          <TextBlock x:Name="WebFilesEmptyLabel" Text="Waiting for incoming uploads..." FontSize="12" Foreground="#64748B" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                       </Grid>
+                                    </Border>
+
+                                    <!-- Storage Footer -->
+                                    <Button Grid.Row="4" Content="Open Downloads Folder" Click="OpenDownloadFolder_Click" Classes="GhostBtn" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="12,8" FontSize="11"/>
+                                 </Grid>
+                              </Border>
+
+                           </Grid>
+
+                        </Grid>
+                     </Border>
+
+                     <!-- (B) NO DEVICES CONNECTED WELCOME STATE (Shown when 0 web clients) -->
+                     <Border x:Name="NoWebClientsCard" Classes="GlassCard" Padding="36" IsVisible="False">
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="20" MaxWidth="520">
+                           <Border Width="64" Height="64" CornerRadius="32" Background="#207C3AED" HorizontalAlignment="Center">
+                              <Path Data="{StaticResource IconGlobe}" Fill="#A855F7" Width="28" Height="28" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                           </Border>
+                           <StackPanel Spacing="6" HorizontalAlignment="Center">
+                              <TextBlock Text="Connect Any Device in 3 Seconds" FontSize="18" FontWeight="Bold" Foreground="#FFFFFF" HorizontalAlignment="Center"/>
+                              <TextBlock Text="No app installation needed. Transfer files directly between iPhone, Android, Mac, and PC via your local browser." FontSize="13" Foreground="#94A3B8" TextAlignment="Center" TextWrapping="Wrap"/>
+                           </StackPanel>
+
+                           <Border Background="#161824" BorderBrush="#222638" BorderThickness="1" CornerRadius="10" Padding="18">
+                              <StackPanel Spacing="10">
+                                 <TextBlock Text="HOW TO CONNECT:" FontSize="11" FontWeight="Bold" Foreground="#7C3AED" LetterSpacing="0.8"/>
+                                 <TextBlock Text="1. Make sure both devices are on the same Wi-Fi (or click Start Hotspot)." FontSize="12" Foreground="#E2E8F0"/>
+                                 <TextBlock Text="2. Scan the QR code or visit the URL shown at the top in your browser." FontSize="12" Foreground="#E2E8F0"/>
+                                 <TextBlock Text="3. Your device will automatically appear in the Active Devices rail above!" FontSize="12" Foreground="#E2E8F0"/>
+                              </StackPanel>
+                           </Border>
+
+                           <Button Content="Show QR Code" Click="ToggleQrCode_Click" Classes="PrimaryBtn" HorizontalAlignment="Center" Padding="20,10" FontSize="13"/>
+                        </StackPanel>
+                     </Border>
+
+                  </Grid>
+               </Grid>
+
+               <!-- Compatibility anchors for legacy references -->
+               <Panel IsVisible="False">
+                  <Border x:Name="HomeWebPortalPanel"/>
+                  <Border x:Name="HomeWifiPasswordPanel"><TextBlock x:Name="HomeWifiPasswordText"/></Border>
+                  <Border x:Name="HomeWifiWebPortalPanel">
+                     <StackPanel Orientation="Horizontal">
+                        <TextBlock x:Name="HomeWifiWebPortalText"/>
+                        <Button x:Name="CopyWifiWebLinkBtn"/>
+                     </StackPanel>
+                  </Border>
+                  <Rectangle x:Name="HomeWifiWebPortalSeparator"/>
+                  <Rectangle x:Name="HomeWifiPasswordSeparator"/>
+                  <TextBlock x:Name="WebPortalLabel"/>
+                  <Grid x:Name="DeviceSessionPanel">
+                     <TextBlock x:Name="SessionDeviceTitle"/>
+                     <TextBlock x:Name="SessionDeviceSub"/>
+                     <Button x:Name="SessionSendFilesBtn"/>
+                     <Button x:Name="SessionSendFolderBtn"/>
+                     <TextBlock x:Name="SessionSendStatusText"/>
+                     <TextBlock x:Name="SessionIncomingCountText"/>
+                     <TextBlock x:Name="SessionIncomingEmptyLabel"/>
+                     <ItemsControl x:Name="SessionIncomingFilesList"/>
+                  </Grid>
+               </Panel>
             </Grid>
 
             <!-- 8. SETTINGS PANEL                          -->
@@ -1416,6 +1566,42 @@
               </Grid>
           </Grid>
         </ScrollViewer>
+
+        <!-- ========================================== -->
+        <!-- FLOATING ACTIVE TRANSFER DOCK              -->
+        <!-- ========================================== -->
+        <Border x:Name="ActiveTransferDock" Grid.Row="1" IsVisible="False" VerticalAlignment="Bottom" HorizontalAlignment="Stretch" Margin="36,0,36,18" ZIndex="4500" Background="#F2111422" BorderBrush="#607C3AED" BorderThickness="1.5" CornerRadius="14" Padding="16,12" BoxShadow="0 14 40 0 #B0000000">
+           <Grid ColumnDefinitions="Auto, *, 220, Auto, Auto">
+              <!-- Direction Badge -->
+              <Border Grid.Column="0" x:Name="ActiveDockBadge" Width="38" Height="38" CornerRadius="19" Background="#257C3AED" Margin="0,0,12,0" VerticalAlignment="Center">
+                 <Path x:Name="ActiveDockIcon" Data="{StaticResource IconSend}" Fill="#A855F7" Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+              </Border>
+
+              <!-- File & Target Info -->
+              <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2" Margin="0,0,16,0">
+                 <Grid ColumnDefinitions="Auto, *">
+                    <TextBlock x:Name="ActiveDockStatusLabel" Text="TRANSFERRING" FontSize="10" FontWeight="Bold" Foreground="#A855F7" LetterSpacing="0.8" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Column="1" x:Name="BottomPlayerFileName" Text="file.zip" FontSize="13" FontWeight="Bold" Foreground="#FFFFFF" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                 </Grid>
+                 <TextBlock x:Name="BottomPlayerPeerName" Text="To: Device • Ready" FontSize="11" Foreground="#94A3B8" TextTrimming="CharacterEllipsis"/>
+              </StackPanel>
+
+              <!-- Progress & Telemetry -->
+              <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="4" Margin="0,0,16,0">
+                 <Grid ColumnDefinitions="*, Auto">
+                    <TextBlock x:Name="BottomPlayerSpeed" Text="0.0 MB/s" FontSize="11" FontWeight="SemiBold" Foreground="#06B6D4"/>
+                    <TextBlock Grid.Column="1" x:Name="ActiveDockProgressPct" Text="0%" FontSize="11" FontWeight="Bold" Foreground="#FFFFFF"/>
+                 </Grid>
+                 <ProgressBar x:Name="BottomPlayerProgress" Height="5" CornerRadius="2.5" Foreground="#7C3AED" Background="#202538" Value="0"/>
+              </StackPanel>
+
+              <!-- Cancel / Abort Button -->
+              <Button Grid.Column="3" x:Name="BottomPlayerCancelBtn" Content="Abort" Click="CancelActiveSend_Click" Classes="GhostBtn" Padding="12,6" FontSize="11" Foreground="#EF4444" Margin="0,0,8,0" VerticalAlignment="Center"/>
+
+              <!-- Optional History Shortcut -->
+              <Button Grid.Column="4" Content="History →" Click="NavTransfers_Click" Classes="GhostBtn" Padding="12,6" FontSize="11" VerticalAlignment="Center"/>
+           </Grid>
+        </Border>
       </Grid>
 
     </Grid>
@@ -1423,11 +1609,6 @@
     <!-- Hidden compatibility anchors for legacy elements -->
     <Panel IsVisible="False">
        <ToggleSwitch x:Name="ThemeToggle" IsVisible="False"/>
-       <TextBlock x:Name="BottomPlayerFileName" Text=""/>
-       <TextBlock x:Name="BottomPlayerPeerName" Text=""/>
-       <TextBlock x:Name="BottomPlayerSpeed" Text=""/>
-       <Button x:Name="BottomPlayerCancelBtn" Click="CancelActiveSend_Click"/>
-       <ProgressBar x:Name="BottomPlayerProgress"/>
     </Panel>
 
     <!-- ========================================== -->

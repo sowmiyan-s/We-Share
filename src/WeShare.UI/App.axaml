@@ -166,6 +166,7 @@
             <StreamGeometry x:Key="IconQr">M4,4 H10 V10 H4 Z M14,4 H20 V10 H14 Z M4,14 H10 V20 H4 Z M14,14 H17 V17 H14 Z M17,17 H20 V20 H17 Z</StreamGeometry>
             <StreamGeometry x:Key="IconWifi">M5,12.5 A11,11 0 0,1 19.1,12.5 M1.4,9 A16,16 0 0,1 22.6,9 M8.5,16.1 A6,6 0 0,1 15.5,16.1 M12,20 H12.01</StreamGeometry>
             <StreamGeometry x:Key="IconDevice">M4,6 H20 A2,2 0 0,1 22,8 V16 A2,2 0 0,1 20,18 H4 A2,2 0 0,1 2,16 V8 A2,2 0 0,1 4,6 Z M2,18 H22</StreamGeometry>
+            <StreamGeometry x:Key="IconGlobe">M12,2 A10,10 0 1,0 22,12 A10,10 0 0,0 12,2 Z M2,12 H22 M12,2 A15,15 0 0,1 16,12 A15,15 0 0,1 12,22 A15,15 0 0,1 8,12 A15,15 0 0,1 12,2 Z</StreamGeometry>
         </ResourceDictionary>
     </Application.Resources>
     <Application.Styles>

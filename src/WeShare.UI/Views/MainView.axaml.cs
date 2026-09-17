@@ -92,7 +92,9 @@ namespace WeShare.UI.Views
         public ObservableCollection<FileTransferState> ReceivedFiles { get; } = new();
         public ObservableCollection<FileTransferState> LibraryFiles { get; } = new();
         public ObservableCollection<StagedWebFile> StagedWebFiles { get; } = new();
+        public ObservableCollection<QueueItem> WebClientSendQueue { get; } = new();
         public ObservableCollection<BatchCheckItem> BatchManifestItems { get; } = new();
+        private DeviceModel? _selectedWebClient;
         private readonly System.Collections.Concurrent.ConcurrentDictionary<string, System.Collections.Generic.List<QueueItem>> _lastDeclinedItems = new();
         private TaskCompletionSource<System.Collections.Generic.List<string>>? _batchManifestTcs;
         private TaskCompletionSource<bool>? _resendRequestTcs;
@@ -132,6 +134,7 @@ namespace WeShare.UI.Views
             IncomingList.ItemsSource  = ActiveReceives;
             OutgoingList.ItemsSource  = ActiveSends;
             ReceivedFilesList.ItemsSource = LibraryFiles;
+            if (WebClientSendQueueList != null) WebClientSendQueueList.ItemsSource = WebClientSendQueue;
 
             Devices.CollectionChanged += (_, _) => Dispatcher.UIThread.Post(UpdateEmptyState);
             ActiveReceivers.CollectionChanged += (_, _) => Dispatcher.UIThread.Post(UpdateEmptyState);
@@ -590,44 +593,24 @@ namespace WeShare.UI.Views
 
         private void NavHome_Click(object? sender, RoutedEventArgs e)
         {
-            if (HasActiveTransfer())
-            {
-                ShowToast("Active transfer in progress — please wait");
-                return;
-            }
             ShowPanel(HomePanel, "HOME", NavHomeBtn);
         }
         private void NavFiles_Click(object? sender, RoutedEventArgs e)
         {
             NavTransfers_Click(sender, e);
         }
-        private void NavTransfers_Click(object? sender, RoutedEventArgs e) => ShowPanel(TransfersPanel, "TRANSFERS", NavTransfersBtn);
+        private void NavTransfers_Click(object? sender, RoutedEventArgs e) => ShowPanel(TransfersPanel, "TRANSFER HISTORY", NavTransfersBtn);
         private void NavWebShared_Click(object? sender, RoutedEventArgs e)
         {
-            if (HasActiveTransfer())
-            {
-                ShowToast("Active transfer in progress — please wait");
-                return;
-            }
-            ShowPanel(WebSharedPanel, "WEB SHARED", NavWebSharedBtn);
+            ShowPanel(WebSharedPanel, "WEB PORTAL", NavWebSharedBtn);
             UpdateWebSharedClientsList();
         }
         private void NavSettings_Click(object? sender, RoutedEventArgs e)
         {
-            if (HasActiveTransfer())
-            {
-                ShowToast("Active transfer in progress — please wait");
-                return;
-            }
             ShowPanel(SettingsPanel, "SETTINGS", NavSettBtn);
         }
         private void NavAbout_Click(object? sender, RoutedEventArgs e)
         {
-            if (HasActiveTransfer())
-            {
-                ShowToast("Active transfer in progress — please wait");
-                return;
-            }
             ShowPanel(AboutPanel, "ABOUT", NavAboutBtn);
         }
 
@@ -1012,11 +995,22 @@ namespace WeShare.UI.Views
 
             TransferDeclinedCard.IsVisible = false;
             _sendTarget = device;
-            ShowPanel(TransfersPanel, "TRANSFERS", NavTransfersBtn);
             SendProgressBorder.IsVisible = true;
 
             _isSending = true;
             UpdateTransfersVisibility();
+            if (itemsToSend.Count > 0)
+            {
+                var first = itemsToSend[0];
+                UpdateActiveTransferDock(new FileTransferState
+                {
+                    FileName = first.Name,
+                    TotalBytes = first.Size,
+                    Direction = TransferDirection.Sent,
+                    PeerName = device.DisplayName,
+                    Status = TransferStatus.Sending
+                });
+            }
             _ = Task.Run(() => ProcessSendSessionAsync(device, itemsToSend));
         }
 
@@ -1988,38 +1982,32 @@ namespace WeShare.UI.Views
             try
             {
                 var ip = UdpDiscoveryService.GetLocalIp();
-                bool hasRealIp = ip != "127.0.0.1";
+                bool hasRealIp = ip != "127.0.0.1" && !ip.StartsWith("169.254.");
 
                 if (hasRealIp)
                 {
-                    // Already connected to a network — run direct host hotspot so users can connect
-                    _hotspotService = new HotspotService();
-                    if (await _hotspotService.IsSupportedAsync())
-                    {
-                        var (started, _) = await _hotspotService.StartAsync();
-                        if (started)
-                        {
-                            await Task.Delay(1000);
-                            UpdateNetworkLabels();
-                        }
-                    }
+                    // Already connected to a real Wi-Fi or Ethernet network.
+                    // Do NOT auto-create a hotspot; preserve current connection and update UI.
+                    Dispatcher.UIThread.Post(UpdateNetworkLabels);
                     return;
                 }
 
+                // Field / Desert Mode: No active router or network found
                 _wifiConnector = new WifiConnectorService();
 
-                // Step 1 — Try to JOIN an existing WeShare hotspot (client role)
+                // Step 1 — Check if a WeShare peer hotspot is already visible nearby to join
                 bool found = await _wifiConnector.IsWeShareHotspotVisibleAsync();
-
                 if (found)
                 {
                     var (ok, _) = await _wifiConnector.AutoConnectToWeShareAsync();
                     if (ok)
                     {
                         await Task.Delay(1500); // let DHCP settle
-                        UpdateNetworkLabels();
+                        Dispatcher.UIThread.Post(() => {
+                            UpdateNetworkLabels();
+                            ShowToast("Auto-connected to nearby WeShare Hotspot!");
+                        });
 
-                        // Burst-broadcast so the host sees us immediately
                         for (int i = 0; i < 4; i++)
                         {
                             await _discoveryService.BroadcastPresenceAsync();
@@ -2029,23 +2017,24 @@ namespace WeShare.UI.Views
                     }
                 }
 
-                // Step 2 — No existing hotspot found — become the HOST
+                // Step 2 — No existing network or hotspot found: Automatically host a Direct Hotspot
                 _hotspotService = new HotspotService();
-                if (!await _hotspotService.IsSupportedAsync())
+                if (await _hotspotService.IsSupportedAsync())
                 {
-                    return;
-                }
-
-                var (startedHost, _) = await _hotspotService.StartAsync();
-                if (startedHost)
-                {
-                    await Task.Delay(1000);
-                    UpdateNetworkLabels();
+                    var (startedHost, _) = await _hotspotService.StartAsync();
+                    if (startedHost)
+                    {
+                        await Task.Delay(1000);
+                        Dispatcher.UIThread.Post(() => {
+                            UpdateNetworkLabels();
+                            ShowToast("No network found — Autonomous Hotspot activated at 192.168.137.1");
+                        });
+                    }
                 }
             }
             catch (Exception ex)
             {
-                ShowToast($"Auto-network error: {ex.Message}");
+                Console.WriteLine($"[AutoNetwork] Error: {ex.Message}");
             }
         }
 
@@ -2053,7 +2042,7 @@ namespace WeShare.UI.Views
         private async void UpdateNetworkLabels()
         {
             var ip = UdpDiscoveryService.GetLocalIp();
-            bool hasRealIp = ip != "127.0.0.1";
+            bool hasRealIp = ip != "127.0.0.1" && !ip.StartsWith("169.254.");
             string ssid = "Not Connected";
             string password = "None";
 
@@ -2086,6 +2075,18 @@ namespace WeShare.UI.Views
                 HomeWebPortalText.Text   = webUrl;
                 GenerateQrBitmap(webUrl);
 
+                if (StartHotspotBtn != null)
+                {
+                    StartHotspotBtn.Content = isHotspotRunning ? "🛑 Stop Hotspot" : "⚡ Direct Hotspot";
+                }
+
+                if (WebPortalNetworkInfo != null)
+                {
+                    WebPortalNetworkInfo.Text = isHotspotRunning 
+                        ? "• Direct Hotspot Active (192.168.137.1)" 
+                        : (hasRealIp ? $"• {ssid} ({ip})" : "• Offline Standalone Mode");
+                }
+
                 if (isHotspotRunning && hasRealIp && ip != _hotspotService!.HotspotIp)
                 {
                     string wifiWebUrl = $"http://{ip}:8080";
@@ -2117,9 +2118,35 @@ namespace WeShare.UI.Views
             });
         }
 
-        private void ManualStartHotspot_Click(object sender, RoutedEventArgs e)
+        private async void ManualStartHotspot_Click(object sender, RoutedEventArgs e)
         {
-            _ = Task.Run(TryAutoNetworkAsync);
+            try
+            {
+                if (_hotspotService != null && _hotspotService.IsRunning)
+                {
+                    var (stopped, _) = await _hotspotService.StopAsync();
+                    ShowToast("Wi-Fi Hotspot stopped");
+                    UpdateNetworkLabels();
+                }
+                else
+                {
+                    _hotspotService ??= new HotspotService();
+                    var (started, ip) = await _hotspotService.StartAsync();
+                    if (started)
+                    {
+                        ShowToast($"Hotspot active at {ip} (SSID: WeShare, Pass: weshare1)");
+                        UpdateNetworkLabels();
+                    }
+                    else
+                    {
+                        ShowToast($"Could not start hotspot: {ip}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowToast($"Hotspot error: {ex.Message}");
+            }
         }
 
         private void ManualConnect_Click(object sender, RoutedEventArgs e)
@@ -2223,14 +2250,12 @@ namespace WeShare.UI.Views
         private void AcceptTransfer_Click(object sender, RoutedEventArgs e)
         {
             AcceptRejectPanel.IsVisible = false;
-            NavTransfers_Click(this, new RoutedEventArgs());
             _acceptTcs?.TrySetResult(true);
         }
 
         private void RejectTransfer_Click(object sender, RoutedEventArgs e)
         {
             AcceptRejectPanel.IsVisible = false;
-            ShowPanel(HomePanel, "HOME", NavHomeBtn);
             _acceptTcs?.TrySetResult(false);
         }
 
@@ -2511,7 +2536,11 @@ namespace WeShare.UI.Views
         private void OnTransferStarted(FileTransferState state)
         {
             Dispatcher.UIThread.Post(async () => {
-                if (state.Direction == TransferDirection.Received) { ActiveReceives.Add(state); RecvEmptyState.IsVisible = false; }
+                if (state.Direction == TransferDirection.Received) 
+                { 
+                    ActiveReceives.Add(state); 
+                    RecvEmptyState.IsVisible = false; 
+                }
                 else 
                 { 
                     SendProgressBorder.IsVisible = true; 
@@ -2519,8 +2548,8 @@ namespace WeShare.UI.Views
                     SendSpeedGraph?.Clear();
                 }
                 
-                // Switch to Transfers view automatically when any transfer starts
-                NavTransfers_Click(this, new RoutedEventArgs());
+                // Show floating in-place dock across any page without forcing navigation away
+                UpdateActiveTransferDock(state);
                 
                 await _dbHelper.SaveTransferAsync(state);
             });
@@ -2546,6 +2575,9 @@ namespace WeShare.UI.Views
                 GlobalActivityBorder.IsVisible = true;
                 GlobalProgressBar.Value        = state.ProgressPercentage;
 
+                // Update persistent Floating Transfer Dock
+                UpdateActiveTransferDock(state);
+
                 // Live speed badge on Home
                 if (HomeSpeedBadge != null)
                 {
@@ -2568,6 +2600,8 @@ namespace WeShare.UI.Views
                 SendProgressBorder.IsVisible   = false;
                 GlobalActivityBorder.IsVisible = false;
                 if (HomeSpeedBadge != null) HomeSpeedBadge.IsVisible = false;
+                HideActiveTransferDock();
+
                 if (state.Direction == TransferDirection.Received)
                 {
                     var ex = ActiveReceives.FirstOrDefault(s => s.FileId == state.FileId);
@@ -2597,6 +2631,8 @@ namespace WeShare.UI.Views
                 SendProgressBorder.IsVisible   = false;
                 GlobalActivityBorder.IsVisible = false;
                 if (HomeSpeedBadge != null) HomeSpeedBadge.IsVisible = false;
+                HideActiveTransferDock();
+
                 if (state.Direction == TransferDirection.Received)
                 {
                     var ex = ActiveReceives.FirstOrDefault(s => s.FileId == state.FileId);
@@ -2614,6 +2650,53 @@ namespace WeShare.UI.Views
             });
         }
 
+        private void UpdateActiveTransferDock(FileTransferState state)
+        {
+            if (ActiveTransferDock == null) return;
+            ActiveTransferDock.IsVisible = true;
+            if (BottomPlayerFileName != null) BottomPlayerFileName.Text = state.FileName;
+            if (BottomPlayerPeerName != null) 
+            {
+                string dirLabel = state.Direction == TransferDirection.Sent ? "To: " : "From: ";
+                string peer = !string.IsNullOrEmpty(state.PeerName) ? state.PeerName : "Nearby Device";
+                string sizeStr = state.TotalBytes > 0 ? $" • {FileTransferState.FormatBytes(state.TotalBytes)}" : "";
+                BottomPlayerPeerName.Text = $"{dirLabel}{peer}{sizeStr}";
+            }
+            if (BottomPlayerSpeed != null) BottomPlayerSpeed.Text = $"{state.SpeedMbPerSec:F1} MB/s";
+            if (ActiveDockProgressPct != null) ActiveDockProgressPct.Text = $"{state.ProgressPercentage:F0}%";
+            if (BottomPlayerProgress != null) BottomPlayerProgress.Value = state.ProgressPercentage;
+            if (ActiveDockStatusLabel != null) 
+                ActiveDockStatusLabel.Text = state.Direction == TransferDirection.Sent ? "SENDING" : "RECEIVING";
+            
+            try
+            {
+                if (ActiveDockIcon != null)
+                {
+                    string iconKey = state.Direction == TransferDirection.Sent ? "IconSend" : "IconReceive";
+                    if (this.TryFindResource(iconKey, out var res) && res is StreamGeometry geom)
+                    {
+                        ActiveDockIcon.Data = geom;
+                    }
+                }
+                if (ActiveDockBadge != null)
+                {
+                    ActiveDockBadge.Background = state.Direction == TransferDirection.Sent 
+                        ? SolidColorBrush.Parse("#257C3AED") 
+                        : SolidColorBrush.Parse("#2506B6D4");
+                }
+            }
+            catch { }
+        }
+
+        private void HideActiveTransferDock()
+        {
+            if (ActiveTransferDock == null) return;
+            if (!HasActiveTransfer())
+            {
+                ActiveTransferDock.IsVisible = false;
+            }
+        }
+
         private void CancelActiveSend_Click(object sender, RoutedEventArgs e)
         {
             if (!string.IsNullOrEmpty(_currentSendingFileId))
@@ -2621,6 +2704,16 @@ namespace WeShare.UI.Views
                 _transferManager.CancelTransfer(_currentSendingFileId);
                 ShowToast("Sending cancelled");
             }
+            else if (ActiveReceives.Count > 0)
+            {
+                var first = ActiveReceives.FirstOrDefault();
+                if (first != null)
+                {
+                    _transferManager.CancelTransfer(first.FileId);
+                    ShowToast("Receiving cancelled");
+                }
+            }
+            HideActiveTransferDock();
         }
 
         private void CancelIncoming_Click(object sender, RoutedEventArgs e)
@@ -3181,42 +3274,238 @@ namespace WeShare.UI.Views
         private void UpdateWebSharedClientsList()
         {
             var webClients = Devices.Where(d => d.Type == "Web Client").ToList();
-            WebClientsListBox.ItemsSource = webClients;
+            if (WebClientsListBox != null) WebClientsListBox.ItemsSource = webClients;
+            if (WebClientsRailCountText != null)
+                WebClientsRailCountText.Text = $"{webClients.Count} device{(webClients.Count == 1 ? "" : "s")} connected";
+            if (SidebarWebClientBadge != null)
+                SidebarWebClientBadge.IsVisible = webClients.Count > 0;
+            if (SidebarWebClientBadgeCount != null)
+                SidebarWebClientBadgeCount.Text = webClients.Count.ToString();
 
-            var selected = WebClientsListBox.SelectedItem as DeviceModel;
-            if (selected == null || !webClients.Any(c => c.Id == selected.Id))
+            if (webClients.Count == 0)
             {
-                WebClientsListBox.SelectedItem = webClients.FirstOrDefault();
+                _selectedWebClient = null;
+                if (WebDeviceSessionView != null) WebDeviceSessionView.IsVisible = false;
+                if (NoWebClientsCard != null) NoWebClientsCard.IsVisible = true;
+            }
+            else
+            {
+                if (WebDeviceSessionView != null) WebDeviceSessionView.IsVisible = true;
+                if (NoWebClientsCard != null) NoWebClientsCard.IsVisible = false;
+
+                if (_selectedWebClient == null || !webClients.Any(c => c.Id == _selectedWebClient.Id))
+                {
+                    _selectedWebClient = webClients.FirstOrDefault();
+                    if (WebClientsListBox != null) WebClientsListBox.SelectedItem = _selectedWebClient;
+                }
+                UpdateSelectedWebClientUI();
             }
             UpdateWebSharedFilesList();
         }
 
-        private void UpdateWebSharedFilesList()
+        private void UpdateSelectedWebClientUI()
         {
-            var selectedClient = WebClientsListBox.SelectedItem as DeviceModel;
-            if (selectedClient == null)
+            if (_selectedWebClient == null) return;
+            if (SelectedWebClientName != null) SelectedWebClientName.Text = _selectedWebClient.DisplayName;
+            if (SelectedWebClientDetails != null) 
+                SelectedWebClientDetails.Text = $"IP: {_selectedWebClient.IpAddress} • Web Portal Client • Connected";
+            if (SelectedWebClientIcon != null)
             {
-                WebSharedFilesList.ItemsSource = null;
-                WebFilesCountText.Text = "0 files";
-                WebFilesEmptyLabel.IsVisible = true;
-                return;
+                string lname = _selectedWebClient.Name.ToLower();
+                SelectedWebClientIcon.Text = (lname.Contains("iphone") || lname.Contains("android") || lname.Contains("mobile") || lname.Contains("phone")) ? "📱" : "💻";
             }
-
-            var clientFiles = StagedWebFiles.Where(f => f.ClientId == selectedClient.Id).ToList();
-            WebSharedFilesList.ItemsSource = clientFiles;
-            WebFilesCountText.Text = $"{clientFiles.Count} file{(clientFiles.Count == 1 ? "" : "s")}";
-            WebFilesEmptyLabel.IsVisible = clientFiles.Count == 0;
+            UpdateWebSendQueueUI();
         }
 
         private void WebClientsListBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
         {
             if (WebClientsListBox.SelectedItem is DeviceModel dev)
             {
-                OpenDeviceSession(dev);
+                _selectedWebClient = dev;
+                _sessionDevice = dev;
+                UpdateSelectedWebClientUI();
+                UpdateWebSharedFilesList();
             }
             else
             {
                 UpdateWebSharedFilesList();
+            }
+        }
+
+        private void UpdateWebSharedFilesList()
+        {
+            if (_selectedWebClient == null)
+            {
+                if (WebSharedFilesList != null) WebSharedFilesList.ItemsSource = null;
+                if (WebFilesCountText != null) WebFilesCountText.Text = "0 files";
+                if (WebFilesEmptyLabel != null) WebFilesEmptyLabel.IsVisible = true;
+                if (WebAcceptAllBtn != null) WebAcceptAllBtn.IsEnabled = false;
+                return;
+            }
+
+            var clientFiles = StagedWebFiles.Where(f => f.ClientId == _selectedWebClient.Id || f.ClientName == _selectedWebClient.Name).ToList();
+            if (WebSharedFilesList != null) WebSharedFilesList.ItemsSource = clientFiles;
+            if (WebFilesCountText != null) WebFilesCountText.Text = $"{clientFiles.Count} file{(clientFiles.Count == 1 ? "" : "s")}";
+            if (WebFilesEmptyLabel != null) WebFilesEmptyLabel.IsVisible = clientFiles.Count == 0;
+            if (WebAcceptAllBtn != null) WebAcceptAllBtn.IsEnabled = clientFiles.Count > 0;
+        }
+
+        private async void WebAddFiles_Click(object? sender, RoutedEventArgs e)
+        {
+            var files = await PickFilesAsync();
+            foreach (var f in files)
+            {
+                if (!WebClientSendQueue.Any(q => q.Path == f.Path))
+                    WebClientSendQueue.Add(f);
+            }
+            UpdateWebSendQueueUI();
+        }
+
+        private async void WebAddFolder_Click(object? sender, RoutedEventArgs e)
+        {
+            var files = await PickFolderAsync();
+            foreach (var f in files)
+            {
+                if (!WebClientSendQueue.Any(q => q.Path == f.Path))
+                    WebClientSendQueue.Add(f);
+            }
+            UpdateWebSendQueueUI();
+        }
+
+        private void WebClearSendQueue_Click(object? sender, RoutedEventArgs e)
+        {
+            WebClientSendQueue.Clear();
+            UpdateWebSendQueueUI();
+        }
+
+        private void WebRemoveStagedItem_Click(object? sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.DataContext is QueueItem item)
+            {
+                WebClientSendQueue.Remove(item);
+                UpdateWebSendQueueUI();
+            }
+        }
+
+        private void UpdateWebSendQueueUI()
+        {
+            if (WebSendStagedCountText != null)
+                WebSendStagedCountText.Text = $"{WebClientSendQueue.Count} file{(WebClientSendQueue.Count == 1 ? "" : "s")} ready";
+            if (WebSendQueueEmptyLabel != null)
+                WebSendQueueEmptyLabel.IsVisible = WebClientSendQueue.Count == 0;
+            if (WebSendToDeviceBtn != null)
+            {
+                string targetName = _selectedWebClient != null ? _selectedWebClient.DisplayName : "Device";
+                WebSendToDeviceBtn.Content = $"🚀 Send {WebClientSendQueue.Count} File(s) to {targetName}";
+                WebSendToDeviceBtn.IsEnabled = WebClientSendQueue.Count > 0 && _selectedWebClient != null;
+            }
+        }
+
+        private void WebSendToDevice_Click(object? sender, RoutedEventArgs e)
+        {
+            if (_selectedWebClient == null)
+            {
+                ShowToast("Please select a device from the rail above");
+                return;
+            }
+            if (WebClientSendQueue.Count == 0)
+            {
+                ShowToast("Please add files to send first");
+                return;
+            }
+
+            var paths = WebClientSendQueue.Select(q => q.Path).ToList();
+            bool ok = paths.Count > 1
+                ? (_webDashboardService?.ShareMultipleForWebClient(_selectedWebClient.Id, paths) ?? false)
+                : (_webDashboardService?.ShareForWebClient(_selectedWebClient.Id, paths[0]) ?? false);
+
+            if (ok)
+            {
+                ShowToast($"Pushed {paths.Count} file(s) to '{_selectedWebClient.DisplayName}'. Browser downloading...");
+                WebClientSendQueue.Clear();
+                UpdateWebSendQueueUI();
+            }
+            else
+            {
+                ShowToast($"Failed to push files. Web client may have disconnected.");
+            }
+        }
+
+        private async void WebAcceptAllFiles_Click(object? sender, RoutedEventArgs e)
+        {
+            if (_selectedWebClient == null) return;
+            var clientFiles = StagedWebFiles.Where(f => f.ClientId == _selectedWebClient.Id || f.ClientName == _selectedWebClient.Name).ToList();
+            if (clientFiles.Count == 0)
+            {
+                ShowToast("No files to accept");
+                return;
+            }
+
+            int count = 0;
+            foreach (var staged in clientFiles)
+            {
+                try
+                {
+                    if (File.Exists(staged.FilePath))
+                    {
+                        string destPath = GetUniqueFilePath(_saveDirectory, staged.FileName);
+                        File.Move(staged.FilePath, destPath);
+                        var state = new FileTransferState
+                        {
+                            FileName = Path.GetFileName(destPath),
+                            FilePath = destPath,
+                            TotalBytes = staged.Size,
+                            TransferredBytes = staged.Size,
+                            Status = TransferStatus.Done,
+                            Direction = TransferDirection.Received,
+                            PeerName = staged.ClientName,
+                            Timestamp = DateTime.UtcNow
+                        };
+                        await _dbHelper.SaveTransferAsync(state);
+                        ReceivedFiles.Insert(0, state);
+                        count++;
+                    }
+                }
+                catch { }
+                StagedWebFiles.Remove(staged);
+            }
+            UpdateWebSharedFilesList();
+            ShowToast($"Accepted and saved {count} file(s) from {_selectedWebClient.DisplayName}");
+            PlaySound("complete");
+        }
+
+        private void ToggleQrCode_Click(object? sender, RoutedEventArgs e)
+        {
+            if (WebPortalQrDrawer != null)
+            {
+                WebPortalQrDrawer.IsVisible = !WebPortalQrDrawer.IsVisible;
+            }
+        }
+
+        private void OpenWebPortalBrowser_Click(object? sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string url = HomeWebPortalText?.Text ?? "";
+                if (!string.IsNullOrEmpty(url))
+                {
+                    Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowToast($"Could not open browser: {ex.Message}");
+            }
+        }
+
+        private void DisconnectCurrentWebClient_Click(object? sender, RoutedEventArgs e)
+        {
+            if (_selectedWebClient != null && !string.IsNullOrEmpty(_selectedWebClient.Id))
+            {
+                _webDashboardService?.DisconnectWebClient(_selectedWebClient.Id);
+                Devices.Remove(_selectedWebClient);
+                UpdateWebSharedClientsList();
+                ShowToast($"Disconnected {_selectedWebClient.DisplayName}");
             }
         }
 
@@ -3302,57 +3591,30 @@ namespace WeShare.UI.Views
             catch { }
         }
 
-
-        // Dedicated Device Session Support
+        // Dedicated Device Session Support (Backwards Compatibility Wrappers)
         private DeviceModel? _sessionDevice;
 
         public void OpenDeviceSession(DeviceModel device)
         {
             _sessionDevice = device;
-            SelectSendTarget(device);
+            _selectedWebClient = device;
+            UpdateSelectedWebClientUI();
+            UpdateWebSharedFilesList();
         }
 
         private void UpdateDeviceSessionFiles()
         {
-            if (_sessionDevice == null) return;
-            var files = StagedWebFiles.Where(f => f.ClientId == _sessionDevice.Id || f.ClientName == _sessionDevice.Name).ToList();
-            if (SessionIncomingFilesList != null) SessionIncomingFilesList.ItemsSource = files;
-            if (SessionIncomingCountText != null) SessionIncomingCountText.Text = $"{files.Count} file{(files.Count == 1 ? "" : "s")}";
-            if (SessionIncomingEmptyLabel != null) SessionIncomingEmptyLabel.IsVisible = files.Count == 0;
+            UpdateWebSharedFilesList();
         }
 
-        private async void SessionSendFiles_Click(object? sender, RoutedEventArgs e)
+        private void SessionSendFiles_Click(object? sender, RoutedEventArgs e)
         {
-            if (_sessionDevice == null) return;
-            var files = await PickFilesAsync();
-            if (files.Count == 0) return;
-            foreach (var f in files)
-            {
-                if (!SendQueue.Any(q => q.Name == f.Name))
-                    SendQueue.Add(f);
-            }
-            UpdateQueueUI();
-            if (SessionSendStatusText != null)
-                SessionSendStatusText.Text = $"{files.Count} file(s) ready to send";
-
-            StartSendSession(_sessionDevice);
+            WebAddFiles_Click(sender, e);
         }
 
-        private async void SessionSendFolder_Click(object? sender, RoutedEventArgs e)
+        private void SessionSendFolder_Click(object? sender, RoutedEventArgs e)
         {
-            if (_sessionDevice == null) return;
-            var files = await PickFolderAsync();
-            if (files.Count == 0) return;
-            foreach (var f in files)
-            {
-                if (!SendQueue.Any(q => q.Path == f.Path))
-                    SendQueue.Add(f);
-            }
-            UpdateQueueUI();
-            if (SessionSendStatusText != null)
-                SessionSendStatusText.Text = $"{files.Count} file(s) from folder ready to send";
-
-            StartSendSession(_sessionDevice);
+            WebAddFolder_Click(sender, e);
         }
 
         private async Task<System.Collections.Generic.List<QueueItem>> PickFolderAsync()
