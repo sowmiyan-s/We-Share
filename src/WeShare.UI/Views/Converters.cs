@@ -78,6 +78,30 @@ namespace WeShare.UI.Views
         public object?[] ConvertBack(object? value, Type[] targetTypes, object? parameter, CultureInfo culture) => throw new NotImplementedException();
     }
 
+    public class DeviceTypeToGeometryConverter : IValueConverter
+    {
+        private static readonly Avalonia.Media.StreamGeometry DeviceGeom = Avalonia.Media.StreamGeometry.Parse("M4,6 H20 A2,2 0 0,1 22,8 V16 A2,2 0 0,1 20,18 H4 A2,2 0 0,1 2,16 V8 A2,2 0 0,1 4,6 Z M2,18 H22");
+        private static readonly Avalonia.Media.StreamGeometry MobileGeom = Avalonia.Media.StreamGeometry.Parse("M12,18 H12.01 M8,21 H16 A2,2 0 0,0 18,19 V5 A2,2 0 0,0 16,3 H8 A2,2 0 0,0 6,5 V19 A2,2 0 0,0 8,21 Z");
+        private static readonly Avalonia.Media.StreamGeometry GlobeGeom = Avalonia.Media.StreamGeometry.Parse("M12,2 A10,10 0 1,0 22,12 A10,10 0 0,0 12,2 Z M2,12 H22 M12,2 A15,15 0 0,1 16,12 A15,15 0 0,1 12,22 A15,15 0 0,1 8,12 A15,15 0 0,1 12,2 Z");
+
+        public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        {
+            if (value is string type && !string.IsNullOrEmpty(type))
+            {
+                string lower = type.ToLowerInvariant();
+                return lower switch
+                {
+                    "phone" or "android" or "ios" or "mobile" or "tablet" or "ipad" => MobileGeom,
+                    "web client" or "web" or "browser" => GlobeGeom,
+                    _ => DeviceGeom
+                };
+            }
+            return DeviceGeom;
+        }
+
+        public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotImplementedException();
+    }
+
     public class DeviceTypeToIconConverter : IValueConverter
     {
         public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
@@ -87,16 +111,15 @@ namespace WeShare.UI.Views
                 string lower = type.ToLowerInvariant();
                 return lower switch
                 {
-                    "phone" or "android" or "ios" or "mobile" => "📱",
-                    "mac" or "apple" or "macos" => "💻",
-                    "linux" => "🐧",
-                    "web client" or "web" or "browser" => "🌐",
-                    "tablet" or "ipad" => "📱",
-                    _ when lower.Contains("windows") || lower.Contains("pc") || lower.Contains("desktop") => "💻",
-                    _ => "💻"
+                    "phone" or "android" or "ios" or "mobile" => "Mobile",
+                    "mac" or "apple" or "macos" => "Mac",
+                    "linux" => "Linux",
+                    "web client" or "web" or "browser" => "Web",
+                    "tablet" or "ipad" => "Tablet",
+                    _ => "PC"
                 };
             }
-            return "💻";
+            return "PC";
         }
 
         public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

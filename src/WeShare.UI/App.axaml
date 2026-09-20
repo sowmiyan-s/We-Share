@@ -17,25 +17,25 @@
                     <Color x:Key="BorderSubtle">#222638</Color>
                     <Color x:Key="BorderHover">#363D57</Color>
 
-                    <!-- Brand Identity: Royal Violet & Refined Fuchsia -->
-                    <Color x:Key="BrandViolet">#7C3AED</Color>
-                    <Color x:Key="BrandVioletDim">#6D28D9</Color>
-                    <Color x:Key="BrandVioletHover">#8B5CF6</Color>
-                    <Color x:Key="BrandMagenta">#EC4899</Color>
-                    <Color x:Key="BrandMagentaHover">#F472B6</Color>
-                    <Color x:Key="BrandMagentaPressed">#DB2777</Color>
+                    <!-- Brand Identity: Modern Indigo & Slate Blue -->
+                    <Color x:Key="BrandViolet">#4F46E5</Color>
+                    <Color x:Key="BrandVioletDim">#4338CA</Color>
+                    <Color x:Key="BrandVioletHover">#6366F1</Color>
+                    <Color x:Key="BrandMagenta">#6366F1</Color>
+                    <Color x:Key="BrandMagentaHover">#818CF8</Color>
+                    <Color x:Key="BrandMagentaPressed">#4338CA</Color>
 
                     <!-- Enterprise Telemetry Colors -->
                     <Color x:Key="TelemetryCyan">#06B6D4</Color>
                     <Color x:Key="TelemetrySuccess">#10B981</Color>
 
                     <!-- Backward Compatibility Mapping -->
-                    <Color x:Key="SpotifyGreen">#7C3AED</Color>
-                    <Color x:Key="SpotifyGreenPressed">#6D28D9</Color>
-                    <Color x:Key="SpotifyGreenHover">#8B5CF6</Color>
-                    <Color x:Key="SpotifyGreenDim">#5B21B6</Color>
-                    <Color x:Key="ElectricIndigo">#7C3AED</Color>
-                    <Color x:Key="ElectricIndigoDim">#6D28D9</Color>
+                    <Color x:Key="SpotifyGreen">#4F46E5</Color>
+                    <Color x:Key="SpotifyGreenPressed">#4338CA</Color>
+                    <Color x:Key="SpotifyGreenHover">#6366F1</Color>
+                    <Color x:Key="SpotifyGreenDim">#3730A3</Color>
+                    <Color x:Key="ElectricIndigo">#4F46E5</Color>
+                    <Color x:Key="ElectricIndigoDim">#4338CA</Color>
                     <Color x:Key="TealAccent">#06B6D4</Color>
                     <Color x:Key="DeepSlate">#090A0F</Color>
                     <Color x:Key="GlassFill">#12141F</Color>
@@ -60,11 +60,11 @@
                     <SolidColorBrush x:Key="GlassBackgroundBrush"       Color="#12141F"/>
                     <SolidColorBrush x:Key="GlassBorderBrush"           Color="#222638"/>
                     <SolidColorBrush x:Key="SolidPanelBackgroundBrush"  Color="#090A0F"/>
-                    <SolidColorBrush x:Key="RadarRingBrush"             Color="#207C3AED"/>
-                    <SolidColorBrush x:Key="SpotifyGreenBrush"          Color="#7C3AED"/>
-                    <SolidColorBrush x:Key="SpotifyGreenPressedBrush"   Color="#6D28D9"/>
-                    <SolidColorBrush x:Key="BrandVioletBrush"           Color="#7C3AED"/>
-                    <SolidColorBrush x:Key="BrandMagentaBrush"          Color="#EC4899"/>
+                    <SolidColorBrush x:Key="RadarRingBrush"             Color="#204F46E5"/>
+                    <SolidColorBrush x:Key="SpotifyGreenBrush"          Color="#4F46E5"/>
+                    <SolidColorBrush x:Key="SpotifyGreenPressedBrush"   Color="#4338CA"/>
+                    <SolidColorBrush x:Key="BrandVioletBrush"           Color="#4F46E5"/>
+                    <SolidColorBrush x:Key="BrandMagentaBrush"          Color="#6366F1"/>
                     <SolidColorBrush x:Key="TelemetryCyanBrush"         Color="#06B6D4"/>
                     <SolidColorBrush x:Key="TextPrimaryBrush"           Color="#F8FAFC"/>
                     <SolidColorBrush x:Key="TextSecondaryBrush"         Color="#94A3B8"/>
@@ -81,21 +81,21 @@
                     <Color x:Key="BorderSubtle">#D1D6E6</Color>
                     <Color x:Key="BorderHover">#B2BACF</Color>
 
-                    <Color x:Key="BrandViolet">#7928CA</Color>
-                    <Color x:Key="BrandVioletDim">#6017A6</Color>
-                    <Color x:Key="BrandMagenta">#D900FF</Color>
-                    <Color x:Key="BrandMagentaHover">#E6007A</Color>
-                    <Color x:Key="BrandMagentaPressed">#B800E6</Color>
+                    <Color x:Key="BrandViolet">#4F46E5</Color>
+                    <Color x:Key="BrandVioletDim">#4338CA</Color>
+                    <Color x:Key="BrandMagenta">#6366F1</Color>
+                    <Color x:Key="BrandMagentaHover">#818CF8</Color>
+                    <Color x:Key="BrandMagentaPressed">#4338CA</Color>
 
                     <Color x:Key="TelemetryCyan">#0284C7</Color>
                     <Color x:Key="TelemetrySuccess">#16A34A</Color>
 
-                    <Color x:Key="SpotifyGreen">#D900FF</Color>
-                    <Color x:Key="SpotifyGreenPressed">#B800E6</Color>
-                    <Color x:Key="SpotifyGreenHover">#E6007A</Color>
-                    <Color x:Key="SpotifyGreenDim">#7928CA</Color>
-                    <Color x:Key="ElectricIndigo">#7928CA</Color>
-                    <Color x:Key="ElectricIndigoDim">#6017A6</Color>
+                    <Color x:Key="SpotifyGreen">#4F46E5</Color>
+                    <Color x:Key="SpotifyGreenPressed">#4338CA</Color>
+                    <Color x:Key="SpotifyGreenHover">#6366F1</Color>
+                    <Color x:Key="SpotifyGreenDim">#3730A3</Color>
+                    <Color x:Key="ElectricIndigo">#4F46E5</Color>
+                    <Color x:Key="ElectricIndigoDim">#4338CA</Color>
                     <Color x:Key="TealAccent">#0284C7</Color>
                     <Color x:Key="DeepSlate">#F5F6FA</Color>
                     <Color x:Key="GlassFill">#FFFFFF</Color>
@@ -118,11 +118,11 @@
                     <SolidColorBrush x:Key="GlassBackgroundBrush"       Color="#FFFFFF"/>
                     <SolidColorBrush x:Key="GlassBorderBrush"           Color="#D1D6E6"/>
                     <SolidColorBrush x:Key="SolidPanelBackgroundBrush"  Color="#FFFFFF"/>
-                    <SolidColorBrush x:Key="RadarRingBrush"             Color="#207928CA"/>
-                    <SolidColorBrush x:Key="SpotifyGreenBrush"          Color="#D900FF"/>
-                    <SolidColorBrush x:Key="SpotifyGreenPressedBrush"   Color="#B800E6"/>
-                    <SolidColorBrush x:Key="BrandVioletBrush"           Color="#7928CA"/>
-                    <SolidColorBrush x:Key="BrandMagentaBrush"          Color="#D900FF"/>
+                    <SolidColorBrush x:Key="RadarRingBrush"             Color="#204F46E5"/>
+                    <SolidColorBrush x:Key="SpotifyGreenBrush"          Color="#4F46E5"/>
+                    <SolidColorBrush x:Key="SpotifyGreenPressedBrush"   Color="#4338CA"/>
+                    <SolidColorBrush x:Key="BrandVioletBrush"           Color="#4F46E5"/>
+                    <SolidColorBrush x:Key="BrandMagentaBrush"          Color="#6366F1"/>
                     <SolidColorBrush x:Key="TelemetryCyanBrush"         Color="#0284C7"/>
                     <SolidColorBrush x:Key="TextPrimaryBrush"           Color="#0F111A"/>
                     <SolidColorBrush x:Key="TextSecondaryBrush"         Color="#4B5268"/>
@@ -135,18 +135,18 @@
             <SolidColorBrush x:Key="ElectricIndigoDimBrush" Color="{DynamicResource BrandVioletDim}"/>
             <SolidColorBrush x:Key="TealSuccessBrush" Color="{DynamicResource BrandMagenta}"/>
 
-            <!-- Brand Gradient Brush (Violet to Fuchsia) -->
+            <!-- Brand Gradient Brush (Modern Indigo Linear) -->
             <LinearGradientBrush x:Key="BrandGradientBrush" StartPoint="0%,0%" EndPoint="100%,100%">
-                <GradientStop Color="#7C3AED" Offset="0"/>
-                <GradientStop Color="#EC4899" Offset="1"/>
+                <GradientStop Color="#4F46E5" Offset="0"/>
+                <GradientStop Color="#6366F1" Offset="1"/>
             </LinearGradientBrush>
             <LinearGradientBrush x:Key="BrandGradientHBrush" StartPoint="0%,50%" EndPoint="100%,50%">
-                <GradientStop Color="#7C3AED" Offset="0"/>
-                <GradientStop Color="#EC4899" Offset="1"/>
+                <GradientStop Color="#4F46E5" Offset="0"/>
+                <GradientStop Color="#6366F1" Offset="1"/>
             </LinearGradientBrush>
             <LinearGradientBrush x:Key="CyanGradientHBrush" StartPoint="0%,50%" EndPoint="100%,50%">
-                <GradientStop Color="#06B6D4" Offset="0"/>
-                <GradientStop Color="#0284C7" Offset="1"/>
+                <GradientStop Color="#0284C7" Offset="0"/>
+                <GradientStop Color="#0EA5E9" Offset="1"/>
             </LinearGradientBrush>
 
             <!-- Pure Resolution-Independent SVG Vector Icons -->
@@ -205,7 +205,7 @@
             <Setter Property="Width" Value="8"/>
             <Setter Property="Height" Value="8"/>
             <Setter Property="CornerRadius" Value="4"/>
-            <Setter Property="Background" Value="#8B12FF"/>
+            <Setter Property="Background" Value="#4F46E5"/>
             <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
             <Style.Animations>
                 <Animation Duration="0:0:2" IterationCount="Infinite">
@@ -282,7 +282,7 @@
             </Setter>
         </Style>
         <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
-            <Setter Property="BorderBrush" Value="#8B12FF"/>
+            <Setter Property="BorderBrush" Value="#6366F1"/>
             <Setter Property="Background" Value="#1A1B2C"/>
         </Style>
         
@@ -292,11 +292,11 @@
             <Setter Property="OffContent" Value=""/>
         </Style>
 
-        <!-- Enterprise Gradient / Magenta ProgressBar Styling -->
+        <!-- Enterprise Indigo ProgressBar Styling -->
         <Style Selector="ProgressBar">
             <Setter Property="CornerRadius" Value="4"/>
             <Setter Property="Background" Value="#1F2033"/>
-            <Setter Property="Foreground" Value="#FF007F"/>
+            <Setter Property="Foreground" Value="#6366F1"/>
         </Style>
 
         <!-- Toast Notification Animation -->

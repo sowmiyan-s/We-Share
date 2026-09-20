@@ -135,6 +135,58 @@ namespace WeShare.Core.Data
             finally { _writeLock.Release(); }
         }
 
+        public async Task SaveBatchTransfersAsync(IEnumerable<FileTransferState> states)
+        {
+            var stateList = states?.ToList();
+            if (stateList == null || stateList.Count == 0) return;
+
+            await _writeLock.WaitAsync();
+            try
+            {
+                using var conn = await OpenConnectionAsync();
+                using var tx = (SqliteTransaction)await conn.BeginTransactionAsync();
+                using var cmd = conn.CreateCommand();
+                cmd.Transaction = tx;
+                cmd.CommandText = @"
+                    INSERT OR REPLACE INTO Transfers
+                    (FileId, SessionId, FileName, FilePath, PeerName,
+                     TotalBytes, TransferredBytes, Status, Direction, Timestamp)
+                    VALUES
+                    ($id, $sessionId, $name, $path, $peer,
+                     $total, $transferred, $status, $dir, $ts)
+                ";
+                var pId = cmd.Parameters.Add("$id", Microsoft.Data.Sqlite.SqliteType.Text);
+                var pSessionId = cmd.Parameters.Add("$sessionId", Microsoft.Data.Sqlite.SqliteType.Text);
+                var pName = cmd.Parameters.Add("$name", Microsoft.Data.Sqlite.SqliteType.Text);
+                var pPath = cmd.Parameters.Add("$path", Microsoft.Data.Sqlite.SqliteType.Text);
+                var pPeer = cmd.Parameters.Add("$peer", Microsoft.Data.Sqlite.SqliteType.Text);
+                var pTotal = cmd.Parameters.Add("$total", Microsoft.Data.Sqlite.SqliteType.Integer);
+                var pTransferred = cmd.Parameters.Add("$transferred", Microsoft.Data.Sqlite.SqliteType.Integer);
+                var pStatus = cmd.Parameters.Add("$status", Microsoft.Data.Sqlite.SqliteType.Integer);
+                var pDir = cmd.Parameters.Add("$dir", Microsoft.Data.Sqlite.SqliteType.Integer);
+                var pTs = cmd.Parameters.Add("$ts", Microsoft.Data.Sqlite.SqliteType.Text);
+
+                foreach (var state in stateList)
+                {
+                    pId.Value = state.FileId;
+                    pSessionId.Value = state.SessionId ?? string.Empty;
+                    pName.Value = state.FileName;
+                    pPath.Value = state.FilePath;
+                    pPeer.Value = state.PeerName ?? string.Empty;
+                    pTotal.Value = state.TotalBytes;
+                    pTransferred.Value = state.TransferredBytes;
+                    pStatus.Value = (int)state.Status;
+                    pDir.Value = (int)state.Direction;
+                    pTs.Value = state.Timestamp.ToString("o");
+                    await cmd.ExecuteNonQueryAsync();
+                }
+
+                await tx.CommitAsync();
+            }
+            catch (Exception ex) { Console.WriteLine($"[DB] Batch save failed: {ex.Message}"); }
+            finally { _writeLock.Release(); }
+        }
+
         // ── Read ───────────────────────────────────────────────────────────────
         public async Task<List<FileTransferState>> GetAllTransfersAsync()
         {

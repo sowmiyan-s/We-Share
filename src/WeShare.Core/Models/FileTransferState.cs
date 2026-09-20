@@ -183,12 +183,12 @@ namespace WeShare.Core.Models
         public string FileSizeDisplay => FormatBytes(TotalBytes);
         public string StatusIcon => Status switch
         {
-            TransferStatus.Done      => "✓",
-            TransferStatus.Failed    => "✕",
-            TransferStatus.Sending   => "↑",
-            TransferStatus.Receiving => "↓",
-            TransferStatus.Paused    => "⏸",
-            _                        => "…"
+            TransferStatus.Done      => "Done",
+            TransferStatus.Failed    => "Failed",
+            TransferStatus.Sending   => "Sending",
+            TransferStatus.Receiving => "Receiving",
+            TransferStatus.Paused    => "Paused",
+            _                        => "Waiting"
         };
 
         public static string FormatBytes(long bytes)

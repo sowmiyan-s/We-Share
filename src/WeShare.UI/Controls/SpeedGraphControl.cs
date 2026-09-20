@@ -135,8 +135,8 @@ namespace WeShare.UI.Controls
                 EndPoint = new RelativePoint(1, 0, RelativeUnit.Relative),
                 GradientStops =
                 {
-                    new GradientStop(Color.Parse("#7C3AED"), 0),
-                    new GradientStop(Color.Parse("#EC4899"), 1)
+                    new GradientStop(Color.Parse("#4F46E5"), 0),
+                    new GradientStop(Color.Parse("#6366F1"), 1)
                 }
             };
             var linePen = new Pen(lineBrush, 2.5);
@@ -153,8 +153,8 @@ namespace WeShare.UI.Controls
                 EndPoint = new RelativePoint(0, 1, RelativeUnit.Relative),
                 GradientStops =
                 {
-                    new GradientStop(Color.FromArgb(50, 236, 72, 153), 0),
-                    new GradientStop(Color.FromArgb(6, 124, 58, 237), 1)
+                    new GradientStop(Color.FromArgb(45, 99, 102, 241), 0),
+                    new GradientStop(Color.FromArgb(4, 79, 70, 229), 1)
                 }
             };
             var geometry = new StreamGeometry();

@@ -14,12 +14,13 @@
     <local:FileSizeConverter x:Key="FileSizeConverter"/>
     <local:RadarPositionConverter x:Key="RadarPos"/>
     <local:DeviceTypeToIconConverter x:Key="DeviceTypeToIconConverter"/>
+    <local:DeviceTypeToGeometryConverter x:Key="DeviceTypeToGeometryConverter"/>
     <local:TransferDirectionLabelConverter x:Key="TransferDirLabel"/>
 
     <!-- Design Tokens -->
-    <SolidColorBrush x:Key="BrandVioletBrush" Color="#7C3AED"/>
-    <SolidColorBrush x:Key="BrandVioletDimBrush" Color="#6D28D9"/>
-    <SolidColorBrush x:Key="BrandMagentaBrush" Color="#EC4899"/>
+    <SolidColorBrush x:Key="BrandVioletBrush" Color="#4F46E5"/>
+    <SolidColorBrush x:Key="BrandVioletDimBrush" Color="#4338CA"/>
+    <SolidColorBrush x:Key="BrandMagentaBrush" Color="#6366F1"/>
     <SolidColorBrush x:Key="TelemetryCyanBrush" Color="#06B6D4"/>
     <SolidColorBrush x:Key="BaseBackgroundBrush" Color="#090A0F"/>
     <SolidColorBrush x:Key="SurfaceBackgroundBrush" Color="#11131C"/>
@@ -408,8 +409,8 @@
           <!-- Bottom System Links & Workstation Identity -->
           <StackPanel Grid.Row="3" Spacing="4" Margin="0,10,0,0">
             
-            <!-- Workstation Identity (Moved to Sidebar to avoid disturbing window caption buttons) -->
-            <Border Background="#161824" BorderBrush="#222638" BorderThickness="1" CornerRadius="8" Padding="10,8" Margin="0,0,0,6">
+            <!-- Workstation Identity (Clickable to change device name anytime) -->
+            <Border Background="#161824" BorderBrush="#222638" BorderThickness="1" CornerRadius="8" Padding="10,8" Margin="0,0,0,6" PointerPressed="SidebarDeviceName_PointerPressed" Cursor="Hand" ToolTip.Tip="Click to change device name">
                <Grid ColumnDefinitions="Auto, *, Auto">
                   <Border Grid.Column="0" Width="28" Height="28" CornerRadius="14" Margin="0,0,10,0" VerticalAlignment="Center" ClipToBounds="True">
                      <Image Source="avares://WeShare.UI/Assets/profile.png" Width="28" Height="28" Stretch="Uniform"/>
@@ -488,14 +489,14 @@
               <Border Grid.Row="1" x:Name="TransferDeclinedCard" IsVisible="False" Background="#1E1218" BorderBrush="#EF4444" BorderThickness="1" CornerRadius="12" Padding="18,14" Margin="0,0,0,20" BoxShadow="0 8 24 0 #40000000">
                  <Grid ColumnDefinitions="Auto, *, Auto, Auto">
                     <Border Grid.Column="0" Width="38" Height="38" CornerRadius="19" Background="#34141C" Margin="0,0,14,0" VerticalAlignment="Center">
-                       <TextBlock Text="✕" FontSize="16" FontWeight="Bold" Foreground="#EF4444" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                       <Path Data="{StaticResource IconClose}" Fill="#EF4444" Width="14" Height="14" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
                        <TextBlock Text="TRANSFER REQUEST DECLINED" FontSize="11" FontWeight="Bold" Foreground="#EF4444" LetterSpacing="0.8"/>
                        <TextBlock x:Name="TransferDeclinedMessage" Text="The recipient declined the file transfer request." FontSize="13" Foreground="#F8FAFC" FontWeight="Medium" TextWrapping="Wrap"/>
                     </StackPanel>
-                    <Button Grid.Column="2" x:Name="RetryTransferBtn" Content="🔄 Retry Request" Click="RetryTransfer_Click" Classes="PrimaryBtn" Padding="14,8" FontSize="12" Margin="14,0,8,0" VerticalAlignment="Center"/>
-                    <Button Grid.Column="3" Content="✕ Dismiss" Click="DismissDeclined_Click" Classes="GhostBtn" Padding="12,8" FontSize="12" VerticalAlignment="Center"/>
+                    <Button Grid.Column="2" x:Name="RetryTransferBtn" Content="Retry Request" Click="RetryTransfer_Click" Classes="PrimaryBtn" Padding="14,8" FontSize="12" Margin="14,0,8,0" VerticalAlignment="Center"/>
+                    <Button Grid.Column="3" Content="Dismiss" Click="DismissDeclined_Click" Classes="GhostBtn" Padding="12,8" FontSize="12" VerticalAlignment="Center"/>
                  </Grid>
               </Border>
 
@@ -549,11 +550,11 @@
                      </Button>
 
                      <!-- Floating Active Transfer Telemetry Pill (Auto-Surfaces on Transfers) -->
-                     <Border x:Name="HomeActiveTransferPill" IsVisible="False" Background="#1B122E" BorderBrush="#D900FF" BorderThickness="1" CornerRadius="20" Padding="16,8" HorizontalAlignment="Center" BoxShadow="0 4 16 0 #20000000">
+                     <Border x:Name="HomeActiveTransferPill" IsVisible="False" Background="#151928" BorderBrush="#4F46E5" BorderThickness="1" CornerRadius="20" Padding="16,8" HorizontalAlignment="Center" BoxShadow="0 4 16 0 #20000000">
                         <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                            <Border Width="8" Height="8" CornerRadius="4" Background="#10B981"/>
                            <TextBlock x:Name="HomeTransferFileName" Text="Transferring files..." FontSize="12" FontWeight="SemiBold" Foreground="#FFFFFF"/>
-                           <TextBlock x:Name="HomeTransferSpeedText" Text="0.0 MB/s" FontSize="12" Foreground="#D900FF" FontWeight="Bold"/>
+                           <TextBlock x:Name="HomeTransferSpeedText" Text="0.0 MB/s" FontSize="12" Foreground="#818CF8" FontWeight="Bold"/>
                            <Button Content="View Transfers →" Click="NavTransfers_Click" Classes="GhostBtn" Padding="8,3" FontSize="10"/>
                         </StackPanel>
                      </Border>
@@ -575,27 +576,29 @@
                <Grid Grid.Row="0" RowDefinitions="Auto, Auto, 14, *">
                   
                   <!-- Target Recipient Banner (Shown when a peer is selected) -->
-                  <Border Grid.Row="0" x:Name="SendTargetCard" IsVisible="False" Background="#161824" BorderBrush="#7C3AED" BorderThickness="1.2" CornerRadius="10" Padding="14,10" Margin="0,0,0,14" BoxShadow="0 4 16 0 #307C3AED">
+                  <Border Grid.Row="0" x:Name="SendTargetCard" IsVisible="False" Background="#161824" BorderBrush="#4F46E5" BorderThickness="1.2" CornerRadius="10" Padding="14,10" Margin="0,0,0,14" BoxShadow="0 4 16 0 #304F46E5">
                      <Grid ColumnDefinitions="Auto, *, Auto, Auto">
-                        <Border Grid.Column="0" Width="36" Height="36" CornerRadius="18" Background="#261A3F" Margin="0,0,12,0" VerticalAlignment="Center">
-                           <TextBlock x:Name="SendTargetIcon" Text="💻" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Border Grid.Column="0" Width="36" Height="36" CornerRadius="18" Background="#1E2338" Margin="0,0,12,0" VerticalAlignment="Center">
+                           <Path x:Name="SendTargetIcon" Data="{StaticResource IconDevice}" Fill="#818CF8" Width="16" Height="16" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
                            <StackPanel Orientation="Horizontal" Spacing="6">
-                              <TextBlock Text="SENDING TO:" FontSize="10" FontWeight="Bold" Foreground="#7C3AED" LetterSpacing="0.8"/>
+                              <TextBlock Text="SENDING TO:" FontSize="10" FontWeight="Bold" Foreground="#818CF8" LetterSpacing="0.8"/>
                               <TextBlock x:Name="SendTargetName" Text="Selected Device" FontSize="13" FontWeight="Bold" Foreground="#FFFFFF"/>
                            </StackPanel>
                            <TextBlock x:Name="SendTargetDetails" Text="PC • 192.168.1.50" FontSize="11" Foreground="#94A3B8"/>
                         </StackPanel>
                         <Button Grid.Column="2" Content="Change Recipient" Click="NavSendDiscovery_Click" Classes="GhostBtn" Padding="10,6" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                        <Button Grid.Column="3" Content="✕" Click="ClearSendTarget_Click" Classes="GhostBtn" Padding="8,6" FontSize="11" VerticalAlignment="Center" ToolTip.Tip="Clear selected recipient"/>
+                        <Button Grid.Column="3" Click="ClearSendTarget_Click" Classes="GhostBtn" Padding="8,6" VerticalAlignment="Center" ToolTip.Tip="Clear selected recipient">
+                           <Path Data="{StaticResource IconClose}" Fill="#94A3B8" Width="10" Height="10" Stretch="Uniform"/>
+                        </Button>
                      </Grid>
                   </Border>
 
                   <Grid Grid.Row="1" ColumnDefinitions="*, Auto">
                      <TextBlock Text="Files to Send" FontSize="16" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
                      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                        <Button Classes="GhostBtn" Content="✕ Clear All" Click="ClearQueue_Click" x:Name="ClearQueueBtn" IsVisible="False"/>
+                        <Button Classes="GhostBtn" Content="Clear All" Click="ClearQueue_Click" x:Name="ClearQueueBtn" IsVisible="False"/>
                         <Button Classes="GhostBtn" Content="+ Add Folder" Click="BrowseFolder_Click"/>
                         <Button Classes="PrimaryBtn" Content="+ Add Files" Click="BrowseFiles_Click"/>
                      </StackPanel>
@@ -611,13 +614,15 @@
                                     <Border Classes="TrackRow" Padding="12,9" Margin="0,0,0,4">
                                        <Grid ColumnDefinitions="Auto, *, Auto, Auto">
                                           <Border Grid.Column="0" Width="36" Height="36" Background="#1E2235" CornerRadius="6" Margin="0,0,12,0" VerticalAlignment="Center">
-                                             <Path Data="{StaticResource IconFile}" Fill="#7C3AED" Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                             <Path Data="{StaticResource IconFile}" Fill="#818CF8" Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                           </Border>
                                           <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
                                              <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="SemiBold" Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
                                              <TextBlock Text="{Binding SizeDisplay}" FontSize="11" Foreground="#94A3B8"/>
                                           </StackPanel>
-                                          <Button Grid.Column="3" Content="✕" Click="RemoveFromQueue_Click" Background="Transparent" Foreground="#EF4444" FontSize="11" Padding="8"/>
+                                          <Button Grid.Column="3" Click="RemoveFromQueue_Click" Background="Transparent" Padding="8">
+                                             <Path Data="{StaticResource IconClose}" Fill="#EF4444" Width="10" Height="10" Stretch="Uniform"/>
+                                          </Button>
                                        </Grid>
                                     </Border>
                                  </DataTemplate>
@@ -722,7 +727,7 @@
                                     <Button Click="SendFile_Click" Background="Transparent" Padding="0" BorderThickness="0">
                                        <StackPanel Spacing="4" HorizontalAlignment="Center">
                                           <Border Classes="DeviceMarker" Width="48" Height="48" Background="#161824" BorderBrush="#7C3AED" BorderThickness="2" CornerRadius="24" BoxShadow="0 4 14 0 #40000000">
-                                             <TextBlock Text="{Binding Type, Converter={StaticResource DeviceTypeToIconConverter}}" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                             <Path Data="{Binding Type, Converter={StaticResource DeviceTypeToGeometryConverter}}" Fill="#A5B4FC" Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                           </Border>
                                           <TextBlock Text="{Binding DisplayName}" FontSize="11" FontWeight="SemiBold" Foreground="#FFFFFF" HorizontalAlignment="Center" MaxWidth="80" TextTrimming="CharacterEllipsis"/>
                                        </StackPanel>
@@ -754,7 +759,7 @@
                            <Button Click="SendFile_Click" Classes="GhostBtn" Padding="14,8" CornerRadius="8">
                               <StackPanel Orientation="Horizontal" Spacing="8">
                                  <Border Width="22" Height="22" CornerRadius="11" Background="#1E2235" VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding Type, Converter={StaticResource DeviceTypeToIconConverter}}" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <Path Data="{Binding Type, Converter={StaticResource DeviceTypeToGeometryConverter}}" Fill="#A5B4FC" Width="12" Height="12" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                  </Border>
                                  <TextBlock Text="{Binding DisplayName}" FontSize="12" FontWeight="SemiBold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
                                  <TextBlock Text="→ Send" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource BrandVioletBrush}" VerticalAlignment="Center"/>
@@ -842,52 +847,54 @@
                               </ItemsControl.ItemsPanel>
                               <ItemsControl.ItemTemplate>
                                  <DataTemplate x:DataType="models:DeviceModel">
-                                    <Button Click="ConnectToPeer_Click" Background="Transparent" Padding="0" BorderThickness="0" ToolTip.Tip="Tap to connect and receive files">
-                                       <StackPanel Spacing="4" HorizontalAlignment="Center">
-                                          <Border Classes="DeviceMarker" Width="48" Height="48" Background="#161824" BorderBrush="#06B6D4" BorderThickness="2" CornerRadius="24" BoxShadow="0 4 14 0 #40000000">
-                                             <TextBlock Text="{Binding Type, Converter={StaticResource DeviceTypeToIconConverter}}" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                          </Border>
-                                          <TextBlock Text="{Binding DisplayName}" FontSize="11" FontWeight="SemiBold" Foreground="#FFFFFF" HorizontalAlignment="Center" MaxWidth="80" TextTrimming="CharacterEllipsis"/>
-                                          <TextBlock Text="{Binding RoleDisplay}" FontSize="9" Foreground="#94A3B8" HorizontalAlignment="Center" MaxWidth="80" TextTrimming="CharacterEllipsis"/>
-                                       </StackPanel>
-                                    </Button>
-                                 </DataTemplate>
-                              </ItemsControl.ItemTemplate>
-                              <ItemsControl.Styles>
-                                 <Style Selector="ContentPresenter">
-                                    <Setter Property="Canvas.Left">
-                                       <MultiBinding Converter="{StaticResource RadarPos}"><Binding /><Binding Path="ActiveSenders" RelativeSource="{RelativeSource AncestorType=views:MainView}"/><Binding Source="X"/></MultiBinding>
-                                    </Setter>
-                                    <Setter Property="Canvas.Top">
-                                       <MultiBinding Converter="{StaticResource RadarPos}"><Binding /><Binding Path="ActiveSenders" RelativeSource="{RelativeSource AncestorType=views:MainView}"/><Binding Source="Y"/></MultiBinding>
-                                    </Setter>
-                                 </Style>
-                              </ItemsControl.Styles>
-                           </ItemsControl>
+                                     <Button Click="ConnectToPeer_Click" Background="Transparent" Padding="0" BorderThickness="0" ToolTip.Tip="Tap to connect and receive files">
+                                        <StackPanel Spacing="4" HorizontalAlignment="Center">
+                                           <Border Classes="DeviceMarker" Width="48" Height="48" Background="#161824" BorderBrush="#06B6D4" BorderThickness="2" CornerRadius="24" BoxShadow="0 4 14 0 #40000000">
+                                              <Path Data="{Binding Type, Converter={StaticResource DeviceTypeToGeometryConverter}}" Fill="#67E8F9" Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                           </Border>
+                                           <TextBlock Text="{Binding DisplayName}" FontSize="11" FontWeight="SemiBold" Foreground="#FFFFFF" HorizontalAlignment="Center" MaxWidth="80" TextTrimming="CharacterEllipsis"/>
+                                           <TextBlock Text="{Binding RoleDisplay}" FontSize="9" Foreground="#94A3B8" HorizontalAlignment="Center" MaxWidth="80" TextTrimming="CharacterEllipsis"/>
+                                        </StackPanel>
+                                     </Button>
+                                  </DataTemplate>
+                               </ItemsControl.ItemTemplate>
+                               <ItemsControl.Styles>
+                                  <Style Selector="ContentPresenter">
+                                     <Setter Property="Canvas.Left">
+                                        <MultiBinding Converter="{StaticResource RadarPos}"><Binding /><Binding Path="ActiveSenders" RelativeSource="{RelativeSource AncestorType=views:MainView}"/><Binding Source="X"/></MultiBinding>
+                                     </Setter>
+                                     <Setter Property="Canvas.Top">
+                                        <MultiBinding Converter="{StaticResource RadarPos}"><Binding /><Binding Path="ActiveSenders" RelativeSource="{RelativeSource AncestorType=views:MainView}"/><Binding Source="Y"/></MultiBinding>
+                                     </Setter>
+                                  </Style>
+                               </ItemsControl.Styles>
+                            </ItemsControl>
                         </Panel>
                      </Grid>
                   </Border>
 
-                  <!-- Discovered Senders Roster & Device Identity Footer -->
-                  <Grid Grid.Row="2" ColumnDefinitions="*, Auto" Margin="0,16,0,0">
-                     <!-- Discovered devices quick connect list -->
-                     <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
-                        <ItemsControl ItemsSource="{Binding ActiveSenders, RelativeSource={RelativeSource AncestorType=views:MainView}}">
-                           <ItemsControl.ItemsPanel>
-                              <ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="10"/></ItemsPanelTemplate>
-                           </ItemsControl.ItemsPanel>
-                           <ItemsControl.ItemTemplate>
-                              <DataTemplate x:DataType="models:DeviceModel">
-                                 <Button Click="ConnectToPeer_Click" Classes="GhostBtn" Padding="14,8" CornerRadius="8">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                       <TextBlock Text="{Binding Type, Converter={StaticResource DeviceTypeToIconConverter}}" FontSize="14" VerticalAlignment="Center"/>
-                                       <StackPanel Spacing="1" VerticalAlignment="Center">
-                                          <TextBlock Text="{Binding DisplayName}" FontSize="12" FontWeight="SemiBold" Foreground="#FFFFFF"/>
-                                          <TextBlock Text="Tap to Connect" FontSize="10" Foreground="#06B6D4"/>
-                                       </StackPanel>
-                                    </StackPanel>
-                                 </Button>
-                              </DataTemplate>
+                   <!-- Discovered Senders Roster & Device Identity Footer -->
+                   <Grid Grid.Row="2" ColumnDefinitions="*, Auto" Margin="0,16,0,0">
+                      <!-- Discovered devices quick connect list -->
+                      <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                         <ItemsControl ItemsSource="{Binding ActiveSenders, RelativeSource={RelativeSource AncestorType=views:MainView}}">
+                            <ItemsControl.ItemsPanel>
+                               <ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="10"/></ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                               <DataTemplate x:DataType="models:DeviceModel">
+                                  <Button Click="ConnectToPeer_Click" Classes="GhostBtn" Padding="14,8" CornerRadius="8">
+                                     <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Border Width="24" Height="24" CornerRadius="12" Background="#161928" VerticalAlignment="Center">
+                                           <Path Data="{Binding Type, Converter={StaticResource DeviceTypeToGeometryConverter}}" Fill="#67E8F9" Width="13" Height="13" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <StackPanel Spacing="1" VerticalAlignment="Center">
+                                           <TextBlock Text="{Binding DisplayName}" FontSize="12" FontWeight="SemiBold" Foreground="#FFFFFF"/>
+                                           <TextBlock Text="Tap to Connect" FontSize="10" Foreground="#06B6D4"/>
+                                        </StackPanel>
+                                     </StackPanel>
+                                  </Button>
+                               </DataTemplate>
                            </ItemsControl.ItemTemplate>
                         </ItemsControl>
                      </ScrollViewer>
@@ -998,11 +1005,11 @@
                                  <Border Classes="TrackRow" Padding="14,12" Margin="0,0,0,6" Background="#161824" CornerRadius="8">
                                     <Grid ColumnDefinitions="Auto, *, Auto, Auto">
                                        <Border Grid.Column="0" Width="36" Height="36" Background="#1E2235" CornerRadius="6" Margin="0,0,12,0" VerticalAlignment="Center">
-                                          <Path Data="{StaticResource IconReceive}" Fill="#EC4899" Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                          <Path Data="{StaticResource IconReceive}" Fill="#6366F1" Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                        </Border>
                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
                                           <TextBlock Text="{Binding FileName}" FontSize="13" FontWeight="SemiBold" Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
-                                          <ProgressBar Height="4" Value="{Binding ProgressPercentage}" Foreground="#EC4899" Background="#262A3D" CornerRadius="2"/>
+                                          <ProgressBar Height="4" Value="{Binding ProgressPercentage}" Foreground="#6366F1" Background="#262A3D" CornerRadius="2"/>
                                           <TextBlock Text="{Binding PeerName, StringFormat='From: {0}'}" FontSize="11" Foreground="#64748B"/>
                                        </StackPanel>
                                        <TextBlock Grid.Column="2" Text="{Binding SpeedMbPerSec, StringFormat='\{0:F1\} MB/s'}" FontSize="12" Foreground="#06B6D4" VerticalAlignment="Center" Margin="14,0"/>
@@ -1046,7 +1053,7 @@
                                        <Border Classes="TrackRow" Padding="12,10" Margin="0,0,0,4">
                                           <Grid ColumnDefinitions="Auto, *, Auto, Auto">
                                              <Border Grid.Column="0" Width="34" Height="34" Background="#1E2235" CornerRadius="6" Margin="0,0,12,0" VerticalAlignment="Center">
-                                                <Path Data="{StaticResource IconFile}" Fill="#7C3AED" Width="15" Height="15" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                                <Path Data="{StaticResource IconFile}" Fill="#818CF8" Width="15" Height="15" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                              </Border>
                                              <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
                                                 <TextBlock Text="{Binding FileName}" FontSize="13" FontWeight="SemiBold" Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
@@ -1065,7 +1072,9 @@
                                                 <Button Content="Open" Click="OpenFileInList_Click" Tag="{Binding}" Classes="PrimaryBtn" Padding="12,5" FontSize="10"/>
                                                 <Button Content="Show in Folder" Click="OpenFolderInList_Click" Tag="{Binding}" Classes="GhostBtn" Padding="10,5" FontSize="10"/>
                                                 <Button Content="Resend" Click="RequestResendForFile_Click" Tag="{Binding}" Classes="GhostBtn" Padding="10,5" FontSize="10" TextElement.Foreground="#06B6D4"/>
-                                                <Button Content="✕" Click="DeleteFileInList_Click" Tag="{Binding}" Background="Transparent" Foreground="#EF4444" FontSize="12" Padding="6"/>
+                                                <Button Click="DeleteFileInList_Click" Tag="{Binding}" Background="Transparent" Padding="6">
+                                                   <Path Data="{StaticResource IconClose}" Fill="#EF4444" Width="10" Height="10" Stretch="Uniform"/>
+                                                </Button>
                                              </StackPanel>
 
                                              <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center" IsVisible="{Binding !IsCompleted}">
@@ -1113,13 +1122,13 @@
                            </Border>
                            <Button x:Name="CopyWebLinkBtn" Content="Copy Link" Click="CopyWebLink_Click" Classes="GhostBtn" Padding="12,8" FontSize="11"/>
                            <Button Content="Open in Browser" Click="OpenWebPortalBrowser_Click" Classes="GhostBtn" Padding="12,8" FontSize="11"/>
-                           <Button x:Name="ToggleQrBtn" Content="📷 QR Code" Click="ToggleQrCode_Click" Classes="GhostBtn" Padding="12,8" FontSize="11"/>
+                           <Button x:Name="ToggleQrBtn" Content="QR Code" Click="ToggleQrCode_Click" Classes="GhostBtn" Padding="12,8" FontSize="11"/>
                         </StackPanel>
                      </StackPanel>
 
                      <!-- Right: Smart Hotspot Controls with Clear Explanation -->
                      <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center" HorizontalAlignment="Right">
-                        <Button x:Name="StartHotspotBtn" Content="⚡ Direct Hotspot" Click="ManualStartHotspot_Click" Classes="PrimaryBtn" Padding="16,9" FontSize="12" ToolTip.Tip="Creates a private local Wi-Fi network directly from this PC when no router exists or devices cannot see each other."/>
+                        <Button x:Name="StartHotspotBtn" Content="Direct Hotspot" Click="ManualStartHotspot_Click" Classes="PrimaryBtn" Padding="16,9" FontSize="12" ToolTip.Tip="Creates a private local Wi-Fi network directly from this PC when no router exists or devices cannot see each other."/>
                         <TextBlock Text="Use if devices are on different networks" FontSize="10" Foreground="#64748B" HorizontalAlignment="Right"/>
                      </StackPanel>
                   </Grid>
@@ -1143,7 +1152,7 @@
                      <Grid RowDefinitions="Auto, Auto">
                         <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto" Margin="0,0,0,10">
                            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                              <Border Width="7" Height="7" CornerRadius="3.5" Background="#7C3AED"/>
+                              <Border Width="7" Height="7" CornerRadius="3.5" Background="#4F46E5"/>
                               <TextBlock Text="ACTIVE CONNECTED DEVICES" FontSize="12" FontWeight="Bold" Foreground="#FFFFFF" LetterSpacing="0.6"/>
                            </StackPanel>
                            <TextBlock Grid.Column="2" x:Name="WebClientsRailCountText" Text="0 devices connected" FontSize="11" Foreground="#94A3B8" VerticalAlignment="Center"/>
@@ -1160,8 +1169,8 @@
                               <DataTemplate x:DataType="models:DeviceModel">
                                  <Border Background="#161824" BorderBrush="#262D44" BorderThickness="1.5" CornerRadius="10" Padding="14,10" MinWidth="170">
                                     <Grid ColumnDefinitions="Auto, *">
-                                       <Border Grid.Column="0" Width="32" Height="32" CornerRadius="16" Background="#207C3AED" Margin="0,0,10,0" VerticalAlignment="Center">
-                                          <TextBlock Text="{Binding Type, Converter={StaticResource DeviceTypeToIconConverter}}" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                       <Border Grid.Column="0" Width="32" Height="32" CornerRadius="16" Background="#204F46E5" Margin="0,0,10,0" VerticalAlignment="Center">
+                                          <Path Data="{Binding Type, Converter={StaticResource DeviceTypeToGeometryConverter}}" Fill="#A5B4FC" Width="16" Height="16" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                        </Border>
                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
                                           <TextBlock Text="{Binding Name}" FontSize="12" FontWeight="Bold" Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
@@ -1187,12 +1196,12 @@
                            
                            <!-- Selected Device Context Header -->
                            <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto">
-                              <Border Grid.Column="0" Width="40" Height="40" CornerRadius="20" Background="#261A3F" Margin="0,0,12,0" VerticalAlignment="Center">
-                                 <TextBlock x:Name="SelectedWebClientIcon" Text="📱" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                              <Border Grid.Column="0" Width="40" Height="40" CornerRadius="20" Background="#1E2338" Margin="0,0,12,0" VerticalAlignment="Center">
+                                 <Path x:Name="SelectedWebClientIcon" Data="{StaticResource IconMobile}" Fill="#818CF8" Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                               </Border>
                               <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
                                  <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock Text="DEVICE WORKSPACE:" FontSize="10" FontWeight="Bold" Foreground="#7C3AED" LetterSpacing="0.8"/>
+                                    <TextBlock Text="DEVICE WORKSPACE:" FontSize="10" FontWeight="Bold" Foreground="#818CF8" LetterSpacing="0.8"/>
                                     <TextBlock x:Name="SelectedWebClientName" Text="Selected Device" FontSize="14" FontWeight="Bold" Foreground="#FFFFFF"/>
                                  </StackPanel>
                                  <TextBlock x:Name="SelectedWebClientDetails" Text="IP: 192.168.1.88 • Connected via Web Portal" FontSize="11" Foreground="#94A3B8"/>
@@ -1229,12 +1238,14 @@
                                                    <DataTemplate x:DataType="views:QueueItem">
                                                       <Border Classes="TrackRow" Padding="10,7" Margin="0,2" Background="#1B1F30" CornerRadius="6">
                                                          <Grid ColumnDefinitions="Auto, *, Auto">
-                                                            <Path Grid.Column="0" Data="{StaticResource IconFile}" Fill="#7C3AED" Width="14" Height="14" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                            <Path Grid.Column="0" Data="{StaticResource IconFile}" Fill="#818CF8" Width="14" Height="14" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,8,0"/>
                                                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                                                <TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold" Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
                                                                <TextBlock Text="{Binding SizeDisplay}" FontSize="10" Foreground="#94A3B8"/>
                                                             </StackPanel>
-                                                            <Button Grid.Column="2" Content="✕" Click="WebRemoveStagedItem_Click" Background="Transparent" Foreground="#EF4444" FontSize="10" Padding="6"/>
+                                                            <Button Grid.Column="2" Click="WebRemoveStagedItem_Click" Background="Transparent" Padding="6">
+                                                               <Path Data="{StaticResource IconClose}" Fill="#EF4444" Width="9" Height="9" Stretch="Uniform"/>
+                                                            </Button>
                                                          </Grid>
                                                       </Border>
                                                    </DataTemplate>
@@ -1250,7 +1261,7 @@
                                     </Border>
 
                                     <!-- Send Action Button -->
-                                    <Button Grid.Row="6" x:Name="WebSendToDeviceBtn" Content="🚀 Send Files to Device" Click="WebSendToDevice_Click" Classes="PrimaryBtn" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="14,10" FontSize="13" FontWeight="Bold"/>
+                                    <Button Grid.Row="6" x:Name="WebSendToDeviceBtn" Content="Send Files to Device" Click="WebSendToDevice_Click" Classes="PrimaryBtn" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="14,10" FontSize="13" FontWeight="Bold"/>
                                  </Grid>
                               </Border>
 
@@ -1475,8 +1486,8 @@
                               <Border Grid.Row="0" Grid.Column="0" Background="#80121524" BorderBrush="#262D42" BorderThickness="1" CornerRadius="10" Padding="16">
                                  <StackPanel Spacing="6">
                                     <StackPanel Orientation="Horizontal" Spacing="8">
-                                       <Border Width="24" Height="24" CornerRadius="6" Background="#207C3AED">
-                                          <TextBlock Text="⚡" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                       <Border Width="24" Height="24" CornerRadius="6" Background="#204F46E5">
+                                          <Path Data="{StaticResource IconTransfers}" Fill="#818CF8" Width="12" Height="12" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                        </Border>
                                        <TextBlock Text="Direct Socket Engine" FontSize="13" FontWeight="SemiBold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
                                     </StackPanel>
@@ -1489,7 +1500,7 @@
                                  <StackPanel Spacing="6">
                                     <StackPanel Orientation="Horizontal" Spacing="8">
                                        <Border Width="24" Height="24" CornerRadius="6" Background="#2006B6D4">
-                                          <TextBlock Text="🛰️" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                          <Path Data="{StaticResource IconWifi}" Fill="#06B6D4" Width="12" Height="12" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                        </Border>
                                        <TextBlock Text="Autonomous Discovery" FontSize="13" FontWeight="SemiBold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
                                     </StackPanel>
@@ -1502,7 +1513,7 @@
                                  <StackPanel Spacing="6">
                                     <StackPanel Orientation="Horizontal" Spacing="8">
                                        <Border Width="24" Height="24" CornerRadius="6" Background="#2010B981">
-                                          <TextBlock Text="🌐" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                          <Path Data="{StaticResource IconGlobe}" Fill="#10B981" Width="12" Height="12" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                        </Border>
                                        <TextBlock Text="Embedded Web Daemon" FontSize="13" FontWeight="SemiBold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
                                     </StackPanel>
@@ -1514,8 +1525,8 @@
                               <Border Grid.Row="2" Grid.Column="2" Background="#80121524" BorderBrush="#262D42" BorderThickness="1" CornerRadius="10" Padding="16">
                                  <StackPanel Spacing="6">
                                     <StackPanel Orientation="Horizontal" Spacing="8">
-                                       <Border Width="24" Height="24" CornerRadius="6" Background="#20EC4899">
-                                          <TextBlock Text="🔒" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                       <Border Width="24" Height="24" CornerRadius="6" Background="#206366F1">
+                                          <Path Data="{StaticResource IconSettings}" Fill="#818CF8" Width="12" Height="12" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                        </Border>
                                        <TextBlock Text="Air-Gapped Sovereignty" FontSize="13" FontWeight="SemiBold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
                                     </StackPanel>
@@ -1617,14 +1628,14 @@
 
     <!-- Mutual Connection Request Modal -->
     <Grid x:Name="ConnectionRequestPanel" IsVisible="False" Background="#A0000000" ZIndex="5200">
-       <Border Background="#11131C" BorderBrush="#7C3AED" BorderThickness="1.5" CornerRadius="16" Padding="32" Width="400" HorizontalAlignment="Center" VerticalAlignment="Center" BoxShadow="0 20 60 0 #A0000000">
+       <Border Background="#11131C" BorderBrush="#23283E" BorderThickness="1" CornerRadius="16" Padding="32" Width="400" HorizontalAlignment="Center" VerticalAlignment="Center" BoxShadow="0 20 60 0 #A0000000">
           <StackPanel Spacing="18">
              <Border Width="60" Height="60" CornerRadius="30" Background="{StaticResource BrandGradientHBrush}" HorizontalAlignment="Center">
                 <Path Data="{StaticResource IconSend}" Fill="#FFFFFF" Width="26" Height="26" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
              </Border>
              
              <StackPanel Spacing="6" HorizontalAlignment="Center">
-                <TextBlock Text="INCOMING CONNECTION REQUEST" FontSize="11" FontWeight="Bold" Foreground="#7C3AED" LetterSpacing="1" HorizontalAlignment="Center"/>
+                <TextBlock Text="INCOMING CONNECTION REQUEST" FontSize="11" FontWeight="Bold" Foreground="#818CF8" LetterSpacing="1" HorizontalAlignment="Center"/>
                 <TextBlock x:Name="ConnectionRequestPeerName" Text="Device Name" FontSize="18" FontWeight="Bold" Foreground="#FFFFFF" HorizontalAlignment="Center" TextAlignment="Center"/>
                 <TextBlock x:Name="ConnectionRequestDetails" Text="PC • 192.168.1.100" FontSize="12" Foreground="#94A3B8" HorizontalAlignment="Center"/>
                 <TextBlock x:Name="ConnectionRequestRoleDesc" Text="wants to connect with you to share files." FontSize="12" Foreground="#64748B" HorizontalAlignment="Center"/>
@@ -1640,14 +1651,14 @@
 
     <!-- Incoming File Approval Modal -->
     <Grid x:Name="AcceptRejectPanel" IsVisible="False" Background="#A0000000" ZIndex="5000">
-       <Border Background="#11131C" BorderBrush="#222638" BorderThickness="1" CornerRadius="14" Padding="32" Width="380" HorizontalAlignment="Center" VerticalAlignment="Center" BoxShadow="0 16 48 0 #80000000">
+       <Border Background="#11131C" BorderBrush="#23283E" BorderThickness="1" CornerRadius="14" Padding="32" Width="380" HorizontalAlignment="Center" VerticalAlignment="Center" BoxShadow="0 16 48 0 #80000000">
           <StackPanel Spacing="18">
              <Border Width="52" Height="52" CornerRadius="26" Background="{StaticResource BrandGradientHBrush}" HorizontalAlignment="Center">
                 <Path Data="{StaticResource IconReceive}" Fill="#FFFFFF" Width="22" Height="22" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
              </Border>
              
              <StackPanel Spacing="4" HorizontalAlignment="Center">
-                <TextBlock Text="INCOMING FILE REQUEST" FontSize="10" FontWeight="Bold" Foreground="#7C3AED" LetterSpacing="1" HorizontalAlignment="Center"/>
+                <TextBlock Text="INCOMING FILE REQUEST" FontSize="10" FontWeight="Bold" Foreground="#818CF8" LetterSpacing="1" HorizontalAlignment="Center"/>
                 <TextBlock x:Name="IncomingFileName" Text="file.zip" FontSize="16" FontWeight="Bold" Foreground="#FFFFFF" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
                 <TextBlock x:Name="IncomingPeerName" Text="From: Nearby PC" FontSize="12" Foreground="#94A3B8" HorizontalAlignment="Center"/>
                 <TextBlock x:Name="IncomingFileSize" Text="0 MB" FontSize="11" Foreground="#64748B" HorizontalAlignment="Center"/>
@@ -1663,7 +1674,7 @@
 
     <!-- 0.1 Batch Manifest Checklist Modal -->
     <Grid x:Name="BatchManifestModal" IsVisible="False" Background="#B0000000" ZIndex="5300">
-       <Border Background="#11131C" BorderBrush="#7C3AED" BorderThickness="1.5" CornerRadius="16" Padding="28" Width="480" MaxHeight="600" HorizontalAlignment="Center" VerticalAlignment="Center" BoxShadow="0 20 60 0 #A0000000">
+       <Border Background="#11131C" BorderBrush="#23283E" BorderThickness="1" CornerRadius="16" Padding="28" Width="480" MaxHeight="600" HorizontalAlignment="Center" VerticalAlignment="Center" BoxShadow="0 20 60 0 #A0000000">
           <Grid RowDefinitions="Auto, 14, Auto, 10, *, 18, Auto">
              <!-- Header with Icon -->
              <Grid Grid.Row="0" ColumnDefinitions="Auto, *">
@@ -1683,7 +1694,7 @@
                 <Border CornerRadius="8" Padding="10,6" Grid.ColumnSpan="3" Background="#161824">
                    <Grid ColumnDefinitions="Auto, *, Auto">
                       <CheckBox x:Name="BatchSelectAllCheckBox" Content="Select All Files" IsChecked="True" Click="BatchSelectAll_Click" Foreground="#F8FAFC" FontSize="12" FontWeight="SemiBold"/>
-                      <TextBlock Grid.Column="2" x:Name="BatchManifestSelectedSummary" Text="0 files selected (0 MB)" FontSize="11" Foreground="#7C3AED" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                      <TextBlock Grid.Column="2" x:Name="BatchManifestSelectedSummary" Text="0 files selected (0 MB)" FontSize="11" Foreground="#818CF8" FontWeight="SemiBold" VerticalAlignment="Center"/>
                    </Grid>
                 </Border>
              </Grid>
@@ -1721,14 +1732,14 @@
 
     <!-- 0.2 Celebratory Transfer Success Modal -->
     <Grid x:Name="TransferSuccessModal" IsVisible="False" Background="#B0000000" ZIndex="5400">
-       <Border Background="#11131C" BorderBrush="#10B981" BorderThickness="1.5" CornerRadius="16" Padding="32" Width="400" HorizontalAlignment="Center" VerticalAlignment="Center" BoxShadow="0 20 60 0 #A0000000">
+       <Border Background="#11131C" BorderBrush="#23283E" BorderThickness="1" CornerRadius="16" Padding="32" Width="400" HorizontalAlignment="Center" VerticalAlignment="Center" BoxShadow="0 20 60 0 #A0000000">
           <StackPanel Spacing="16">
              <Border Width="64" Height="64" CornerRadius="32" Background="#1810B981" BorderBrush="#4010B981" BorderThickness="1.5" HorizontalAlignment="Center">
-                <TextBlock Text="✓" FontSize="32" FontWeight="Bold" Foreground="#10B981" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <Path Data="{StaticResource IconCheck}" Fill="#10B981" Width="26" Height="26" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
              </Border>
 
              <StackPanel Spacing="4" HorizontalAlignment="Center">
-                <TextBlock x:Name="TransferSuccessTitle" Text="Transfer Completed! 🎉" FontSize="18" FontWeight="Bold" Foreground="#10B981" HorizontalAlignment="Center"/>
+                <TextBlock x:Name="TransferSuccessTitle" Text="Transfer Completed" FontSize="18" FontWeight="Bold" Foreground="#10B981" HorizontalAlignment="Center"/>
                 <TextBlock x:Name="TransferSuccessSubtitle" Text="All files were delivered successfully." FontSize="12" Foreground="#94A3B8" HorizontalAlignment="Center"/>
              </StackPanel>
 
@@ -1742,7 +1753,7 @@
                    <TextBlock Grid.Row="1" Grid.Column="1" x:Name="TransferSuccessTotalSize" Text="0 MB" FontSize="12" FontWeight="Bold" Foreground="#FFFFFF" Margin="0,3"/>
 
                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Remote Device:" FontSize="12" Foreground="#64748B" Margin="0,3"/>
-                   <TextBlock Grid.Row="2" Grid.Column="1" x:Name="TransferSuccessPeerName" Text="Peer" FontSize="12" FontWeight="Bold" Foreground="#7C3AED" Margin="0,3"/>
+                   <TextBlock Grid.Row="2" Grid.Column="1" x:Name="TransferSuccessPeerName" Text="Peer" FontSize="12" FontWeight="Bold" Foreground="#818CF8" Margin="0,3"/>
                 </Grid>
              </Border>
 
@@ -1756,10 +1767,10 @@
 
     <!-- 0.3 Peer Resend Request Modal -->
     <Grid x:Name="ResendRequestModal" IsVisible="False" Background="#B0000000" ZIndex="5450">
-       <Border Background="#11131C" BorderBrush="#06B6D4" BorderThickness="1.5" CornerRadius="16" Padding="28" Width="380" HorizontalAlignment="Center" VerticalAlignment="Center" BoxShadow="0 20 60 0 #A0000000">
+       <Border Background="#11131C" BorderBrush="#23283E" BorderThickness="1" CornerRadius="16" Padding="28" Width="380" HorizontalAlignment="Center" VerticalAlignment="Center" BoxShadow="0 20 60 0 #A0000000">
           <StackPanel Spacing="16">
              <Border Width="56" Height="56" CornerRadius="28" Background="#1806B6D4" BorderBrush="#4006B6D4" BorderThickness="1.5" HorizontalAlignment="Center">
-                <TextBlock Text="↻" FontSize="26" FontWeight="Bold" Foreground="#06B6D4" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <Path Data="{StaticResource IconHistory}" Fill="#06B6D4" Width="22" Height="22" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
              </Border>
 
              <StackPanel Spacing="6" HorizontalAlignment="Center">
@@ -1795,13 +1806,15 @@
                    <TextBlock Text="SEND QUICK NOTE / TEXT" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource BrandVioletBrush}" LetterSpacing="1"/>
                    <TextBlock Text="Send links, snippets, or passwords to nearby devices" FontSize="12" Foreground="#94A3B8"/>
                 </StackPanel>
-                <Button Grid.Column="1" Content="✕" Click="CloseQuickText_Click" Background="Transparent" Foreground="#64748B" FontSize="14" Padding="6,2"/>
+                <Button Grid.Column="1" Click="CloseQuickText_Click" Background="Transparent" Padding="6,2">
+                   <Path Data="{StaticResource IconClose}" Fill="#64748B" Width="12" Height="12" Stretch="Uniform"/>
+                </Button>
              </Grid>
 
              <TextBox x:Name="QuickTextInput" AcceptsReturn="True" TextWrapping="Wrap" Height="130" Watermark="Type or paste any text, URL, code snippet, or note here..."/>
 
              <Grid ColumnDefinitions="Auto, *, Auto">
-                <Button Grid.Column="0" Content="📋 Paste Clipboard" Click="PasteClipboardToText_Click" Classes="GhostBtn" Padding="12,7" FontSize="11"/>
+                <Button Grid.Column="0" Content="Paste Clipboard" Click="PasteClipboardToText_Click" Classes="GhostBtn" Padding="12,7" FontSize="11"/>
                 <Button Grid.Column="2" Content="Send Note →" Click="SendQuickText_Click" Classes="PrimaryBtn" Padding="18,7" FontSize="12" FontWeight="SemiBold"/>
              </Grid>
           </StackPanel>
@@ -1817,7 +1830,9 @@
                    <TextBlock Text="QUICK NOTE RECEIVED" FontSize="11" FontWeight="Bold" Foreground="#10B981" LetterSpacing="1"/>
                    <TextBlock x:Name="IncomingNoteSenderText" Text="From: Nearby Device" FontSize="12" Foreground="#94A3B8"/>
                 </StackPanel>
-                <Button Grid.Column="1" Content="✕" Click="CloseIncomingNote_Click" Background="Transparent" Foreground="#64748B" FontSize="14" Padding="6,2"/>
+                <Button Grid.Column="1" Click="CloseIncomingNote_Click" Background="Transparent" Padding="6,2">
+                   <Path Data="{StaticResource IconClose}" Fill="#64748B" Width="12" Height="12" Stretch="Uniform"/>
+                </Button>
              </Grid>
 
              <Border Background="#161824" BorderBrush="#222638" BorderThickness="1" CornerRadius="8" Padding="12" MaxHeight="200">
@@ -1827,8 +1842,8 @@
              </Border>
 
              <Grid ColumnDefinitions="*, 10, Auto">
-                <Button Grid.Column="0" Content="📋 Copy to Clipboard" Click="CopyIncomingNote_Click" Classes="PrimaryBtn" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="14,8" FontSize="12" FontWeight="SemiBold"/>
-                <Button Grid.Column="2" x:Name="IncomingNoteOpenLinkBtn" Content="🌐 Open Link" Click="OpenIncomingNoteLink_Click" Classes="GhostBtn" Padding="14,8" FontSize="12" IsVisible="False"/>
+                <Button Grid.Column="0" Content="Copy to Clipboard" Click="CopyIncomingNote_Click" Classes="PrimaryBtn" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="14,8" FontSize="12" FontWeight="SemiBold"/>
+                <Button Grid.Column="2" x:Name="IncomingNoteOpenLinkBtn" Content="Open Link" Click="OpenIncomingNoteLink_Click" Classes="GhostBtn" Padding="14,8" FontSize="12" IsVisible="False"/>
              </Grid>
           </StackPanel>
        </Border>
@@ -1843,7 +1858,9 @@
                    <TextBlock x:Name="PreviewFileName" Text="image.png" FontSize="14" FontWeight="Bold" Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
                    <TextBlock x:Name="PreviewFileSpecs" Text="1920x1080 · 2.4 MB" FontSize="11" Foreground="#94A3B8"/>
                 </StackPanel>
-                <Button Grid.Column="1" Content="✕" Click="ClosePreviewModal_Click" Background="Transparent" Foreground="#64748B" FontSize="16" Padding="6,2"/>
+                <Button Grid.Column="1" Click="ClosePreviewModal_Click" Background="Transparent" Padding="6,2">
+                   <Path Data="{StaticResource IconClose}" Fill="#64748B" Width="14" Height="14" Stretch="Uniform"/>
+                </Button>
              </Grid>
 
              <!-- Preview Image Viewer -->
@@ -1853,7 +1870,7 @@
 
              <!-- Preview Actions -->
              <Grid Grid.Row="4" ColumnDefinitions="Auto, *, Auto">
-                <Button Grid.Column="0" Content="📋 Copy Image to Clipboard" Click="CopyPreviewImage_Click" Classes="PrimaryBtn" Padding="14,8" FontSize="11" FontWeight="SemiBold"/>
+                <Button Grid.Column="0" Content="Copy Image to Clipboard" Click="CopyPreviewImage_Click" Classes="PrimaryBtn" Padding="14,8" FontSize="11" FontWeight="SemiBold"/>
                 <Button Grid.Column="2" Content="Open in Default App" Click="OpenPreviewInApp_Click" Classes="GhostBtn" Padding="14,8" FontSize="11"/>
              </Grid>
           </Grid>
@@ -1871,6 +1888,29 @@
                 <Button Grid.Column="0" Content="Cancel" Click="CloseNicknameModal_Click" Classes="GhostBtn" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
                 <Button Grid.Column="2" Content="Save Name" Click="SaveNickname_Click" Classes="PrimaryBtn" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
              </Grid>
+          </StackPanel>
+       </Border>
+    </Grid>
+
+    <!-- 5. First-Run Welcome Device Name Onboarding Modal -->
+    <Grid x:Name="FirstRunWelcomeModal" IsVisible="False" Background="#D806080E" ZIndex="5900">
+       <Border Background="#11131C" BorderBrush="#23283E" BorderThickness="1" CornerRadius="16" Padding="32" Width="440" HorizontalAlignment="Center" VerticalAlignment="Center" BoxShadow="0 24 64 0 #90000000">
+          <StackPanel Spacing="18" HorizontalAlignment="Stretch">
+             <Border Width="68" Height="68" CornerRadius="34" Background="#161928" BorderBrush="#242B45" BorderThickness="1" HorizontalAlignment="Center" BoxShadow="0 8 28 0 #304F46E5">
+                <Image Source="avares://WeShare.UI/Assets/app_logo.png" Width="42" Height="42" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+             </Border>
+             <StackPanel Spacing="6" HorizontalAlignment="Center">
+                <TextBlock Text="Welcome to We Share" FontSize="21" FontWeight="ExtraBold" Foreground="#FFFFFF" HorizontalAlignment="Center"/>
+                <TextBlock Text="Instant, high-speed local file sharing with nearby devices." FontSize="12" Foreground="#94A3B8" HorizontalAlignment="Center"/>
+             </StackPanel>
+             <Border Background="#161928" BorderBrush="#242B45" BorderThickness="1" CornerRadius="12" Padding="16" Margin="0,4,0,0">
+                <StackPanel Spacing="8">
+                   <TextBlock Text="SET YOUR DEVICE NAME" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource BrandCyanBrush}" LetterSpacing="0.8"/>
+                   <TextBlock Text="How your PC will appear to nearby phones, laptops, and web portal users:" FontSize="11" Foreground="#64748B" TextWrapping="Wrap"/>
+                   <TextBox x:Name="WelcomeDeviceNameInput" MaxLength="32" Watermark="e.g. My PC, Living Room Laptop..." Background="#0C0D15" Foreground="#FFFFFF" BorderBrush="#242B45" BorderThickness="1" CornerRadius="8" Padding="12,10" FontSize="13" FontWeight="SemiBold"/>
+                </StackPanel>
+             </Border>
+             <Button Content="Continue to We Share →" Click="CompleteOnboarding_Click" Classes="PrimaryBtn" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Height="44" FontWeight="Bold" FontSize="13" Margin="0,6,0,0"/>
           </StackPanel>
        </Border>
     </Grid>

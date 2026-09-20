@@ -361,21 +361,37 @@ namespace WeShare.Core.Transfer
 
                 TransferStarted?.Invoke(state);
 
-                // Prepare save path
+                // Prepare save path with strict path traversal prevention
                 string dest;
                 if (!string.IsNullOrEmpty(state.RelativePath))
                 {
-                    string relDir = Path.GetDirectoryName(state.RelativePath) ?? "";
-                    string targetDir = Path.Combine(saveDirectory, relDir);
+                    // Normalize separators, trim leading separators, and remove any '..' components
+                    string cleanRel = state.RelativePath.Replace('\\', '/').TrimStart('/');
+                    var parts = cleanRel.Split('/', StringSplitOptions.RemoveEmptyEntries)
+                                        .Where(p => p != "." && p != "..")
+                                        .ToArray();
+                    string safeRel = Path.Combine(parts);
+                    string targetDir = string.IsNullOrEmpty(safeRel) ? saveDirectory : Path.Combine(saveDirectory, Path.GetDirectoryName(safeRel) ?? "");
+                    
+                    // Verify resolved targetDir does not escape saveDirectory
+                    string fullTarget = Path.GetFullPath(targetDir);
+                    string fullSave = Path.GetFullPath(saveDirectory);
+                    if (!fullTarget.StartsWith(fullSave, StringComparison.OrdinalIgnoreCase))
+                    {
+                        targetDir = saveDirectory;
+                    }
+
                     Directory.CreateDirectory(targetDir);
-                    dest = Path.Combine(targetDir, Path.GetFileName(state.RelativePath));
+                    string safeFileName = Path.GetFileName(state.RelativePath);
+                    if (string.IsNullOrWhiteSpace(safeFileName)) safeFileName = state.FileName;
+                    dest = Path.Combine(targetDir, safeFileName);
                 }
                 else
                 {
                     string category = GetCategoryFolder(Path.GetExtension(state.FileName));
                     string targetDir = Path.Combine(saveDirectory, category);
                     Directory.CreateDirectory(targetDir);
-                    dest = GetUniqueFilePath(targetDir, state.FileName);
+                    dest = GetUniqueFilePath(targetDir, Path.GetFileName(state.FileName));
                 }
                 state.FilePath = dest;
 

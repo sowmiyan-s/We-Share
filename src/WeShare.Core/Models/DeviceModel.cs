@@ -102,7 +102,9 @@ namespace WeShare.Core.Models
             {
                 if (SetProperty(ref _role, value))
                 {
+                    _isReceiver = string.Equals(_role, "Receiver", StringComparison.OrdinalIgnoreCase);
                     OnPropertyChanged(nameof(RoleDisplay));
+                    OnPropertyChanged(nameof(IsReceiver));
                 }
             }
         }
@@ -111,7 +113,7 @@ namespace WeShare.Core.Models
         {
             "Receiver" => "Ready to Receive",
             "Sender" => "Ready to Send",
-            _ => "Available"
+            _ => "Idle"
         };
 
         public string ConnectionStatus
@@ -122,13 +124,15 @@ namespace WeShare.Core.Models
 
         public bool IsReceiver
         {
-            get => _isReceiver || _role == "Receiver";
+            get => _isReceiver || string.Equals(_role, "Receiver", StringComparison.OrdinalIgnoreCase);
             set
             {
                 if (SetProperty(ref _isReceiver, value))
                 {
-                    if (value && _role != "Receiver") _role = "Receiver";
-                    else if (!value && _role == "Receiver") _role = "Sender";
+                    if (value && !string.Equals(_role, "Receiver", StringComparison.OrdinalIgnoreCase)) 
+                        _role = "Receiver";
+                    else if (!value && string.Equals(_role, "Receiver", StringComparison.OrdinalIgnoreCase)) 
+                        _role = "Idle";
                     OnPropertyChanged(nameof(Role));
                     OnPropertyChanged(nameof(RoleDisplay));
                 }

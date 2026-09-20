@@ -104,6 +104,9 @@ namespace WeShare.UI.Views
         private readonly System.Threading.SemaphoreSlim _uiRequestLock = new(1, 1);
         private string? _lastAcceptedIp;
         private DateTime _lastAcceptedTime;
+        private string? _activeAcceptedBatchId;
+        private string? _currentBatchSenderIp;
+        private BatchManifest? _currentPendingBatchManifest;
         private bool _isUpdatingLibrary = false;
         private bool _isLibraryUpdatePending = false;
         private string? _currentSendingFileId;
@@ -127,7 +130,9 @@ namespace WeShare.UI.Views
 
             _dbHelper = new DatabaseHelper();
             _platformService = platformService ?? new Services.StubPlatformService();
-            _localDevice = new DeviceModel { Port = 45679, Name = Environment.MachineName, Type = _platformService.GetDeviceType() };
+            var savedName = _dbHelper.GetSetting("DeviceName", "");
+            string initialDeviceName = !string.IsNullOrWhiteSpace(savedName) ? savedName : Environment.MachineName;
+            _localDevice = new DeviceModel { Port = 45679, Name = initialDeviceName, Type = _platformService.GetDeviceType() };
 
             // Bind list sources
             SendQueueList.ItemsSource = SendQueue;
@@ -192,7 +197,7 @@ namespace WeShare.UI.Views
             _soundEffectsEnabled = soundVal == "true";
             if (SoundToggle != null) SoundToggle.IsChecked = _soundEffectsEnabled;
 
-            var savedAccent = _dbHelper.GetSetting("AccentColor", "#7C3AED");
+            var savedAccent = _dbHelper.GetSetting("AccentColor", "#4F46E5");
             if (!string.IsNullOrEmpty(savedAccent)) ApplyAccentColor(savedAccent);
 
             LoadDevicePreferences();
@@ -248,6 +253,7 @@ namespace WeShare.UI.Views
                 _webDashboardService.SetPeersProvider(() => Devices.ToList());
                 _webDashboardService.WebClientConnected += OnWebClientConnected;
                 _webDashboardService.WebClientConnectedEx += OnWebClientConnectedEx;
+                _webDashboardService.WebClientRoleChanged += OnWebClientRoleChanged;
                 _webDashboardService.WebClientDisconnectedEx += OnWebClientDisconnectedEx;
                 _webDashboardService.WebClientHeartbeat += OnWebClientHeartbeat;
                 _webDashboardService.WebFileShared += OnWebFileShared;
@@ -346,6 +352,14 @@ namespace WeShare.UI.Views
 
             UpdateEmptyState();
             NavHome_Click(this, new RoutedEventArgs());
+
+            // First-run onboarding check
+            var nameInit = _dbHelper.GetSetting("DeviceNameInitialized", "");
+            if (string.IsNullOrEmpty(nameInit))
+            {
+                if (WelcomeDeviceNameInput != null) WelcomeDeviceNameInput.Text = _localDevice.Name;
+                if (FirstRunWelcomeModal != null) FirstRunWelcomeModal.IsVisible = true;
+            }
 
             // Network check — auto-start hotspot or auto-join if no network
             UpdateNetworkLabels();
@@ -562,6 +576,17 @@ namespace WeShare.UI.Views
         {
             try
             {
+                // Normalize any loud/legacy accents to the modern indigo palette
+                if (string.IsNullOrWhiteSpace(hex) || 
+                    hex.Equals("#E5A50A", StringComparison.OrdinalIgnoreCase) || 
+                    hex.Equals("#F59E0B", StringComparison.OrdinalIgnoreCase) || 
+                    hex.Equals("#EC4899", StringComparison.OrdinalIgnoreCase) || 
+                    hex.Equals("#D900FF", StringComparison.OrdinalIgnoreCase) ||
+                    hex.Equals("#7C3AED", StringComparison.OrdinalIgnoreCase))
+                {
+                    hex = "#4F46E5";
+                }
+
                 var color = Avalonia.Media.Color.Parse(hex);
                 var brush = new Avalonia.Media.SolidColorBrush(color);
                 this.Resources["BrandVioletBrush"] = brush;
@@ -935,13 +960,16 @@ namespace WeShare.UI.Views
                 if (SendTargetDetails != null) SendTargetDetails.Text = $"{_sendTarget.Type} • {_sendTarget.IpAddress}";
                 if (SendTargetIcon != null)
                 {
-                    SendTargetIcon.Text = _sendTarget.Type?.ToLower() switch
+                    string key = _sendTarget.Type?.ToLower() switch
                     {
-                        "phone" or "android" or "ios" => "📱",
-                        "mac" or "apple" => "💻",
-                        "web client" => "🌐",
-                        _ => "💻"
+                        "phone" or "android" or "ios" or "mobile" => "IconMobile",
+                        "web client" or "web" => "IconGlobe",
+                        _ => "IconDevice"
                     };
+                    if (this.TryFindResource(key, out var geom) && geom is Avalonia.Media.Geometry g)
+                    {
+                        SendTargetIcon.Data = g;
+                    }
                 }
 
                 if (ChooseRecipientBtn != null)
@@ -976,6 +1004,14 @@ namespace WeShare.UI.Views
 
         private void StartSendSession(DeviceModel device)
         {
+            // Strict ShareIt / Mi Share / Quick Share rule: only send to devices in Receiving state
+            bool isReceiver = device.IsReceiver || string.Equals(device.Role, "Receiver", StringComparison.OrdinalIgnoreCase);
+            if (!isReceiver)
+            {
+                ShowToast($"'{device.DisplayName}' is not in Receive mode. Please ask recipient to click 'Receive' first.");
+                return;
+            }
+
             var itemsToSend = SendQueue.ToList();
             if (itemsToSend.Count == 0 && _lastDeclinedItems.TryGetValue(device.Id ?? device.IpAddress, out var saved))
             {
@@ -1184,7 +1220,7 @@ namespace WeShare.UI.Views
                     await Dispatcher.UIThread.InvokeAsync(() =>
                     {
                         SendProgressBar.Value = 100;
-                        SendProgressSpeed.Text = "✓ All files delivered successfully!";
+                        SendProgressSpeed.Text = "All files delivered successfully!";
                         SendProgressPct.Text = "Done";
                         ShowTransferSuccessModal(true, device.DisplayName, items.Count, items.Sum(x => x.Size));
                     });
@@ -1303,8 +1339,18 @@ namespace WeShare.UI.Views
                 if (targetDevice != null)
                 {
                     _sendTarget = targetDevice;
-                    ShowToast($"Sending directly to {targetDevice.DisplayName}...");
-                    StartSendSession(targetDevice);
+                    UpdateSendTargetUI();
+                    bool isRecv = targetDevice.IsReceiver || string.Equals(targetDevice.Role, "Receiver", StringComparison.OrdinalIgnoreCase);
+                    if (isRecv)
+                    {
+                        ShowToast($"Sending directly to {targetDevice.DisplayName}...");
+                        StartSendSession(targetDevice);
+                    }
+                    else
+                    {
+                        ShowPanel(SendFilesPanel, "SEND FILES", NavSendBtn);
+                        ShowToast($"'{targetDevice.DisplayName}' is not in Receive mode. Ask recipient to tap 'Receive'.");
+                    }
                 }
                 else
                 {
@@ -2077,7 +2123,7 @@ namespace WeShare.UI.Views
 
                 if (StartHotspotBtn != null)
                 {
-                    StartHotspotBtn.Content = isHotspotRunning ? "🛑 Stop Hotspot" : "⚡ Direct Hotspot";
+                    StartHotspotBtn.Content = isHotspotRunning ? "Stop Hotspot" : "Direct Hotspot";
                 }
 
                 if (WebPortalNetworkInfo != null)
@@ -2164,8 +2210,8 @@ namespace WeShare.UI.Views
 
             ManualIPDialog.IsVisible = false;
             
-            // Add a virtual device for this IP
-            var device = new DeviceModel { Name = $"Manual Peer ({ip})", IpAddress = ip, Port = 45679 };
+            // Add a virtual device for this IP, marking it ready to receive
+            var device = new DeviceModel { Name = $"Manual Peer ({ip})", IpAddress = ip, Port = 45679, Role = "Receiver", IsReceiver = true };
             if (!Devices.Any(d => IsSameIpAddress(d.IpAddress, ip))) Devices.Add(device);
 
             _sendTarget = device;
@@ -2195,11 +2241,14 @@ namespace WeShare.UI.Views
         private TaskCompletionSource<bool>? _acceptTcs;
         private async Task<bool> OnTransferRequested(FileTransferState state)
         {
-            bool isSame = (IsSameIpAddress(_lastAcceptedIp, state.RemoteIp) && (DateTime.Now - _lastAcceptedTime).TotalSeconds < 60);
+            bool isBatchAccepted = !string.IsNullOrEmpty(state.BatchId) && state.BatchId == _activeAcceptedBatchId;
+            bool isSame = (IsSameIpAddress(_lastAcceptedIp, state.RemoteIp) && (DateTime.Now - _lastAcceptedTime).TotalSeconds < 120);
 
-            // 1. Auto-Accept Logic (Settings or active session) - check before lock
-            if (_autoAcceptAllTransfers || isSame || (IsSameIpAddress(_lastAcceptedIp, state.RemoteIp) && (DateTime.Now - _lastAcceptedTime).TotalSeconds < 60))
+            // 1. Auto-Accept Logic (Settings, active batch, active session, or dedicated Receive Mode)
+            if (_autoAcceptAllTransfers || isSame || isBatchAccepted || _localDevice.IsReceiver)
             {
+                _lastAcceptedIp = state.RemoteIp;
+                _lastAcceptedTime = DateTime.Now;
                 return true;
             }
 
@@ -2215,7 +2264,7 @@ namespace WeShare.UI.Views
                     currentIsSame = (IsSameIpAddress(state.RemoteIp, currentActiveIpOrId) || state.FileId == currentActiveIpOrId);
                 }
 
-                if (_autoAcceptAllTransfers || currentIsSame || (IsSameIpAddress(_lastAcceptedIp, state.RemoteIp) && (DateTime.Now - _lastAcceptedTime).TotalSeconds < 60))
+                if (_autoAcceptAllTransfers || currentIsSame || isBatchAccepted || (IsSameIpAddress(_lastAcceptedIp, state.RemoteIp) && (DateTime.Now - _lastAcceptedTime).TotalSeconds < 120) || _localDevice.IsReceiver)
                 {
                     // Extend the auto-accept session since it is accepted
                     _lastAcceptedIp = state.RemoteIp;
@@ -2360,7 +2409,7 @@ namespace WeShare.UI.Views
                 if (SessionDeviceTitle != null) SessionDeviceTitle.Text = peer.DisplayName;
                 if (SessionDeviceSub != null) SessionDeviceSub.Text = $"{peer.Type} • {peer.IpAddress}";
                 PlaySound("success");
-                ShowToast($"✓ Connected with {peer.DisplayName}!");
+                ShowToast($"Connected with {peer.DisplayName}!");
 
                 if (_localDevice.Role == "Sender" || (SendDiscoveryPanel != null && SendDiscoveryPanel.IsVisible))
                 {
@@ -2522,13 +2571,37 @@ namespace WeShare.UI.Views
             });
         }
 
+        private void CompleteOnboarding_Click(object? sender, RoutedEventArgs e)
+        {
+            var chosenName = WelcomeDeviceNameInput?.Text?.Trim();
+            if (!string.IsNullOrWhiteSpace(chosenName))
+            {
+                _localDevice.Name = chosenName;
+                if (SidebarDeviceName != null) SidebarDeviceName.Text = chosenName;
+                if (HomeDeviceNameText != null) HomeDeviceNameText.Text = chosenName;
+                if (SettingsDeviceName != null) SettingsDeviceName.Text = chosenName;
+                _ = _dbHelper.SetSettingAsync("DeviceName", chosenName);
+            }
+            _ = _dbHelper.SetSettingAsync("DeviceNameInitialized", "true");
+            if (FirstRunWelcomeModal != null) FirstRunWelcomeModal.IsVisible = false;
+            _ = _discoveryService?.BroadcastPresenceAsync();
+            ShowToast($"Device name set to '{_localDevice.Name}'");
+        }
+
+        private void SidebarDeviceName_PointerPressed(object? sender, PointerPressedEventArgs e)
+        {
+            if (WelcomeDeviceNameInput != null) WelcomeDeviceNameInput.Text = _localDevice.Name;
+            if (FirstRunWelcomeModal != null) FirstRunWelcomeModal.IsVisible = true;
+        }
+
         private void SettingsDeviceName_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (SettingsDeviceName != null && !string.IsNullOrEmpty(SettingsDeviceName.Text))
             {
                 _localDevice.Name = SettingsDeviceName.Text;
-                SidebarDeviceName.Text = _localDevice.Name;
-                HomeDeviceNameText.Text = _localDevice.Name;
+                if (SidebarDeviceName != null) SidebarDeviceName.Text = _localDevice.Name;
+                if (HomeDeviceNameText != null) HomeDeviceNameText.Text = _localDevice.Name;
+                _ = _dbHelper.SetSettingAsync("DeviceName", _localDevice.Name);
             }
         }
 
@@ -2966,32 +3039,98 @@ namespace WeShare.UI.Views
         private void OnWebClientConnectedEx(WebDashboardService.WebClientInfo client)
         {
             if (client == null) return;
-            if (UdpDiscoveryService.IsOwnAddress(client.IpAddress)) return;
+            if (client.ClientId == _localDevice.Id) return;
 
             Dispatcher.UIThread.Post(() => {
+                string role = client.Role ?? "Receiver";
                 var existing = Devices.FirstOrDefault(d => d.Id == client.ClientId);
                 if (existing != null)
                 {
                     existing.Name = client.Name;
                     existing.IpAddress = client.IpAddress;
+                    existing.Role = role;
+                    existing.IsReceiver = (role == "Receiver");
                     existing.LastSeen = DateTime.Now;
                 }
                 else
                 {
-                    Devices.Add(new DeviceModel
+                    existing = new DeviceModel
                     {
                         Id = client.ClientId,
                         Name = client.Name,
                         IpAddress = client.IpAddress,
                         Type = "Web Client",
+                        Role = role,
+                        IsReceiver = (role == "Receiver"),
                         LastSeen = DateTime.Now,
                         Port = 8080
-                    });
+                    };
+                    Devices.Add(existing);
                 }
+
+                if (role == "Receiver")
+                {
+                    if (!ActiveReceivers.Any(d => d.Id == client.ClientId))
+                        ActiveReceivers.Add(existing);
+                    var s = ActiveSenders.FirstOrDefault(d => d.Id == client.ClientId);
+                    if (s != null) ActiveSenders.Remove(s);
+                }
+                else if (role == "Sender")
+                {
+                    if (!ActiveSenders.Any(d => d.Id == client.ClientId))
+                        ActiveSenders.Add(existing);
+                    var r = ActiveReceivers.FirstOrDefault(d => d.Id == client.ClientId);
+                    if (r != null) ActiveReceivers.Remove(r);
+                }
+                else
+                {
+                    var r = ActiveReceivers.FirstOrDefault(d => d.Id == client.ClientId);
+                    if (r != null) ActiveReceivers.Remove(r);
+                    var s = ActiveSenders.FirstOrDefault(d => d.Id == client.ClientId);
+                    if (s != null) ActiveSenders.Remove(s);
+                }
+
                 UpdateEmptyState();
                 if (WebSharedPanel != null && WebSharedPanel.IsVisible)
                 {
                     UpdateWebSharedClientsList();
+                }
+            });
+        }
+
+        private void OnWebClientRoleChanged(string clientId, string role)
+        {
+            Dispatcher.UIThread.Post(() => {
+                var existing = Devices.FirstOrDefault(d => d.Id == clientId);
+                if (existing != null)
+                {
+                    existing.Role = role;
+                    existing.IsReceiver = (role == "Receiver");
+                    existing.LastSeen = DateTime.Now;
+
+                    if (role == "Receiver")
+                    {
+                        if (!ActiveReceivers.Any(d => d.Id == clientId))
+                            ActiveReceivers.Add(existing);
+                        var s = ActiveSenders.FirstOrDefault(d => d.Id == clientId);
+                        if (s != null) ActiveSenders.Remove(s);
+                    }
+                    else if (role == "Sender")
+                    {
+                        if (!ActiveSenders.Any(d => d.Id == clientId))
+                            ActiveSenders.Add(existing);
+                        var r = ActiveReceivers.FirstOrDefault(d => d.Id == clientId);
+                        if (r != null) ActiveReceivers.Remove(r);
+                    }
+                    else
+                    {
+                        var r = ActiveReceivers.FirstOrDefault(d => d.Id == clientId);
+                        if (r != null) ActiveReceivers.Remove(r);
+                        var s = ActiveSenders.FirstOrDefault(d => d.Id == clientId);
+                        if (s != null) ActiveSenders.Remove(s);
+                    }
+
+                    UpdateEmptyState();
                 }
             });
         }
@@ -3003,6 +3142,10 @@ namespace WeShare.UI.Views
                 if (existing != null)
                 {
                     Devices.Remove(existing);
+                    var r = ActiveReceivers.FirstOrDefault(d => d.Id == clientId);
+                    if (r != null) ActiveReceivers.Remove(r);
+                    var s = ActiveSenders.FirstOrDefault(d => d.Id == clientId);
+                    if (s != null) ActiveSenders.Remove(s);
                     UpdateEmptyState();
                 }
 
@@ -3217,54 +3360,10 @@ namespace WeShare.UI.Views
             // Prompt user using the standard dialog popup
             bool accepted = await OnTransferRequested(state);
 
-            if (accepted)
+            if (!accepted)
             {
-                try
-                {
-                    if (File.Exists(state.FilePath))
-                    {
-                        string filename = Path.GetFileName(state.FilePath);
-                        string ext = Path.GetExtension(filename);
-                        string category = TcpTransferManager.GetCategoryFolder(ext);
-                        string targetDir = Path.Combine(_saveDirectory, category);
-                        Directory.CreateDirectory(targetDir);
-
-                        string destPath = GetUniqueFilePath(targetDir, filename);
-                        File.Move(state.FilePath, destPath);
-                        state.FilePath = destPath;
-
-                        await _dbHelper.SaveTransferAsync(state);
-                        Dispatcher.UIThread.Post(() => {
-                            ReceivedFiles.Insert(0, state);
-                            ShowToast($"Received via Web Portal: {state.FileName}");
-                            UpdateEmptyState();
-                            _platformService.ShowSystemToast("File Received", $"{state.FileName} from {state.PeerName}", state.FilePath);
-                        });
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Dispatcher.UIThread.Post(() => {
-                        ShowToast($"Failed to save file: {ex.Message}");
-                    });
-                    return false;
-                }
-            }
-            else
-            {
-                try
-                {
-                    if (File.Exists(state.FilePath))
-                    {
-                        File.Delete(state.FilePath);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[WebShared] Error deleting rejected file: {ex.Message}");
-                }
                 Dispatcher.UIThread.Post(() => {
-                    ShowToast($"Rejected web file: {state.FileName}");
+                    ShowToast($"Declined incoming web transfer: {state.FileName}");
                 });
             }
 
@@ -3312,7 +3411,11 @@ namespace WeShare.UI.Views
             if (SelectedWebClientIcon != null)
             {
                 string lname = _selectedWebClient.Name.ToLower();
-                SelectedWebClientIcon.Text = (lname.Contains("iphone") || lname.Contains("android") || lname.Contains("mobile") || lname.Contains("phone")) ? "📱" : "💻";
+                string key = (lname.Contains("iphone") || lname.Contains("android") || lname.Contains("mobile") || lname.Contains("phone")) ? "IconMobile" : "IconDevice";
+                if (this.TryFindResource(key, out var geom) && geom is Avalonia.Media.Geometry g)
+                {
+                    SelectedWebClientIcon.Data = g;
+                }
             }
             UpdateWebSendQueueUI();
         }
@@ -3396,7 +3499,7 @@ namespace WeShare.UI.Views
             if (WebSendToDeviceBtn != null)
             {
                 string targetName = _selectedWebClient != null ? _selectedWebClient.DisplayName : "Device";
-                WebSendToDeviceBtn.Content = $"🚀 Send {WebClientSendQueue.Count} File(s) to {targetName}";
+                WebSendToDeviceBtn.Content = $"Send {WebClientSendQueue.Count} File(s) to {targetName}";
                 WebSendToDeviceBtn.IsEnabled = WebClientSendQueue.Count > 0 && _selectedWebClient != null;
             }
         }
@@ -3540,7 +3643,16 @@ namespace WeShare.UI.Views
                     }
                     else
                     {
-                        ShowToast("Source file does not exist.");
+                        // File was already automatically finalized into downloads by OnWebTransferCompleted
+                        var existing = ReceivedFiles.FirstOrDefault(f => f.FileName == stagedFile.FileName);
+                        if (existing != null)
+                        {
+                            ShowToast($"File already saved to Downloads: {existing.FileName}");
+                        }
+                        else
+                        {
+                            ShowToast($"File received: {stagedFile.FileName}");
+                        }
                         StagedWebFiles.Remove(stagedFile);
                         UpdateWebSharedFilesList();
                     }
@@ -3652,6 +3764,8 @@ namespace WeShare.UI.Views
         // ── Batch Manifest Review Checklist Modal ────────────────────────────────
         private async Task<System.Collections.Generic.List<string>> OnBatchManifestRequested(BatchManifest manifest)
         {
+            _currentPendingBatchManifest = manifest;
+            _currentBatchSenderIp = manifest.SenderIp;
             var tcs = new TaskCompletionSource<System.Collections.Generic.List<string>>(TaskCreationOptions.RunContinuationsAsynchronously);
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
@@ -3722,6 +3836,12 @@ namespace WeShare.UI.Views
         private void AcceptBatchManifest_Click(object? sender, RoutedEventArgs e)
         {
             if (BatchManifestModal != null) BatchManifestModal.IsVisible = false;
+            if (_currentPendingBatchManifest != null)
+            {
+                _activeAcceptedBatchId = _currentPendingBatchManifest.BatchId;
+                _lastAcceptedIp = _currentPendingBatchManifest.SenderIp;
+                _lastAcceptedTime = DateTime.Now;
+            }
             var acceptedIds = BatchManifestItems.Where(x => x.IsSelected).Select(x => x.FileId).ToList();
             _batchManifestTcs?.TrySetResult(acceptedIds);
             ShowToast($"Accepted {acceptedIds.Count} files for transfer.");
@@ -3748,7 +3868,7 @@ namespace WeShare.UI.Views
             if (TransferSuccessModal != null)
             {
                 if (TransferSuccessTitle != null)
-                    TransferSuccessTitle.Text = isSender ? "Files Sent Successfully! 🎉" : "Files Received Successfully! 🎉";
+                    TransferSuccessTitle.Text = isSender ? "Files Sent Successfully" : "Files Received Successfully";
                 if (TransferSuccessSubtitle != null)
                     TransferSuccessSubtitle.Text = isSender 
                         ? $"All {fileCount} files were delivered to {peerName}." 
@@ -3762,7 +3882,7 @@ namespace WeShare.UI.Views
 
                 TransferSuccessModal.IsVisible = true;
                 PlaySound("success");
-                ShowToast("✓ Transfer completed successfully!");
+                ShowToast("Transfer completed successfully!");
             }
         }
 
@@ -3871,7 +3991,7 @@ namespace WeShare.UI.Views
                     });
                     if (res)
                     {
-                        ShowToast($"✓ {_sendTarget.DisplayName} accepted resend request for '{transfer.FileName}'!");
+                        ShowToast($"{_sendTarget.DisplayName} accepted resend request for '{transfer.FileName}'!");
                     }
                     else
                     {

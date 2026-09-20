@@ -59,7 +59,7 @@ namespace WeShare.Core.Discovery
                     var now = DateTime.UtcNow;
                     foreach (var kvp in _trackedDevices)
                     {
-                        if (now - kvp.Value.LastSeen > TimeSpan.FromSeconds(4.5))
+                        if (now - kvp.Value.LastSeen > TimeSpan.FromSeconds(6.0))
                         {
                             if (_trackedDevices.TryRemove(kvp.Key, out var lost))
                             {
@@ -83,10 +83,12 @@ namespace WeShare.Core.Discovery
                     _ = Task.Run(() => ProcessPacket(result), token);
                 }
                 catch (OperationCanceledException) { break; }
+                catch (ObjectDisposedException) { break; }
                 catch (Exception ex)
                 {
+                    if (token.IsCancellationRequested) break;
                     Console.WriteLine($"[Discovery] Listen error: {ex.Message}");
-                    await Task.Delay(1000, token);
+                    try { await Task.Delay(1000, token); } catch { break; }
                 }
             }
         }
@@ -103,17 +105,27 @@ namespace WeShare.Core.Discovery
 
                 device.IpAddress = remoteIp;
                 device.LastSeen = DateTime.UtcNow;
+                if (string.IsNullOrWhiteSpace(device.Role))
+                    device.Role = device.IsReceiver ? "Receiver" : "Idle";
+                else
+                    device.IsReceiver = string.Equals(device.Role, "Receiver", StringComparison.OrdinalIgnoreCase);
 
-                if (string.Equals(device.Role, "Idle", StringComparison.OrdinalIgnoreCase))
+                if (_trackedDevices.TryGetValue(device.Id, out var existing))
                 {
-                    _trackedDevices.TryRemove(device.Id, out _);
-                    DeviceLost?.Invoke(device);
-                    return;
+                    existing.Name = device.Name;
+                    existing.IpAddress = device.IpAddress;
+                    existing.Port = device.Port;
+                    existing.Role = device.Role;
+                    existing.IsReceiver = device.IsReceiver;
+                    existing.LastSeen = device.LastSeen;
+                    DeviceDiscovered?.Invoke(existing);
                 }
-
-                _trackedDevices[device.Id] = device;
-                Console.WriteLine($"[Discovery] Found: {device.Name} @ {device.IpAddress} (Role: {device.Role})");
-                DeviceDiscovered?.Invoke(device);
+                else
+                {
+                    _trackedDevices[device.Id] = device;
+                    Console.WriteLine($"[Discovery] Found: {device.Name} @ {device.IpAddress} (Role: {device.Role})");
+                    DeviceDiscovered?.Invoke(device);
+                }
             }
             catch (Exception ex)
             {

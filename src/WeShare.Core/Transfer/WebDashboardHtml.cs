@@ -20,12 +20,12 @@ namespace WeShare.Core.Transfer
   --card: rgba(22, 26, 42, 0.65);
   --card-hover: rgba(28, 33, 54, 0.85);
   --card-solid: #171B2C;
-  --border: rgba(124, 58, 237, 0.22);
+  --border: rgba(255, 255, 255, 0.10);
   --border-subtle: rgba(255, 255, 255, 0.08);
-  --primary: #7C3AED;
-  --primary-light: #9333EA;
-  --primary-gradient: linear-gradient(135deg, #7C3AED 0%, #9333EA 50%, #4F46E5 100%);
-  --primary-glow: rgba(124, 58, 237, 0.1);
+  --primary: #4F46E5;
+  --primary-light: #6366F1;
+  --primary-gradient: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%);
+  --primary-glow: rgba(79, 70, 229, 0.12);
   --cyan: #06B6D4;
   --emerald: #10B981;
   --amber: #A855F7;
@@ -50,11 +50,11 @@ html[data-theme=""light""] {
   --card: rgba(241, 245, 249, 0.8);
   --card-hover: rgba(226, 232, 240, 0.9);
   --card-solid: #F1F5F9;
-  --border: rgba(124, 58, 237, 0.2);
+  --border: rgba(79, 70, 229, 0.18);
   --border-subtle: rgba(0, 0, 0, 0.08);
-  --primary: #7C3AED;
-  --primary-light: #8B5CF6;
-  --primary-glow: rgba(124, 58, 237, 0.2);
+  --primary: #4F46E5;
+  --primary-light: #6366F1;
+  --primary-glow: rgba(79, 70, 229, 0.15);
   --text: #0F172A;
   --text-dim: #475569;
   --text-muted: #94A3B8;
@@ -267,6 +267,12 @@ body::before {
 @keyframes ticker-anim {
   0% { transform: translateX(0); }
   100% { transform: translateX(-100%); }
+}
+
+@keyframes pulseRing {
+  0% { transform: scale(0.7); opacity: 0.9; }
+  50% { opacity: 0.4; }
+  100% { transform: scale(1.35); opacity: 0; }
 }
 
 /* ------------------------------------------------------------- */
@@ -1613,9 +1619,13 @@ input[type=""file""] {
       <span>Send</span>
       <span class=""tab-badge"" id=""stagingBadge"" style=""display:none;"">0</span>
     </button>
-    <button class=""tab-btn"" id=""tabBtnDownloads"" onclick=""switchTab('downloads')"">
+    <button class=""tab-btn"" id=""tabBtnReceive"" onclick=""switchTab('receive')"">
       <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4""/><polyline points=""7 10 12 15 17 10""/><line x1=""12"" y1=""15"" x2=""12"" y2=""3""/></svg>
-      <span>Downloads</span>
+      <span>Receive</span>
+    </button>
+    <button class=""tab-btn"" id=""tabBtnDownloads"" onclick=""switchTab('downloads')"">
+      <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z""/></svg>
+      <span>Library</span>
       <span class=""tab-badge"" id=""downloadsBadge"" style=""display:none;"">0</span>
     </button>
     <button class=""tab-btn"" id=""tabBtnActivity"" onclick=""switchTab('activity')"">
@@ -1669,8 +1679,8 @@ input[type=""file""] {
 
       <!-- Connect Action Button / Status -->
       <div id=""connectActionSection"" style=""margin-top:8px;"">
-        <button id=""connectHostBtn"" onclick=""connectToHost('Sender')"" style=""width:100%; padding:11px 16px; border-radius:10px; background:linear-gradient(135deg, #7C3AED, #9333EA); border:none; color:#fff; font-size:13px; font-weight:700; cursor:pointer; box-shadow:0 4px 14px rgba(124,58,237,0.35);"">
-          🔗 Connect to Host PC to Share Files
+        <button id=""connectHostBtn"" onclick=""connectToHost('Sender')"" style=""width:100%; padding:11px 16px; border-radius:10px; background:linear-gradient(135deg, #4F46E5, #6366F1); border:none; color:#fff; font-size:13px; font-weight:700; cursor:pointer; box-shadow:0 4px 14px rgba(79,70,229,0.35);"">
+          Connect to Host PC to Share Files
         </button>
       </div>
       <div id=""connectedActiveSection"" style=""display:none; margin-top:8px; align-items:center; justify-content:space-between; background:#0E2E28; border:1px solid #10B981; border-radius:10px; padding:8px 12px;"">
@@ -1746,6 +1756,9 @@ input[type=""file""] {
         </select>
       </div>
     </div>
+    <div id=""targetReceiverStatusPill"" style=""margin:-8px 0 14px 0; display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700; padding:4px 12px; border-radius:12px; background:rgba(239,68,68,0.12); color:var(--rose); border:1px solid rgba(239,68,68,0.25);"">
+      Target is not in Receive mode
+    </div>
 
     <!-- Step 3: Staging Tray & Transfer Action -->
     <div class=""staging-card"" id=""stagingTray"" style=""display: none;"">
@@ -1776,7 +1789,51 @@ input[type=""file""] {
   </div>
 
   <!-- ========================================================= -->
-  <!-- 2. DOWNLOADS TAB VIEW                                     -->
+  <!-- 2. RECEIVE TAB VIEW (RADAR + WAITING STATE)               -->
+  <!-- ========================================================= -->
+  <div class=""tab-view"" id=""viewReceive"">
+    <div style=""background:var(--panel); border:1px solid var(--border); border-radius:var(--radius-lg); padding:32px 20px; text-align:center; margin-bottom:16px;"">
+      
+      <!-- Concentric Pulsing Radar Center -->
+      <div style=""position:relative; width:160px; height:160px; margin:0 auto 20px auto; display:flex; align-items:center; justify-content:center;"">
+        <div style=""position:absolute; inset:0; border-radius:50%; border:2px solid rgba(124, 58, 237, 0.25); animation:pulseRing 2.4s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;""></div>
+        <div style=""position:absolute; inset:16px; border-radius:50%; border:2px solid rgba(6, 182, 212, 0.35); animation:pulseRing 2.4s cubic-bezier(0.215, 0.61, 0.355, 1) infinite 0.6s;""></div>
+        <div style=""width:84px; height:84px; border-radius:50%; background:linear-gradient(135deg, #7C3AED, #06B6D4); display:flex; align-items:center; justify-content:center; box-shadow:0 0 28px rgba(124,58,237,0.5); z-index:2;"">
+          <img src=""/api/assets/receive.png"" onerror=""this.style.display='none'; this.nextElementSibling.style.display='block';"" alt=""Receive"" style=""width:48px; height:48px; object-fit:contain;"">
+          <svg style=""display:none; width:38px; height:38px; color:#fff;"" xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2.5"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4""/><polyline points=""7 10 12 15 17 10""/><line x1=""12"" y1=""15"" x2=""12"" y2=""3""/></svg>
+        </div>
+      </div>
+
+      <div style=""display:inline-flex; align-items:center; gap:8px; padding:6px 16px; background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.3); border-radius:20px; color:var(--emerald); font-size:12px; font-weight:800; letter-spacing:0.5px;"">
+        <span class=""status-dot""></span>READY TO RECEIVE
+      </div>
+
+      <div id=""receiveDeviceName"" style=""font-size:20px; font-weight:800; color:var(--text); margin-top:14px;"">Mobile Web</div>
+      <div style=""font-size:12px; color:var(--text-muted); margin-top:4px;"">Visible to Host PC and nearby senders</div>
+
+      <div style=""background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); border-radius:12px; padding:14px; margin-top:24px; text-align:left;"">
+        <div style=""display:flex; align-items:center; gap:10px; margin-bottom:6px;"">
+          <div style=""width:6px; height:6px; border-radius:3px; background:var(--cyan);""></div>
+          <span style=""font-size:12px; font-weight:700; color:var(--text);"">Receive Workflow:</span>
+        </div>
+        <div style=""font-size:11px; color:var(--text-dim); line-height:1.6;"">
+          • Keep this tab open while waiting for incoming files.<br>
+          • On the sending PC or peer, tap <b>Send Files</b> and select this device.<br>
+          • When files are sent, a download prompt will automatically pop up right here!
+        </div>
+      </div>
+
+      <div style=""margin-top:20px;"">
+        <button onclick=""openEditNicknameModal()"" class=""cb-btn"" style=""background:rgba(255,255,255,0.06); border:1px solid var(--border); color:var(--text); font-size:11px; padding:8px 16px;"">
+          Edit Device Name
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- 3. DOWNLOADS / LIBRARY TAB VIEW                           -->
   <!-- ========================================================= -->
   <div class=""tab-view"" id=""viewDownloads"">
     <div class=""card-section"">
@@ -1943,7 +2000,7 @@ input[type=""file""] {
     <div class=""modal-icon-disc"" style=""background:rgba(16, 185, 129, 0.15); color:var(--emerald); width:64px; height:64px;"">
       <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2.5"" stroke-linecap=""round"" stroke-linejoin=""round"" style=""width:32px; height:32px;""><path d=""M20 6L9 17l-5-5""/></svg>
     </div>
-    <div class=""modal-title"" style=""color:var(--emerald); font-size:18px; margin-top:4px;"">Transfer Completed! 🎉</div>
+    <div class=""modal-title"" style=""color:var(--emerald); font-size:18px; margin-top:4px;"">Transfer Completed</div>
     <div class=""modal-desc"" id=""transferSuccessDesc"">All selected files were transferred successfully.</div>
 
     <div style=""background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); border-radius:10px; padding:12px; margin:4px 0; text-align:left; font-size:12px;"">
@@ -1999,6 +2056,50 @@ input[type=""file""] {
     </div>
   </div>
 </div>
+<!-- =========================================================== -->
+<!-- FIRST-RUN DEVICE NAME ONBOARDING MODAL                      -->
+<!-- =========================================================== -->
+<div class=""modal-overlay"" id=""welcomeOnboardingModal"">
+  <div class=""modal-sheet"" style=""max-width:380px; text-align:center;"">
+    <div class=""modal-icon-disc"" style=""background:linear-gradient(135deg, #7C3AED, #06B6D4); width:64px; height:64px; margin:0 auto 12px auto; box-shadow:0 0 24px rgba(124,58,237,0.4);"">
+      <svg style=""width:32px; height:32px; stroke:#fff; fill:none;"" viewBox=""0 0 24 24"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2""/><circle cx=""12"" cy=""7"" r=""4""/></svg>
+    </div>
+    <div class=""modal-title"" style=""font-size:18px; font-weight:800;"">Welcome to We Share</div>
+    <div class=""modal-desc"" style=""font-size:12px; margin-top:6px; color:var(--text-muted);"">
+      Set a device name so the Host PC and nearby devices can easily recognize you:
+    </div>
+
+    <div style=""margin:18px 0 6px 0; text-align:left;"">
+      <label style=""font-size:11px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.5px;"">Device Name</label>
+      <input type=""text"" id=""welcomeDeviceNameInput"" maxlength=""32"" placeholder=""e.g., iPhone, Android, Living Room Tablet"" style=""width:100%; box-sizing:border-box; margin-top:6px; padding:12px 14px; background:rgba(255,255,255,0.06); border:1.5px solid var(--primary); border-radius:10px; color:var(--text); font-size:14px; font-weight:600; outline:none;"">
+    </div>
+
+    <div class=""modal-actions"" style=""margin-top:16px;"">
+      <button class=""modal-btn modal-btn-accept"" style=""width:100%;"" onclick=""confirmWelcomeNickname()"">Continue to We Share →</button>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================== -->
+<!-- EDIT DEVICE NAME MODAL                                      -->
+<!-- =========================================================== -->
+<div class=""modal-overlay"" id=""editNicknameModal"">
+  <div class=""modal-sheet"" style=""max-width:360px; text-align:center;"">
+    <div class=""modal-title"" style=""font-size:16px; font-weight:800;"">Edit Device Name</div>
+    <div class=""modal-desc"" style=""font-size:12px; margin-top:4px; color:var(--text-muted);"">
+      Change how your device appears to nearby peers:
+    </div>
+
+    <div style=""margin:16px 0 6px 0; text-align:left;"">
+      <input type=""text"" id=""editNicknameInput"" maxlength=""32"" placeholder=""Device name..."" style=""width:100%; box-sizing:border-box; padding:12px 14px; background:rgba(255,255,255,0.06); border:1.5px solid var(--primary); border-radius:10px; color:var(--text); font-size:14px; font-weight:600; outline:none;"">
+    </div>
+
+    <div class=""modal-actions"" style=""margin-top:14px;"">
+      <button class=""modal-btn modal-btn-decline"" onclick=""document.getElementById('editNicknameModal').classList.remove('active')"">Cancel</button>
+      <button class=""modal-btn modal-btn-accept"" onclick=""confirmEditNickname()"">Save Name</button>
+    </div>
+  </div>
+</div>
 
 <!-- TOAST PILL -->
 <div class=""toast-pill"" id=""toastPill"">
@@ -2037,7 +2138,7 @@ async function connectToHost(role = 'Sender') {
     showToast('Failed to connect: ' + err.message);
     setConnectedState(false);
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = '🔗 Connect to Host PC to Share Files'; }
+    if (btn) { btn.disabled = false; btn.textContent = 'Connect to Host PC to Share Files'; }
   }
 }
 
@@ -2130,13 +2231,47 @@ function saveNickname(name) {
   fetch('/api/heartbeat?clientId=' + getClientId() + '&name=' + encodeURIComponent(name), { method: 'POST' }).catch(() => {});
 }
 
+function checkOnboarding() {
+  try {
+    const initialized = localStorage.getItem('weshare_nickname_initialized');
+    if (!initialized) {
+      const modal = document.getElementById('welcomeOnboardingModal');
+      const input = document.getElementById('welcomeDeviceNameInput');
+      if (input) input.value = getSavedNickname();
+      if (modal) modal.classList.add('active');
+    }
+  } catch(e) {}
+}
+
+function confirmWelcomeNickname() {
+  const input = document.getElementById('welcomeDeviceNameInput');
+  let name = (input ? input.value : '').trim();
+  if (!name) name = 'Mobile Device';
+  try {
+    localStorage.setItem('weshare_nickname', name);
+    localStorage.setItem('weshare_nickname_initialized', 'true');
+  } catch(e) {}
+  saveNickname(name);
+  const modal = document.getElementById('welcomeOnboardingModal');
+  if (modal) modal.classList.remove('active');
+  showToast('Welcome, ' + name + '! Ready to share.');
+}
+
 function promptEditNickname() {
-  const cur = getSavedNickname();
-  const res = prompt('Enter your device nickname:', cur);
-  if (res && res.trim() && res.trim() !== cur) {
-    saveNickname(res.trim());
-    showToast('Nickname updated: ' + res.trim());
-  }
+  const modal = document.getElementById('editNicknameModal');
+  const input = document.getElementById('editNicknameInput');
+  if (input) input.value = getSavedNickname();
+  if (modal) modal.classList.add('active');
+}
+
+function confirmEditNickname() {
+  const input = document.getElementById('editNicknameInput');
+  let name = (input ? input.value : '').trim();
+  if (!name) return;
+  saveNickname(name);
+  const modal = document.getElementById('editNicknameModal');
+  if (modal) modal.classList.remove('active');
+  showToast('Device name updated: ' + name);
 }
 
 /* ------------------------------------------------------------- */
@@ -2178,6 +2313,12 @@ function switchTab(name) {
   if (name === 'send') {
     document.getElementById('tabBtnSend').classList.add('active');
     document.getElementById('viewSend').classList.add('active');
+    fetch('/api/client-role?clientId=' + getClientId() + '&role=Sender&name=' + encodeURIComponent(getSavedNickname()), { method: 'POST' }).catch(() => {});
+    loadDiscoveredDevices();
+  } else if (name === 'receive') {
+    document.getElementById('tabBtnReceive').classList.add('active');
+    document.getElementById('viewReceive').classList.add('active');
+    fetch('/api/client-role?clientId=' + getClientId() + '&role=Receiver&name=' + encodeURIComponent(getSavedNickname()), { method: 'POST' }).catch(() => {});
   } else if (name === 'downloads') {
     document.getElementById('tabBtnDownloads').classList.add('active');
     document.getElementById('viewDownloads').classList.add('active');
@@ -2361,7 +2502,18 @@ async function startBatchSend() {
   if (s3) s3.className = 'wsw-step active';
 
   const clientId = getClientId();
-  const targetId = document.getElementById('targetDeviceSelect').value || 'pc';
+  const targetSelect = document.getElementById('targetDeviceSelect');
+  const targetId = targetSelect ? (targetSelect.value || 'pc') : 'pc';
+  const selectedOpt = targetSelect && targetSelect.selectedIndex >= 0 ? targetSelect.options[targetSelect.selectedIndex] : null;
+  const isTargetInRecv = selectedOpt ? (selectedOpt.dataset.isReceiver === 'true') : true;
+
+  if (!isTargetInRecv) {
+    showToast('Cannot send: Target device is not in Receive mode. Ask recipient to open Receive tab.');
+    isUploading = false;
+    document.getElementById('sendAllBtn').disabled = false;
+    return;
+  }
+
   const batchId = 'wb_' + Date.now();
 
   let filesToSend = stagedFiles.slice();
@@ -2665,8 +2817,14 @@ async function loadHostInfo() {
   try {
     const res = await fetch('/api/me').then(r => r.json());
     if (res && res.name) {
-      document.getElementById('hostStatusText').textContent = 'CONNECTED: ' + res.name.toUpperCase();
-      document.getElementById('targetNameLabel').textContent = res.name;
+      const isRecv = res.isReceiver || res.role === 'Receiver';
+      document.getElementById('hostStatusText').textContent = isRecv
+        ? 'READY TO RECEIVE: ' + res.name.toUpperCase()
+        : 'ONLINE: ' + res.name.toUpperCase();
+      const label = document.getElementById('targetNameLabel');
+      if (label && (!document.getElementById('targetDeviceSelect') || document.getElementById('targetDeviceSelect').value === 'pc')) {
+        label.textContent = res.name + (isRecv ? ' [Ready to Receive]' : ' [Not in Receive Mode]');
+      }
     }
   } catch(e) {
     document.getElementById('hostStatusText').textContent = 'CONNECTING...';
@@ -2677,31 +2835,64 @@ async function loadDiscoveredDevices() {
   try {
     const devices = await fetch('/api/devices').then(r => r.json());
     const sel = document.getElementById('targetDeviceSelect');
+    if (!sel) return;
     const curVal = sel.value;
-    sel.innerHTML = '<option value=""pc"">Host PC</option>';
     const myId = getClientId();
+    
+    // Check host PC info
+    const meRes = await fetch('/api/me').then(r => r.json()).catch(() => null);
+    const hostName = (meRes && meRes.name) ? meRes.name : 'Host PC';
+    const isHostRecv = meRes ? (meRes.isReceiver || meRes.role === 'Receiver') : false;
+
+    sel.innerHTML = `<option value=""pc"" data-is-receiver=""${isHostRecv}"">${hostName} ${isHostRecv ? '(Ready to Receive)' : '(Not in Receive Mode)'}</option>`;
+    
     if (Array.isArray(devices)) {
       devices.forEach(d => {
         if (!d) return;
         if (d.id === myId || d.id === 'wc_' + myId || (myId && d.id && d.id.includes(myId))) return;
         const opt = document.createElement('option');
         opt.value = d.id;
-        opt.textContent = (d.isFavorite ? '• ' : '') + d.name;
+        const isRecv = d.isReceiver || d.role === 'Receiver';
+        opt.dataset.isReceiver = isRecv ? 'true' : 'false';
+        opt.textContent = `${d.isFavorite ? '• ' : ''}${d.name} ${isRecv ? '(Ready to Receive)' : '(Not in Receive Mode)'}`;
         sel.appendChild(opt);
       });
     }
     sel.value = curVal || 'pc';
+    onTargetDeviceChanged();
   } catch(e) {}
 }
 
 function onTargetDeviceChanged() {
   const sel = document.getElementById('targetDeviceSelect');
-  document.getElementById('targetNameLabel').textContent = sel.options[sel.selectedIndex].text;
+  if (!sel || !sel.options || sel.selectedIndex < 0) return;
+  const opt = sel.options[sel.selectedIndex];
+  const label = document.getElementById('targetNameLabel');
+  if (label) label.textContent = opt.text;
+  
+  const isRecv = opt.dataset.isReceiver === 'true';
+  const pill = document.getElementById('targetReceiverStatusPill');
+  const sendBtn = document.getElementById('sendAllBtn');
+  if (pill) {
+    pill.style.display = 'inline-flex';
+    if (isRecv) {
+      pill.style.background = 'rgba(16,185,129,0.12)';
+      pill.style.color = 'var(--emerald)';
+      pill.style.borderColor = 'rgba(16,185,129,0.25)';
+      pill.innerHTML = '<span style=""width:6px; height:6px; border-radius:50%; background:#10B981; display:inline-block; margin-right:6px;""></span>Target is Ready to Receive';
+    } else {
+      pill.style.background = 'rgba(239,68,68,0.12)';
+      pill.style.color = 'var(--rose)';
+      pill.style.borderColor = 'rgba(239,68,68,0.25)';
+      pill.innerHTML = '<span style=""width:6px; height:6px; border-radius:50%; background:#EF4444; display:inline-block; margin-right:6px;""></span>Target is not in Receive mode (Ask recipient to tap Receive)';
+    }
+  }
 }
 
 async function loadAvailableFiles() {
   try {
-    const files = await fetch('/api/files').then(r => r.json());
+    const cid = getClientId();
+    const files = await fetch('/api/files?clientId=' + encodeURIComponent(cid)).then(r => r.json());
     const list = document.getElementById('downloadFilesList');
     const badge = document.getElementById('downloadsBadge');
 
@@ -2723,6 +2914,7 @@ async function loadAvailableFiles() {
     files.forEach(f => {
       const item = document.createElement('div');
       item.className = 'file-card-item';
+      const fileId = f.id || '';
       item.innerHTML = `
         <div class=""fci-left"">
           <div class=""fci-icon"">${getFileCategorySvg(f.name)}</div>
@@ -2731,7 +2923,7 @@ async function loadAvailableFiles() {
             <span class=""fci-meta"">${formatBytes(f.size)}</span>
           </div>
         </div>
-        <a class=""fci-dl-btn"" href=""/download?file=${encodeURIComponent(f.name)}"" download>
+        <a class=""fci-dl-btn"" href=""/download?id=${encodeURIComponent(fileId)}&file=${encodeURIComponent(f.name)}&clientId=${encodeURIComponent(cid)}"" download=""${f.name}"">
           <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2.5"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4""/><polyline points=""7 10 12 15 17 10""/><line x1=""12"" y1=""15"" x2=""12"" y2=""3""/></svg>
           Download
         </a>
@@ -2822,7 +3014,10 @@ function initSSE() {
   sse.addEventListener('offer', (e) => {
     try {
       pendingSingleOffer = JSON.parse(e.data);
-      document.getElementById('singleOfferDesc').textContent = `Incoming file from ${pendingSingleOffer.from || 'Host PC'}: ""${pendingSingleOffer.name}"" (${formatBytes(pendingSingleOffer.size)})`;
+      const rawName = pendingSingleOffer.name || 'file';
+      const cleanName = decodeURIComponent(rawName);
+      pendingSingleOffer.displayName = cleanName;
+      document.getElementById('singleOfferDesc').textContent = `Incoming file from ${pendingSingleOffer.from || 'Host PC'}: ""${cleanName}"" (${formatBytes(pendingSingleOffer.size)})`;
       document.getElementById('singleOfferModal').classList.add('active');
     } catch(err) {}
   });
@@ -2836,8 +3031,12 @@ function initSSE() {
 
   sse.addEventListener('batch-offer', (e) => {
     try {
-      const manifest = JSON.parse(e.data);
-      showIncomingBatchChecklist(manifest);
+      const data = JSON.parse(e.data);
+      const filesArr = Array.isArray(data) ? data : (data.files || []);
+      filesArr.forEach(f => {
+        f.fileName = decodeURIComponent(f.name || f.fileName || 'file');
+      });
+      showIncomingBatchChecklist({ files: filesArr, senderName: 'Host PC' });
     } catch(err) {}
   });
 
@@ -2889,18 +3088,24 @@ function initSSE() {
 
 function acceptSingleOffer() {
   const modal = document.getElementById('singleOfferModal');
-  modal.classList.remove('active');
+  if (modal) modal.classList.remove('active');
   if (pendingSingleOffer) {
     const fid = pendingSingleOffer.id || pendingSingleOffer.fileId || '';
     const cid = getClientId();
-    window.location.href = `/download?id=${encodeURIComponent(fid)}&file=${encodeURIComponent(pendingSingleOffer.name)}&clientId=${encodeURIComponent(cid)}`;
-    showToast('Download started');
+    const cleanName = pendingSingleOffer.displayName || pendingSingleOffer.name || 'file';
+    const a = document.createElement('a');
+    a.href = `/download?id=${encodeURIComponent(fid)}&file=${encodeURIComponent(cleanName)}&clientId=${encodeURIComponent(cid)}`;
+    a.download = cleanName;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => a.remove(), 1000);
+    showToast('Download started: ' + cleanName);
   }
 }
 
 function declineSingleOffer() {
   const modal = document.getElementById('singleOfferModal');
-  modal.classList.remove('active');
+  if (modal) modal.classList.remove('active');
   if (pendingSingleOffer) {
     const fid = pendingSingleOffer.id || pendingSingleOffer.fileId || '';
     const cid = getClientId();
@@ -2927,15 +3132,15 @@ function showIncomingBatchChecklist(manifest) {
   list.innerHTML = '';
 
   files.forEach((f, idx) => {
-    const fid = f.fileId || f.FileId || ('f_' + idx);
-    const fname = f.fileName || f.FileName || 'file';
+    const fid = f.id || f.Id || f.fileId || f.FileId || ('f_' + idx);
+    const fname = f.fileName || f.FileName || f.name || f.Name || 'file';
     const frel = f.relativePath || f.RelativePath || '';
     const fsize = f.size || f.Size || 0;
 
     const row = document.createElement('label');
     row.className = 'batch-chk-item';
     row.innerHTML = `
-      <input type=""checkbox"" class=""batch-file-chk"" data-file-id=""${fid}"" data-size=""${fsize}"" checked onchange=""updateBatchChecklistStats()"">
+      <input type=""checkbox"" class=""batch-file-chk"" data-file-id=""${fid}"" data-file-name=""${encodeURIComponent(fname)}"" data-size=""${fsize}"" checked onchange=""updateBatchChecklistStats()"">
       <div class=""batch-chk-info"">
         <span class=""batch-chk-name"" title=""${fname}"">${fname}</span>
         ${frel && frel !== fname ? `<span style=""font-size:10px;color:var(--text-muted);"">${frel}</span>` : ''}
@@ -2978,13 +3183,16 @@ function updateBatchChecklistStats() {
 
 async function acceptSelectedBatchOffer() {
   const modal = document.getElementById('batchOfferModal');
-  modal.classList.remove('active');
+  if (modal) modal.classList.remove('active');
 
   if (!pendingBatchManifest) return;
 
-  const acceptedIds = [];
+  const acceptedFiles = [];
   document.querySelectorAll('.batch-file-chk:checked').forEach(c => {
-    acceptedIds.push(c.getAttribute('data-file-id'));
+    acceptedFiles.push({
+      id: c.getAttribute('data-file-id'),
+      name: c.getAttribute('data-file-name') || ''
+    });
   });
 
   const batchId = pendingBatchManifest.batchId || pendingBatchManifest.BatchId || '';
@@ -2993,13 +3201,24 @@ async function acceptSelectedBatchOffer() {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       batchId: batchId,
-      accepted: acceptedIds.length > 0,
-      acceptedFileIds: acceptedIds
+      accepted: acceptedFiles.length > 0,
+      acceptedFileIds: acceptedFiles.map(x => x.id)
     })
   }).catch(() => {});
 
-  if (acceptedIds.length > 0) {
-    showToast(`Accepted ${acceptedIds.length} files. Receiving...`);
+  if (acceptedFiles.length > 0) {
+    showToast(`Accepted ${acceptedFiles.length} files. Starting download...`);
+    const cid = getClientId();
+    acceptedFiles.forEach((item, idx) => {
+      setTimeout(() => {
+        const a = document.createElement('a');
+        a.href = `/download?id=${encodeURIComponent(item.id)}&file=${item.name}&clientId=${encodeURIComponent(cid)}`;
+        a.download = decodeURIComponent(item.name) || 'download';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => a.remove(), 1000);
+      }, idx * 600);
+    });
   } else {
     showToast('Batch transfer declined');
   }
@@ -3120,19 +3339,23 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('nicknameDisplay').textContent = getSavedNickname();
   document.getElementById('portalUrlDisplay').textContent = window.location.origin;
 
+  checkOnboarding();
   loadHostInfo();
   loadDiscoveredDevices();
   loadAvailableFiles();
   loadHistory();
   initSSE();
 
-  // Send initial heartbeat with nickname
+  // Send initial role as Receiver (ready to receive from Host PC) and heartbeat with nickname
+  fetch('/api/client-role?clientId=' + getClientId() + '&role=Receiver&name=' + encodeURIComponent(getSavedNickname()), { method: 'POST' }).catch(() => {});
   fetch('/api/heartbeat?clientId=' + getClientId() + '&name=' + encodeURIComponent(getSavedNickname()), { method: 'POST' }).catch(() => {});
 
-  // Recurring heartbeat
+  // Recurring heartbeat & discovery refresh
   setInterval(() => {
     fetch('/api/heartbeat?clientId=' + getClientId() + '&name=' + encodeURIComponent(getSavedNickname()), { method: 'POST' }).catch(() => {});
-  }, 8000);
+    loadDiscoveredDevices();
+    loadHostInfo();
+  }, 6000);
 });
 </script>
 

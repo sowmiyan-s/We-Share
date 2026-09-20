@@ -47,6 +47,7 @@ namespace WeShare.Core.Transfer
         public event Action<FileTransferState>? WebTransferCompleted;
         public event Action<FileTransferState>? WebTransferFailed;
         public event Action<string>? WebClientHeartbeat;
+        public event Action<string, string>? WebClientRoleChanged;
         public event Action<string, string, string>? WebOfferDeclined;
         public Func<FileTransferState, Task<bool>>? WebFileSharedCallback { get; set; }
         public Func<ConnectionRequest, Task<bool>>? ConnectionRequestCallback { get; set; }
@@ -122,6 +123,7 @@ namespace WeShare.Core.Transfer
             public string ClientId { get; set; } = "";
             public string Name { get; set; } = "";
             public string IpAddress { get; set; } = "";
+            public string Role { get; set; } = "Receiver";
             public StreamWriter? EventWriter { get; set; }
         }
 
@@ -229,7 +231,11 @@ namespace WeShare.Core.Transfer
             await _webClientsLock.WaitAsync();
             try
             {
-                var data = $"data: {type}\n\n";
+                int colon = type.IndexOf(':');
+                var data = colon > 0
+                    ? $"event: {type[..colon]}\ndata: {type[(colon + 1)..]}\n\n"
+                    : $"data: {type}\n\n";
+
                 foreach (var kvp in _activeWebClients)
                 {
                     if (kvp.Value.EventWriter != null)
@@ -255,7 +261,12 @@ namespace WeShare.Core.Transfer
                 {
                     try
                     {
-                        await clientInfo.EventWriter.WriteAsync($"data: {type}\n\n");
+                        int colon = type.IndexOf(':');
+                        var data = colon > 0
+                            ? $"event: {type[..colon]}\ndata: {type[(colon + 1)..]}\n\n"
+                            : $"data: {type}\n\n";
+
+                        await clientInfo.EventWriter.WriteAsync(data);
                         await clientInfo.EventWriter.FlushAsync();
                     }
                     catch
@@ -405,7 +416,7 @@ namespace WeShare.Core.Transfer
                     // --- Read Request Body for Non-Upload POSTs ---
                     string bodyString = string.Empty;
                     JsonElement? jsonBody = null;
-                    if (method == "POST" && path != "/api/upload" &&
+                    if (method == "POST" && path != "/api/upload" && path != "/upload" &&
                         headers.TryGetValue("Content-Length", out var clStr) && int.TryParse(clStr, out int contentLen) && contentLen > 0 && contentLen < 1048576)
                     {
                         byte[] bodyBuf = new byte[contentLen];
@@ -472,7 +483,13 @@ namespace WeShare.Core.Transfer
                     {
                         string remoteIp = client.Client.RemoteEndPoint is System.Net.IPEndPoint rep ? rep.Address.ToString() : "unknown";
                         WebClientConnected?.Invoke("Web Portal", remoteIp);
-                        await SendJson(stream, new { name = _localDevice.Name, ip = _localDevice.IpAddress });
+                        bool isRecv = string.Equals(_localDevice.Role, "Receiver", StringComparison.OrdinalIgnoreCase) || _localDevice.IsReceiver;
+                        await SendJson(stream, new { 
+                            name = _localDevice.DisplayName, 
+                            ip = _localDevice.IpAddress,
+                            role = _localDevice.Role,
+                            isReceiver = isRecv
+                        });
                     }
 
                     else if (method == "GET" && path == "/api/devices")
@@ -493,11 +510,66 @@ namespace WeShare.Core.Transfer
                         await SendJson(stream, new { success = true, ip = remoteIp, authenticated = true });
                     }
 
+                    else if (path == "/api/client-role")
+                    {
+                        string? clientId = GetParam("clientId");
+                        string? role = GetParam("role", "Receiver");
+                        string? name = GetParam("name");
+                        if (!string.IsNullOrEmpty(clientId))
+                        {
+                            WebClientInfo? newInfo = null;
+                            await _webClientsLock.WaitAsync();
+                            try
+                            {
+                                if (_activeWebClients.TryGetValue(clientId, out var winfo))
+                                {
+                                    winfo.Role = role ?? "Receiver";
+                                    if (!string.IsNullOrEmpty(name)) winfo.Name = Uri.UnescapeDataString(name);
+                                }
+                                else
+                                {
+                                    string remoteIp = client.Client.RemoteEndPoint is System.Net.IPEndPoint rep ? rep.Address.ToString() : "unknown";
+                                    newInfo = new WebClientInfo
+                                    {
+                                        ClientId = clientId,
+                                        Name = !string.IsNullOrEmpty(name) ? Uri.UnescapeDataString(name) : "Web Client",
+                                        Role = role ?? "Receiver",
+                                        IpAddress = remoteIp
+                                    };
+                                    _activeWebClients[clientId] = newInfo;
+                                }
+                            }
+                            finally { _webClientsLock.Release(); }
+
+                            if (newInfo != null)
+                            {
+                                WebClientConnectedEx?.Invoke(newInfo);
+                            }
+                            WebClientRoleChanged?.Invoke(clientId, role ?? "Receiver");
+                        }
+                        await SendJson(stream, new { success = true, role = role ?? "Receiver" });
+                    }
+
                     else if (path == "/api/heartbeat")
                     {
-                        string? cId = queryParams.GetValueOrDefault("clientId");
+                        string? cId = queryParams.GetValueOrDefault("clientId") ?? GetParam("clientId");
+                        string? name = queryParams.GetValueOrDefault("name") ?? GetParam("name");
+                        string? role = queryParams.GetValueOrDefault("role") ?? GetParam("role");
                         if (!string.IsNullOrEmpty(cId))
                         {
+                            if (!string.IsNullOrEmpty(name) || !string.IsNullOrEmpty(role))
+                            {
+                                await _webClientsLock.WaitAsync();
+                                try
+                                {
+                                    if (_activeWebClients.TryGetValue(cId, out var winfo))
+                                    {
+                                        if (!string.IsNullOrEmpty(name)) winfo.Name = Uri.UnescapeDataString(name);
+                                        if (!string.IsNullOrEmpty(role)) winfo.Role = role;
+                                    }
+                                }
+                                finally { _webClientsLock.Release(); }
+                            }
                             WebClientHeartbeat?.Invoke(cId);
                         }
                         await SendJson(stream, new { success = true });
@@ -938,6 +1010,7 @@ namespace WeShare.Core.Transfer
                             {
                                 resultFiles.AddRange(specFiles);
                             }
+                            resultFiles.AddRange(_sharedFiles);
                         }
                         finally { _filesLock.Release(); }
                         await SendJson(stream, resultFiles);
@@ -947,6 +1020,7 @@ namespace WeShare.Core.Transfer
                     {
                         string clientId = queryParams.GetValueOrDefault("clientId", Guid.NewGuid().ToString("n"));
                         string clientName = queryParams.GetValueOrDefault("name", "Web Client");
+                        string clientRole = queryParams.GetValueOrDefault("role", "Receiver");
                         string remoteIp = client.Client.RemoteEndPoint is System.Net.IPEndPoint rep ? rep.Address.ToString() : "unknown";
 
                         var header = "HTTP/1.1 200 OK\r\n" +
@@ -963,6 +1037,7 @@ namespace WeShare.Core.Transfer
                         {
                             ClientId = clientId,
                             Name = clientName,
+                            Role = clientRole,
                             IpAddress = remoteIp,
                             EventWriter = writer
                         };
@@ -988,32 +1063,30 @@ namespace WeShare.Core.Transfer
                         catch { }
                         finally
                         {
+                            bool wasRemoved = false;
                             await _webClientsLock.WaitAsync();
                             try
                             {
                                 if (_activeWebClients.TryGetValue(clientId, out var stored) && stored == clientInfo)
                                 {
                                     _activeWebClients.Remove(clientId);
+                                    wasRemoved = true;
                                 }
                             }
                             finally { _webClientsLock.Release(); }
 
-                            await _filesLock.WaitAsync();
-                            try
+                            if (wasRemoved)
                             {
-                                _clientSpecificFiles.Remove(clientId);
+                                WebClientDisconnectedEx?.Invoke(clientId);
                             }
-                            finally { _filesLock.Release(); }
-
-                            WebClientDisconnectedEx?.Invoke(clientId);
                         }
                     }
 
                     else if (method == "GET" && path == "/download")
                     {
                         string? id = queryParams.GetValueOrDefault("id") ?? queryParams.GetValueOrDefault("fileId");
+                        string? fileNameParam = queryParams.GetValueOrDefault("file") ?? queryParams.GetValueOrDefault("name");
                         string? clientId = queryParams.GetValueOrDefault("clientId");
-
 
                         SharedFile? file = null;
                         await _filesLock.WaitAsync();
@@ -1028,6 +1101,18 @@ namespace WeShare.Core.Transfer
                                 if (file == null)
                                 {
                                     file = _sharedFiles.FirstOrDefault(f => string.Equals(f.Id, id, StringComparison.OrdinalIgnoreCase));
+                                }
+                            }
+                            if (file == null && !string.IsNullOrEmpty(fileNameParam))
+                            {
+                                string unescapedName = Uri.UnescapeDataString(fileNameParam);
+                                if (!string.IsNullOrEmpty(clientId) && _clientSpecificFiles.TryGetValue(clientId, out var list2))
+                                {
+                                    file = list2.FirstOrDefault(f => string.Equals(f.Name, unescapedName, StringComparison.OrdinalIgnoreCase));
+                                }
+                                if (file == null)
+                                {
+                                    file = _sharedFiles.FirstOrDefault(f => string.Equals(f.Name, unescapedName, StringComparison.OrdinalIgnoreCase));
                                 }
                             }
                         }
@@ -1131,19 +1216,31 @@ namespace WeShare.Core.Transfer
                             string rawName = headers.GetValueOrDefault("X-File-Name") ?? queryParams.GetValueOrDefault("name") ?? "upload.dat";
                             string filename = Path.GetFileName(Uri.UnescapeDataString(rawName));
                             string rawRelPath = headers.GetValueOrDefault("X-Relative-Path") ?? queryParams.GetValueOrDefault("relativePath") ?? "";
+                            string webSharedDir = Path.Combine(_saveDirectory, "web_shared");
+                            Directory.CreateDirectory(webSharedDir);
                             string destPath;
                             if (!string.IsNullOrEmpty(rawRelPath))
                             {
-                                string relPath = Uri.UnescapeDataString(rawRelPath);
-                                string relDir = Path.GetDirectoryName(relPath) ?? "";
-                                string targetDir = Path.Combine(_saveDirectory, "web_shared", relDir);
+                                string cleanRel = Uri.UnescapeDataString(rawRelPath).Replace('\\', '/').TrimStart('/');
+                                var pathSegments = cleanRel.Split('/', StringSplitOptions.RemoveEmptyEntries)
+                                                           .Where(p => p != "." && p != "..")
+                                                           .ToArray();
+                                string safeRel = Path.Combine(pathSegments);
+                                string targetDir = string.IsNullOrEmpty(safeRel) ? webSharedDir : Path.Combine(webSharedDir, Path.GetDirectoryName(safeRel) ?? "");
+                                string fullTarget = Path.GetFullPath(targetDir);
+                                string fullBase = Path.GetFullPath(webSharedDir);
+                                if (!fullTarget.StartsWith(fullBase, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    targetDir = webSharedDir;
+                                }
+
                                 Directory.CreateDirectory(targetDir);
-                                destPath = Path.Combine(targetDir, Path.GetFileName(relPath));
+                                string safeFileName = Path.GetFileName(safeRel);
+                                if (string.IsNullOrWhiteSpace(safeFileName)) safeFileName = filename;
+                                destPath = Path.Combine(targetDir, safeFileName);
                             }
                             else
                             {
-                                string webSharedDir = Path.Combine(_saveDirectory, "web_shared");
-                                Directory.CreateDirectory(webSharedDir);
                                 destPath = GetUniqueFilePath(webSharedDir, filename);
                             }
 
