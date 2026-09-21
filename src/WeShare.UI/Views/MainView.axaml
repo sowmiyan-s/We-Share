@@ -922,6 +922,128 @@
             </Grid>
 
             <!-- ========================================== -->
+            <!-- 4.5 DEDICATED FULL ACTIVE TRANSFER PANEL   -->
+            <!-- ========================================== -->
+            <Grid x:Name="ActiveTransferPanel" IsVisible="False" Classes="SignalPanel">
+               <Grid RowDefinitions="Auto, Auto, *, Auto" MaxWidth="920" HorizontalAlignment="Stretch">
+                  
+                  <!-- 1. Header Banner & Live Connection Card -->
+                  <Border Grid.Row="0" Classes="GlassCard" Padding="20,16" Margin="0,0,0,16">
+                     <Grid ColumnDefinitions="Auto, *, Auto">
+                        <Border Grid.Column="0" Width="46" Height="46" CornerRadius="23" Background="#1A1E30" BorderBrush="#2A3150" BorderThickness="1" Margin="0,0,14,0" VerticalAlignment="Center">
+                           <Path x:Name="ActiveTransferDirIcon" Data="{StaticResource IconTransfer}" Fill="#A855F7" Width="20" Height="20" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
+                           <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                              <Border x:Name="ActiveTransferRoleBadge" Background="#25173B" BorderBrush="#7C3AED" BorderThickness="1" CornerRadius="12" Padding="8,3">
+                                 <TextBlock x:Name="ActiveTransferRoleText" Text="SENDING IN PROGRESS" FontSize="10" FontWeight="Bold" Foreground="#A855F7" LetterSpacing="0.8"/>
+                              </Border>
+                              <Border Background="#102A24" BorderBrush="#10B981" BorderThickness="1" CornerRadius="12" Padding="8,3">
+                                 <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+                                    <Border Width="6" Height="6" CornerRadius="3" Background="#10B981"/>
+                                    <TextBlock Text="P2P DIRECT LINK" FontSize="10" FontWeight="Bold" Foreground="#10B981"/>
+                                 </StackPanel>
+                              </Border>
+                           </StackPanel>
+                           <TextBlock x:Name="ActiveTransferPeerInfo" Text="Connected to Peer" FontSize="14" FontWeight="SemiBold" Foreground="#FFFFFF"/>
+                        </StackPanel>
+
+                        <Button Grid.Column="2" x:Name="ActiveTransferCancelBtn" Content="Cancel Transfer" Click="CancelActiveTransferSession_Click" Classes="GhostBtn" Padding="14,8" FontSize="11" Foreground="#EF4444" BorderBrush="#3A1D28" VerticalAlignment="Center"/>
+                     </Grid>
+                  </Border>
+
+                  <!-- 2. Primary Overall Progress & Speed Metrics Card -->
+                  <Border Grid.Row="1" Classes="GlassCard" Padding="24" Margin="0,0,0,16">
+                     <Grid RowDefinitions="Auto, 16, Auto, 14, Auto, 12, Auto">
+                        <!-- Top Metrics Row -->
+                        <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
+                           <StackPanel Spacing="3">
+                              <TextBlock Text="OVERALL BATCH PROGRESS" FontSize="11" FontWeight="Bold" Foreground="#94A3B8" LetterSpacing="0.8"/>
+                              <TextBlock x:Name="ActiveTransferSummaryFilesText" Text="Preparing file transfer..." FontSize="16" FontWeight="Bold" Foreground="#FFFFFF"/>
+                           </StackPanel>
+                           <TextBlock Grid.Column="1" x:Name="ActiveTransferBigPctText" Text="0%" FontSize="32" FontWeight="ExtraBold" Foreground="#A855F7" VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <!-- Main Progress Bar -->
+                        <ProgressBar Grid.Row="2" x:Name="ActiveTransferMainProgressBar" Height="8" CornerRadius="4" Foreground="{DynamicResource BrandGradientHBrush}" Background="#161824" Minimum="0" Maximum="100" Value="0"/>
+
+                        <!-- Speed & ETA Stats Grid -->
+                        <Grid Grid.Row="4" ColumnDefinitions="*, *, *, *">
+                           <Border Grid.Column="0" Background="#121420" CornerRadius="8" Padding="12,10" Margin="0,0,6,0">
+                              <StackPanel Spacing="2">
+                                 <TextBlock Text="CURRENT SPEED" FontSize="10" FontWeight="Bold" Foreground="#64748B"/>
+                                 <TextBlock x:Name="ActiveTransferSpeedText" Text="0.0 MB/s" FontSize="14" FontWeight="Bold" Foreground="#06B6D4"/>
+                              </StackPanel>
+                           </Border>
+                           <Border Grid.Column="1" Background="#121420" CornerRadius="8" Padding="12,10" Margin="3,0,3,0">
+                              <StackPanel Spacing="2">
+                                 <TextBlock Text="ESTIMATED TIME" FontSize="10" FontWeight="Bold" Foreground="#64748B"/>
+                                 <TextBlock x:Name="ActiveTransferEtaText" Text="--:--" FontSize="14" FontWeight="Bold" Foreground="#F8FAFC"/>
+                              </StackPanel>
+                           </Border>
+                           <Border Grid.Column="2" Background="#121420" CornerRadius="8" Padding="12,10" Margin="3,0,3,0">
+                              <StackPanel Spacing="2">
+                                 <TextBlock Text="TRANSFERRED" FontSize="10" FontWeight="Bold" Foreground="#64748B"/>
+                                 <TextBlock x:Name="ActiveTransferBytesText" Text="0 MB / 0 MB" FontSize="14" FontWeight="Bold" Foreground="#F8FAFC"/>
+                              </StackPanel>
+                           </Border>
+                           <Border Grid.Column="3" Background="#121420" CornerRadius="8" Padding="12,10" Margin="6,0,0,0">
+                              <StackPanel Spacing="2">
+                                 <TextBlock Text="FILES COMPLETED" FontSize="10" FontWeight="Bold" Foreground="#64748B"/>
+                                 <TextBlock x:Name="ActiveTransferFilesCountText" Text="0 / 0" FontSize="14" FontWeight="Bold" Foreground="#10B981"/>
+                              </StackPanel>
+                           </Border>
+                        </Grid>
+
+                        <!-- Speed Graph Sparkline -->
+                        <controls:SpeedGraphControl Grid.Row="6" x:Name="ActiveTransferSpeedGraph" Height="48" Margin="0,4,0,0"/>
+                     </Grid>
+                  </Border>
+
+                  <!-- 3. File-by-File Transfer Progress List -->
+                  <Border Grid.Row="2" Classes="GlassCard" Padding="20" MinHeight="220">
+                     <Grid RowDefinitions="Auto, 12, *">
+                        <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
+                           <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                              <TextBlock Text="Batch Transfer Queue" FontSize="14" FontWeight="Bold" Foreground="#FFFFFF"/>
+                              <TextBlock x:Name="ActiveTransferQueueCount" Text="(0 files)" FontSize="12" Foreground="#94A3B8" VerticalAlignment="Center"/>
+                           </StackPanel>
+                           <TextBlock Grid.Column="1" Text="Status &amp; Progress" FontSize="11" FontWeight="SemiBold" Foreground="#64748B" VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <ScrollViewer Grid.Row="2" MaxHeight="300" VerticalScrollBarVisibility="Auto">
+                           <ItemsControl x:Name="ActiveTransferBatchList">
+                              <ItemsControl.ItemTemplate>
+                                 <DataTemplate x:DataType="views:ActiveBatchFileItem">
+                                    <Border Background="#131624" BorderBrush="#1E2338" BorderThickness="1" CornerRadius="10" Padding="14,10" Margin="0,0,0,8">
+                                       <Grid ColumnDefinitions="Auto, *, Auto">
+                                          <Border Grid.Column="0" Width="36" Height="36" CornerRadius="8" Background="#1E2235" Margin="0,0,12,0" VerticalAlignment="Center">
+                                             <Path Data="{StaticResource IconFileGeneric}" Fill="#A5B4FC" Width="16" Height="16" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                          </Border>
+                                          <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
+                                             <TextBlock Text="{Binding FileName}" FontSize="13" FontWeight="SemiBold" Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
+                                             <Grid ColumnDefinitions="Auto, *">
+                                                <TextBlock Grid.Column="0" Text="{Binding FormattedSize}" FontSize="11" Foreground="#64748B" Margin="0,0,12,0"/>
+                                                <ProgressBar Grid.Column="1" Height="4" Value="{Binding ProgressPercentage}" IsVisible="{Binding IsTransferring}" Foreground="#7C3AED" Background="#262A3D" CornerRadius="2" VerticalAlignment="Center"/>
+                                             </Grid>
+                                          </StackPanel>
+                                          <Border Grid.Column="2" Background="#1A1E30" BorderBrush="{Binding StatusBadgeColor}" BorderThickness="1" CornerRadius="12" Padding="10,4" Margin="12,0,0,0" VerticalAlignment="Center">
+                                             <TextBlock Text="{Binding StatusBadgeText}" FontSize="11" FontWeight="Bold" Foreground="{Binding StatusBadgeColor}"/>
+                                          </Border>
+                                       </Grid>
+                                    </Border>
+                                 </DataTemplate>
+                              </ItemsControl.ItemTemplate>
+                           </ItemsControl>
+                        </ScrollViewer>
+                     </Grid>
+                  </Border>
+
+               </Grid>
+            </Grid>
+
+            <!-- ========================================== -->
             <!-- 5. ACTIVE TRANSFERS MONITOR                -->
             <!-- ========================================== -->
             <Grid x:Name="TransfersPanel" IsVisible="False" Classes="SignalPanel" RowDefinitions="Auto, Auto, *">
@@ -1760,6 +1882,38 @@
              <Grid ColumnDefinitions="*, 12, *">
                 <Button Grid.Column="0" Content="Open Downloads" Click="OpenDownloadFolder_Click" Classes="GhostBtn" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="14,10"/>
                 <Button Grid.Column="2" Content="Done" Click="CloseTransferSuccessModal_Click" Classes="PrimaryBtn" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="14,10" FontWeight="Bold"/>
+             </Grid>
+          </StackPanel>
+       </Border>
+    </Grid>
+
+    <!-- 0.25 Transfer Failure / Cancelled Modal -->
+    <Grid x:Name="TransferFailureModal" IsVisible="False" Background="#B0000000" ZIndex="5400">
+       <Border Background="#11131C" BorderBrush="#3D1C24" BorderThickness="1" CornerRadius="16" Padding="32" Width="400" HorizontalAlignment="Center" VerticalAlignment="Center" BoxShadow="0 20 60 0 #A0000000">
+          <StackPanel Spacing="16">
+             <Border Width="64" Height="64" CornerRadius="32" Background="#20EF4444" BorderBrush="#40EF4444" BorderThickness="1.5" HorizontalAlignment="Center">
+                <Path Data="{StaticResource IconClose}" Fill="#EF4444" Width="22" Height="22" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+             </Border>
+
+             <StackPanel Spacing="4" HorizontalAlignment="Center">
+                <TextBlock x:Name="TransferFailureTitle" Text="Transfer Failed" FontSize="18" FontWeight="Bold" Foreground="#EF4444" HorizontalAlignment="Center"/>
+                <TextBlock x:Name="TransferFailureSubtitle" Text="The file transfer could not be completed." FontSize="12" Foreground="#94A3B8" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center"/>
+             </StackPanel>
+
+             <!-- Failure Details Card -->
+             <Border Background="#161824" BorderBrush="#222638" BorderThickness="1" CornerRadius="10" Padding="16,12">
+                <Grid RowDefinitions="Auto, Auto" ColumnDefinitions="*, Auto">
+                   <TextBlock Grid.Row="0" Grid.Column="0" Text="Reason / Details:" FontSize="12" Foreground="#64748B" Margin="0,3"/>
+                   <TextBlock Grid.Row="0" Grid.Column="1" x:Name="TransferFailureReason" Text="Cancelled by user" FontSize="12" FontWeight="Bold" Foreground="#F87171" Margin="0,3" TextWrapping="Wrap"/>
+
+                   <TextBlock Grid.Row="1" Grid.Column="0" Text="Remote Device:" FontSize="12" Foreground="#64748B" Margin="0,3"/>
+                   <TextBlock Grid.Row="1" Grid.Column="1" x:Name="TransferFailurePeerName" Text="Peer" FontSize="12" FontWeight="Bold" Foreground="#818CF8" Margin="0,3"/>
+                </Grid>
+             </Border>
+
+             <Grid ColumnDefinitions="*, 12, *">
+                <Button Grid.Column="0" Content="Retry" x:Name="TransferFailureRetryBtn" Click="RetryFailedTransfer_Click" Classes="PrimaryBtn" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="14,10"/>
+                <Button Grid.Column="2" Content="Dismiss" Click="CloseTransferFailureModal_Click" Classes="GhostBtn" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="14,10"/>
              </Grid>
           </StackPanel>
        </Border>

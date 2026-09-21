@@ -28,6 +28,7 @@ namespace WeShare.Core.Transfer
         public string ClientId { get; set; } = Guid.NewGuid().ToString("n");
         public string PeerName { get; set; } = "";
         public string PeerIp { get; set; } = "";
+        public int LocalPort { get; set; }
         public string PeerType { get; set; } = "PC";
         public string Role { get; set; } = "Sender"; // "Sender" or "Receiver"
     }
@@ -109,6 +110,15 @@ namespace WeShare.Core.Transfer
             {
                 try { client.Close(); } catch { }
             }
+        }
+
+        public void CancelAll()
+        {
+            foreach (var kvp in _activeClients)
+            {
+                try { kvp.Value.Close(); } catch { }
+            }
+            _activeClients.Clear();
         }
 
         public event Action<FileTransferState>? TransferStarted;
@@ -293,7 +303,7 @@ namespace WeShare.Core.Transfer
                     Name = req.PeerName,
                     Type = req.PeerType,
                     IpAddress = remoteIp,
-                    Port = _listenPort,
+                    Port = req.LocalPort > 0 ? req.LocalPort : _listenPort,
                     ConnectionStatus = "Connected",
                     Role = req.Role == "Receiver" ? "Receiver" : "Sender"
                 };
@@ -477,6 +487,7 @@ namespace WeShare.Core.Transfer
                 ClientId = Guid.NewGuid().ToString("n"),
                 PeerName = LocalName,
                 PeerIp = targetIp,
+                LocalPort = _listenPort,
                 PeerType = LocalType,
                 Role = role
             };

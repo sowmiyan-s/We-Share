@@ -1904,6 +1904,78 @@ input[type=""file""] {
         <span class=""url-text"" id=""portalUrlDisplay"">http://...</span>
         <button class=""copy-btn"" onclick=""copyPortalUrl()"">COPY</button>
       </div>
+  <!-- ========================================================= -->
+  <!-- 5. DEDICATED FULL ACTIVE TRANSFER VIEW                     -->
+  <!-- ========================================================= -->
+  <div class=""tab-view"" id=""viewTransfer"">
+    <div class=""card-section"">
+      
+      <!-- Top Session Card -->
+      <div style=""background:var(--panel); border:1px solid var(--border); border-radius:var(--radius-md); padding:18px; margin-bottom:16px; display:flex; align-items:center; justify-content:space-between;"">
+        <div style=""display:flex; align-items:center; gap:12px;"">
+          <div style=""width:42px; height:42px; border-radius:21px; background:rgba(124,58,237,0.18); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; color:var(--primary-light);"">
+            <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2.2"" stroke-linecap=""round"" stroke-linejoin=""round"" style=""width:20px;height:20px;""><path d=""M17 3L21 7L17 11""/><path d=""M3 13L7 17L3 21""/><path d=""M21 7H3""/><path d=""M3 17H21""/></svg>
+          </div>
+          <div>
+            <div style=""display:flex; align-items:center; gap:6px; margin-bottom:3px;"">
+              <span id=""transferPageRoleBadge"" style=""padding:2px 8px; border-radius:10px; background:#25173B; border:1px solid #7C3AED; font-size:10px; font-weight:800; color:#A855F7; letter-spacing:0.5px;"">UPLOADING</span>
+              <span style=""padding:2px 8px; border-radius:10px; background:#102A24; border:1px solid #10B981; font-size:10px; font-weight:800; color:#10B981;"">DIRECT LINK</span>
+            </div>
+            <div id=""transferPagePeerName"" style=""font-size:15px; font-weight:700; color:var(--text);"">Host PC</div>
+          </div>
+        </div>
+        <button onclick=""cancelActiveUpload()"" class=""cb-btn"" style=""background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.3); color:#EF4444; font-size:11px; padding:8px 14px;"">
+          Cancel Transfer
+        </button>
+      </div>
+
+      <!-- Main Progress & Telemetry Card -->
+      <div style=""background:var(--panel); border:1px solid var(--border); border-radius:var(--radius-md); padding:22px; margin-bottom:16px;"">
+        <div style=""display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:12px;"">
+          <div>
+            <div style=""font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:4px;"">Overall Progress</div>
+            <div id=""transferPageFileTitle"" style=""font-size:16px; font-weight:800; color:var(--text);"">Preparing transfer...</div>
+          </div>
+          <div id=""transferPagePercentText"" style=""font-size:28px; font-weight:900; color:#A855F7;"">0%</div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div style=""width:100%; height:8px; background:rgba(255,255,255,0.06); border-radius:4px; overflow:hidden; margin-bottom:16px;"">
+          <div id=""transferPageBarFill"" style=""height:100%; width:0%; background:linear-gradient(90deg, #4F46E5, #06B6D4); border-radius:4px; transition:width 0.15s ease;""></div>
+        </div>
+
+        <!-- Stats 4-Column Grid -->
+        <div style=""display:grid; grid-template-columns:repeat(auto-fit, minmax(110px, 1fr)); gap:8px;"">
+          <div style=""background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); border-radius:8px; padding:10px;"">
+            <div style=""font-size:10px; font-weight:700; color:var(--text-muted);"">SPEED</div>
+            <div id=""transferPageSpeedText"" style=""font-size:14px; font-weight:800; color:var(--cyan); margin-top:2px;"">0.0 MB/s</div>
+          </div>
+          <div style=""background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); border-radius:8px; padding:10px;"">
+            <div style=""font-size:10px; font-weight:700; color:var(--text-muted);"">ESTIMATED TIME</div>
+            <div id=""transferPageEtaText"" style=""font-size:14px; font-weight:800; color:var(--text); margin-top:2px;"">--:--</div>
+          </div>
+          <div style=""background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); border-radius:8px; padding:10px;"">
+            <div style=""font-size:10px; font-weight:700; color:var(--text-muted);"">TRANSFERRED</div>
+            <div id=""transferPageBytesText"" style=""font-size:14px; font-weight:800; color:var(--text); margin-top:2px;"">0 B / 0 B</div>
+          </div>
+          <div style=""background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); border-radius:8px; padding:10px;"">
+            <div style=""font-size:10px; font-weight:700; color:var(--text-muted);"">FILES DONE</div>
+            <div id=""transferPageFilesText"" style=""font-size:14px; font-weight:800; color:var(--emerald); margin-top:2px;"">0 / 0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- File Queue Itemized List -->
+      <div style=""background:var(--panel); border:1px solid var(--border); border-radius:var(--radius-md); padding:18px;"">
+        <div style=""display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;"">
+          <span style=""font-size:14px; font-weight:800; color:var(--text);"">File Queue</span>
+          <span id=""transferPageQueueCount"" style=""font-size:11px; color:var(--text-muted);"">0 files</span>
+        </div>
+        <div id=""transferPageQueueList"" style=""display:flex; flex-direction:column; gap:8px; max-height:280px; overflow-y:auto; padding-right:4px;"">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -2025,6 +2097,34 @@ input[type=""file""] {
 </div>
 
 <!-- =========================================================== -->
+<!-- TRANSFER FAILURE / CANCELLED MODAL                          -->
+<!-- =========================================================== -->
+<div class=""modal-overlay"" id=""transferFailureModal"">
+  <div class=""modal-sheet"" style=""max-width:380px; text-align:center;"">
+    <div class=""modal-icon-disc"" style=""background:rgba(239, 68, 68, 0.15); color:#EF4444; width:64px; height:64px;"">
+      <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2.5"" stroke-linecap=""round"" stroke-linejoin=""round"" style=""width:32px; height:32px;""><line x1=""18"" y1=""6"" x2=""6"" y2=""18""/><line x1=""6"" y1=""6"" x2=""18"" y2=""18""/></svg>
+    </div>
+    <div class=""modal-title"" style=""color:#EF4444; font-size:18px; margin-top:4px;"">Transfer Interrupted</div>
+    <div class=""modal-desc"" id=""transferFailureDesc"" style=""font-size:13px;"">The file transfer was stopped or interrupted.</div>
+
+    <div style=""background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); border-radius:10px; padding:12px; margin:4px 0; text-align:left; font-size:12px;"">
+      <div style=""display:flex; justify-content:space-between; margin-bottom:6px;"">
+        <span style=""color:var(--text-dim);"">Reason:</span>
+        <span id=""failureReasonText"" style=""font-weight:700; color:#F87171;"">Cancelled by user</span>
+      </div>
+      <div style=""display:flex; justify-content:space-between;"">
+        <span style=""color:var(--text-dim);"">Connected Peer:</span>
+        <span id=""failurePeerName"" style=""font-weight:700; color:var(--primary-light);"">Host PC</span>
+      </div>
+    </div>
+
+    <div class=""modal-actions"" style=""margin-top:8px;"">
+      <button class=""modal-btn modal-btn-decline"" onclick=""closeFailureModal()"">Dismiss</button>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================== -->
 <!-- RESEND REQUEST MODAL                                        -->
 <!-- =========================================================== -->
 <div class=""modal-overlay"" id=""resendRequestModal"">
@@ -2114,6 +2214,8 @@ input[type=""file""] {
 let currentTargetId = 'pc';
 let stagedFiles = [];
 let isUploading = false;
+let isTransferActive = false;
+let activeTransferRole = 'Sender';
 let currentXhr = null;
 let speedHistory = [];
 const MAX_SPEED_POINTS = 36;
@@ -2307,10 +2409,18 @@ function updateThemeIcon(theme) {
 /* TAB SWITCHING                                                 */
 /* ------------------------------------------------------------- */
 function switchTab(name) {
+  if (isTransferActive && name !== 'transfer') {
+    showToast('File transfer in progress. Please wait or cancel the transfer.');
+    return;
+  }
+
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.tab-view').forEach(v => v.classList.remove('active'));
 
-  if (name === 'send') {
+  if (name === 'transfer') {
+    const vt = document.getElementById('viewTransfer');
+    if (vt) vt.classList.add('active');
+  } else if (name === 'send') {
     document.getElementById('tabBtnSend').classList.add('active');
     document.getElementById('viewSend').classList.add('active');
     fetch('/api/client-role?clientId=' + getClientId() + '&role=Sender&name=' + encodeURIComponent(getSavedNickname()), { method: 'POST' }).catch(() => {});
@@ -2563,8 +2673,58 @@ async function startBatchSend() {
   if (total === 0) {
     showToast('No files were accepted by recipient');
     isUploading = false;
+    isTransferActive = false;
     document.getElementById('sendAllBtn').disabled = false;
     return;
+  }
+
+  isTransferActive = true;
+  activeTransferRole = 'Sender';
+  switchTab('transfer');
+
+  // Populate viewTransfer
+  const roleBadge = document.getElementById('transferPageRoleBadge');
+  if (roleBadge) {
+    roleBadge.textContent = 'UPLOADING';
+    roleBadge.style.color = '#A855F7';
+    roleBadge.style.borderColor = '#7C3AED';
+  }
+  const peerLabel = document.getElementById('transferPagePeerName');
+  if (peerLabel) peerLabel.textContent = pairedHostName || 'Host PC';
+
+  const queueCountEl = document.getElementById('transferPageQueueCount');
+  if (queueCountEl) queueCountEl.textContent = `${total} file${total > 1 ? 's' : ''}`;
+  const filesDoneEl = document.getElementById('transferPageFilesText');
+  if (filesDoneEl) filesDoneEl.textContent = `0 / ${total}`;
+  const totalBatchBytes = filesToSend.reduce((acc, f) => acc + (f.size || 0), 0);
+  const bytesDoneEl = document.getElementById('transferPageBytesText');
+  if (bytesDoneEl) bytesDoneEl.textContent = `0 B / ${formatBytes(totalBatchBytes)}`;
+
+  const queueList = document.getElementById('transferPageQueueList');
+  if (queueList) {
+    queueList.innerHTML = '';
+    filesToSend.forEach((f, idx) => {
+      const row = document.createElement('div');
+      row.id = 'transferPageQueueItem_' + idx;
+      row.style.display = 'flex';
+      row.style.alignItems = 'center';
+      row.style.justifyContent = 'space-between';
+      row.style.padding = '10px 14px';
+      row.style.borderRadius = '8px';
+      row.style.background = 'rgba(255,255,255,0.03)';
+      row.style.border = '1px solid var(--border-subtle)';
+      row.innerHTML = `
+        <div style=""display:flex; align-items:center; gap:10px; overflow:hidden;"">
+          <div style=""color:var(--text-muted);"">${getFileCategorySvg(f.name)}</div>
+          <div style=""display:flex; flex-direction:column; overflow:hidden;"">
+            <span style=""font-size:13px; font-weight:700; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"" title=""${f.name}"">${f.name}</span>
+            <span style=""font-size:11px; color:var(--text-dim);"">${formatBytes(f.size)}</span>
+          </div>
+        </div>
+        <span id=""transferPageQueueStatus_${idx}"" style=""font-size:11px; font-weight:700; color:var(--text-muted); padding:3px 8px; border-radius:6px; background:rgba(255,255,255,0.04);"">Waiting</span>
+      `;
+      queueList.appendChild(row);
+    });
   }
 
   const hud = document.getElementById('transferHud');
@@ -2575,14 +2735,19 @@ async function startBatchSend() {
   let failMessage = '';
 
   for (let i = 0; i < filesToSend.length; i++) {
+    if (!isUploading) break;
     const file = filesToSend[i];
     
-    // Highlight staged item in list
-    const originalIdx = stagedFiles.indexOf(file);
-    const itemEl = originalIdx >= 0 ? document.getElementById('stagedItem_' + originalIdx) : null;
-    if (itemEl) itemEl.style.borderColor = 'var(--cyan)';
+    // Highlight active queue item
+    const statusEl = document.getElementById('transferPageQueueStatus_' + i);
+    if (statusEl) {
+      statusEl.textContent = 'Transferring...';
+      statusEl.style.color = 'var(--cyan)';
+      statusEl.style.background = 'rgba(6,182,212,0.12)';
+    }
 
-    // Update HUD titles
+    const titleEl = document.getElementById('transferPageFileTitle');
+    if (titleEl) titleEl.textContent = `[${i + 1}/${total}] ${file.name}`;
     document.getElementById('hudFileName').textContent = `[${i + 1}/${total}] ${file.name}`;
     updateHudProgress(0, file.size, 0, '--');
     speedHistory = [];
@@ -2600,14 +2765,21 @@ async function startBatchSend() {
       successCount++;
       totalBytesTransferred += file.size;
 
-      if (itemEl) {
-        itemEl.style.borderColor = 'var(--emerald)';
-        itemEl.style.opacity = '0.7';
+      if (statusEl) {
+        statusEl.textContent = 'Completed';
+        statusEl.style.color = 'var(--emerald)';
+        statusEl.style.background = 'rgba(16,185,129,0.12)';
       }
+      if (filesDoneEl) filesDoneEl.textContent = `${successCount} / ${total}`;
+      if (bytesDoneEl) bytesDoneEl.textContent = `${formatBytes(totalBytesTransferred)} / ${formatBytes(totalBatchBytes)}`;
     } catch (err) {
       console.error('File upload failed:', err);
       failMessage = err.message || 'Upload error';
-      if (itemEl) itemEl.style.borderColor = 'var(--rose)';
+      if (statusEl) {
+        statusEl.textContent = 'Failed';
+        statusEl.style.color = '#EF4444';
+        statusEl.style.background = 'rgba(239,68,68,0.12)';
+      }
       if (failMessage.includes('declined') || failMessage.includes('aborted')) break;
     }
   }
@@ -2616,14 +2788,14 @@ async function startBatchSend() {
   document.getElementById('sendAllBtn').disabled = false;
   hud.classList.remove('active');
 
-  if (successCount > 0) {
+  if (successCount > 0 && successCount === total) {
     // Notify server of batch complete
     fetch(`/api/batch-complete?clientId=${encodeURIComponent(clientId)}&count=${successCount}&bytes=${totalBytesTransferred}`, { method: 'POST' }).catch(() => {});
     showTransferSuccessModal(true, pairedHostName, successCount, totalBytesTransferred);
     stagedFiles = [];
     renderStagingTray();
   } else {
-    showToast(`Upload failed: ${failMessage}`);
+    showTransferFailureModal(failMessage || 'Transfer was cancelled or interrupted.', pairedHostName);
   }
 
   loadHistory();
@@ -2658,43 +2830,42 @@ function streamFileUpload(file, uploadId, clientId, batchId, relativePath) {
     currentXhr = xhr;
 
     let uploadUrl = uploadId 
-      ? '/upload?clientId=' + encodeURIComponent(clientId) + '&id=' + encodeURIComponent(uploadId)
-      : '/upload?clientId=' + encodeURIComponent(clientId) + '&name=' + encodeURIComponent(file.name);
-    if (batchId) uploadUrl += '&batchId=' + encodeURIComponent(batchId);
-    if (relativePath) uploadUrl += '&relativePath=' + encodeURIComponent(relativePath);
+      ? `/upload?id=${encodeURIComponent(uploadId)}&clientId=${encodeURIComponent(clientId)}`
+      : `/upload?name=${encodeURIComponent(file.name)}&size=${file.size}&clientId=${encodeURIComponent(clientId)}&batchId=${encodeURIComponent(batchId)}&relPath=${encodeURIComponent(relativePath)}`;
 
-    xhr.open('POST', uploadUrl);
-    xhr.setRequestHeader('X-File-Name', encodeURIComponent(file.name));
-    if (relativePath) xhr.setRequestHeader('X-Relative-Path', encodeURIComponent(relativePath));
+    xhr.open('POST', uploadUrl, true);
 
-    let lastTime = performance.now();
     let lastLoaded = 0;
+    let lastTime = Date.now();
     let rollingSpeed = 0;
 
     xhr.upload.onprogress = (e) => {
-      if (!e.lengthComputable) return;
-      const now = performance.now();
-      const elapsed = (now - lastTime) / 1000;
+      if (e.lengthComputable && e.total > 0) {
+        const now = Date.now();
+        const dt = (now - lastTime) / 1000;
+        if (dt > 0.3) {
+          const bytesDiff = e.loaded - lastLoaded;
+          const currentSpeed = (bytesDiff / dt) / (1024 * 1024);
+          rollingSpeed = rollingSpeed === 0 ? currentSpeed : (rollingSpeed * 0.6 + currentSpeed * 0.4);
+          lastLoaded = e.loaded;
+          lastTime = now;
 
-      if (elapsed >= 0.2 || e.loaded === e.total) {
-        const bytesDiff = e.loaded - lastLoaded;
-        const currentSpeed = elapsed > 0 ? ((bytesDiff / elapsed) / 1000000) : 0; // MB/s
-        rollingSpeed = rollingSpeed === 0 ? currentSpeed : (rollingSpeed * 0.7 + currentSpeed * 0.3);
-
-        const percent = Math.min(100, Math.round((e.loaded / e.total) * 100));
-        let etaStr = '--';
-        if (rollingSpeed > 0.05) {
-          const remSeconds = Math.max(0, Math.round((e.total - e.loaded) / (rollingSpeed * 1000000)));
-          etaStr = remSeconds < 60 ? `${remSeconds}s` : `${Math.floor(remSeconds / 60)}m ${remSeconds % 60}s`;
+          speedHistory.push(rollingSpeed);
+          if (speedHistory.length > MAX_SPEED_POINTS) speedHistory.shift();
+          drawSpeedGraph();
         }
 
-        updateHudProgress(percent, e.total, e.loaded, rollingSpeed, etaStr);
-        speedHistory.push(rollingSpeed);
-        if (speedHistory.length > MAX_SPEED_POINTS) speedHistory.shift();
-        drawSpeedGraph();
+        const pct = Math.min(100, Math.round((e.loaded / e.total) * 100));
+        let etaStr = '--';
+        if (rollingSpeed > 0.05) {
+          const remBytes = e.total - e.loaded;
+          const remSec = Math.round((remBytes / (1024 * 1024)) / rollingSpeed);
+          const m = Math.floor(remSec / 60);
+          const s = remSec % 60;
+          etaStr = `${m}m ${s < 10 ? '0' : ''}${s}s`;
+        }
 
-        lastTime = now;
-        lastLoaded = e.loaded;
+        updateHudProgress(pct, e.total, e.loaded, rollingSpeed, etaStr);
       }
     };
 
@@ -2740,6 +2911,7 @@ function cancelActiveUpload() {
   document.getElementById('transferHud').classList.remove('active');
   document.getElementById('sendAllBtn').disabled = false;
   showToast('Transfer canceled');
+  showTransferFailureModal('Transfer cancelled by user.', pairedHostName);
 }
 
 function updateHudProgress(percent, totalBytes, loadedBytes, speedMb, etaStr) {
@@ -2747,6 +2919,16 @@ function updateHudProgress(percent, totalBytes, loadedBytes, speedMb, etaStr) {
   document.getElementById('hudSpeedText').textContent = (speedMb || 0).toFixed(1) + ' MB/s';
   document.getElementById('hudBytesText').textContent = `${formatBytes(loadedBytes)} / ${formatBytes(totalBytes)} (${percent}%)`;
   document.getElementById('hudEtaText').textContent = etaStr ? `ETA: ${etaStr}` : 'ETA: --';
+
+  // Also sync to viewTransfer dedicated panel
+  const pgBar = document.getElementById('transferPageBarFill');
+  if (pgBar) pgBar.style.width = percent + '%';
+  const pgPct = document.getElementById('transferPagePercentText');
+  if (pgPct) pgPct.textContent = percent + '%';
+  const pgSpeed = document.getElementById('transferPageSpeedText');
+  if (pgSpeed) pgSpeed.textContent = (speedMb || 0).toFixed(1) + ' MB/s';
+  const pgEta = document.getElementById('transferPageEtaText');
+  if (pgEta) pgEta.textContent = etaStr || '--:--';
 }
 
 function drawSpeedGraph() {
@@ -3207,17 +3389,78 @@ async function acceptSelectedBatchOffer() {
   }).catch(() => {});
 
   if (acceptedFiles.length > 0) {
+    isTransferActive = true;
+    activeTransferRole = 'Receiver';
+    switchTab('transfer');
+
+    const roleBadge = document.getElementById('transferPageRoleBadge');
+    if (roleBadge) {
+      roleBadge.textContent = 'DOWNLOADING';
+      roleBadge.style.color = '#10B981';
+      roleBadge.style.borderColor = '#10B981';
+    }
+    const peerLabel = document.getElementById('transferPagePeerName');
+    if (peerLabel) peerLabel.textContent = (pendingBatchManifest.senderName || pendingBatchManifest.SenderName || pairedHostName || 'Host PC');
+
+    const queueCountEl = document.getElementById('transferPageQueueCount');
+    if (queueCountEl) queueCountEl.textContent = `${acceptedFiles.length} files`;
+    const filesDoneEl = document.getElementById('transferPageFilesText');
+    if (filesDoneEl) filesDoneEl.textContent = `0 / ${acceptedFiles.length}`;
+
+    const queueList = document.getElementById('transferPageQueueList');
+    if (queueList) {
+      queueList.innerHTML = '';
+      acceptedFiles.forEach((item, idx) => {
+        const row = document.createElement('div');
+        row.id = 'transferPageQueueItem_' + idx;
+        row.style.display = 'flex';
+        row.style.alignItems = 'center';
+        row.style.justifyContent = 'space-between';
+        row.style.padding = '10px 14px';
+        row.style.borderRadius = '8px';
+        row.style.background = 'rgba(255,255,255,0.03)';
+        row.style.border = '1px solid var(--border-subtle)';
+        row.innerHTML = `
+          <div style=""display:flex; align-items:center; gap:10px; overflow:hidden;"">
+            <div style=""color:var(--text-muted);"">${getFileCategorySvg(item.name)}</div>
+            <span style=""font-size:13px; font-weight:700; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"" title=""${item.name}"">${item.name}</span>
+          </div>
+          <span id=""transferPageQueueStatus_${idx}"" style=""font-size:11px; font-weight:700; color:var(--text-muted); padding:3px 8px; border-radius:6px; background:rgba(255,255,255,0.04);"">Waiting</span>
+        `;
+        queueList.appendChild(row);
+      });
+    }
+
     showToast(`Accepted ${acceptedFiles.length} files. Starting download...`);
     const cid = getClientId();
+    let completedDownloads = 0;
     acceptedFiles.forEach((item, idx) => {
       setTimeout(() => {
+        const statusEl = document.getElementById('transferPageQueueStatus_' + idx);
+        if (statusEl) {
+          statusEl.textContent = 'Downloading...';
+          statusEl.style.color = 'var(--cyan)';
+        }
         const a = document.createElement('a');
         a.href = `/download?id=${encodeURIComponent(item.id)}&file=${item.name}&clientId=${encodeURIComponent(cid)}`;
         a.download = decodeURIComponent(item.name) || 'download';
         document.body.appendChild(a);
         a.click();
-        setTimeout(() => a.remove(), 1000);
-      }, idx * 600);
+        setTimeout(() => {
+          a.remove();
+          completedDownloads++;
+          if (statusEl) {
+            statusEl.textContent = 'Downloaded';
+            statusEl.style.color = 'var(--emerald)';
+          }
+          if (filesDoneEl) filesDoneEl.textContent = `${completedDownloads} / ${acceptedFiles.length}`;
+          const pct = Math.round((completedDownloads / acceptedFiles.length) * 100);
+          const bar = document.getElementById('transferPageBarFill');
+          if (bar) bar.style.width = pct + '%';
+          const pctText = document.getElementById('transferPagePercentText');
+          if (pctText) pctText.textContent = pct + '%';
+        }, 800);
+      }, idx * 700);
     });
   } else {
     showToast('Batch transfer declined');
@@ -3243,6 +3486,7 @@ function declineBatchOffer() {
 }
 
 function showTransferSuccessModal(isSender, peerName, fileCount, totalBytes) {
+  isTransferActive = false;
   const modal = document.getElementById('transferSuccessModal');
   const countEl = document.getElementById('successFileCount');
   const sizeEl = document.getElementById('successTotalSize');
@@ -3261,6 +3505,29 @@ function showTransferSuccessModal(isSender, peerName, fileCount, totalBytes) {
 function closeSuccessModal() {
   const modal = document.getElementById('transferSuccessModal');
   if (modal) modal.classList.remove('active');
+  isTransferActive = false;
+  switchTab(activeTransferRole === 'Sender' ? 'send' : 'receive');
+}
+
+function showTransferFailureModal(reason, peerName) {
+  isTransferActive = false;
+  const modal = document.getElementById('transferFailureModal');
+  const reasonEl = document.getElementById('failureReasonText');
+  const peerEl = document.getElementById('failurePeerName');
+  const descEl = document.getElementById('transferFailureDesc');
+
+  if (reasonEl) reasonEl.textContent = reason || 'Connection lost or cancelled';
+  if (peerEl) peerEl.textContent = peerName || 'Host PC';
+  if (descEl) descEl.textContent = 'The file transfer could not be completed.';
+
+  if (modal) modal.classList.add('active');
+}
+
+function closeFailureModal() {
+  const modal = document.getElementById('transferFailureModal');
+  if (modal) modal.classList.remove('active');
+  isTransferActive = false;
+  switchTab(activeTransferRole === 'Sender' ? 'send' : 'receive');
 }
 
 let pendingResendRequest = null;

@@ -61,6 +61,99 @@ namespace WeShare.UI.Views
         public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
     }
 
+    public enum TransferFileItemStatus
+    {
+        Waiting,
+        Transferring,
+        Completed,
+        Failed
+    }
+
+    public class ActiveBatchFileItem : System.ComponentModel.INotifyPropertyChanged
+    {
+        private TransferFileItemStatus _status = TransferFileItemStatus.Waiting;
+        private double _progressPercentage;
+        private string _statusText = "Waiting in queue";
+
+        public string FileId { get; set; } = "";
+        public string FileName { get; set; } = "";
+        public long FileSize { get; set; }
+        public string FormattedSize => FileTransferState.FormatBytes(FileSize);
+        public string RelativePath { get; set; } = "";
+
+        public TransferFileItemStatus Status
+        {
+            get => _status;
+            set
+            {
+                if (_status != value)
+                {
+                    _status = value;
+                    OnPropertyChanged(nameof(Status));
+                    OnPropertyChanged(nameof(IsWaiting));
+                    OnPropertyChanged(nameof(IsTransferring));
+                    OnPropertyChanged(nameof(IsCompleted));
+                    OnPropertyChanged(nameof(IsFailed));
+                    OnPropertyChanged(nameof(StatusBadgeColor));
+                    OnPropertyChanged(nameof(StatusBadgeText));
+                }
+            }
+        }
+
+        public double ProgressPercentage
+        {
+            get => _progressPercentage;
+            set
+            {
+                if (Math.Abs(_progressPercentage - value) > 0.01)
+                {
+                    _progressPercentage = value;
+                    OnPropertyChanged(nameof(ProgressPercentage));
+                    OnPropertyChanged(nameof(ProgressDisplay));
+                }
+            }
+        }
+
+        public string StatusText
+        {
+            get => _statusText;
+            set
+            {
+                if (_statusText != value)
+                {
+                    _statusText = value;
+                    OnPropertyChanged(nameof(StatusText));
+                }
+            }
+        }
+
+        public bool IsWaiting => _status == TransferFileItemStatus.Waiting;
+        public bool IsTransferring => _status == TransferFileItemStatus.Transferring;
+        public bool IsCompleted => _status == TransferFileItemStatus.Completed;
+        public bool IsFailed => _status == TransferFileItemStatus.Failed;
+
+        public string StatusBadgeColor => _status switch
+        {
+            TransferFileItemStatus.Completed => "#10B981",
+            TransferFileItemStatus.Transferring => "#A855F7",
+            TransferFileItemStatus.Failed => "#EF4444",
+            _ => "#64748B"
+        };
+
+        public string StatusBadgeText => _status switch
+        {
+            TransferFileItemStatus.Completed => "Completed",
+            TransferFileItemStatus.Transferring => $"{ProgressPercentage:F0}%",
+            TransferFileItemStatus.Failed => "Failed",
+            _ => "Waiting"
+        };
+
+        public string ProgressDisplay => $"{ProgressPercentage:F0}%";
+
+        public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+        protected void OnPropertyChanged(string prop) => PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(prop));
+    }
+
     public partial class MainView : UserControl
     {
         public const string CurrentVersion = "1.1.0";
@@ -94,6 +187,15 @@ namespace WeShare.UI.Views
         public ObservableCollection<StagedWebFile> StagedWebFiles { get; } = new();
         public ObservableCollection<QueueItem> WebClientSendQueue { get; } = new();
         public ObservableCollection<BatchCheckItem> BatchManifestItems { get; } = new();
+        public ObservableCollection<ActiveBatchFileItem> ActiveTransferBatchFiles { get; } = new();
+        private bool _isTransferInProgress = false;
+        private long _activeBatchTotalBytes = 0;
+        private long _activeBatchTransferredBytes = 0;
+        private int _activeBatchTotalCount = 0;
+        private int _activeBatchCompletedCount = 0;
+        private string _activeTransferPeerName = "";
+        private bool _activeTransferIsSender = true;
+        private DateTime _transferStartTime;
         private DeviceModel? _selectedWebClient;
         private readonly System.Collections.Concurrent.ConcurrentDictionary<string, System.Collections.Generic.List<QueueItem>> _lastDeclinedItems = new();
         private TaskCompletionSource<System.Collections.Generic.List<string>>? _batchManifestTcs;
@@ -140,6 +242,7 @@ namespace WeShare.UI.Views
             OutgoingList.ItemsSource  = ActiveSends;
             ReceivedFilesList.ItemsSource = LibraryFiles;
             if (WebClientSendQueueList != null) WebClientSendQueueList.ItemsSource = WebClientSendQueue;
+            if (ActiveTransferBatchList != null) ActiveTransferBatchList.ItemsSource = ActiveTransferBatchFiles;
 
             Devices.CollectionChanged += (_, _) => Dispatcher.UIThread.Post(UpdateEmptyState);
             ActiveReceivers.CollectionChanged += (_, _) => Dispatcher.UIThread.Post(UpdateEmptyState);
@@ -353,12 +456,19 @@ namespace WeShare.UI.Views
             UpdateEmptyState();
             NavHome_Click(this, new RoutedEventArgs());
 
-            // First-run onboarding check
+            // First-run onboarding check: only ask to set device name on first time opening after install
             var nameInit = _dbHelper.GetSetting("DeviceNameInitialized", "");
             if (string.IsNullOrEmpty(nameInit))
             {
-                if (WelcomeDeviceNameInput != null) WelcomeDeviceNameInput.Text = _localDevice.Name;
-                if (FirstRunWelcomeModal != null) FirstRunWelcomeModal.IsVisible = true;
+                if (!string.IsNullOrWhiteSpace(savedName))
+                {
+                    _dbHelper.SetSetting("DeviceNameInitialized", "true");
+                }
+                else
+                {
+                    if (WelcomeDeviceNameInput != null) WelcomeDeviceNameInput.Text = _localDevice.Name;
+                    if (FirstRunWelcomeModal != null) FirstRunWelcomeModal.IsVisible = true;
+                }
             }
 
             // Network check — auto-start hotspot or auto-join if no network
@@ -386,11 +496,18 @@ namespace WeShare.UI.Views
 
         private void ShowPanel(Control panel, string title, Button? navBtn = null)
         {
+            if (_isTransferInProgress && panel != ActiveTransferPanel)
+            {
+                ShowToast("File transfer is in progress! Please wait or cancel the transfer.");
+                return;
+            }
+
             if (SendDiscoveryPanel != null && SendDiscoveryPanel.IsVisible && panel != SendDiscoveryPanel)
             {
                 try { _platformService.StopBluetoothDiscovery(); } catch { }
             }
 
+            if (ActiveTransferPanel != null) ActiveTransferPanel.IsVisible = false;
             if (HomePanel != null) HomePanel.IsVisible = false;
             if (SettingsPanel != null) SettingsPanel.IsVisible = false;
             if (AboutPanel != null) AboutPanel.IsVisible = false;
@@ -878,7 +995,16 @@ namespace WeShare.UI.Views
                       ?? ((sender as Control)?.DataContext as DeviceModel);
             if (device == null) return;
 
-            SelectSendTarget(device);
+            if (SendQueue.Count > 0)
+            {
+                _sendTarget = device;
+                UpdateSendTargetUI();
+                StartSendSession(device);
+            }
+            else
+            {
+                SelectSendTarget(device);
+            }
         }
 
         public void SelectSendTarget(DeviceModel device)
@@ -1004,14 +1130,6 @@ namespace WeShare.UI.Views
 
         private void StartSendSession(DeviceModel device)
         {
-            // Strict ShareIt / Mi Share / Quick Share rule: only send to devices in Receiving state
-            bool isReceiver = device.IsReceiver || string.Equals(device.Role, "Receiver", StringComparison.OrdinalIgnoreCase);
-            if (!isReceiver)
-            {
-                ShowToast($"'{device.DisplayName}' is not in Receive mode. Please ask recipient to click 'Receive' first.");
-                return;
-            }
-
             var itemsToSend = SendQueue.ToList();
             if (itemsToSend.Count == 0 && _lastDeclinedItems.TryGetValue(device.Id ?? device.IpAddress, out var saved))
             {
@@ -1032,21 +1150,39 @@ namespace WeShare.UI.Views
             TransferDeclinedCard.IsVisible = false;
             _sendTarget = device;
             SendProgressBorder.IsVisible = true;
-
             _isSending = true;
             UpdateTransfersVisibility();
-            if (itemsToSend.Count > 0)
+
+            _isTransferInProgress = true;
+            _activeTransferIsSender = true;
+            _activeTransferPeerName = device.DisplayName;
+            _activeBatchTotalBytes = itemsToSend.Sum(x => x.Size);
+            _activeBatchTransferredBytes = 0;
+            _activeBatchTotalCount = itemsToSend.Count;
+            _activeBatchCompletedCount = 0;
+            _transferStartTime = DateTime.UtcNow;
+
+            ActiveTransferBatchFiles.Clear();
+            foreach (var item in itemsToSend)
             {
-                var first = itemsToSend[0];
-                UpdateActiveTransferDock(new FileTransferState
+                ActiveTransferBatchFiles.Add(new ActiveBatchFileItem
                 {
-                    FileName = first.Name,
-                    TotalBytes = first.Size,
-                    Direction = TransferDirection.Sent,
-                    PeerName = device.DisplayName,
-                    Status = TransferStatus.Sending
+                    FileName = item.Name,
+                    FileSize = item.Size,
+                    RelativePath = item.RelativePath,
+                    Status = TransferFileItemStatus.Waiting,
+                    StatusText = "Waiting in queue"
                 });
             }
+            if (ActiveTransferBatchFiles.Count > 0)
+            {
+                ActiveTransferBatchFiles[0].Status = TransferFileItemStatus.Transferring;
+                ActiveTransferBatchFiles[0].StatusText = "Connecting...";
+            }
+
+            UpdateActiveTransferViewInfo(true, device.DisplayName, device.IpAddress, itemsToSend.Count, _activeBatchTotalBytes);
+            ShowPanel(ActiveTransferPanel, "ACTIVE TRANSFER");
+
             _ = Task.Run(() => ProcessSendSessionAsync(device, itemsToSend));
         }
 
@@ -1083,10 +1219,12 @@ namespace WeShare.UI.Views
                         {
                             await Dispatcher.UIThread.InvokeAsync(() =>
                             {
+                                _isTransferInProgress = false;
                                 TransferDeclinedMessage.Text = $"'{device.DisplayName}' declined the transfer request.";
                                 TransferDeclinedCard.IsVisible = true;
                                 SendProgressBorder.IsVisible = false;
                                 UpdateTransfersVisibility();
+                                ShowTransferFailureModal($"'{device.DisplayName}' declined the transfer request.", device.DisplayName, canRetry: true);
                             });
                             return;
                         }
@@ -1101,6 +1239,28 @@ namespace WeShare.UI.Views
                             }
                         }
                         items = acceptedItems;
+                        await Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            _activeBatchTotalCount = items.Count;
+                            _activeBatchTotalBytes = items.Sum(x => x.Size);
+                            ActiveTransferBatchFiles.Clear();
+                            foreach (var it in items)
+                            {
+                                ActiveTransferBatchFiles.Add(new ActiveBatchFileItem
+                                {
+                                    FileName = it.Name,
+                                    FileSize = it.Size,
+                                    RelativePath = it.RelativePath,
+                                    Status = TransferFileItemStatus.Waiting,
+                                    StatusText = "Waiting in queue"
+                                });
+                            }
+                            if (ActiveTransferBatchFiles.Count > 0)
+                            {
+                                ActiveTransferBatchFiles[0].Status = TransferFileItemStatus.Transferring;
+                            }
+                            UpdateActiveTransferViewInfo(true, device.DisplayName, device.IpAddress, items.Count, _activeBatchTotalBytes);
+                        });
                     }
                     catch (Exception ex)
                     {
@@ -1495,6 +1655,7 @@ namespace WeShare.UI.Views
 
         private async Task<Avalonia.Media.Imaging.Bitmap?> LoadWindowsShellThumbnailAsync(string path)
         {
+#if WINDOWS
             DebugLog($"LoadWindowsShellThumbnailAsync called for: '{path}'");
             try
             {
@@ -1530,6 +1691,8 @@ namespace WeShare.UI.Views
             {
                 DebugLog($"Failed to load Windows shell thumbnail for '{path}': {ex.Message}\n{ex.StackTrace}");
             }
+#endif
+            await Task.CompletedTask;
             return null;
         }
 
@@ -2413,7 +2576,14 @@ namespace WeShare.UI.Views
 
                 if (_localDevice.Role == "Sender" || (SendDiscoveryPanel != null && SendDiscoveryPanel.IsVisible))
                 {
-                    ShowPanel(SendFilesPanel, "SEND FILES", NavSendBtn);
+                    if (SendQueue.Count > 0)
+                    {
+                        StartSendSession(peer);
+                    }
+                    else
+                    {
+                        ShowPanel(SendFilesPanel, "SEND FILES", NavSendBtn);
+                    }
                 }
                 else if (_localDevice.Role == "Receiver")
                 {
@@ -2580,9 +2750,9 @@ namespace WeShare.UI.Views
                 if (SidebarDeviceName != null) SidebarDeviceName.Text = chosenName;
                 if (HomeDeviceNameText != null) HomeDeviceNameText.Text = chosenName;
                 if (SettingsDeviceName != null) SettingsDeviceName.Text = chosenName;
-                _ = _dbHelper.SetSettingAsync("DeviceName", chosenName);
+                _dbHelper.SetSetting("DeviceName", chosenName);
             }
-            _ = _dbHelper.SetSettingAsync("DeviceNameInitialized", "true");
+            _dbHelper.SetSetting("DeviceNameInitialized", "true");
             if (FirstRunWelcomeModal != null) FirstRunWelcomeModal.IsVisible = false;
             _ = _discoveryService?.BroadcastPresenceAsync();
             ShowToast($"Device name set to '{_localDevice.Name}'");
@@ -2590,8 +2760,7 @@ namespace WeShare.UI.Views
 
         private void SidebarDeviceName_PointerPressed(object? sender, PointerPressedEventArgs e)
         {
-            if (WelcomeDeviceNameInput != null) WelcomeDeviceNameInput.Text = _localDevice.Name;
-            if (FirstRunWelcomeModal != null) FirstRunWelcomeModal.IsVisible = true;
+            ShowPanel(SettingsPanel, "SETTINGS", NavSettBtn);
         }
 
         private void SettingsDeviceName_TextChanged(object sender, TextChangedEventArgs e)
@@ -2602,6 +2771,7 @@ namespace WeShare.UI.Views
                 if (SidebarDeviceName != null) SidebarDeviceName.Text = _localDevice.Name;
                 if (HomeDeviceNameText != null) HomeDeviceNameText.Text = _localDevice.Name;
                 _ = _dbHelper.SetSettingAsync("DeviceName", _localDevice.Name);
+                _dbHelper.SetSetting("DeviceNameInitialized", "true");
             }
         }
 
@@ -2620,9 +2790,55 @@ namespace WeShare.UI.Views
                     _currentSendingFileId = state.FileId;
                     SendSpeedGraph?.Clear();
                 }
-                
-                // Show floating in-place dock across any page without forcing navigation away
-                UpdateActiveTransferDock(state);
+
+                // If not already in full transfer mode, transition now
+                if (!_isTransferInProgress)
+                {
+                    _isTransferInProgress = true;
+                    _activeTransferIsSender = state.Direction == TransferDirection.Sent;
+                    _activeTransferPeerName = !string.IsNullOrEmpty(state.PeerName) ? state.PeerName : "Nearby Device";
+                    _activeBatchTotalBytes = state.TotalBytes;
+                    _activeBatchTransferredBytes = 0;
+                    _activeBatchTotalCount = 1;
+                    _activeBatchCompletedCount = 0;
+                    _transferStartTime = DateTime.UtcNow;
+
+                    ActiveTransferBatchFiles.Clear();
+                    ActiveTransferBatchFiles.Add(new ActiveBatchFileItem
+                    {
+                        FileId = state.FileId,
+                        FileName = state.FileName,
+                        FileSize = state.TotalBytes,
+                        RelativePath = state.RelativePath,
+                        Status = TransferFileItemStatus.Transferring,
+                        StatusText = "Transferring..."
+                    });
+                    UpdateActiveTransferViewInfo(_activeTransferIsSender, _activeTransferPeerName, state.RemoteIp, 1, state.TotalBytes);
+                    ShowPanel(ActiveTransferPanel, "ACTIVE TRANSFER");
+                }
+                else
+                {
+                    var existing = ActiveTransferBatchFiles.FirstOrDefault(f => f.FileId == state.FileId || f.FileName.Equals(state.FileName, StringComparison.OrdinalIgnoreCase));
+                    if (existing != null)
+                    {
+                        existing.FileId = state.FileId;
+                        existing.Status = TransferFileItemStatus.Transferring;
+                        existing.StatusText = "Transferring...";
+                    }
+                    else
+                    {
+                        ActiveTransferBatchFiles.Add(new ActiveBatchFileItem
+                        {
+                            FileId = state.FileId,
+                            FileName = state.FileName,
+                            FileSize = state.TotalBytes,
+                            RelativePath = state.RelativePath,
+                            Status = TransferFileItemStatus.Transferring,
+                            StatusText = "Transferring..."
+                        });
+                        _activeBatchTotalCount = ActiveTransferBatchFiles.Count;
+                    }
+                }
                 
                 await _dbHelper.SaveTransferAsync(state);
             });
@@ -2648,9 +2864,6 @@ namespace WeShare.UI.Views
                 GlobalActivityBorder.IsVisible = true;
                 GlobalProgressBar.Value        = state.ProgressPercentage;
 
-                // Update persistent Floating Transfer Dock
-                UpdateActiveTransferDock(state);
-
                 // Live speed badge on Home
                 if (HomeSpeedBadge != null)
                 {
@@ -2664,6 +2877,30 @@ namespace WeShare.UI.Views
                     _lastAcceptedIp = state.RemoteIp;
                     _lastAcceptedTime = DateTime.Now;
                 }
+
+                // Update ActiveTransferPanel & file item
+                var item = ActiveTransferBatchFiles.FirstOrDefault(f => f.FileId == state.FileId || f.FileName.Equals(state.FileName, StringComparison.OrdinalIgnoreCase));
+                if (item != null)
+                {
+                    item.ProgressPercentage = state.ProgressPercentage;
+                    item.Status = TransferFileItemStatus.Transferring;
+                    item.StatusText = $"{state.ProgressPercentage:F0}% ({state.SpeedMbPerSec:F1} MB/s)";
+                }
+
+                long curFileBytes = (long)(state.TotalBytes * (state.ProgressPercentage / 100.0));
+                long totalDone = _activeBatchTransferredBytes + curFileBytes;
+                long totalVolume = Math.Max(_activeBatchTotalBytes, totalDone);
+                double overallPct = totalVolume > 0 ? (totalDone * 100.0 / totalVolume) : state.ProgressPercentage;
+                if (overallPct > 100) overallPct = 100;
+
+                if (ActiveTransferMainProgressBar != null) ActiveTransferMainProgressBar.Value = overallPct;
+                if (ActiveTransferBigPctText != null) ActiveTransferBigPctText.Text = $"{overallPct:F0}%";
+                if (ActiveTransferSpeedText != null) ActiveTransferSpeedText.Text = $"{state.SpeedMbPerSec:F1} MB/s";
+                if (ActiveTransferEtaText != null) ActiveTransferEtaText.Text = state.ETA.TotalSeconds > 0 ? state.ETA.ToString(@"mm\:ss") : "--:--";
+                if (ActiveTransferBytesText != null) ActiveTransferBytesText.Text = $"{FileTransferState.FormatBytes(totalDone)} / {FileTransferState.FormatBytes(totalVolume)}";
+                if (ActiveTransferSummaryFilesText != null) ActiveTransferSummaryFilesText.Text = $"Transferring {state.FileName} ({Math.Min(_activeBatchCompletedCount + 1, _activeBatchTotalCount)} of {_activeBatchTotalCount})...";
+                if (ActiveTransferFilesCountText != null) ActiveTransferFilesCountText.Text = $"{_activeBatchCompletedCount} / {_activeBatchTotalCount}";
+                ActiveTransferSpeedGraph?.AddSpeed(state.SpeedMbPerSec);
             });
         }
 
@@ -2673,7 +2910,19 @@ namespace WeShare.UI.Views
                 SendProgressBorder.IsVisible   = false;
                 GlobalActivityBorder.IsVisible = false;
                 if (HomeSpeedBadge != null) HomeSpeedBadge.IsVisible = false;
-                HideActiveTransferDock();
+
+                // Update active transfer batch file item
+                var batchItem = ActiveTransferBatchFiles.FirstOrDefault(f => f.FileId == state.FileId || f.FileName.Equals(state.FileName, StringComparison.OrdinalIgnoreCase));
+                if (batchItem != null)
+                {
+                    batchItem.Status = TransferFileItemStatus.Completed;
+                    batchItem.ProgressPercentage = 100;
+                    batchItem.StatusText = "Completed";
+                }
+
+                _activeBatchCompletedCount++;
+                _activeBatchTransferredBytes += state.TotalBytes;
+                if (ActiveTransferFilesCountText != null) ActiveTransferFilesCountText.Text = $"{_activeBatchCompletedCount} / {_activeBatchTotalCount}";
 
                 if (state.Direction == TransferDirection.Received)
                 {
@@ -2695,6 +2944,25 @@ namespace WeShare.UI.Views
                     await _dbHelper.SaveTransferAsync(state);
                     CleanTempZipFile(state.FilePath);
                 }
+
+                // Check if all files in the batch are finished
+                bool allDone = _activeBatchTotalCount > 0 && (_activeBatchCompletedCount >= _activeBatchTotalCount || ActiveTransferBatchFiles.All(f => f.Status == TransferFileItemStatus.Completed));
+                if (allDone)
+                {
+                    _isTransferInProgress = false;
+                    string peer = !string.IsNullOrEmpty(_activeTransferPeerName) ? _activeTransferPeerName : state.PeerName;
+                    ShowTransferSuccessModal(_activeTransferIsSender, peer, _activeBatchCompletedCount, _activeBatchTotalBytes > 0 ? _activeBatchTotalBytes : _activeBatchTransferredBytes);
+                }
+                else
+                {
+                    // Advance next waiting file to transferring
+                    var nextWaiting = ActiveTransferBatchFiles.FirstOrDefault(f => f.Status == TransferFileItemStatus.Waiting);
+                    if (nextWaiting != null)
+                    {
+                        nextWaiting.Status = TransferFileItemStatus.Transferring;
+                        nextWaiting.StatusText = "Starting...";
+                    }
+                }
             });
         }
 
@@ -2704,7 +2972,6 @@ namespace WeShare.UI.Views
                 SendProgressBorder.IsVisible   = false;
                 GlobalActivityBorder.IsVisible = false;
                 if (HomeSpeedBadge != null) HomeSpeedBadge.IsVisible = false;
-                HideActiveTransferDock();
 
                 if (state.Direction == TransferDirection.Received)
                 {
@@ -2717,9 +2984,20 @@ namespace WeShare.UI.Views
                     CleanTempZipFile(state.FilePath);
                 }
                 await _dbHelper.SaveTransferAsync(state);
+
+                var batchItem = ActiveTransferBatchFiles.FirstOrDefault(f => f.FileId == state.FileId || f.FileName.Equals(state.FileName, StringComparison.OrdinalIgnoreCase));
+                if (batchItem != null)
+                {
+                    batchItem.Status = TransferFileItemStatus.Failed;
+                    batchItem.StatusText = "Failed";
+                }
+
+                _isTransferInProgress = false;
                 string reason = !string.IsNullOrEmpty(state.ErrorMessage) ? state.ErrorMessage : "Connection failed or rejected";
                 ShowToast($"Transfer failed: {reason}");
                 _platformService.ShowSystemToast("Transfer Failed", $"{state.FileName}: {reason}");
+
+                ShowTransferFailureModal(reason, _activeTransferPeerName, canRetry: _activeTransferIsSender);
             });
         }
 
@@ -3841,6 +4119,38 @@ namespace WeShare.UI.Views
                 _activeAcceptedBatchId = _currentPendingBatchManifest.BatchId;
                 _lastAcceptedIp = _currentPendingBatchManifest.SenderIp;
                 _lastAcceptedTime = DateTime.Now;
+
+                var selectedFiles = BatchManifestItems.Where(x => x.IsSelected).ToList();
+                _activeBatchTotalCount = selectedFiles.Count;
+                _activeBatchTotalBytes = selectedFiles.Sum(x => x.Size);
+                _activeBatchCompletedCount = 0;
+                _activeBatchTransferredBytes = 0;
+                _activeTransferIsSender = false;
+                _activeTransferPeerName = _currentPendingBatchManifest.SenderName;
+                _isTransferInProgress = true;
+                _transferStartTime = DateTime.UtcNow;
+
+                ActiveTransferBatchFiles.Clear();
+                foreach (var f in selectedFiles)
+                {
+                    ActiveTransferBatchFiles.Add(new ActiveBatchFileItem
+                    {
+                        FileId = f.FileId,
+                        FileName = f.FileName,
+                        FileSize = f.Size,
+                        RelativePath = f.RelativePath,
+                        Status = TransferFileItemStatus.Waiting,
+                        StatusText = "Waiting in queue"
+                    });
+                }
+                if (ActiveTransferBatchFiles.Count > 0)
+                {
+                    ActiveTransferBatchFiles[0].Status = TransferFileItemStatus.Transferring;
+                    ActiveTransferBatchFiles[0].StatusText = "Receiving...";
+                }
+
+                UpdateActiveTransferViewInfo(false, _currentPendingBatchManifest.SenderName, _currentPendingBatchManifest.SenderIp, selectedFiles.Count, _activeBatchTotalBytes);
+                ShowPanel(ActiveTransferPanel, "ACTIVE TRANSFER");
             }
             var acceptedIds = BatchManifestItems.Where(x => x.IsSelected).Select(x => x.FileId).ToList();
             _batchManifestTcs?.TrySetResult(acceptedIds);
@@ -3886,9 +4196,115 @@ namespace WeShare.UI.Views
             }
         }
 
+        public void ShowTransferFailureModal(string reason, string peerName, bool canRetry = false)
+        {
+            if (TransferFailureModal != null)
+            {
+                if (TransferFailureTitle != null) TransferFailureTitle.Text = "Transfer Failed";
+                if (TransferFailureSubtitle != null) TransferFailureSubtitle.Text = "The transfer was interrupted or cancelled.";
+                if (TransferFailureReason != null) TransferFailureReason.Text = string.IsNullOrEmpty(reason) ? "Unknown error" : reason;
+                if (TransferFailurePeerName != null) TransferFailurePeerName.Text = string.IsNullOrEmpty(peerName) ? "Nearby Device" : peerName;
+                if (TransferFailureRetryBtn != null) TransferFailureRetryBtn.IsVisible = canRetry;
+
+                TransferFailureModal.IsVisible = true;
+                PlaySound("failed");
+            }
+        }
+
         private void CloseTransferSuccessModal_Click(object? sender, RoutedEventArgs e)
         {
             if (TransferSuccessModal != null) TransferSuccessModal.IsVisible = false;
+            _isTransferInProgress = false;
+            ShowPanel(HomePanel, "HOME", NavHomeBtn);
+        }
+
+        private void CloseTransferFailureModal_Click(object? sender, RoutedEventArgs e)
+        {
+            if (TransferFailureModal != null) TransferFailureModal.IsVisible = false;
+            _isTransferInProgress = false;
+            ShowPanel(HomePanel, "HOME", NavHomeBtn);
+        }
+
+        private void RetryFailedTransfer_Click(object? sender, RoutedEventArgs e)
+        {
+            if (TransferFailureModal != null) TransferFailureModal.IsVisible = false;
+            _isTransferInProgress = false;
+
+            if (_sendTarget != null && SendQueue.Count > 0)
+            {
+                StartSendSession(_sendTarget);
+            }
+            else
+            {
+                ShowPanel(SendFilesPanel, "SEND FILES", NavSendBtn);
+            }
+        }
+
+        private void CancelActiveTransferSession_Click(object? sender, RoutedEventArgs e)
+        {
+            _isTransferInProgress = false;
+            try
+            {
+                _transferManager.CancelAll();
+            }
+            catch (Exception ex)
+            {
+                DebugLog($"CancelAll error: {ex.Message}");
+            }
+
+            ShowToast("Transfer cancelled by user.");
+            ShowTransferFailureModal("Transfer cancelled by user.", _activeTransferPeerName, canRetry: _activeTransferIsSender);
+        }
+
+        private void UpdateActiveTransferViewInfo(bool isSender, string peerName, string peerIp, int totalFiles, long totalBytes)
+        {
+            if (ActiveTransferRoleBadge != null)
+            {
+                ActiveTransferRoleBadge.Background = isSender ? new SolidColorBrush(Color.Parse("#25173B")) : new SolidColorBrush(Color.Parse("#102A24"));
+                ActiveTransferRoleBadge.BorderBrush = isSender ? new SolidColorBrush(Color.Parse("#7C3AED")) : new SolidColorBrush(Color.Parse("#10B981"));
+            }
+            if (ActiveTransferRoleText != null)
+            {
+                ActiveTransferRoleText.Text = isSender ? "SENDING IN PROGRESS" : "RECEIVING IN PROGRESS";
+                ActiveTransferRoleText.Foreground = isSender ? new SolidColorBrush(Color.Parse("#A855F7")) : new SolidColorBrush(Color.Parse("#10B981"));
+            }
+            if (ActiveTransferPeerInfo != null)
+            {
+                string ipDisplay = !string.IsNullOrEmpty(peerIp) ? $" ({peerIp})" : "";
+                ActiveTransferPeerInfo.Text = $"{(isSender ? "Sending to: " : "Receiving from: ")}{peerName}{ipDisplay}";
+            }
+            if (ActiveTransferQueueCount != null)
+            {
+                ActiveTransferQueueCount.Text = $"({totalFiles} file{(totalFiles == 1 ? "" : "s")})";
+            }
+            if (ActiveTransferFilesCountText != null)
+            {
+                ActiveTransferFilesCountText.Text = $"0 / {totalFiles}";
+            }
+            if (ActiveTransferBytesText != null)
+            {
+                ActiveTransferBytesText.Text = $"0 B / {FileTransferState.FormatBytes(totalBytes)}";
+            }
+            if (ActiveTransferSummaryFilesText != null)
+            {
+                ActiveTransferSummaryFilesText.Text = $"{totalFiles} file{(totalFiles == 1 ? "" : "s")} queued";
+            }
+            if (ActiveTransferMainProgressBar != null)
+            {
+                ActiveTransferMainProgressBar.Value = 0;
+            }
+            if (ActiveTransferBigPctText != null)
+            {
+                ActiveTransferBigPctText.Text = "0%";
+            }
+            if (ActiveTransferSpeedText != null)
+            {
+                ActiveTransferSpeedText.Text = "0.0 MB/s";
+            }
+            if (ActiveTransferEtaText != null)
+            {
+                ActiveTransferEtaText.Text = "--:--";
+            }
         }
 
         // ── Resend Request Handlers ───────────────────────────────────────────────
