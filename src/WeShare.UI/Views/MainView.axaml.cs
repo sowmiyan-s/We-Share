@@ -538,9 +538,13 @@ namespace WeShare.UI.Views
             PageTitle.Text = title;
             SetActiveNav(navBtn);
 
-            if (_discoveryService != null && !string.Equals(oldRole, targetRole, StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(oldRole, targetRole, StringComparison.OrdinalIgnoreCase))
             {
-                _ = _discoveryService.BroadcastRoleAsync(targetRole);
+                if (_discoveryService != null)
+                {
+                    _ = _discoveryService.BroadcastRoleAsync(targetRole);
+                }
+                _webDashboardService?.NotifyAllClients("refresh");
             }
 
             if (targetRole == "Receiver")
@@ -759,42 +763,42 @@ namespace WeShare.UI.Views
         private void HomeSend_Click(object sender, RoutedEventArgs e)
         {
             _sendTarget = null;
-            SendStepWizard.IsVisible = true;
-            Step1Indicator.Foreground = SolidColorBrush.Parse("#7C3AED");
-            Step2Indicator.Foreground = SolidColorBrush.Parse("#64748B");
-            ShowPanel(SendFilesPanel, "SEND FILES", NavHomeBtn);
+            NavSendFiles_Click(sender, e);
         }
 
         private void HomeReceive_Click(object sender, RoutedEventArgs e) => NavReceiveMode_Click(sender, e);
 
         private void NavSendFiles_Click(object sender, RoutedEventArgs e)
         {
+            ShowPanel(SendDiscoveryPanel, "RADAR DISCOVERY", NavSendBtn);
+            SendStepWizard.IsVisible = true;
+            Step1Indicator.Foreground = SolidColorBrush.Parse("#7C3AED");
+            Step2Indicator.Foreground = SolidColorBrush.Parse("#64748B");
+
+            UpdateEmptyState();
+            _ = _discoveryService.BroadcastPresenceAsync();
+            try { _platformService.StartBluetoothDiscovery(OnDeviceDiscovered); } catch { }
+        }
+
+        private void NavSendFilesStage_Click(object? sender, RoutedEventArgs e)
+        {
             UpdateSendTargetUI();
             ShowPanel(SendFilesPanel, "SEND FILES", NavSendBtn);
             SendStepWizard.IsVisible = true;
             Step1Indicator.Foreground = SolidColorBrush.Parse("#7C3AED");
-            // Auto-highlight step 2 if recipient is already selected
             Step2Indicator.Foreground = SolidColorBrush.Parse(_sendTarget != null ? "#7C3AED" : "#64748B");
             UpdateQueueUI();
         }
 
         private void NavSendDiscovery_Click(object sender, RoutedEventArgs e)
         {
-            if (SendQueue.Count == 0 && _sendTarget == null)
-            {
-                ShowToast("Please add some files first");
-                return;
-            }
-            ShowPanel(SendDiscoveryPanel, "CHOOSE RECIPIENT", null);
+            ShowPanel(SendDiscoveryPanel, "RADAR DISCOVERY", NavSendBtn);
             SendStepWizard.IsVisible = true;
-            Step1Indicator.Foreground = SolidColorBrush.Parse("#64748B");
-            Step2Indicator.Foreground = SolidColorBrush.Parse("#7C3AED");
+            Step1Indicator.Foreground = SolidColorBrush.Parse("#7C3AED");
+            Step2Indicator.Foreground = SolidColorBrush.Parse("#64748B");
 
-            // Update the "LOOKING FOR DEVICES..." hint immediately, then trigger a
-            // fresh broadcast so newly-arrived receivers appear on the radar quickly.
             UpdateEmptyState();
             _ = _discoveryService.BroadcastPresenceAsync();
-
             try { _platformService.StartBluetoothDiscovery(OnDeviceDiscovered); } catch { }
         }
 
@@ -3751,6 +3755,60 @@ namespace WeShare.UI.Views
                     WebClientSendQueue.Add(f);
             }
             UpdateWebSendQueueUI();
+        }
+
+        private async void WebQuickSendFiles_Click(object? sender, RoutedEventArgs e)
+        {
+            if (_selectedWebClient == null)
+            {
+                ShowToast("Please select a device from the list above first");
+                return;
+            }
+
+            var files = await PickFilesAsync();
+            if (files == null || files.Count == 0) return;
+
+            var paths = files.Select(f => f.Path).ToList();
+            bool ok = paths.Count > 1
+                ? (_webDashboardService?.ShareMultipleForWebClient(_selectedWebClient.Id, paths) ?? false)
+                : (_webDashboardService?.ShareForWebClient(_selectedWebClient.Id, paths[0]) ?? false);
+
+            if (ok)
+            {
+                ShowToast($"Sent {paths.Count} file(s) to '{_selectedWebClient.DisplayName}'. Browser receiving notification...");
+                PlaySound("send");
+            }
+            else
+            {
+                ShowToast("Failed to send files. Web client may have disconnected.");
+            }
+        }
+
+        private async void WebQuickSendFolder_Click(object? sender, RoutedEventArgs e)
+        {
+            if (_selectedWebClient == null)
+            {
+                ShowToast("Please select a device from the list above first");
+                return;
+            }
+
+            var files = await PickFolderAsync();
+            if (files == null || files.Count == 0) return;
+
+            var paths = files.Select(f => f.Path).ToList();
+            bool ok = paths.Count > 1
+                ? (_webDashboardService?.ShareMultipleForWebClient(_selectedWebClient.Id, paths) ?? false)
+                : (_webDashboardService?.ShareForWebClient(_selectedWebClient.Id, paths[0]) ?? false);
+
+            if (ok)
+            {
+                ShowToast($"Sent {paths.Count} file(s) from folder to '{_selectedWebClient.DisplayName}'. Browser receiving notification...");
+                PlaySound("send");
+            }
+            else
+            {
+                ShowToast("Failed to send files. Web client may have disconnected.");
+            }
         }
 
         private void WebClearSendQueue_Click(object? sender, RoutedEventArgs e)

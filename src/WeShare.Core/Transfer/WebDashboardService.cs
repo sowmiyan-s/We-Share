@@ -226,7 +226,7 @@ namespace WeShare.Core.Transfer
             return true;
         }
 
-        private async void NotifyAllClients(string type)
+        public async void NotifyAllClients(string type)
         {
             await _webClientsLock.WaitAsync();
             try
@@ -352,9 +352,11 @@ namespace WeShare.Core.Transfer
             {
                 try
                 {
+                    client.ReceiveTimeout = 0;
+                    client.SendTimeout = 0;
                     using var stream = client.GetStream();
                     
-                    byte[] headerBuffer = new byte[8192];
+                    byte[] headerBuffer = new byte[32768];
                     int totalHeaderRead = 0;
                     int headerEndIndex = -1;
 
@@ -495,6 +497,11 @@ namespace WeShare.Core.Transfer
                     else if (method == "GET" && path == "/api/devices")
                     {
                         var peers = _getPeers?.Invoke() ?? Array.Empty<DeviceModel>();
+                        string? roleFilter = queryParams.GetValueOrDefault("role");
+                        if (!string.IsNullOrEmpty(roleFilter))
+                        {
+                            peers = peers.Where(d => string.Equals(d.Role, roleFilter, StringComparison.OrdinalIgnoreCase) || (roleFilter.Equals("Receiver", StringComparison.OrdinalIgnoreCase) && d.IsReceiver)).ToList();
+                        }
                         await SendJson(stream, peers);
                     }
 
@@ -525,6 +532,7 @@ namespace WeShare.Core.Transfer
                                 {
                                     winfo.Role = role ?? "Receiver";
                                     if (!string.IsNullOrEmpty(name)) winfo.Name = Uri.UnescapeDataString(name);
+                                    newInfo = winfo;
                                 }
                                 else
                                 {
@@ -557,6 +565,7 @@ namespace WeShare.Core.Transfer
                         string? role = queryParams.GetValueOrDefault("role") ?? GetParam("role");
                         if (!string.IsNullOrEmpty(cId))
                         {
+                            WebClientInfo? updatedInfo = null;
                             if (!string.IsNullOrEmpty(name) || !string.IsNullOrEmpty(role))
                             {
                                 await _webClientsLock.WaitAsync();
@@ -566,9 +575,14 @@ namespace WeShare.Core.Transfer
                                     {
                                         if (!string.IsNullOrEmpty(name)) winfo.Name = Uri.UnescapeDataString(name);
                                         if (!string.IsNullOrEmpty(role)) winfo.Role = role;
+                                        updatedInfo = winfo;
                                     }
                                 }
                                 finally { _webClientsLock.Release(); }
+                            }
+                            if (updatedInfo != null)
+                            {
+                                WebClientConnectedEx?.Invoke(updatedInfo);
                             }
                             WebClientHeartbeat?.Invoke(cId);
                         }
@@ -977,8 +991,13 @@ namespace WeShare.Core.Transfer
                         }
                         else
                         {
+                            bool isPcInReceiverMode = _localDevice.IsReceiver || string.Equals(_localDevice.Role, "Receiver", StringComparison.OrdinalIgnoreCase);
                             bool accepted = false;
-                            if (WebFileSharedCallback != null)
+                            if (isPcInReceiverMode)
+                            {
+                                accepted = true;
+                            }
+                            else if (WebFileSharedCallback != null)
                             {
                                 accepted = await WebFileSharedCallback(transferState);
                             }
@@ -994,7 +1013,7 @@ namespace WeShare.Core.Transfer
                             }
                             else
                             {
-                                await SendJson(stream, new { accepted = false });
+                                await SendJson(stream, new { accepted = false, error = "Target is not in Receive mode" });
                             }
                         }
                     }
@@ -1019,7 +1038,8 @@ namespace WeShare.Core.Transfer
                     else if (method == "GET" && path == "/api/events")
                     {
                         string clientId = queryParams.GetValueOrDefault("clientId", Guid.NewGuid().ToString("n"));
-                        string clientName = queryParams.GetValueOrDefault("name", "Web Client");
+                        string rawName = queryParams.GetValueOrDefault("name", "Web Client");
+                        string clientName = !string.IsNullOrEmpty(rawName) ? Uri.UnescapeDataString(rawName) : "Web Client";
                         string clientRole = queryParams.GetValueOrDefault("role", "Receiver");
                         string remoteIp = client.Client.RemoteEndPoint is System.Net.IPEndPoint rep ? rep.Address.ToString() : "unknown";
 
@@ -1193,6 +1213,8 @@ namespace WeShare.Core.Transfer
                         string? clientId = GetParam("clientId");
                         string? fileId = GetParam("id");
                         bool isSessionConnected = (!string.IsNullOrEmpty(clientId) && _connectedWebSessions.ContainsKey(clientId)) || !_connectedWebSessions.IsEmpty;
+                        bool isPcInReceiverMode = _localDevice.IsReceiver || string.Equals(_localDevice.Role, "Receiver", StringComparison.OrdinalIgnoreCase);
+                        bool isKnownClient = !string.IsNullOrEmpty(clientId) && _activeWebClients.ContainsKey(clientId);
 
                         FileTransferState? transferState = null;
                         if (!string.IsNullOrEmpty(fileId))
@@ -1200,9 +1222,9 @@ namespace WeShare.Core.Transfer
                             _approvedUploads.TryGetValue(fileId, out transferState);
                         }
 
-                        if (!isSessionConnected && transferState == null)
+                        if (!isSessionConnected && !isPcInReceiverMode && !isKnownClient && transferState == null)
                         {
-                            await SendResponse(stream, 400, "application/json", "{\"success\":false,\"error\":\"Upload not pre-approved or invalid id\"}");
+                            await SendResponse(stream, 400, "application/json", "{\"success\":false,\"error\":\"Target device is not in Receive mode\"}");
                             return;
                         }
 

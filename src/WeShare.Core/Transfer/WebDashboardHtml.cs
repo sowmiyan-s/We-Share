@@ -8,58 +8,58 @@ namespace WeShare.Core.Transfer
 <meta charset=""UTF-8"">
 <meta name=""viewport"" content=""width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"">
 <meta name=""description"" content=""We Share Web Portal - High-speed, secure local peer-to-peer file transfer between mobile and PC."">
-<meta name=""theme-color"" content=""#080A10"">
+<meta name=""theme-color"" content=""#07090E"">
 <title>We Share | Web Portal</title>
 
 <style>
 :root {
   --bg: #07090E;
   --bg-subtle: #0D101A;
-  --panel: rgba(16, 19, 31, 0.75);
+  --panel: rgba(16, 19, 31, 0.85);
   --panel-solid: #111422;
-  --card: rgba(22, 26, 42, 0.65);
-  --card-hover: rgba(28, 33, 54, 0.85);
+  --card: rgba(22, 26, 42, 0.75);
+  --card-hover: rgba(28, 33, 54, 0.9);
   --card-solid: #171B2C;
-  --border: rgba(255, 255, 255, 0.10);
+  --border: rgba(255, 255, 255, 0.12);
   --border-subtle: rgba(255, 255, 255, 0.08);
   --primary: #4F46E5;
   --primary-light: #6366F1;
   --primary-gradient: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%);
-  --primary-glow: rgba(79, 70, 229, 0.12);
+  --primary-glow: rgba(79, 70, 229, 0.25);
   --cyan: #06B6D4;
   --emerald: #10B981;
-  --amber: #A855F7;
+  --amber: #F59E0B;
   --rose: #F43F5E;
   --text: #F8FAFC;
   --text-dim: #94A3B8;
   --text-muted: #64748B;
-  --input-bg: rgba(15, 18, 29, 0.8);
+  --input-bg: rgba(15, 18, 29, 0.85);
   --backdrop-blur: blur(20px);
   --radius-sm: 8px;
   --radius-md: 14px;
   --radius-lg: 20px;
   --radius-full: 9999px;
-  --shadow-glow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 html[data-theme=""light""] {
   --bg: #F8FAFC;
   --bg-subtle: #EDF2F7;
-  --panel: rgba(255, 255, 255, 0.85);
+  --panel: rgba(255, 255, 255, 0.9);
   --panel-solid: #FFFFFF;
-  --card: rgba(241, 245, 249, 0.8);
-  --card-hover: rgba(226, 232, 240, 0.9);
+  --card: rgba(241, 245, 249, 0.85);
+  --card-hover: rgba(226, 232, 240, 0.95);
   --card-solid: #F1F5F9;
-  --border: rgba(79, 70, 229, 0.18);
+  --border: rgba(79, 70, 229, 0.2);
   --border-subtle: rgba(0, 0, 0, 0.08);
   --primary: #4F46E5;
   --primary-light: #6366F1;
-  --primary-glow: rgba(79, 70, 229, 0.15);
+  --primary-glow: rgba(79, 70, 229, 0.2);
   --text: #0F172A;
   --text-dim: #475569;
   --text-muted: #94A3B8;
-  --input-bg: rgba(241, 245, 249, 0.9);
-  --shadow-glow: 0 8 24 0 rgba(124, 58, 237, 0.12);
+  --input-bg: rgba(241, 245, 249, 0.95);
+  --shadow-glow: 0 10px 25px rgba(79, 70, 229, 0.12);
 }
 
 * {
@@ -74,21 +74,20 @@ body {
   color: var(--text);
   font-family: 'Segoe UI', system-ui, -apple-system, Roboto, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
   min-height: 100vh;
-  padding-bottom: 120px;
+  padding-bottom: 90px;
   overflow-x: hidden;
   position: relative;
 }
 
-/* Ambient Background Glow */
 body::before {
   content: '';
   position: fixed;
   top: -120px;
   left: 50%;
   transform: translateX(-50%);
-  width: 600px;
-  height: 400px;
-  background: radial-gradient(circle, rgba(124, 58, 237, 0.18) 0%, rgba(6, 182, 212, 0.08) 50%, transparent 70%);
+  width: 650px;
+  height: 420px;
+  background: radial-gradient(circle, rgba(79, 70, 229, 0.18) 0%, rgba(6, 182, 212, 0.08) 50%, transparent 70%);
   filter: blur(80px);
   pointer-events: none;
   z-index: 0;
@@ -103,7 +102,7 @@ body::before {
   z-index: 1;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 18px;
 }
 @media (max-width: 640px) {
   .app-wrapper {
@@ -112,16 +111,14 @@ body::before {
   }
 }
 
-/* ------------------------------------------------------------- */
-/* TOP APP BAR / BRAND HEADER                                    */
-/* ------------------------------------------------------------- */
+/* TOP APP BAR */
 .app-header {
   background: var(--panel);
   backdrop-filter: var(--backdrop-blur);
   -webkit-backdrop-filter: var(--backdrop-blur);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 14px 18px;
+  padding: 12px 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -135,8 +132,8 @@ body::before {
 }
 
 .brand-logo-disc {
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   border-radius: 12px;
   background: var(--card);
   border: 1px solid var(--border);
@@ -147,8 +144,8 @@ body::before {
 }
 
 .brand-logo-disc img {
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   object-fit: contain;
 }
 
@@ -158,7 +155,6 @@ body::before {
 }
 
 .brand-title {
-  font-family: inherit;
   font-size: 16px;
   font-weight: 800;
   letter-spacing: 0.5px;
@@ -172,7 +168,7 @@ body::before {
   gap: 6px;
   font-size: 11px;
   color: var(--emerald);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .status-dot {
@@ -196,12 +192,31 @@ body::before {
   gap: 8px;
 }
 
+.nickname-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.nickname-pill:hover {
+  background: var(--card-hover);
+  border-color: var(--primary);
+}
+
 .header-btn {
   background: var(--card);
-  border: 1px solid var(--border-subtle);
-  color: var(--text);
-  width: 38px;
-  height: 38px;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  width: 36px;
+  height: 36px;
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -209,147 +224,102 @@ body::before {
   cursor: pointer;
   transition: all 0.2s ease;
 }
-
 .header-btn:hover {
   background: var(--card-hover);
-  border-color: var(--primary);
-  transform: translateY(-1px);
+  color: var(--text);
 }
-
 .header-btn svg {
   width: 17px;
   height: 17px;
 }
 
-/* Nickname Pill */
-.nickname-pill {
-  background: var(--card);
-  border: 1px solid var(--border-subtle);
-  border-radius: 20px;
-  padding: 4px 10px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.nickname-pill:hover {
-  border-color: var(--primary);
-}
-
-/* ------------------------------------------------------------- */
-/* MARQUEE SIGNAL BAR                                            */
-/* ------------------------------------------------------------- */
+/* MARQUEE SIGNAL TICKER */
 .signal-ticker {
-  background: rgba(124, 58, 237, 0.08);
-  border: 1px solid rgba(124, 58, 237, 0.18);
-  border-radius: 10px;
-  padding: 6px 12px;
+  background: rgba(79, 70, 229, 0.08);
+  border: 1px solid rgba(79, 70, 229, 0.2);
+  border-radius: var(--radius-md);
+  padding: 7px 14px;
   overflow: hidden;
   white-space: nowrap;
-  display: flex;
-  align-items: center;
 }
 
 .ticker-content {
   display: inline-block;
-  padding-left: 100%;
-  animation: ticker-anim 28s linear infinite;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
+  letter-spacing: 0.8px;
   color: var(--primary-light);
+  animation: marquee 25s linear infinite;
 }
 
-@keyframes ticker-anim {
-  0% { transform: translateX(0); }
+@keyframes marquee {
+  0% { transform: translateX(100%); }
   100% { transform: translateX(-100%); }
 }
 
-@keyframes pulseRing {
-  0% { transform: scale(0.7); opacity: 0.9; }
-  50% { opacity: 0.4; }
-  100% { transform: scale(1.35); opacity: 0; }
-}
-
-/* ------------------------------------------------------------- */
-/* NAVIGATION TAB BAR                                            */
-/* ------------------------------------------------------------- */
+/* NAVIGATION TAB BAR */
 .tab-bar {
+  display: flex;
+  align-items: center;
   background: var(--panel);
   backdrop-filter: var(--backdrop-blur);
   -webkit-backdrop-filter: var(--backdrop-blur);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 5px;
-  display: flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 6px;
   gap: 6px;
 }
 
 .tab-btn {
   flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 14px;
+  border-radius: var(--radius-md);
   background: transparent;
   border: none;
-  border-radius: 10px;
-  padding: 10px 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  cursor: pointer;
   color: var(--text-dim);
-  font-family: inherit;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
 }
 
-.tab-btn svg {
-  width: 18px;
-  height: 18px;
-  transition: transform 0.2s ease;
-}
-
 .tab-btn:hover {
   color: var(--text);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .tab-btn.active {
   background: var(--primary-gradient);
   color: #FFFFFF;
-  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.4);
+  box-shadow: 0 4px 16px var(--primary-glow);
 }
 
-.tab-btn.active svg {
-  transform: translateY(-1px);
+.tab-btn svg {
+  width: 17px;
+  height: 17px;
 }
 
 .tab-badge {
-  position: absolute;
-  top: 4px;
-  right: 12px;
-  background: var(--cyan);
-  color: #080A10;
-  font-size: 9px;
+  background: var(--rose);
+  color: #FFFFFF;
+  font-size: 10px;
   font-weight: 800;
-  border-radius: 8px;
-  padding: 1px 5px;
-  min-width: 14px;
-  text-align: center;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: 2px;
 }
 
-/* ------------------------------------------------------------- */
-/* TAB CONTENT PANELS                                            */
-/* ------------------------------------------------------------- */
+/* TAB VIEWS */
 .tab-view {
   display: none;
   flex-direction: column;
   gap: 16px;
-  animation: fadeIn 0.22s ease forwards;
+  animation: fadeIn 0.2s ease forwards;
 }
 
 .tab-view.active {
@@ -357,307 +327,116 @@ body::before {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(5px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ------------------------------------------------------------- */
-
-/* ------------------------------------------------------------- */
-/* 3-STEP WORKFLOW WIZARD                                        */
-/* ------------------------------------------------------------- */
-.web-step-wizard {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+/* CARDS */
+.card-section {
   background: var(--panel);
-  backdrop-filter: var(--backdrop-blur);
-  -webkit-backdrop-filter: var(--backdrop-blur);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 10px 16px;
-}
-
-/* SHAREIT WEB RADAR SCANNER */
-.web-radar-container {
-  position: relative;
-  width: 200px;
-  height: 200px;
-  margin: 12px auto;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.web-radar-ring {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-}
-.web-radar-sweep {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background: conic-gradient(from 0deg at 50% 50%, rgba(124, 58, 237, 0.3) 0deg, transparent 60deg, transparent 360deg);
-  animation: webRadarSpin 3s linear infinite;
-  pointer-events: none;
-}
-@keyframes webRadarSpin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-.web-radar-pulse {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  border: 1.5px solid rgba(124, 58, 237, 0.6);
-  animation: webRadarPulse 2.5s ease-out infinite;
-  pointer-events: none;
-}
-@keyframes webRadarPulse {
-  0% { transform: scale(0.2); opacity: 0.9; }
-  70% { transform: scale(1.0); opacity: 0; }
-  100% { transform: scale(1.0); opacity: 0; }
-}
-.web-radar-center {
-  position: relative;
-  z-index: 2;
-  width: 48px;
-  height: 48px;
-  border-radius: 24px;
-  background: var(--card-solid);
-  border: 2px solid var(--primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 0 16px rgba(124, 58, 237, 0.5);
-}
-.web-radar-node {
-  position: absolute;
-  z-index: 4;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-.web-radar-node:hover {
-  transform: scale(1.08);
-}
-.web-radar-node-disc {
-  width: 40px;
-  height: 40px;
-  border-radius: 20px;
-  background: var(--card-solid);
-  border: 2px solid var(--cyan);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 12px rgba(6, 182, 212, 0.35);
+  gap: 16px;
+  box-shadow: var(--shadow-glow);
 }
 
-.wsw-step {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  opacity: 0.45;
-  transition: all 0.25s ease;
-}
-.wsw-step.active {
-  opacity: 1;
-}
-.wsw-step.completed {
-  opacity: 0.9;
-}
-.wsw-badge {
-  width: 22px;
-  height: 22px;
-  border-radius: 11px;
-  background: var(--card-solid);
-  border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--text-dim);
-}
-.wsw-step.active .wsw-badge {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: #fff;
-}
-.wsw-step.completed .wsw-badge {
-  background: var(--emerald);
-  border-color: var(--emerald);
-  color: #fff;
-}
-.wsw-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text);
-}
-.wsw-connector {
-  width: 20px;
-  height: 2px;
-  background: var(--border-subtle);
-  border-radius: 1px;
-  transition: background 0.25s ease;
-}
-.wsw-connector.active {
-  background: var(--primary);
-}
-
-/* TARGET DEVICE SELECTOR STRIP                                  */
-/* ------------------------------------------------------------- */
-.device-select-card {
-  background: var(--panel);
-  backdrop-filter: var(--backdrop-blur);
-  -webkit-backdrop-filter: var(--backdrop-blur);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 12px 16px;
+.section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-.dsc-left {
+.section-title {
   display: flex;
   align-items: center;
   gap: 10px;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: 0.3px;
 }
 
-.dsc-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: rgba(124, 58, 237, 0.15);
+/* DROPZONE */
+.dropzone-card {
+  background: var(--card);
+  border: 2px dashed rgba(79, 70, 229, 0.35);
+  border-radius: var(--radius-lg);
+  padding: 34px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.dropzone-card:hover {
+  border-color: var(--primary-light);
+  background: var(--card-hover);
+  transform: translateY(-2px);
+}
+
+.dz-icon-circle {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(79, 70, 229, 0.15);
+  border: 1px solid rgba(79, 70, 229, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--primary-light);
 }
 
-.dsc-icon svg {
-  width: 16px;
-  height: 16px;
-}
-
-.dsc-label {
-  font-size: 11px;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  font-weight: 700;
-}
-
-.dsc-select-wrap select {
-  background: var(--card-solid);
-  border: 1px solid var(--border);
-  color: var(--text);
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 6px 12px;
-  border-radius: 8px;
-  outline: none;
-  cursor: pointer;
-}
-
-/* ------------------------------------------------------------- */
-/* SEND TAB: MODERN MULTI-FILE DROPZONE                          */
-/* ------------------------------------------------------------- */
-.dropzone-card {
-  background: var(--panel);
-  backdrop-filter: var(--backdrop-blur);
-  -webkit-backdrop-filter: var(--backdrop-blur);
-  border: 2px dashed var(--border);
-  border-radius: var(--radius-lg);
-  padding: 36px 20px;
-  text-align: center;
-  position: relative;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  overflow: hidden;
-}
-
-.dropzone-card.dragover {
-  border-color: var(--cyan);
-  background: rgba(6, 182, 212, 0.08);
-  transform: scale(1.01);
-}
-
-.dropzone-card:hover {
-  border-color: var(--primary-light);
-  background: rgba(124, 58, 237, 0.06);
-}
-
-.dz-icon-circle {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: var(--primary-gradient);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 16px;
-  box-shadow: 0 6px 20px var(--primary-glow);
-  color: #FFFFFF;
-}
-
 .dz-icon-circle svg {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
 }
 
 .dz-title {
-  font-family: inherit;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 800;
-  margin-bottom: 6px;
   color: var(--text);
 }
 
 .dz-sub {
   font-size: 12px;
-  color: var(--text-dim);
-  max-width: 320px;
-  margin: 0 auto 20px;
+  color: var(--text-muted);
+  max-width: 360px;
   line-height: 1.5;
 }
 
 .dz-btn-group {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   justify-content: center;
-  flex-wrap: wrap;
+  margin-top: 6px;
 }
 
 .dz-action-btn {
-  background: var(--card);
+  background: rgba(255, 255, 255, 0.06);
   border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 9px 16px;
   color: var(--text);
-  padding: 10px 18px;
-  border-radius: 10px;
-  font-family: inherit;
   font-size: 12px;
   font-weight: 700;
-  cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .dz-action-btn:hover {
-  background: var(--primary-gradient);
+  background: var(--primary);
+  border-color: var(--primary);
   color: #FFFFFF;
-  border-color: transparent;
-  transform: translateY(-1px);
 }
 
 .dz-action-btn svg {
@@ -665,20 +444,15 @@ body::before {
   height: 15px;
 }
 
-/* ------------------------------------------------------------- */
-/* STAGING TRAY (MULTIPLE SELECTED FILES)                        */
-/* ------------------------------------------------------------- */
+/* STAGING TRAY */
 .staging-card {
-  background: var(--panel);
-  backdrop-filter: var(--backdrop-blur);
-  -webkit-backdrop-filter: var(--backdrop-blur);
+  background: var(--card-solid);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 18px;
   display: flex;
   flex-direction: column;
   gap: 14px;
-  box-shadow: var(--shadow-glow);
 }
 
 .staging-header {
@@ -690,19 +464,19 @@ body::before {
 .staging-title {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-family: inherit;
+  gap: 10px;
   font-size: 14px;
   font-weight: 800;
   color: var(--text);
 }
 
 .staging-badge {
-  background: rgba(124, 58, 237, 0.2);
+  background: rgba(79, 70, 229, 0.15);
+  border: 1px solid rgba(79, 70, 229, 0.3);
   color: var(--primary-light);
   font-size: 11px;
-  font-weight: 700;
-  padding: 2px 8px;
+  font-weight: 800;
+  padding: 3px 8px;
   border-radius: 12px;
 }
 
@@ -713,47 +487,26 @@ body::before {
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 6px;
-  transition: background 0.15s;
-}
-
-.staging-clear-btn:hover {
-  background: rgba(244, 63, 94, 0.1);
 }
 
 .staging-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-height: 240px;
+  max-height: 220px;
   overflow-y: auto;
   padding-right: 4px;
 }
 
-.staging-list::-webkit-scrollbar {
-  width: 4px;
-}
-.staging-list::-webkit-scrollbar-thumb {
-  background: rgba(124, 58, 237, 0.3);
-  border-radius: 4px;
-}
-
 .staging-item {
-  background: var(--card);
-  border: 1px solid var(--border-subtle);
-  border-radius: 10px;
-  padding: 10px 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  transition: all 0.2s ease;
-}
-
-.staging-item:hover {
-  border-color: var(--border);
-  background: var(--card-hover);
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
 }
 
 .si-left {
@@ -768,18 +521,14 @@ body::before {
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  background: rgba(124, 58, 237, 0.15);
+  background: rgba(79, 70, 229, 0.12);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--cyan);
+  color: var(--primary-light);
   flex-shrink: 0;
 }
-
-.si-icon svg {
-  width: 16px;
-  height: 16px;
-}
+.si-icon svg { width: 16px; height: 16px; }
 
 .si-info {
   display: flex;
@@ -789,7 +538,7 @@ body::before {
 
 .si-name {
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text);
   white-space: nowrap;
   overflow: hidden;
@@ -798,118 +547,567 @@ body::before {
 
 .si-size {
   font-size: 10px;
-  font-family: inherit;
-  color: var(--text-muted);
+  color: var(--text-dim);
 }
 
-.si-remove {
+.si-remove-btn {
   background: transparent;
   border: none;
   color: var(--text-muted);
-  width: 26px;
-  height: 26px;
-  border-radius: 6px;
+  cursor: pointer;
+  padding: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  border-radius: 6px;
   transition: all 0.15s ease;
-  flex-shrink: 0;
 }
-
-.si-remove:hover {
+.si-remove-btn:hover {
   color: var(--rose);
   background: rgba(244, 63, 94, 0.1);
 }
+.si-remove-btn svg { width: 14px; height: 14px; }
 
 .staging-footer {
-  border-top: 1px solid var(--border-subtle);
-  padding-top: 12px;
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border-subtle);
 }
 
 .staging-summary-row {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 11px;
-  color: var(--text-dim);
+  flex-direction: column;
+}
+
+.staging-summary-lbl {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 700;
 }
 
 .staging-summary-val {
-  font-family: inherit;
-  font-weight: 700;
-  color: var(--cyan);
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text);
 }
 
 .send-all-btn {
   background: var(--primary-gradient);
-  color: #FFFFFF;
   border: none;
-  padding: 13px 20px;
   border-radius: var(--radius-md);
-  font-family: inherit;
+  padding: 12px 24px;
+  color: #FFFFFF;
   font-size: 13px;
   font-weight: 800;
-  letter-spacing: 0.5px;
-  cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 8px;
-  box-shadow: 0 4px 18px var(--primary-glow);
+  cursor: pointer;
+  box-shadow: 0 4px 16px var(--primary-glow);
   transition: all 0.2s ease;
 }
-
 .send-all-btn:hover {
-  opacity: 0.95;
   transform: translateY(-1px);
+  box-shadow: 0 6px 20px var(--primary-glow);
 }
-
 .send-all-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
 }
-
-.send-all-btn svg {
-  width: 16px;
-  height: 16px;
-}
+.send-all-btn svg { width: 16px; height: 16px; }
 
 /* ------------------------------------------------------------- */
-/* DOWNLOADS TAB                                                 */
+/* RADAR STAGE (SENDER DISCOVERY)                                */
 /* ------------------------------------------------------------- */
-.card-section {
+.radar-stage-card {
   background: var(--panel);
-  backdrop-filter: var(--backdrop-blur);
-  -webkit-backdrop-filter: var(--backdrop-blur);
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 18px;
+  padding: 24px 20px;
+  text-align: center;
+  box-shadow: var(--shadow-glow);
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  align-items: center;
+  gap: 16px;
 }
 
-.section-header {
+.radar-top-bar {
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-.section-title {
-  font-family: inherit;
-  font-size: 15px;
+.radar-back-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 7px 12px;
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.radar-back-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+.radar-back-btn svg { width: 13px; height: 13px; }
+
+.radar-batch-pill {
+  background: rgba(79, 70, 229, 0.12);
+  border: 1px solid rgba(79, 70, 229, 0.25);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary-light);
+}
+
+.web-radar-box {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  margin: 10px auto;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+.radar-circle {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(79, 70, 229, 0.25);
+  pointer-events: none;
+}
+.radar-circle.c1 { width: 80px; height: 80px; }
+.radar-circle.c2 { width: 150px; height: 150px; border-style: dashed; border-color: rgba(79, 70, 229, 0.2); }
+.radar-circle.c3 { width: 220px; height: 220px; }
+.radar-circle.c4 { width: 280px; height: 280px; border-color: rgba(79, 70, 229, 0.15); }
+
+.radar-sweep-beam {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg at 50% 50%, rgba(79, 70, 229, 0.35) 0deg, transparent 65deg, transparent 360deg);
+  animation: radarRotate 3s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes radarRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.radar-wave {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 1.5px solid rgba(6, 182, 212, 0.6);
+  animation: radarPulseWave 2.6s ease-out infinite;
+  pointer-events: none;
+}
+
+@keyframes radarPulseWave {
+  0% { transform: scale(0.25); opacity: 0.9; }
+  80% { transform: scale(1.0); opacity: 0; }
+  100% { transform: scale(1.0); opacity: 0; }
+}
+
+.radar-center-sender {
+  position: relative;
+  z-index: 3;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--card-solid);
+  border: 2px solid var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-light);
+  box-shadow: 0 0 20px var(--primary-glow);
+}
+.radar-center-sender svg { width: 24px; height: 24px; }
+
+/* DYNAMIC RECEIVER RADAR NODES */
+.web-radar-node {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  transform: translate(-50%, -50%);
+}
+
+.web-radar-node:hover {
+  transform: translate(-50%, -50%) scale(1.12);
+}
+
+.web-radar-node-disc {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10B981, #06B6D4);
+  border: 2.5px solid #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.6);
+  color: #FFFFFF;
+}
+.web-radar-node-disc svg { width: 22px; height: 22px; }
+
+.web-radar-node-label {
+  font-size: 11px;
   font-weight: 800;
+  color: #FFFFFF;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid var(--border);
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-top: 4px;
+  white-space: nowrap;
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.radar-empty-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  max-width: 420px;
+}
+
+.radar-empty-title {
+  font-size: 12px;
+  font-weight: 700;
   color: var(--text);
   display: flex;
   align-items: center;
+  gap: 6px;
+}
+
+.radar-empty-text {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* ------------------------------------------------------------- */
+/* RECEIVE MODE VIEW                                             */
+/* ------------------------------------------------------------- */
+.receive-hero-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 36px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  box-shadow: var(--shadow-glow);
+}
+
+.receive-beacon-wrap {
+  position: relative;
+  width: 170px;
+  height: 170px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 8px 0;
+}
+
+.beacon-ring-1 {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(16, 185, 129, 0.3);
+  animation: beaconPulse 2.4s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
+}
+
+.beacon-ring-2 {
+  position: absolute;
+  inset: 18px;
+  border-radius: 50%;
+  border: 2px solid rgba(6, 182, 212, 0.35);
+  animation: beaconPulse 2.4s cubic-bezier(0.2, 0.6, 0.4, 1) infinite 0.7s;
+}
+
+@keyframes beaconPulse {
+  0% { transform: scale(0.6); opacity: 0.9; }
+  80% { transform: scale(1.15); opacity: 0; }
+  100% { transform: scale(1.15); opacity: 0; }
+}
+
+.beacon-center-disc {
+  width: 86px;
+  height: 86px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10B981 0%, #06B6D4 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  box-shadow: 0 0 30px rgba(16, 185, 129, 0.5);
+  z-index: 2;
+}
+.beacon-center-disc svg { width: 40px; height: 40px; }
+
+.receive-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 18px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 20px;
+  color: var(--emerald);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+}
+
+.receive-device-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.receive-device-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.receive-guide-box {
+  width: 100%;
+  max-width: 440px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
   gap: 8px;
 }
 
+.rgb-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 11px;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+.rgb-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cyan);
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+
+/* ------------------------------------------------------------- */
+/* DEDICATED FULL ACTIVE TRANSFER VIEW                           */
+/* ------------------------------------------------------------- */
+.transfer-view-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  box-shadow: var(--shadow-glow);
+}
+
+.tv-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tv-peer-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tv-peer-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(79, 70, 229, 0.15);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-light);
+}
+.tv-peer-avatar svg { width: 22px; height: 22px; }
+
+.tv-peer-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.tv-role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--primary-light);
+}
+
+.tv-peer-name {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.tv-abort-btn {
+  background: rgba(244, 63, 94, 0.12);
+  border: 1px solid rgba(244, 63, 94, 0.3);
+  color: var(--rose);
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.tv-abort-btn:hover {
+  background: var(--rose);
+  color: #FFFFFF;
+}
+
+.tv-progress-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tv-pb-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.tv-current-filename {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 80%;
+}
+
+.tv-pct-display {
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--primary-light);
+}
+
+.tv-bar-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.tv-bar-fill {
+  width: 0%;
+  height: 100%;
+  background: var(--primary-gradient);
+  border-radius: 4px;
+  transition: width 0.15s linear;
+}
+
+.tv-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 8px;
+}
+
+.tv-stat-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tv-stat-lbl {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.tv-stat-val {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.tv-queue-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 220px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.transfer-queue-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-subtle);
+}
+
+/* ------------------------------------------------------------- */
+/* DOWNLOADS & ACTIVITY LISTS                                    */
+/* ------------------------------------------------------------- */
 .file-cards-list {
   display: flex;
   flex-direction: column;
@@ -920,23 +1118,17 @@ body::before {
   background: var(--card);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  padding: 12px 14px;
+  padding: 12px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  transition: all 0.2s ease;
-}
-
-.file-card-item:hover {
-  background: var(--card-hover);
-  border-color: var(--border);
 }
 
 .fci-left {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   overflow: hidden;
   flex: 1;
 }
@@ -945,22 +1137,18 @@ body::before {
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  background: rgba(124, 58, 237, 0.15);
+  background: rgba(79, 70, 229, 0.12);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--primary-light);
   flex-shrink: 0;
 }
-
-.fci-icon svg {
-  width: 18px;
-  height: 18px;
-}
+.fci-icon svg { width: 18px; height: 18px; }
 
 .fci-name {
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text);
   white-space: nowrap;
   overflow: hidden;
@@ -969,69 +1157,24 @@ body::before {
 
 .fci-meta {
   font-size: 11px;
-  font-family: inherit;
-  color: var(--text-muted);
+  color: var(--text-dim);
 }
 
 .fci-dl-btn {
-  background: rgba(124, 58, 237, 0.15);
-  color: var(--primary-light);
-  border: 1px solid var(--border);
+  background: var(--primary-gradient);
+  border: none;
+  color: #FFFFFF;
   padding: 8px 14px;
-  border-radius: 8px;
-  font-family: inherit;
+  border-radius: var(--radius-sm);
   font-size: 11px;
   font-weight: 700;
-  cursor: pointer;
+  text-decoration: none;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
 }
+.fci-dl-btn svg { width: 13px; height: 13px; }
 
-.fci-dl-btn:hover {
-  background: var(--primary-gradient);
-  color: #FFFFFF;
-  border-color: transparent;
-}
-
-.fci-dl-btn svg {
-  width: 13px;
-  height: 13px;
-}
-
-.empty-state-box {
-  text-align: center;
-  padding: 32px 16px;
-  color: var(--text-muted);
-}
-
-.empty-state-box svg {
-  width: 42px;
-  height: 42px;
-  margin-bottom: 10px;
-  color: var(--border);
-}
-
-.empty-state-title {
-  font-weight: 700;
-  font-size: 13px;
-  color: var(--text-dim);
-  margin-bottom: 4px;
-}
-
-.empty-state-text {
-  font-size: 11px;
-  line-height: 1.5;
-  max-width: 280px;
-  margin: 0 auto;
-}
-
-/* ------------------------------------------------------------- */
-/* ACTIVITY TAB                                                  */
-/* ------------------------------------------------------------- */
 .history-item {
   background: var(--card);
   border: 1px solid var(--border-subtle);
@@ -1052,33 +1195,21 @@ body::before {
 }
 
 .hi-dir-badge {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
-
-.hi-dir-badge.received {
-  background: rgba(16, 185, 129, 0.15);
-  color: var(--emerald);
-}
-
-.hi-dir-badge.sent {
-  background: rgba(6, 182, 212, 0.15);
-  color: var(--cyan);
-}
-
-.hi-dir-badge svg {
-  width: 14px;
-  height: 14px;
-}
+.hi-dir-badge.received { background: rgba(16, 185, 129, 0.15); color: var(--emerald); }
+.hi-dir-badge.sent { background: rgba(6, 182, 212, 0.15); color: var(--cyan); }
+.hi-dir-badge svg { width: 14px; height: 14px; }
 
 .hi-name {
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text);
   white-space: nowrap;
   overflow: hidden;
@@ -1090,68 +1221,62 @@ body::before {
   color: var(--text-muted);
 }
 
-.hi-right {
-  text-align: right;
-  flex-shrink: 0;
-}
-
 .hi-status {
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
-
 .hi-status.completed { color: var(--emerald); }
 .hi-status.failed { color: var(--rose); }
 
-/* ------------------------------------------------------------- */
-/* SHARE TAB                                                     */
-/* ------------------------------------------------------------- */
+.empty-state-box {
+  text-align: center;
+  padding: 36px 16px;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.empty-state-box svg {
+  width: 44px;
+  height: 44px;
+  color: var(--border);
+}
+.empty-state-title {
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--text-dim);
+}
+.empty-state-text {
+  font-size: 12px;
+  line-height: 1.5;
+  max-width: 300px;
+}
+
+/* SHARE TAB */
 .qr-container {
   display: flex;
   align-items: center;
   gap: 20px;
   padding: 8px 0;
 }
+@media (max-width: 480px) {
+  .qr-container { flex-direction: column; text-align: center; }
+}
 
 .qr-box {
   background: #FFFFFF;
-  border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  padding: 8px;
-  width: 130px;
-  height: 130px;
+  padding: 10px;
+  width: 140px;
+  height: 140px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-
-.qr-box img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.qr-info {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.qr-title {
-  font-family: inherit;
-  font-weight: 800;
-  font-size: 15px;
-  color: var(--text);
-}
-
-.qr-desc {
-  font-size: 11px;
-  color: var(--text-dim);
-  line-height: 1.5;
-}
+.qr-box img { width: 100%; height: 100%; object-fit: contain; }
 
 .url-copy-box {
   display: flex;
@@ -1160,12 +1285,11 @@ body::before {
   background: var(--input-bg);
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
-  padding: 6px 10px;
+  padding: 8px 12px;
 }
 
 .url-text {
-  font-family: inherit;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--cyan);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1174,212 +1298,18 @@ body::before {
 }
 
 .copy-btn {
-  background: rgba(124, 58, 237, 0.2);
-  border: none;
+  background: rgba(79, 70, 229, 0.2);
+  border: 1px solid rgba(79, 70, 229, 0.35);
   color: var(--primary-light);
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.copy-btn:hover {
-  background: var(--primary);
-  color: #FFFFFF;
-}
-
-/* ------------------------------------------------------------- */
-/* CAPTIVE PORTAL NOTICE                                         */
-/* ------------------------------------------------------------- */
-.captive-banner {
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(245, 158, 11, 0.3);
-  border-radius: var(--radius-md);
-  padding: 12px 14px;
-  display: none;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-.cb-icon {
-  color: var(--amber);
-  margin-top: 2px;
-}
-
-.cb-content {
-  flex: 1;
-}
-
-.cb-title {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--amber);
-  margin-bottom: 2px;
-}
-
-.cb-text {
-  font-size: 11px;
-  color: var(--text-dim);
-  line-height: 1.4;
-  margin-bottom: 8px;
-}
-
-.cb-btn {
-  background: var(--amber);
-  color: #080A10;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-family: inherit;
-  font-size: 11px;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-/* ------------------------------------------------------------- */
-/* FLOATING LIVE TRANSFER HUD (BOTTOM SHEET / HUD)               */
-/* ------------------------------------------------------------- */
-.transfer-hud {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(12, 15, 26, 0.94);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-top: 1px solid var(--border);
-  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.6);
-  padding: 16px 20px 24px;
-  z-index: 2000;
-  transform: translateY(110%);
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.transfer-hud.active {
-  transform: translateY(0);
-}
-
-.hud-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.hud-file-tag {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  overflow: hidden;
-  flex: 1;
-}
-
-.hud-pulse-ring {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--cyan);
-  box-shadow: 0 0 12px var(--cyan);
-  animation: pulse-dot 1.5s infinite;
-  flex-shrink: 0;
-}
-
-.hud-file-title {
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.hud-cancel-btn {
-  background: rgba(244, 63, 94, 0.15);
-  border: 1px solid rgba(244, 63, 94, 0.3);
-  color: var(--rose);
   padding: 5px 12px;
-  border-radius: 8px;
+  border-radius: 6px;
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.15s ease;
 }
+.copy-btn:hover { background: var(--primary); color: #FFFFFF; }
 
-.hud-cancel-btn:hover {
-  background: var(--rose);
-  color: #FFFFFF;
-}
-
-/* Progress bar */
-.hud-bar-container {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.hud-bar-track {
-  width: 100%;
-  height: 8px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.08);
-  overflow: hidden;
-  position: relative;
-}
-
-.hud-bar-fill {
-  width: 0%;
-  height: 100%;
-  background: var(--primary-gradient);
-  border-radius: 4px;
-  transition: width 0.2s linear;
-  box-shadow: 0 0 14px var(--primary-glow);
-}
-
-.hud-stats-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 11px;
-  font-family: inherit;
-}
-
-.hud-speed {
-  color: var(--cyan);
-  font-weight: 700;
-}
-
-.hud-bytes {
-  color: var(--text-dim);
-}
-
-.hud-eta {
-  color: var(--primary-light);
-  font-weight: 700;
-}
-
-/* Sparkline Wave Canvas */
-.hud-sparkline-wrap {
-  width: 100%;
-  height: 38px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--border-subtle);
-  overflow: hidden;
-}
-
-#hudSpeedGraph {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-/* ------------------------------------------------------------- */
-/* INCOMING FILE MODAL DIALOG                                    */
-/* ------------------------------------------------------------- */
+/* MODALS */
 .modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -1405,7 +1335,7 @@ body::before {
   background: var(--panel-solid);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 28px 24px;
+  padding: 24px 22px;
   width: 100%;
   max-width: 400px;
   text-align: center;
@@ -1414,7 +1344,7 @@ body::before {
   transition: transform 0.2s ease;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 
 .modal-overlay.active .modal-sheet {
@@ -1422,24 +1352,19 @@ body::before {
 }
 
 .modal-icon-disc {
-  width: 60px;
-  height: 60px;
-  border-radius: 30px;
-  background: rgba(124, 58, 237, 0.15);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(79, 70, 229, 0.15);
   color: var(--primary-light);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto;
 }
-
-.modal-icon-disc svg {
-  width: 28px;
-  height: 28px;
-}
+.modal-icon-disc svg { width: 28px; height: 28px; }
 
 .modal-title {
-  font-family: inherit;
   font-size: 18px;
   font-weight: 800;
   color: var(--text);
@@ -1460,7 +1385,6 @@ body::before {
   flex: 1;
   padding: 12px;
   border-radius: 10px;
-  font-family: inherit;
   font-size: 12px;
   font-weight: 800;
   cursor: pointer;
@@ -1489,25 +1413,12 @@ body::before {
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
   text-align: left;
-  transition: background 0.15s ease;
-}
-.batch-chk-item:hover {
-  background: rgba(255, 255, 255, 0.06);
 }
 .batch-chk-item input[type=""checkbox""] {
-  display: inline-block !important;
   accent-color: var(--primary);
   width: 16px;
   height: 16px;
-  flex-shrink: 0;
   cursor: pointer;
-}
-.batch-chk-info {
-  flex: 1;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
 }
 .batch-chk-name {
   font-size: 12px;
@@ -1517,14 +1428,8 @@ body::before {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.batch-chk-meta {
-  font-size: 10px;
-  color: var(--text-dim);
-}
 
-/* ------------------------------------------------------------- */
-/* TOAST NOTIFICATION                                            */
-/* ------------------------------------------------------------- */
+/* TOAST */
 .toast-pill {
   position: fixed;
   top: 20px;
@@ -1550,16 +1455,9 @@ body::before {
   transform: translateX(-50%) translateY(0);
   opacity: 1;
 }
+.toast-pill svg { width: 16px; height: 16px; }
 
-.toast-pill svg {
-  width: 16px;
-  height: 16px;
-}
-
-/* Hidden Inputs */
-input[type=""file""] {
-  display: none;
-}
+input[type=""file""] { display: none; }
 </style>
 </head>
 <body>
@@ -1570,21 +1468,22 @@ input[type=""file""] {
   <header class=""app-header"">
     <div class=""brand-section"">
       <div class=""brand-logo-disc"">
-        <img src=""/api/logo"" alt=""WeShare Logo"">
+        <img src=""/api/logo"" alt=""WeShare"" onerror=""this.style.display='none';"">
       </div>
       <div class=""brand-title-wrap"">
         <span class=""brand-title"">WE SHARE</span>
         <span class=""brand-status-badge"">
           <span class=""status-dot""></span>
-          <span id=""hostStatusText"">CONNECTING...</span>
+          <span id=""hostStatusText"">ONLINE</span>
         </span>
       </div>
     </div>
 
     <div class=""header-actions"">
-      <div class=""nickname-pill"" onclick=""promptEditNickname()"" title=""Edit Nickname"">
-        <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round"" style=""width:12px; height:12px; color:var(--primary-light);""><path d=""M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2""/><circle cx=""12"" cy=""7"" r=""4""/></svg>
-        <span id=""nicknameDisplay"">Mobile Web</span>
+      <div class=""nickname-pill"" onclick=""promptEditNickname()"" title=""Click to rename device"">
+        <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round"" style=""width:13px; height:13px; color:var(--primary-light);""><rect x=""5"" y=""2"" width=""14"" height=""20"" rx=""2"" ry=""2""/><line x1=""12"" y1=""18"" x2=""12.01"" y2=""18""/></svg>
+        <span id=""nicknameDisplay"">Device</span>
+        <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round"" style=""width:11px; height:11px; color:var(--text-muted); margin-left:2px;""><path d=""M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7""/><path d=""M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z""/></svg>
       </div>
       <button class=""header-btn"" id=""themeToggleBtn"" onclick=""toggleTheme()"" title=""Toggle Theme"">
         <svg id=""themeIcon"" xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2.2"" stroke-linecap=""round"" stroke-linejoin=""round""><circle cx=""12"" cy=""12"" r=""4""/><path d=""M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41""/></svg>
@@ -1592,20 +1491,7 @@ input[type=""file""] {
     </div>
   </header>
 
-  <!-- CAPTIVE PORTAL WARNING -->
-  <div class=""captive-banner"" id=""captiveWarning"">
-    <div class=""cb-icon"">
-      <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round"" style=""width:20px;height:20px;""><path d=""M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z""/><line x1=""12"" y1=""9"" x2=""12"" y2=""13""/><line x1=""12"" y1=""17"" x2=""12.01"" y2=""17""/></svg>
-    </div>
-    <div class=""cb-content"">
-      <div class=""cb-title"">Wi-Fi Sign-In Notice</div>
-      <div class=""cb-text"">Authorize this connection to prevent mobile data fallback while transferring files.</div>
-      <button class=""cb-btn"" onclick=""authorizeWifi()"">AUTHORIZE WI-FI</button>
-    </div>
-    <button onclick=""document.getElementById('captiveWarning').style.display='none'"" style=""background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:16px;"">&times;</button>
-  </div>
-
-  <!-- MARQUEE TICKER -->
+  <!-- MARQUEE SIGNAL TICKER -->
   <div class=""signal-ticker"">
     <div class=""ticker-content"">
       ULTRA-FAST LOCAL DIRECT TRANSFER • ZERO CLOUD STORAGE • P2P HIGH SPEED ACTIVE • WE SHARE PORTAL READY
@@ -1639,196 +1525,176 @@ input[type=""file""] {
   </nav>
 
   <!-- ========================================================= -->
-  <!-- 1. SEND TAB VIEW (3-STEP INTUITIVE SEQUENCE)                 -->
+  <!-- 1. SEND TAB VIEW (SHAREit STAGED FLOW)                     -->
   <!-- ========================================================= -->
   <div class=""tab-view active"" id=""viewSend"">
 
-    <!-- SHAREit Style Radar Discovery & Connection Card -->
-    <div class=""radar-connect-card"" id=""radarConnectCard"" style=""background:var(--panel); border:1px solid var(--border); border-radius:var(--radius-md); padding:16px; text-align:center; margin-bottom:16px;"">
-      <div style=""display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;"">
-        <div style=""display:flex; align-items:center; gap:8px;"">
-          <div style=""width:8px; height:8px; border-radius:4px; background:var(--primary);""></div>
-          <span style=""font-size:13px; font-weight:700; color:var(--text);"">Nearby Share Radar</span>
-        </div>
-        <div id=""sessionStatusBadge"" style=""font-size:11px; font-weight:700; padding:4px 10px; border-radius:20px; background:#1e2338; color:#94A3B8;"">
-          DISCONNECTED
-        </div>
-      </div>
-
-      <!-- Rotating Sonar Radar -->
-      <div class=""web-radar-container"" id=""webRadarContainer"">
-        <div class=""web-radar-ring"" style=""width:200px; height:200px; border:1px solid rgba(124,58,237,0.2);""></div>
-        <div class=""web-radar-ring"" style=""width:130px; height:130px; border:1px dashed rgba(124,58,237,0.25);""></div>
-        <div class=""web-radar-ring"" style=""width:70px; height:70px; border:1px solid rgba(124,58,237,0.3);""></div>
-        <div class=""web-radar-sweep""></div>
-        <div class=""web-radar-pulse""></div>
-        
-        <!-- Center Phone Node -->
-        <div class=""web-radar-center"">
-          <svg style=""width:22px; height:22px; stroke:#A855F7; fill:none;"" viewBox=""0 0 24 24"" stroke-width=""2""><rect x=""5"" y=""2"" width=""14"" height=""20"" rx=""2"" ry=""2""/><line x1=""12"" y1=""18"" x2=""12.01"" y2=""18""/></svg>
-        </div>
-
-        <!-- Discovered Host PC Node on Radar -->
-        <div class=""web-radar-node"" id=""hostRadarNode"" onclick=""connectToHost('Sender')"" style=""top:20px; right:25px;"">
-          <div class=""web-radar-node-disc"">
-            <svg style=""width:18px; height:18px; stroke:#06B6D4; fill:none;"" viewBox=""0 0 24 24"" stroke-width=""2""><rect x=""2"" y=""3"" width=""20"" height=""14"" rx=""2"" ry=""2""/><line x1=""8"" y1=""21"" x2=""16"" y2=""21""/><line x1=""12"" y1=""17"" x2=""12"" y2=""21""/></svg>
+    <!-- STAGE 1: RADAR RECEIVER DISCOVERY (SHOWN FIRST) -->
+    <div id=""sendRadarStage"" style=""display:block;"">
+      <div class=""radar-stage-card"">
+        <div class=""radar-top-bar"">
+          <div class=""receive-status-pill"" style=""margin:0;"">
+            <span class=""status-dot""></span>
+            <span>RADAR SCANNING</span>
           </div>
-          <span id=""radarHostName"" style=""font-size:10px; font-weight:700; color:#fff; margin-top:3px; max-width:70px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"">Host PC</span>
+          <button class=""radar-back-btn"" onclick=""openSendPickerWithoutTarget()"">
+            Choose Files First →
+          </button>
+        </div>
+
+        <div style=""display:flex; flex-direction:column; align-items:center; gap:4px; margin-top:8px;"">
+          <div style=""font-size:17px; font-weight:800; color:var(--text);"">Nearby Receivers</div>
+          <div style=""font-size:12px; color:var(--text-muted); text-align:center;"">Tap an active receiver node to connect and send files</div>
+        </div>
+
+        <!-- Animated Sweeping Radar Circle -->
+        <div class=""web-radar-box"" id=""webRadarBox"">
+          <div class=""radar-circle c1""></div>
+          <div class=""radar-circle c2""></div>
+          <div class=""radar-circle c3""></div>
+          <div class=""radar-circle c4""></div>
+          <div class=""radar-sweep-beam""></div>
+          <div class=""radar-wave""></div>
+
+          <!-- Center Node: You (Sender) -->
+          <div class=""radar-center-sender"" title=""You (Sender)"">
+            <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><rect x=""5"" y=""2"" width=""14"" height=""20"" rx=""2"" ry=""2""/><line x1=""12"" y1=""18"" x2=""12.01"" y2=""18""/></svg>
+          </div>
+
+          <!-- Dynamic Receiver Nodes Container -->
+          <div id=""radarNodesContainer""></div>
+        </div>
+
+        <!-- Empty Radar Status -->
+        <div class=""radar-empty-hint"" id=""radarEmptyHint"">
+          <div class=""radar-empty-title"">
+            <span class=""status-dot""></span>
+            <span>Scanning for Nearby Receivers...</span>
+          </div>
+          <div class=""radar-empty-text"">
+            Make sure the recipient device is in <b>Receive Mode</b>.<br>
+            • On PC: Click the <b>RECEIVE</b> tab.<br>
+            • On another phone: Open this portal and tap <b>Receive</b>.
+          </div>
         </div>
       </div>
+    </div>
 
-      <!-- Connect Action Button / Status -->
-      <div id=""connectActionSection"" style=""margin-top:8px;"">
-        <button id=""connectHostBtn"" onclick=""connectToHost('Sender')"" style=""width:100%; padding:11px 16px; border-radius:10px; background:linear-gradient(135deg, #4F46E5, #6366F1); border:none; color:#fff; font-size:13px; font-weight:700; cursor:pointer; box-shadow:0 4px 14px rgba(79,70,229,0.35);"">
-          Connect to Host PC to Share Files
+    <!-- STAGE 2: FILE SELECTION & STAGING (SHOWN AFTER CONNECTING) -->
+    <div id=""sendSelectionStage"" style=""display:none;"">
+
+      <!-- CONNECTED TARGET BANNER -->
+      <div id=""connectedTargetBanner"" style=""margin-bottom:14px; padding:12px 16px; border-radius:14px; background:linear-gradient(135deg, rgba(79,70,229,0.15), rgba(16,185,129,0.12)); border:1.5px solid rgba(16,185,129,0.3); display:flex; justify-content:space-between; align-items:center;"">
+        <div style=""display:flex; align-items:center; gap:10px;"">
+          <div style=""width:10px; height:10px; border-radius:5px; background:var(--emerald); box-shadow:0 0 10px var(--emerald);""></div>
+          <div style=""display:flex; flex-direction:column;"">
+            <div style=""font-size:10px; font-weight:800; color:var(--emerald); letter-spacing:0.8px;"">CONNECTED RECIPIENT</div>
+            <div id=""connectedTargetName"" style=""font-size:14px; font-weight:800; color:var(--text);"">Host PC</div>
+          </div>
+        </div>
+        <button type=""button"" class=""staging-clear-btn"" style=""padding:6px 12px; font-size:11px; background:rgba(255,255,255,0.08); border-radius:8px; border:1px solid var(--border);"" onclick=""openSenderRadar()"">
+          Change (Radar)
         </button>
       </div>
-      <div id=""connectedActiveSection"" style=""display:none; margin-top:8px; align-items:center; justify-content:space-between; background:#0E2E28; border:1px solid #10B981; border-radius:10px; padding:8px 12px;"">
-        <div style=""display:flex; align-items:center; gap:8px;"">
-          <div style=""width:8px; height:8px; border-radius:4px; background:#10B981;""></div>
-          <span id=""connectedDeviceLabel"" style=""font-size:12px; font-weight:700; color:#10B981;"">Connected with Host PC</span>
+      <!-- Hidden Multi-File, Folder and Camera Inputs -->
+      <input type=""file"" id=""multiFileInput"" multiple onchange=""onFilesSelected(this.files)"">
+      <input type=""file"" id=""folderInput"" webkitdirectory directory multiple onchange=""onFolderSelected(this.files)"">
+      <input type=""file"" id=""cameraInput"" accept=""image/*,video/*"" capture=""environment"" onchange=""onFilesSelected(this.files)"">
+
+      <!-- Interactive Dropzone -->
+      <div class=""dropzone-card"" id=""dropZone"" onclick=""document.getElementById('multiFileInput').click()"">
+        <div class=""dz-icon-circle"">
+          <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2.2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4""/><polyline points=""17 8 12 3 7 8""/><line x1=""12"" y1=""3"" x2=""12"" y2=""15""/></svg>
         </div>
-        <button onclick=""disconnectFromHost()"" style=""padding:5px 10px; border-radius:6px; background:#1e2338; border:1px solid #333d5a; color:#EF4444; font-size:11px; font-weight:600; cursor:pointer;"">Disconnect</button>
-      </div>
-    </div>
-
-    <!-- 3-Step Sequence Wizard -->
-    <div class=""web-step-wizard"" id=""webStepWizard"">
-      <div class=""wsw-step active"" id=""wswStep1"">
-        <div class=""wsw-badge"">1</div>
-        <div class=""wsw-label"">Select Files</div>
-      </div>
-      <div class=""wsw-connector"" id=""wswConn1""></div>
-      <div class=""wsw-step"" id=""wswStep2"">
-        <div class=""wsw-badge"">2</div>
-        <div class=""wsw-label"">Choose Device</div>
-      </div>
-      <div class=""wsw-connector"" id=""wswConn2""></div>
-      <div class=""wsw-step"" id=""wswStep3"">
-        <div class=""wsw-badge"">3</div>
-        <div class=""wsw-label"">Transfer</div>
-      </div>
-    </div>
-
-    <!-- Hidden Multi-File, Folder and Camera Inputs -->
-    <input type=""file"" id=""multiFileInput"" multiple onchange=""onFilesSelected(this.files)"">
-    <input type=""file"" id=""folderInput"" webkitdirectory directory multiple onchange=""onFolderSelected(this.files)"">
-    <input type=""file"" id=""cameraInput"" accept=""image/*,video/*"" capture=""environment"" onchange=""onFilesSelected(this.files)"">
-
-    <!-- Step 1: Interactive Dropzone -->
-    <div class=""dropzone-card"" id=""dropZone"" onclick=""document.getElementById('multiFileInput').click()"">
-      <div class=""dz-icon-circle"">
-        <img src=""/api/assets/send.png"" onerror=""this.style.display='none'; this.nextElementSibling.style.display='block';"" alt=""Send"" style=""width:44px; height:44px; object-fit:contain; filter:drop-shadow(0 4px 12px rgba(124,58,237,0.45));"">
-        <svg style=""display:none;"" xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2.2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4""/><polyline points=""17 8 12 3 7 8""/><line x1=""12"" y1=""3"" x2=""12"" y2=""15""/></svg>
-      </div>
-      <div class=""dz-title"">Step 1: Select Files to Transfer</div>
-      <div class=""dz-sub"">Tap or drop photos, 4K videos, documents, or entire folders of any size.</div>
-      <div class=""dz-btn-group"" onclick=""event.stopPropagation()"">
-        <button class=""dz-action-btn"" onclick=""document.getElementById('multiFileInput').click()"">
-          <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z""/><polyline points=""14 2 14 8 20 8""/><line x1=""12"" y1=""18"" x2=""12"" y2=""12""/><line x1=""9"" y1=""15"" x2=""15"" y2=""15""/></svg>
-          Browse Files
-        </button>
-        <button class=""dz-action-btn"" onclick=""document.getElementById('folderInput').click()"">
-          <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z""/></svg>
-          Add Folder
-        </button>
-        <button class=""dz-action-btn"" onclick=""document.getElementById('cameraInput').click()"">
-          <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z""/><circle cx=""12"" cy=""13"" r=""4""/></svg>
-          Camera Roll
-        </button>
-      </div>
-    </div>
-
-    <!-- Step 2: Destination Device Selector -->
-    <div class=""device-select-card"" id=""deviceSelectCard"">
-      <div class=""dsc-left"">
-        <div class=""dsc-icon"">
-          <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><rect x=""2"" y=""3"" width=""20"" height=""14"" rx=""2"" ry=""2""/><line x1=""8"" y1=""21"" x2=""16"" y2=""21""/><line x1=""12"" y1=""17"" x2=""12"" y2=""21""/></svg>
-        </div>
-        <div>
-          <div class=""dsc-label"">Step 2: Choose Destination Device</div>
-          <div style=""font-size:12px; font-weight:700; color:var(--text);"" id=""targetNameLabel"">Host PC</div>
+        <div class=""dz-title"">Select Files to Send</div>
+        <div class=""dz-sub"">Choose photos, 4K videos, documents, or entire folders to send over local high-speed Wi-Fi.</div>
+        <div class=""dz-btn-group"" onclick=""event.stopPropagation()"">
+          <button class=""dz-action-btn"" onclick=""document.getElementById('multiFileInput').click()"">
+            <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z""/><polyline points=""14 2 14 8 20 8""/><line x1=""12"" y1=""18"" x2=""12"" y2=""12""/><line x1=""9"" y1=""15"" x2=""15"" y2=""15""/></svg>
+            Browse Files
+          </button>
+          <button class=""dz-action-btn"" onclick=""document.getElementById('folderInput').click()"">
+            <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z""/></svg>
+            Add Folder
+          </button>
+          <button class=""dz-action-btn"" onclick=""document.getElementById('cameraInput').click()"">
+            <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z""/><circle cx=""12"" cy=""13"" r=""4""/></svg>
+            Camera Roll
+          </button>
         </div>
       </div>
-      <div class=""dsc-select-wrap"">
-        <select id=""targetDeviceSelect"" onchange=""onTargetDeviceChanged()"">
-          <option value=""pc"">Host PC</option>
-        </select>
-      </div>
-    </div>
-    <div id=""targetReceiverStatusPill"" style=""margin:-8px 0 14px 0; display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700; padding:4px 12px; border-radius:12px; background:rgba(239,68,68,0.12); color:var(--rose); border:1px solid rgba(239,68,68,0.25);"">
-      Target is not in Receive mode
-    </div>
 
-    <!-- Step 3: Staging Tray & Transfer Action -->
-    <div class=""staging-card"" id=""stagingTray"" style=""display: none;"">
-      <div class=""staging-header"">
-        <div class=""staging-title"">
-          <span>Step 3: Ready to Transfer</span>
-          <span class=""staging-badge"" id=""stagingCountBadge"">0 files</span>
+      <!-- Staging Tray -->
+      <div class=""staging-card"" id=""stagingTray"" style=""display:none; margin-top:16px;"">
+        <div class=""staging-header"">
+          <div class=""staging-title"">
+            <span>Staged for Transfer</span>
+            <span class=""staging-badge"" id=""stagingCountBadge"">0 files</span>
+          </div>
+          <button class=""staging-clear-btn"" onclick=""clearStagingTray()"">Clear All</button>
         </div>
-        <button class=""staging-clear-btn"" onclick=""clearStagingTray()"">Clear All</button>
-      </div>
 
-      <div class=""staging-list"" id=""stagingList"">
-        <!-- Rendered dynamically -->
-      </div>
-
-      <div class=""staging-footer"">
-        <div class=""staging-summary-row"">
-          <span>Total Batch Payload:</span>
-          <span class=""staging-summary-val"" id=""stagingTotalSize"">0 MB</span>
+        <div class=""staging-list"" id=""stagingList"">
+          <!-- Populated dynamically -->
         </div>
-        <button class=""send-all-btn"" id=""sendAllBtn"" onclick=""startBatchSend()"">
-          <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2.5"" stroke-linecap=""round"" stroke-linejoin=""round""><line x1=""22"" y1=""2"" x2=""11"" y2=""13""/><polygon points=""22 2 15 22 11 13 2 9 22 2""/></svg>
-          <span id=""sendAllBtnText"">Start Transfer to Device →</span>
-        </button>
+
+        <div class=""staging-footer"">
+          <div class=""staging-summary-row"">
+            <span class=""staging-summary-lbl"">Total Volume</span>
+            <span class=""staging-summary-val"" id=""stagingTotalSize"">0 MB</span>
+          </div>
+          <button class=""send-all-btn"" id=""sendAllBtn"" onclick=""sendBatchToConnectedTarget()"">
+            <span id=""sendAllBtnText"">Send Files to Recipient</span>
+            <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2.5"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M22 2L11 13""/><path d=""M22 2l-7 20-4-9-9-4 20-7z""/></svg>
+          </button>
+        </div>
       </div>
     </div>
 
+    </div>
   </div>
 
-  <!-- ========================================================= -->
-  <!-- 2. RECEIVE TAB VIEW (RADAR + WAITING STATE)               -->
+  <!-- ===+ -->
+  <!-- 2. RECEIVE TAB VIEW (RECEIVER MODE BEACON)                 -->
   <!-- ========================================================= -->
   <div class=""tab-view"" id=""viewReceive"">
-    <div style=""background:var(--panel); border:1px solid var(--border); border-radius:var(--radius-lg); padding:32px 20px; text-align:center; margin-bottom:16px;"">
-      
-      <!-- Concentric Pulsing Radar Center -->
-      <div style=""position:relative; width:160px; height:160px; margin:0 auto 20px auto; display:flex; align-items:center; justify-content:center;"">
-        <div style=""position:absolute; inset:0; border-radius:50%; border:2px solid rgba(124, 58, 237, 0.25); animation:pulseRing 2.4s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;""></div>
-        <div style=""position:absolute; inset:16px; border-radius:50%; border:2px solid rgba(6, 182, 212, 0.35); animation:pulseRing 2.4s cubic-bezier(0.215, 0.61, 0.355, 1) infinite 0.6s;""></div>
-        <div style=""width:84px; height:84px; border-radius:50%; background:linear-gradient(135deg, #7C3AED, #06B6D4); display:flex; align-items:center; justify-content:center; box-shadow:0 0 28px rgba(124,58,237,0.5); z-index:2;"">
-          <img src=""/api/assets/receive.png"" onerror=""this.style.display='none'; this.nextElementSibling.style.display='block';"" alt=""Receive"" style=""width:48px; height:48px; object-fit:contain;"">
-          <svg style=""display:none; width:38px; height:38px; color:#fff;"" xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2.5"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4""/><polyline points=""7 10 12 15 17 10""/><line x1=""12"" y1=""15"" x2=""12"" y2=""3""/></svg>
+    <div class=""receive-hero-card"">
+      <div class=""receive-status-pill"">
+        <span class=""status-dot""></span>
+        <span>READY TO RECEIVE</span>
+      </div>
+
+      <!-- Concentric Pulsing Receiver Beacon -->
+      <div class=""receive-beacon-wrap"">
+        <div class=""beacon-ring-1""></div>
+        <div class=""beacon-ring-2""></div>
+        <div class=""beacon-center-disc"">
+          <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2.2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4""/><polyline points=""7 10 12 15 17 10""/><line x1=""12"" y1=""15"" x2=""12"" y2=""3""/></svg>
         </div>
       </div>
 
-      <div style=""display:inline-flex; align-items:center; gap:8px; padding:6px 16px; background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.3); border-radius:20px; color:var(--emerald); font-size:12px; font-weight:800; letter-spacing:0.5px;"">
-        <span class=""status-dot""></span>READY TO RECEIVE
-      </div>
+      <div class=""receive-device-title"" id=""receiveDeviceName"">Mobile Web</div>
+      <div class=""receive-device-sub"">Broadcasting presence to Host PC and nearby senders</div>
 
-      <div id=""receiveDeviceName"" style=""font-size:20px; font-weight:800; color:var(--text); margin-top:14px;"">Mobile Web</div>
-      <div style=""font-size:12px; color:var(--text-muted); margin-top:4px;"">Visible to Host PC and nearby senders</div>
-
-      <div style=""background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); border-radius:12px; padding:14px; margin-top:24px; text-align:left;"">
-        <div style=""display:flex; align-items:center; gap:10px; margin-bottom:6px;"">
-          <div style=""width:6px; height:6px; border-radius:3px; background:var(--cyan);""></div>
-          <span style=""font-size:12px; font-weight:700; color:var(--text);"">Receive Workflow:</span>
+      <div class=""receive-guide-box"">
+        <div class=""rgb-row"">
+          <div class=""rgb-dot""></div>
+          <div><b>Keep this screen open</b> while waiting for files. Your device is now visible on senders' radar.</div>
         </div>
-        <div style=""font-size:11px; color:var(--text-dim); line-height:1.6;"">
-          • Keep this tab open while waiting for incoming files.<br>
-          • On the sending PC or peer, tap <b>Send Files</b> and select this device.<br>
-          • When files are sent, a download prompt will automatically pop up right here!
+        <div class=""rgb-row"">
+          <div class=""rgb-dot""></div>
+          <div>When a sender selects this device, an incoming transfer prompt will appear for you to accept.</div>
+        </div>
+        <div class=""rgb-row"">
+          <div class=""rgb-dot""></div>
+          <div>Transfers operate completely offline over your local Wi-Fi or hotspot with zero cloud usage.</div>
         </div>
       </div>
 
-      <div style=""margin-top:20px;"">
-        <button onclick=""openEditNicknameModal()"" class=""cb-btn"" style=""background:rgba(255,255,255,0.06); border:1px solid var(--border); color:var(--text); font-size:11px; padding:8px 16px;"">
-          Edit Device Name
-        </button>
-      </div>
-
+      <button onclick=""promptEditNickname()"" class=""dz-action-btn"" style=""margin-top:6px;"">
+        <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2""/><circle cx=""12"" cy=""7"" r=""4""/></svg>
+        Edit Device Name
+      </button>
     </div>
   </div>
 
@@ -1840,7 +1706,7 @@ input[type=""file""] {
       <div class=""section-header"">
         <div class=""section-title"">
           <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round"" style=""width:16px; height:16px; color:var(--primary-light);""><path d=""M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4""/><polyline points=""7 10 12 15 17 10""/><line x1=""12"" y1=""15"" x2=""12"" y2=""3""/></svg>
-          <span>Available from PC</span>
+          <span>Available Files</span>
         </div>
         <button onclick=""loadAvailableFiles()"" style=""background:none;border:none;color:var(--primary-light);font-size:11px;font-weight:700;cursor:pointer;"">REFRESH</button>
       </div>
@@ -1849,21 +1715,21 @@ input[type=""file""] {
         <div class=""empty-state-box"">
           <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""1.8"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z""/><polyline points=""13 2 13 9 20 9""/></svg>
           <div class=""empty-state-title"">No Files Available</div>
-          <div class=""empty-state-text"">Files shared from the desktop app will appear here for instant 1-click download.</div>
+          <div class=""empty-state-text"">Files shared from the PC will appear here for instant 1-click download.</div>
         </div>
       </div>
     </div>
   </div>
 
   <!-- ========================================================= -->
-  <!-- 3. ACTIVITY TAB VIEW                                      -->
+  <!-- 4. ACTIVITY TAB VIEW                                      -->
   <!-- ========================================================= -->
   <div class=""tab-view"" id=""viewActivity"">
     <div class=""card-section"">
       <div class=""section-header"">
         <div class=""section-title"">
           <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round"" style=""width:16px; height:16px; color:var(--primary-light);""><circle cx=""12"" cy=""12"" r=""10""/><polyline points=""12 6 12 12 16 14""/></svg>
-          <span>Recent Transfers</span>
+          <span>Transfer Activity</span>
         </div>
         <button onclick=""loadHistory()"" style=""background:none;border:none;color:var(--primary-light);font-size:11px;font-weight:700;cursor:pointer;"">REFRESH</button>
       </div>
@@ -1872,14 +1738,14 @@ input[type=""file""] {
         <div class=""empty-state-box"">
           <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""1.8"" stroke-linecap=""round"" stroke-linejoin=""round""><polyline points=""22 12 18 12 15 21 9 3 6 12 2 12""/></svg>
           <div class=""empty-state-title"">No Transfers Yet</div>
-          <div class=""empty-state-text"">Completed uploads and downloads between this device and the host will be recorded here.</div>
+          <div class=""empty-state-text"">Completed uploads and downloads will be recorded here.</div>
         </div>
       </div>
     </div>
   </div>
 
   <!-- ========================================================= -->
-  <!-- 4. SHARE TAB VIEW                                         -->
+  <!-- 5. SHARE TAB VIEW                                         -->
   <!-- ========================================================= -->
   <div class=""tab-view"" id=""viewShare"">
     <div class=""card-section"">
@@ -1892,11 +1758,11 @@ input[type=""file""] {
 
       <div class=""qr-container"">
         <div class=""qr-box"">
-          <img src=""/api/qr"" alt=""Portal QR Code"">
+          <img src=""/api/qr"" alt=""QR Code"">
         </div>
-        <div class=""qr-info"">
-          <div class=""qr-title"">Scan from Camera</div>
-          <div class=""qr-desc"">Point your phone's camera at this QR code to instantly open the We Share Web Portal on any local device.</div>
+        <div style=""display:flex; flex-direction:column; gap:8px;"">
+          <div style=""font-size:15px; font-weight:800; color:var(--text);"">Scan from Camera</div>
+          <div style=""font-size:12px; color:var(--text-dim); line-height:1.5;"">Scan this QR code with any phone or tablet on the same Wi-Fi network to open We Share instantly.</div>
         </div>
       </div>
 
@@ -1904,119 +1770,79 @@ input[type=""file""] {
         <span class=""url-text"" id=""portalUrlDisplay"">http://...</span>
         <button class=""copy-btn"" onclick=""copyPortalUrl()"">COPY</button>
       </div>
+    </div>
+  </div>
+
   <!-- ========================================================= -->
-  <!-- 5. DEDICATED FULL ACTIVE TRANSFER VIEW                     -->
+  <!-- 6. DEDICATED FULL ACTIVE TRANSFER VIEW                     -->
   <!-- ========================================================= -->
   <div class=""tab-view"" id=""viewTransfer"">
-    <div class=""card-section"">
-      
-      <!-- Top Session Card -->
-      <div style=""background:var(--panel); border:1px solid var(--border); border-radius:var(--radius-md); padding:18px; margin-bottom:16px; display:flex; align-items:center; justify-content:space-between;"">
-        <div style=""display:flex; align-items:center; gap:12px;"">
-          <div style=""width:42px; height:42px; border-radius:21px; background:rgba(124,58,237,0.18); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; color:var(--primary-light);"">
-            <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2.2"" stroke-linecap=""round"" stroke-linejoin=""round"" style=""width:20px;height:20px;""><path d=""M17 3L21 7L17 11""/><path d=""M3 13L7 17L3 21""/><path d=""M21 7H3""/><path d=""M3 17H21""/></svg>
+    <div class=""transfer-view-card"">
+      <div class=""tv-top-row"">
+        <div class=""tv-peer-info"">
+          <div class=""tv-peer-avatar"">
+            <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><rect x=""2"" y=""3"" width=""20"" height=""14"" rx=""2"" ry=""2""/><line x1=""8"" y1=""21"" x2=""16"" y2=""21""/><line x1=""12"" y1=""17"" x2=""12"" y2=""21""/></svg>
           </div>
-          <div>
-            <div style=""display:flex; align-items:center; gap:6px; margin-bottom:3px;"">
-              <span id=""transferPageRoleBadge"" style=""padding:2px 8px; border-radius:10px; background:#25173B; border:1px solid #7C3AED; font-size:10px; font-weight:800; color:#A855F7; letter-spacing:0.5px;"">UPLOADING</span>
-              <span style=""padding:2px 8px; border-radius:10px; background:#102A24; border:1px solid #10B981; font-size:10px; font-weight:800; color:#10B981;"">DIRECT LINK</span>
-            </div>
-            <div id=""transferPagePeerName"" style=""font-size:15px; font-weight:700; color:var(--text);"">Host PC</div>
+          <div class=""tv-peer-text"">
+            <span class=""tv-role-badge"" id=""transferPageRoleBadge"">DIRECT P2P TRANSFER</span>
+            <span class=""tv-peer-name"" id=""transferPagePeerName"">Host PC</span>
           </div>
         </div>
-        <button onclick=""cancelActiveUpload()"" class=""cb-btn"" style=""background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.3); color:#EF4444; font-size:11px; padding:8px 14px;"">
-          Cancel Transfer
-        </button>
+        <button class=""tv-abort-btn"" onclick=""cancelActiveUpload()"">Cancel</button>
       </div>
 
-      <!-- Main Progress & Telemetry Card -->
-      <div style=""background:var(--panel); border:1px solid var(--border); border-radius:var(--radius-md); padding:22px; margin-bottom:16px;"">
-        <div style=""display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:12px;"">
-          <div>
-            <div style=""font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:4px;"">Overall Progress</div>
-            <div id=""transferPageFileTitle"" style=""font-size:16px; font-weight:800; color:var(--text);"">Preparing transfer...</div>
-          </div>
-          <div id=""transferPagePercentText"" style=""font-size:28px; font-weight:900; color:#A855F7;"">0%</div>
+      <!-- Main Progress Box -->
+      <div class=""tv-progress-box"">
+        <div class=""tv-pb-top"">
+          <span class=""tv-current-filename"" id=""transferPageFileTitle"">Preparing files...</span>
+          <span class=""tv-pct-display"" id=""transferPagePercentText"">0%</span>
         </div>
 
-        <!-- Progress Bar -->
-        <div style=""width:100%; height:8px; background:rgba(255,255,255,0.06); border-radius:4px; overflow:hidden; margin-bottom:16px;"">
-          <div id=""transferPageBarFill"" style=""height:100%; width:0%; background:linear-gradient(90deg, #4F46E5, #06B6D4); border-radius:4px; transition:width 0.15s ease;""></div>
+        <div class=""tv-bar-track"">
+          <div class=""tv-bar-fill"" id=""transferPageBarFill""></div>
         </div>
 
-        <!-- Stats 4-Column Grid -->
-        <div style=""display:grid; grid-template-columns:repeat(auto-fit, minmax(110px, 1fr)); gap:8px;"">
-          <div style=""background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); border-radius:8px; padding:10px;"">
-            <div style=""font-size:10px; font-weight:700; color:var(--text-muted);"">SPEED</div>
-            <div id=""transferPageSpeedText"" style=""font-size:14px; font-weight:800; color:var(--cyan); margin-top:2px;"">0.0 MB/s</div>
+        <div class=""tv-stats-grid"">
+          <div class=""tv-stat-card"">
+            <span class=""tv-stat-lbl"">Speed</span>
+            <span class=""tv-stat-val"" id=""transferPageSpeedText"">0.0 MB/s</span>
           </div>
-          <div style=""background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); border-radius:8px; padding:10px;"">
-            <div style=""font-size:10px; font-weight:700; color:var(--text-muted);"">ESTIMATED TIME</div>
-            <div id=""transferPageEtaText"" style=""font-size:14px; font-weight:800; color:var(--text); margin-top:2px;"">--:--</div>
+          <div class=""tv-stat-card"">
+            <span class=""tv-stat-lbl"">Files</span>
+            <span class=""tv-stat-val"" id=""transferPageFilesText"">0 / 0</span>
           </div>
-          <div style=""background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); border-radius:8px; padding:10px;"">
-            <div style=""font-size:10px; font-weight:700; color:var(--text-muted);"">TRANSFERRED</div>
-            <div id=""transferPageBytesText"" style=""font-size:14px; font-weight:800; color:var(--text); margin-top:2px;"">0 B / 0 B</div>
+          <div class=""tv-stat-card"">
+            <span class=""tv-stat-lbl"">Volume</span>
+            <span class=""tv-stat-val"" id=""transferPageBytesText"">0 MB / 0 MB</span>
           </div>
-          <div style=""background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); border-radius:8px; padding:10px;"">
-            <div style=""font-size:10px; font-weight:700; color:var(--text-muted);"">FILES DONE</div>
-            <div id=""transferPageFilesText"" style=""font-size:14px; font-weight:800; color:var(--emerald); margin-top:2px;"">0 / 0</div>
+          <div class=""tv-stat-card"">
+            <span class=""tv-stat-lbl"">ETA</span>
+            <span class=""tv-stat-val"" id=""transferPageEtaText"">--:--</span>
           </div>
         </div>
       </div>
 
-      <!-- File Queue Itemized List -->
-      <div style=""background:var(--panel); border:1px solid var(--border); border-radius:var(--radius-md); padding:18px;"">
-        <div style=""display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;"">
-          <span style=""font-size:14px; font-weight:800; color:var(--text);"">File Queue</span>
-          <span id=""transferPageQueueCount"" style=""font-size:11px; color:var(--text-muted);"">0 files</span>
-        </div>
-        <div id=""transferPageQueueList"" style=""display:flex; flex-direction:column; gap:8px; max-height:280px; overflow-y:auto; padding-right:4px;"">
-          <!-- Populated dynamically -->
-        </div>
+      <!-- File Checklist Queue -->
+      <div style=""font-size:12px; font-weight:800; color:var(--text); margin-top:4px;"">
+        Transfer Queue (<span id=""transferPageQueueCount"">0 files</span>)
       </div>
-
+      <div class=""tv-queue-container"" id=""transferPageQueueList"">
+        <!-- Rows populated dynamically -->
+      </div>
     </div>
   </div>
 
 </div>
 
 <!-- =========================================================== -->
-<!-- FLOATING LIVE TRANSFER HUD                                  -->
+<!-- MODALS                                                      -->
 <!-- =========================================================== -->
-<div class=""transfer-hud"" id=""transferHud"">
-  <div class=""hud-header"">
-    <div class=""hud-file-tag"">
-      <div class=""hud-pulse-ring""></div>
-      <div class=""hud-file-title"" id=""hudFileName"">Uploading file...</div>
-    </div>
-    <button class=""hud-cancel-btn"" onclick=""cancelActiveUpload()"">Abort</button>
-  </div>
 
-  <div class=""hud-bar-container"">
-    <div class=""hud-bar-track"">
-      <div class=""hud-bar-fill"" id=""hudBarFill""></div>
-    </div>
-    <div class=""hud-stats-row"">
-      <span class=""hud-speed"" id=""hudSpeedText"">0.0 MB/s</span>
-      <span class=""hud-bytes"" id=""hudBytesText"">0 MB / 0 MB</span>
-      <span class=""hud-eta"" id=""hudEtaText"">ETA: --</span>
-    </div>
-  </div>
-
-  <div class=""hud-sparkline-wrap"">
-    <canvas id=""hudSpeedGraph""></canvas>
-  </div>
-</div>
-
-<!-- =========================================================== -->
-<!-- INCOMING TRANSFER BOTTOM MODAL (SINGLE FILE)                -->
-<!-- =========================================================== -->
+<!-- SINGLE FILE OFFER MODAL -->
 <div class=""modal-overlay"" id=""singleOfferModal"">
   <div class=""modal-sheet"">
     <div class=""modal-icon-disc"">
-      <img src=""/api/assets/receive.png"" onerror=""this.style.display='none'; this.nextElementSibling.style.display='block';"" alt=""Receive"" style=""width:44px; height:44px; object-fit:contain; filter:drop-shadow(0 4px 12px rgba(236,72,153,0.45));"">
-      <svg style=""display:none;"" xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4""/><polyline points=""7 10 12 15 17 10""/><line x1=""12"" y1=""15"" x2=""12"" y2=""3""/></svg>
+      <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4""/><polyline points=""7 10 12 15 17 10""/><line x1=""12"" y1=""15"" x2=""12"" y2=""3""/></svg>
     </div>
     <div class=""modal-title"">Incoming File</div>
     <div class=""modal-desc"" id=""singleOfferDesc"">The host PC is offering to send you a file.</div>
@@ -2027,23 +1853,19 @@ input[type=""file""] {
   </div>
 </div>
 
-<!-- =========================================================== -->
-<!-- INCOMING TRANSFER BOTTOM MODAL (BATCH MANIFEST CHECKLIST)   -->
-<!-- =========================================================== -->
+<!-- BATCH CHECKLIST MODAL -->
 <div class=""modal-overlay"" id=""batchOfferModal"">
-  <div class=""modal-sheet"" style=""max-width:440px; max-height:85vh; display:flex; flex-direction:column; text-align:left;"">
-    <div style=""display:flex; align-items:center; gap:12px; margin-bottom:12px;"">
-      <div class=""modal-icon-disc"" style=""margin:0; width:44px; height:44px; background:rgba(124,58,237,0.15); color:var(--primary-light);"">
-        <img src=""/api/assets/receive.png"" onerror=""this.style.display='none'; this.nextElementSibling.style.display='block';"" alt=""Receive"" style=""width:36px; height:36px; object-fit:contain;"">
-        <svg style=""display:none;"" xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z""/></svg>
+  <div class=""modal-sheet"" style=""max-width:440px; text-align:left;"">
+    <div style=""display:flex; align-items:center; gap:12px; margin-bottom:10px;"">
+      <div class=""modal-icon-disc"" style=""margin:0; width:44px; height:44px;"">
+        <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z""/></svg>
       </div>
-      <div style=""flex:1; overflow:hidden;"">
-        <div class=""modal-title"" id=""batchOfferTitle"" style=""font-size:16px;"">Incoming Batch (0 Files)</div>
+      <div>
+        <div class=""modal-title"" id=""batchOfferTitle"" style=""font-size:16px;"">Incoming Batch</div>
         <div class=""modal-desc"" id=""batchOfferDesc"" style=""font-size:11px;"">Select the files you want to receive.</div>
       </div>
     </div>
 
-    <!-- Select All / Count Bar -->
     <div style=""display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:rgba(255,255,255,0.04); border:1px solid var(--border-subtle); border-radius:8px; margin-bottom:8px;"">
       <label style=""display:flex; align-items:center; gap:8px; cursor:pointer; font-size:12px; font-weight:700; color:var(--text);"">
         <input type=""checkbox"" id=""batchSelectAllCheck"" onchange=""toggleBatchSelectAll(this.checked)"" checked style=""accent-color:var(--primary); width:16px; height:16px; cursor:pointer;"">
@@ -2052,10 +1874,7 @@ input[type=""file""] {
       <span id=""batchSelectedSize"" style=""font-size:11px; font-weight:700; color:var(--primary-light);"">0 MB</span>
     </div>
 
-    <!-- Scrollable Checklist -->
-    <div id=""batchOfferFileList"" style=""flex:1; overflow-y:auto; max-height:260px; display:flex; flex-direction:column; gap:6px; margin-bottom:12px; padding-right:4px;"">
-      <!-- Generated dynamically -->
-    </div>
+    <div id=""batchOfferFileList"" style=""max-height:240px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; margin-bottom:12px; padding-right:4px;""></div>
 
     <div class=""modal-actions"">
       <button class=""modal-btn modal-btn-decline"" onclick=""declineBatchOffer()"">Decline All</button>
@@ -2064,139 +1883,80 @@ input[type=""file""] {
   </div>
 </div>
 
-<!-- =========================================================== -->
-<!-- TRANSFER SUCCESS CELEBRATION MODAL                          -->
-<!-- =========================================================== -->
+<!-- TRANSFER SUCCESS MODAL -->
 <div class=""modal-overlay"" id=""transferSuccessModal"">
-  <div class=""modal-sheet"" style=""max-width:380px; text-align:center;"">
-    <div class=""modal-icon-disc"" style=""background:rgba(16, 185, 129, 0.15); color:var(--emerald); width:64px; height:64px;"">
-      <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2.5"" stroke-linecap=""round"" stroke-linejoin=""round"" style=""width:32px; height:32px;""><path d=""M20 6L9 17l-5-5""/></svg>
+  <div class=""modal-sheet"">
+    <div class=""modal-icon-disc"" style=""background:rgba(16, 185, 129, 0.15); color:var(--emerald);"">
+      <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2.5"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M20 6L9 17l-5-5""/></svg>
     </div>
-    <div class=""modal-title"" style=""color:var(--emerald); font-size:18px; margin-top:4px;"">Transfer Completed</div>
-    <div class=""modal-desc"" id=""transferSuccessDesc"">All selected files were transferred successfully.</div>
-
-    <div style=""background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); border-radius:10px; padding:12px; margin:4px 0; text-align:left; font-size:12px;"">
+    <div class=""modal-title"" style=""color:var(--emerald);"">Transfer Completed</div>
+    <div class=""modal-desc"" id=""transferSuccessDesc"">Files were transferred successfully.</div>
+    <div style=""background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); border-radius:10px; padding:12px; text-align:left; font-size:12px;"">
       <div style=""display:flex; justify-content:space-between; margin-bottom:6px;"">
-        <span style=""color:var(--text-dim);"">Files Transferred:</span>
+        <span style=""color:var(--text-dim);"">Files Delivered:</span>
         <span id=""successFileCount"" style=""font-weight:700; color:var(--text);"">0 files</span>
       </div>
       <div style=""display:flex; justify-content:space-between; margin-bottom:6px;"">
-        <span style=""color:var(--text-dim);"">Payload Volume:</span>
+        <span style=""color:var(--text-dim);"">Total Volume:</span>
         <span id=""successTotalSize"" style=""font-weight:700; color:var(--text);"">0 MB</span>
       </div>
       <div style=""display:flex; justify-content:space-between;"">
-        <span style=""color:var(--text-dim);"">Connected Peer:</span>
+        <span style=""color:var(--text-dim);"">Peer:</span>
         <span id=""successPeerName"" style=""font-weight:700; color:var(--primary-light);"">Host PC</span>
       </div>
     </div>
-
-    <div class=""modal-actions"" style=""margin-top:8px;"">
+    <div class=""modal-actions"">
       <button class=""modal-btn modal-btn-accept"" onclick=""closeSuccessModal()"">Done</button>
     </div>
   </div>
 </div>
 
-<!-- =========================================================== -->
-<!-- TRANSFER FAILURE / CANCELLED MODAL                          -->
-<!-- =========================================================== -->
+<!-- TRANSFER FAILURE MODAL -->
 <div class=""modal-overlay"" id=""transferFailureModal"">
-  <div class=""modal-sheet"" style=""max-width:380px; text-align:center;"">
-    <div class=""modal-icon-disc"" style=""background:rgba(239, 68, 68, 0.15); color:#EF4444; width:64px; height:64px;"">
-      <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2.5"" stroke-linecap=""round"" stroke-linejoin=""round"" style=""width:32px; height:32px;""><line x1=""18"" y1=""6"" x2=""6"" y2=""18""/><line x1=""6"" y1=""6"" x2=""18"" y2=""18""/></svg>
+  <div class=""modal-sheet"">
+    <div class=""modal-icon-disc"" style=""background:rgba(244, 63, 94, 0.15); color:var(--rose);"">
+      <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2.5"" stroke-linecap=""round"" stroke-linejoin=""round""><line x1=""18"" y1=""6"" x2=""6"" y2=""18""/><line x1=""6"" y1=""6"" x2=""18"" y2=""18""/></svg>
     </div>
-    <div class=""modal-title"" style=""color:#EF4444; font-size:18px; margin-top:4px;"">Transfer Interrupted</div>
-    <div class=""modal-desc"" id=""transferFailureDesc"" style=""font-size:13px;"">The file transfer was stopped or interrupted.</div>
-
-    <div style=""background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); border-radius:10px; padding:12px; margin:4px 0; text-align:left; font-size:12px;"">
-      <div style=""display:flex; justify-content:space-between; margin-bottom:6px;"">
-        <span style=""color:var(--text-dim);"">Reason:</span>
-        <span id=""failureReasonText"" style=""font-weight:700; color:#F87171;"">Cancelled by user</span>
-      </div>
-      <div style=""display:flex; justify-content:space-between;"">
-        <span style=""color:var(--text-dim);"">Connected Peer:</span>
-        <span id=""failurePeerName"" style=""font-weight:700; color:var(--primary-light);"">Host PC</span>
-      </div>
-    </div>
-
-    <div class=""modal-actions"" style=""margin-top:8px;"">
+    <div class=""modal-title"" style=""color:var(--rose);"">Transfer Interrupted</div>
+    <div class=""modal-desc"" id=""transferFailureDesc"">The file transfer was stopped or interrupted.</div>
+    <div class=""modal-actions"">
       <button class=""modal-btn modal-btn-decline"" onclick=""closeFailureModal()"">Dismiss</button>
     </div>
   </div>
 </div>
 
-<!-- =========================================================== -->
-<!-- RESEND REQUEST MODAL                                        -->
-<!-- =========================================================== -->
-<div class=""modal-overlay"" id=""resendRequestModal"">
-  <div class=""modal-sheet"" style=""max-width:360px; text-align:center;"">
-    <div class=""modal-icon-disc"" style=""background:rgba(6, 182, 212, 0.15); color:var(--cyan);"">
-      <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round"" style=""width:28px;height:28px;""><polyline points=""1 4 1 10 7 10""/><polyline points=""23 20 23 14 17 14""/><path d=""M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15""/></svg>
-    </div>
-    <div class=""modal-title"">Resend Request</div>
-    <div class=""modal-desc"" id=""resendRequestDesc"">The recipient requested to resend a file.</div>
-    <div class=""modal-actions"" style=""margin-top:10px;"">
-      <button class=""modal-btn modal-btn-decline"" onclick=""respondResendRequest(false)"">Decline</button>
-      <button class=""modal-btn modal-btn-accept"" onclick=""respondResendRequest(true)"">Accept & Resend</button>
-    </div>
-  </div>
-</div>
-<!-- =========================================================== -->
-<!-- INCOMING CONNECTION REQUEST MODAL                           -->
-<!-- =========================================================== -->
-<div class=""modal-overlay"" id=""incomingConnectModal"">
-  <div class=""modal-sheet"" style=""max-width:340px; text-align:center;"">
-    <div class=""modal-icon-disc"" style=""background:linear-gradient(135deg, #7C3AED, #06B6D4);"">
-      <svg style=""width:28px; height:28px; stroke:#fff; fill:none;"" viewBox=""0 0 24 24"" stroke-width=""2""><path d=""M4 17l6-6-6-6M12 19h8""/></svg>
-    </div>
-    <div class=""modal-title"" style=""margin-top:10px;"">Connect Request</div>
-    <div class=""modal-desc"" id=""incomingConnectDesc"">Host PC wants to connect with you to share files.</div>
-    <div class=""modal-actions"" style=""margin-top:16px;"">
-      <button class=""modal-btn modal-btn-decline"" onclick=""respondConnectRequest(false)"">Decline</button>
-      <button class=""modal-btn modal-btn-accept"" onclick=""respondConnectRequest(true)"">Accept & Connect</button>
-    </div>
-  </div>
-</div>
-<!-- =========================================================== -->
-<!-- FIRST-RUN DEVICE NAME ONBOARDING MODAL                      -->
-<!-- =========================================================== -->
-<div class=""modal-overlay"" id=""welcomeOnboardingModal"">
-  <div class=""modal-sheet"" style=""max-width:380px; text-align:center;"">
-    <div class=""modal-icon-disc"" style=""background:linear-gradient(135deg, #7C3AED, #06B6D4); width:64px; height:64px; margin:0 auto 12px auto; box-shadow:0 0 24px rgba(124,58,237,0.4);"">
-      <svg style=""width:32px; height:32px; stroke:#fff; fill:none;"" viewBox=""0 0 24 24"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2""/><circle cx=""12"" cy=""7"" r=""4""/></svg>
-    </div>
-    <div class=""modal-title"" style=""font-size:18px; font-weight:800;"">Welcome to We Share</div>
-    <div class=""modal-desc"" style=""font-size:12px; margin-top:6px; color:var(--text-muted);"">
-      Set a device name so the Host PC and nearby devices can easily recognize you:
-    </div>
 
-    <div style=""margin:18px 0 6px 0; text-align:left;"">
-      <label style=""font-size:11px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.5px;"">Device Name</label>
-      <input type=""text"" id=""welcomeDeviceNameInput"" maxlength=""32"" placeholder=""e.g., iPhone, Android, Living Room Tablet"" style=""width:100%; box-sizing:border-box; margin-top:6px; padding:12px 14px; background:rgba(255,255,255,0.06); border:1.5px solid var(--primary); border-radius:10px; color:var(--text); font-size:14px; font-weight:600; outline:none;"">
+<!-- FIRST-TIME DEVICE NAME ONBOARDING MODAL -->
+<div class=""modal-overlay"" id=""onboardingNameModal"">
+  <div class=""modal-sheet"" style=""max-width:360px;"">
+    <div style=""display:flex; justify-content:center; margin-bottom:12px;"">
+      <div style=""width:56px; height:56px; border-radius:28px; background:rgba(79,70,229,0.18); display:flex; align-items:center; justify-content:center; color:var(--primary-light);"">
+        <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round"" width=""28"" height=""28""><rect x=""5"" y=""2"" width=""14"" height=""20"" rx=""2"" ry=""2""/><line x1=""12"" y1=""18"" x2=""12.01"" y2=""18""/></svg>
+      </div>
     </div>
-
-    <div class=""modal-actions"" style=""margin-top:16px;"">
-      <button class=""modal-btn modal-btn-accept"" style=""width:100%;"" onclick=""confirmWelcomeNickname()"">Continue to We Share →</button>
+    <div class=""modal-title"" style=""text-align:center; font-size:18px;"">Set Your Device Name</div>
+    <div class=""modal-desc"" style=""text-align:center; font-size:12px; margin-bottom:14px;"">Identify this device to the Host PC and nearby peers on the Radar:</div>
+    <div style=""position:relative; margin-bottom:16px;"">
+      <input type=""text"" id=""onboardingNameInput"" maxlength=""28"" style=""width:100%; box-sizing:border-box; padding:12px 44px 12px 14px; background:rgba(255,255,255,0.06); border:1.5px solid var(--primary); border-radius:10px; color:var(--text); font-size:14px; font-weight:700; outline:none;"">
+      <button type=""button"" onclick=""randomizeOnboardingName()"" title=""Randomize name"" style=""position:absolute; right:8px; top:50%; transform:translateY(-50%); background:transparent; border:none; color:var(--primary-light); cursor:pointer; padding:6px; display:flex; align-items:center;"">
+        <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2.2"" stroke-linecap=""round"" stroke-linejoin=""round"" width=""18"" height=""18""><polyline points=""23 4 23 10 17 10""/><polyline points=""1 20 1 14 7 14""/><path d=""M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15""/></svg>
+      </button>
+    </div>
+    <div class=""modal-actions"" style=""margin-top:0;"">
+      <button class=""modal-btn modal-btn-accept"" style=""width:100%;"" onclick=""confirmOnboardingName()"">Confirm &amp; Continue</button>
     </div>
   </div>
 </div>
 
-<!-- =========================================================== -->
-<!-- EDIT DEVICE NAME MODAL                                      -->
-<!-- =========================================================== -->
+<!-- EDIT NICKNAME MODAL -->
 <div class=""modal-overlay"" id=""editNicknameModal"">
-  <div class=""modal-sheet"" style=""max-width:360px; text-align:center;"">
-    <div class=""modal-title"" style=""font-size:16px; font-weight:800;"">Edit Device Name</div>
-    <div class=""modal-desc"" style=""font-size:12px; margin-top:4px; color:var(--text-muted);"">
-      Change how your device appears to nearby peers:
-    </div>
-
-    <div style=""margin:16px 0 6px 0; text-align:left;"">
-      <input type=""text"" id=""editNicknameInput"" maxlength=""32"" placeholder=""Device name..."" style=""width:100%; box-sizing:border-box; padding:12px 14px; background:rgba(255,255,255,0.06); border:1.5px solid var(--primary); border-radius:10px; color:var(--text); font-size:14px; font-weight:600; outline:none;"">
-    </div>
-
-    <div class=""modal-actions"" style=""margin-top:14px;"">
+  <div class=""modal-sheet"">
+    <div class=""modal-title"">Device Name</div>
+    <div class=""modal-desc"">Change how your device appears to nearby peers:</div>
+    <input type=""text"" id=""editNicknameInput"" maxlength=""32"" placeholder=""Device name..."" style=""width:100%; box-sizing:border-box; padding:12px 14px; background:rgba(255,255,255,0.06); border:1.5px solid var(--primary); border-radius:10px; color:var(--text); font-size:14px; font-weight:600; outline:none;"">
+    <div class=""modal-actions"">
       <button class=""modal-btn modal-btn-decline"" onclick=""document.getElementById('editNicknameModal').classList.remove('active')"">Cancel</button>
-      <button class=""modal-btn modal-btn-accept"" onclick=""confirmEditNickname()"">Save Name</button>
+      <button class=""modal-btn modal-btn-accept"" onclick=""confirmEditNickname()"">Save</button>
     </div>
   </div>
 </div>
@@ -2211,92 +1971,22 @@ input[type=""file""] {
 /* ------------------------------------------------------------- */
 /* CLIENT STATE & IDENTITY                                       */
 /* ------------------------------------------------------------- */
-let currentTargetId = 'pc';
 let stagedFiles = [];
 let isUploading = false;
 let isTransferActive = false;
-let activeTransferRole = 'Sender';
 let currentXhr = null;
-let speedHistory = [];
-const MAX_SPEED_POINTS = 36;
+let pairedHostName = 'Receiver';
+let connectedTarget = null;
 let pendingSingleOffer = null;
-let pendingBatchOffer = null;
-let isSessionPaired = false;
-let pairedHostName = 'Host PC';
+let pendingBatchManifest = null;
+let toastTimeout = null;
 
-async function connectToHost(role = 'Sender') {
-  const btn = document.getElementById('connectHostBtn');
-  if (btn) { btn.disabled = true; btn.textContent = 'Connecting to Host PC...'; }
-  try {
-    const res = await fetch(`/api/connect?clientId=${encodeURIComponent(getClientId())}&name=${encodeURIComponent(getSavedNickname())}&role=${role}`, { method: 'POST' }).then(r => r.json());
-    if (res.accepted) {
-      setConnectedState(true, res.pcName || 'Host PC');
-      showToast('Connected with ' + (res.pcName || 'Host PC') + '!');
-    } else {
-      showToast('Connection request was declined.');
-      setConnectedState(false);
-    }
-  } catch (err) {
-    showToast('Failed to connect: ' + err.message);
-    setConnectedState(false);
-  } finally {
-    if (btn) { btn.disabled = false; btn.textContent = 'Connect to Host PC to Share Files'; }
-  }
-}
-
-async function disconnectFromHost() {
-  await fetch(`/api/disconnect?clientId=${encodeURIComponent(getClientId())}`, { method: 'POST' }).catch(() => {});
-  setConnectedState(false);
-  showToast('Disconnected.');
-}
-
-function setConnectedState(connected, hostName = 'Host PC') {
-  isSessionPaired = connected;
-  pairedHostName = hostName;
-  const statusBadge = document.getElementById('sessionStatusBadge');
-  const actionSection = document.getElementById('connectActionSection');
-  const activeSection = document.getElementById('connectedActiveSection');
-  const label = document.getElementById('connectedDeviceLabel');
-  const hostStatusText = document.getElementById('hostStatusText');
-  const radarHostName = document.getElementById('radarHostName');
-
-  if (radarHostName && hostName) radarHostName.textContent = hostName;
-
-  if (connected) {
-    if (statusBadge) {
-      statusBadge.textContent = 'CONNECTED';
-      statusBadge.style.background = '#0E2E28';
-      statusBadge.style.color = '#10B981';
-      statusBadge.style.border = '1px solid #10B981';
-    }
-    if (actionSection) actionSection.style.display = 'none';
-    if (activeSection) activeSection.style.display = 'flex';
-    if (label) label.textContent = 'Connected with ' + hostName;
-    if (hostStatusText) hostStatusText.textContent = 'CONNECTED: ' + hostName.toUpperCase();
-  } else {
-    if (statusBadge) {
-      statusBadge.textContent = 'DISCONNECTED';
-      statusBadge.style.background = '#1e2338';
-      statusBadge.style.color = '#94A3B8';
-      statusBadge.style.border = 'none';
-    }
-    if (actionSection) actionSection.style.display = 'block';
-    if (activeSection) activeSection.style.display = 'none';
-    if (hostStatusText) hostStatusText.textContent = 'ONLINE';
-  }
-}
-
-async function respondConnectRequest(accept) {
-  const modal = document.getElementById('incomingConnectModal');
-  if (modal) modal.classList.remove('active');
-  await fetch(`/api/connect-respond?clientId=${encodeURIComponent(getClientId())}&accept=${accept}`, { method: 'POST' }).catch(() => {});
-  if (accept) {
-    setConnectedState(true, pairedHostName);
-    showToast('Connected with ' + pairedHostName + '!');
-  } else {
-    setConnectedState(false);
-    showToast('Connection declined.');
-  }
+function generateRandomDeviceName() {
+  const syllables = ['shi', 'wo', 'fe', 'je', 'rig', 'ko', 'la', 'mi', 'zu', 'no', 'ba', 'te', 'lu', 'va', 'ro', 'ki', 'pa', 'ze', 'du', 'li', 'ka', 'po', 'ne', 'si', 'ta', 'ra', 'vi', 'xen', 'mox', 'lun'];
+  const s1 = syllables[Math.floor(Math.random() * syllables.length)];
+  const s2 = syllables[Math.floor(Math.random() * syllables.length)];
+  const s3 = (Math.random() > 0.45) ? syllables[Math.floor(Math.random() * syllables.length)] : '';
+  return 'web-' + s1 + s2 + s3;
 }
 
 function getClientId() {
@@ -2317,46 +2007,49 @@ function getClientId() {
 
 function getSavedNickname() {
   try {
-    return localStorage.getItem('weshare_nickname') || 'Mobile Web';
+    let name = localStorage.getItem('weshare_nickname');
+    if (!name) {
+      name = generateRandomDeviceName();
+      localStorage.setItem('weshare_nickname', name);
+    }
+    return name;
   } catch(e) {
-    return 'Mobile Web';
+    return generateRandomDeviceName();
   }
 }
 
 function saveNickname(name) {
   name = (name || '').trim();
   if (!name) return;
-  try {
-    localStorage.setItem('weshare_nickname', name);
+  try { 
+    localStorage.setItem('weshare_nickname', name); 
+    localStorage.setItem('weshare_named', 'true');
   } catch(e) {}
-  document.getElementById('nicknameDisplay').textContent = name;
-  fetch('/api/heartbeat?clientId=' + getClientId() + '&name=' + encodeURIComponent(name), { method: 'POST' }).catch(() => {});
+  
+  const nd = document.getElementById('nicknameDisplay');
+  if (nd) nd.textContent = name;
+  const devTitle = document.getElementById('receiveDeviceName');
+  if (devTitle) devTitle.textContent = name;
+
+  const cid = getClientId();
+  const role = (document.getElementById('viewReceive')?.classList.contains('active')) ? 'Receiver' : 'Sender';
+  fetch(`/api/client-role?clientId=${encodeURIComponent(cid)}&role=${role}&name=${encodeURIComponent(name)}`, { method: 'POST' }).catch(() => {});
+  fetch(`/api/heartbeat?clientId=${encodeURIComponent(cid)}&name=${encodeURIComponent(name)}&role=${role}`, { method: 'POST' }).catch(() => {});
 }
 
-function checkOnboarding() {
-  try {
-    const initialized = localStorage.getItem('weshare_nickname_initialized');
-    if (!initialized) {
-      const modal = document.getElementById('welcomeOnboardingModal');
-      const input = document.getElementById('welcomeDeviceNameInput');
-      if (input) input.value = getSavedNickname();
-      if (modal) modal.classList.add('active');
-    }
-  } catch(e) {}
+function randomizeOnboardingName() {
+  const input = document.getElementById('onboardingNameInput');
+  if (input) input.value = generateRandomDeviceName();
 }
 
-function confirmWelcomeNickname() {
-  const input = document.getElementById('welcomeDeviceNameInput');
+function confirmOnboardingName() {
+  const input = document.getElementById('onboardingNameInput');
   let name = (input ? input.value : '').trim();
-  if (!name) name = 'Mobile Device';
-  try {
-    localStorage.setItem('weshare_nickname', name);
-    localStorage.setItem('weshare_nickname_initialized', 'true');
-  } catch(e) {}
+  if (!name) name = generateRandomDeviceName();
   saveNickname(name);
-  const modal = document.getElementById('welcomeOnboardingModal');
+  const modal = document.getElementById('onboardingNameModal');
   if (modal) modal.classList.remove('active');
-  showToast('Welcome, ' + name + '! Ready to share.');
+  showToast('Device name confirmed: ' + name);
 }
 
 function promptEditNickname() {
@@ -2373,17 +2066,22 @@ function confirmEditNickname() {
   saveNickname(name);
   const modal = document.getElementById('editNicknameModal');
   if (modal) modal.classList.remove('active');
-  showToast('Device name updated: ' + name);
+  showToast('Device name saved: ' + name);
 }
 
-/* ------------------------------------------------------------- */
-/* THEME CONTROLLER                                              */
-/* ------------------------------------------------------------- */
+function showToast(msg) {
+  const t = document.getElementById('toastPill');
+  document.getElementById('toastText').textContent = msg;
+  t.classList.add('show');
+  if (toastTimeout) clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => {
+    t.classList.remove('show');
+  }, 3000);
+}
+
 function initTheme() {
   let theme = 'dark';
-  try {
-    theme = localStorage.getItem('weshare_theme') || 'dark';
-  } catch(e) {}
+  try { theme = localStorage.getItem('weshare_theme') || 'dark'; } catch(e) {}
   document.documentElement.setAttribute('data-theme', theme);
   updateThemeIcon(theme);
 }
@@ -2398,6 +2096,7 @@ function toggleTheme() {
 
 function updateThemeIcon(theme) {
   const icon = document.getElementById('themeIcon');
+  if (!icon) return;
   if (theme === 'light') {
     icon.innerHTML = '<path d=""M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z""/>';
   } else {
@@ -2405,12 +2104,38 @@ function updateThemeIcon(theme) {
   }
 }
 
+function formatBytes(bytes) {
+  if (!bytes || bytes === 0) return '0 B';
+  const k = 1024;
+  const dm = 1;
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+}
+
+function getFileCategorySvg(name) {
+  const ext = (name.split('.').pop() || '').toLowerCase();
+  if (['mp4', 'mkv', 'mov', 'avi', 'wmv', 'flv', 'webm', 'm4v'].includes(ext)) {
+    return '<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><polygon points=""23 7 16 12 23 17 23 7""/><rect x=""1"" y=""5"" width=""15"" height=""14"" rx=""2"" ry=""2""/></svg>';
+  }
+  if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'heic'].includes(ext)) {
+    return '<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><rect x=""3"" y=""3"" width=""18"" height=""18"" rx=""2"" ry=""2""/><circle cx=""8.5"" cy=""8.5"" r=""1.5""/><polyline points=""21 15 16 10 5 21""/></svg>';
+  }
+  if (['mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a'].includes(ext)) {
+    return '<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M9 18V5l12-2v13""/><circle cx=""6"" cy=""18"" r=""3""/><circle cx=""18"" cy=""16"" r=""3""/></svg>';
+  }
+  if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) {
+    return '<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M21 8v13H3V8""/><path d=""M1 3h22v5H1z""/><path d=""M10 12h4""/></svg>';
+  }
+  return '<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z""/><polyline points=""14 2 14 8 20 8""/></svg>';
+}
+
 /* ------------------------------------------------------------- */
-/* TAB SWITCHING                                                 */
+/* TAB SWITCHING & ROLE BROADCAST                                */
 /* ------------------------------------------------------------- */
 function switchTab(name) {
   if (isTransferActive && name !== 'transfer') {
-    showToast('File transfer in progress. Please wait or cancel the transfer.');
+    showToast('File transfer is currently active.');
     return;
   }
 
@@ -2424,7 +2149,8 @@ function switchTab(name) {
     document.getElementById('tabBtnSend').classList.add('active');
     document.getElementById('viewSend').classList.add('active');
     fetch('/api/client-role?clientId=' + getClientId() + '&role=Sender&name=' + encodeURIComponent(getSavedNickname()), { method: 'POST' }).catch(() => {});
-    loadDiscoveredDevices();
+    // Reset to selection stage if returning
+    closeSenderRadar();
   } else if (name === 'receive') {
     document.getElementById('tabBtnReceive').classList.add('active');
     document.getElementById('viewReceive').classList.add('active');
@@ -2444,59 +2170,7 @@ function switchTab(name) {
 }
 
 /* ------------------------------------------------------------- */
-/* TOAST                                                         */
-/* ------------------------------------------------------------- */
-let toastTimeout = null;
-function showToast(msg) {
-  const t = document.getElementById('toastPill');
-  document.getElementById('toastText').textContent = msg;
-  t.classList.add('show');
-  if (toastTimeout) clearTimeout(toastTimeout);
-  toastTimeout = setTimeout(() => {
-    t.classList.remove('show');
-  }, 3200);
-}
-
-/* ------------------------------------------------------------- */
-/* FORMATTING UTILS                                              */
-/* ------------------------------------------------------------- */
-function formatBytes(bytes) {
-  if (!bytes || bytes === 0) return '0 B';
-  const k = 1024;
-  const dm = 1;
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-}
-
-function getFileCategorySvg(name) {
-  const ext = (name.split('.').pop() || '').toLowerCase();
-  // Video
-  if (['mp4', 'mkv', 'mov', 'avi', 'wmv', 'flv', 'webm', 'm4v', '3gp'].includes(ext)) {
-    return '<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><polygon points=""23 7 16 12 23 17 23 7""/><rect x=""1"" y=""5"" width=""15"" height=""14"" rx=""2"" ry=""2""/></svg>';
-  }
-  // Image
-  if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'heic', 'heif', 'ico', 'avif'].includes(ext)) {
-    return '<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><rect x=""3"" y=""3"" width=""18"" height=""18"" rx=""2"" ry=""2""/><circle cx=""8.5"" cy=""8.5"" r=""1.5""/><polyline points=""21 15 16 10 5 21""/></svg>';
-  }
-  // Audio
-  if (['mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a', 'wma'].includes(ext)) {
-    return '<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M9 18V5l12-2v13""/><circle cx=""6"" cy=""18"" r=""3""/><circle cx=""18"" cy=""16"" r=""3""/></svg>';
-  }
-  // Archive
-  if (['zip', 'rar', '7z', 'tar', 'gz', 'bz2', 'iso'].includes(ext)) {
-    return '<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M21 8v13H3V8""/><path d=""M1 3h22v5H1z""/><path d=""M10 12h4""/></svg>';
-  }
-  // Document
-  if (['pdf', 'doc', 'docx', 'txt', 'rtf', 'odt', 'xls', 'xlsx', 'ppt', 'pptx'].includes(ext)) {
-    return '<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z""/><polyline points=""14 2 14 8 20 8""/><line x1=""16"" y1=""13"" x2=""8"" y2=""13""/><line x1=""16"" y1=""17"" x2=""8"" y2=""17""/></svg>';
-  }
-  // Generic
-  return '<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z""/><polyline points=""13 2 13 9 20 9""/></svg>';
-}
-
-/* ------------------------------------------------------------- */
-/* STAGING TRAY HANDLER (MULTIPLE FILES & FOLDERS)               */
+/* FILE STAGING IN SENDER FLOW                                   */
 /* ------------------------------------------------------------- */
 function onFilesSelected(fileList) {
   if (!fileList || fileList.length === 0) return;
@@ -2536,150 +2210,225 @@ function clearStagingTray() {
 }
 
 function renderStagingTray() {
+  updateSendButtonText();
   const tray = document.getElementById('stagingTray');
   const list = document.getElementById('stagingList');
   const countBadge = document.getElementById('stagingCountBadge');
   const tabBadge = document.getElementById('stagingBadge');
-  const totalSize = document.getElementById('stagingTotalSize');
-  const btnText = document.getElementById('sendAllBtnText');
+  const totalSizeEl = document.getElementById('stagingTotalSize');
 
   if (stagedFiles.length === 0) {
     tray.style.display = 'none';
     tabBadge.style.display = 'none';
-    const s1 = document.getElementById('wswStep1'), s2 = document.getElementById('wswStep2'), s3 = document.getElementById('wswStep3');
-    const c1 = document.getElementById('wswConn1'), c2 = document.getElementById('wswConn2');
-    if (s1) s1.className = 'wsw-step active';
-    if (s2) s2.className = 'wsw-step';
-    if (s3) s3.className = 'wsw-step';
-    if (c1) c1.className = 'wsw-connector';
-    if (c2) c2.className = 'wsw-connector';
     return;
   }
-  const s1 = document.getElementById('wswStep1'), s2 = document.getElementById('wswStep2'), s3 = document.getElementById('wswStep3');
-  const c1 = document.getElementById('wswConn1'), c2 = document.getElementById('wswConn2');
-  if (s1) s1.className = 'wsw-step completed';
-  if (c1) c1.className = 'wsw-connector active';
-  if (s2) s2.className = 'wsw-step active';
-  if (c2) c2.className = 'wsw-connector';
-  if (s3) s3.className = 'wsw-step';
 
   tray.style.display = 'flex';
   tabBadge.style.display = 'inline-block';
   tabBadge.textContent = stagedFiles.length;
-  countBadge.textContent = stagedFiles.length + (stagedFiles.length === 1 ? ' file' : ' files');
+  countBadge.textContent = `${stagedFiles.length} file${stagedFiles.length > 1 ? 's' : ''}`;
 
-  let combinedBytes = 0;
+  const totalBytes = stagedFiles.reduce((acc, f) => acc + (f.size || 0), 0);
+  totalSizeEl.textContent = formatBytes(totalBytes);
+
   list.innerHTML = '';
-
   stagedFiles.forEach((f, idx) => {
-    combinedBytes += f.size;
     const item = document.createElement('div');
     item.className = 'staging-item';
-    item.id = 'stagedItem_' + idx;
-    const relDisp = (f.customRelativePath && f.customRelativePath !== f.name) ? `<div style=""font-size:10px; color:var(--text-muted); text-overflow:ellipsis; overflow:hidden;"">${f.customRelativePath}</div>` : '';
     item.innerHTML = `
       <div class=""si-left"">
-        <div class=""si-icon"">
-          ${getFileCategorySvg(f.name)}
-        </div>
+        <div class=""si-icon"">${getFileCategorySvg(f.name)}</div>
         <div class=""si-info"">
           <span class=""si-name"" title=""${f.name}"">${f.name}</span>
-          ${relDisp}
           <span class=""si-size"">${formatBytes(f.size)}</span>
         </div>
       </div>
-      <button class=""si-remove"" onclick=""removeStagedFile(${idx})"" title=""Remove file"" ${isUploading ? 'disabled style=""opacity:0.3""' : ''}>
-        <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2.5"" stroke-linecap=""round"" stroke-linejoin=""round"" style=""width:14px; height:14px;""><line x1=""18"" y1=""6"" x2=""6"" y2=""18""/><line x1=""6"" y1=""6"" x2=""18"" y2=""18""/></svg>
+      <button class=""si-remove-btn"" onclick=""removeStagedFile(${idx})"" title=""Remove file"">
+        <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2.2"" stroke-linecap=""round"" stroke-linejoin=""round""><line x1=""18"" y1=""6"" x2=""6"" y2=""18""/><line x1=""6"" y1=""6"" x2=""18"" y2=""18""/></svg>
       </button>
     `;
     list.appendChild(item);
   });
-
-  totalSize.textContent = formatBytes(combinedBytes);
-  btnText.textContent = `Send ${stagedFiles.length} File${stagedFiles.length > 1 ? 's' : ''} (${formatBytes(combinedBytes)})`;
 }
 
 /* ------------------------------------------------------------- */
-/* BATCH FILE STREAMING UPLOADER WITH MANIFEST NEGOTIATION      */
+/* RADAR STAGE (SENDER DISCOVERY - SHAREit STYLE)               */
 /* ------------------------------------------------------------- */
-async function startBatchSend() {
-  if (stagedFiles.length === 0 || isUploading) return;
-  isUploading = true;
-  document.getElementById('sendAllBtn').disabled = true;
-  const s2 = document.getElementById('wswStep2'), s3 = document.getElementById('wswStep3'), c2 = document.getElementById('wswConn2');
-  if (s2) s2.className = 'wsw-step completed';
-  if (c2) c2.className = 'wsw-connector active';
-  if (s3) s3.className = 'wsw-step active';
+let radarScanInterval = null;
 
-  const clientId = getClientId();
-  const targetSelect = document.getElementById('targetDeviceSelect');
-  const targetId = targetSelect ? (targetSelect.value || 'pc') : 'pc';
-  const selectedOpt = targetSelect && targetSelect.selectedIndex >= 0 ? targetSelect.options[targetSelect.selectedIndex] : null;
-  const isTargetInRecv = selectedOpt ? (selectedOpt.dataset.isReceiver === 'true') : true;
 
-  if (!isTargetInRecv) {
-    showToast('Cannot send: Target device is not in Receive mode. Ask recipient to open Receive tab.');
-    isUploading = false;
-    document.getElementById('sendAllBtn').disabled = false;
+function connectToTarget(rec) {
+  connectedTarget = rec;
+  pairedHostName = rec.name;
+  
+  const nameEl = document.getElementById('connectedTargetName');
+  if (nameEl) nameEl.textContent = `${rec.name} (${rec.ip})`;
+  
+  updateSendButtonText();
+  
+  document.getElementById('sendRadarStage').style.display = 'none';
+  document.getElementById('sendSelectionStage').style.display = 'block';
+  
+  showToast(`Connected to ${rec.name}! Choose files to send.`);
+}
+
+function openSendPickerWithoutTarget() {
+  document.getElementById('sendRadarStage').style.display = 'none';
+  document.getElementById('sendSelectionStage').style.display = 'block';
+  updateSendButtonText();
+}
+
+function sendBatchToConnectedTarget() {
+  if (!connectedTarget) {
+    showToast('Please select a target receiver from the Radar');
+    openSenderRadar();
     return;
   }
+  if (stagedFiles.length === 0) {
+    showToast('Please add some files to send first');
+    return;
+  }
+  sendBatchToTarget(connectedTarget.id, connectedTarget.name);
+}
 
-  const batchId = 'wb_' + Date.now();
+function updateSendButtonText() {
+  const btnText = document.getElementById('sendAllBtnText');
+  if (!btnText) return;
+  const count = stagedFiles.length;
+  const target = connectedTarget ? connectedTarget.name : 'Recipient';
+  btnText.textContent = `Send ${count} File${count === 1 ? '' : 's'} to ${target}`;
+}
 
-  let filesToSend = stagedFiles.slice();
+function openSenderRadar() {
+  if (stagedFiles.length === 0) {
+    showToast('Please select files to send first.');
+    return;
+  }
+  document.getElementById('sendSelectionStage').style.display = 'none';
+  document.getElementById('sendRadarStage').style.display = 'block';
 
-  // If connected with Host PC, negotiate batch manifest so recipient can review/choose files
-  if (isSessionPaired && targetId === 'pc') {
-    try {
-      showToast('Sending transfer manifest to recipient...');
-      const manifestPayload = {
-        senderId: clientId,
-        senderName: getSavedNickname(),
-        batchId: batchId,
-        files: stagedFiles.map((f, idx) => ({
-          fileId: 'wf_' + idx + '_' + Date.now(),
-          fileName: f.name,
-          relativePath: f.customRelativePath || f.webkitRelativePath || f.name,
-          size: f.size
-        }))
-      };
+  const totalBytes = stagedFiles.reduce((acc, f) => acc + (f.size || 0), 0);
+  document.getElementById('radarBatchSummary').textContent = `${stagedFiles.length} file${stagedFiles.length > 1 ? 's' : ''} (${formatBytes(totalBytes)})`;
 
-      const manifestRes = await fetch('/api/batch-manifest?clientId=' + encodeURIComponent(clientId), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(manifestPayload)
-      }).then(r => r.json());
+  loadDiscoveredReceivers();
+  if (radarScanInterval) clearInterval(radarScanInterval);
+  radarScanInterval = setInterval(loadDiscoveredReceivers, 2500);
+}
 
-      if (!manifestRes || !manifestRes.acceptedFileIds || manifestRes.acceptedFileIds.length === 0) {
-        showToast('Recipient declined file transfer');
-        isUploading = false;
-        document.getElementById('sendAllBtn').disabled = false;
-        return;
+function closeSenderRadar() {
+  if (radarScanInterval) {
+    clearInterval(radarScanInterval);
+    radarScanInterval = null;
+  }
+  document.getElementById('sendRadarStage').style.display = 'none';
+  document.getElementById('sendSelectionStage').style.display = 'block';
+}
+
+async function loadDiscoveredReceivers() {
+  const container = document.getElementById('radarNodesContainer');
+  const emptyHint = document.getElementById('radarEmptyHint');
+  if (!container) return;
+
+  try {
+    // 1. Check Host PC info
+    const meRes = await fetch('/api/me').then(r => r.json()).catch(() => null);
+    // 2. Check other discovered devices
+    const peers = await fetch('/api/devices?role=Receiver').then(r => r.json()).catch(() => []);
+
+    const myId = getClientId();
+    const receivers = [];
+
+    // Check if Host PC is in Receive Mode
+    if (meRes && meRes.name) {
+      const isHostRecv = meRes.isReceiver || meRes.role === 'Receiver';
+      if (isHostRecv) {
+        receivers.push({
+          id: 'pc',
+          name: meRes.name,
+          type: 'PC',
+          isHost: true
+        });
       }
+    }
 
-      const acceptedIdSet = new Set(manifestRes.acceptedFileIds);
-      filesToSend = [];
-      manifestPayload.files.forEach((mf, idx) => {
-        if (acceptedIdSet.has(mf.fileId)) {
-          filesToSend.push(stagedFiles[idx]);
+    // Check other LAN peers
+    if (Array.isArray(peers)) {
+      peers.forEach(d => {
+        if (!d) return;
+        if (d.id === myId || (d.id && d.id.includes(myId))) return;
+        const isRecv = d.isReceiver || d.role === 'Receiver';
+        // STRICT RULE: Only show devices that are in RECEIVE MODE!
+        if (isRecv) {
+          receivers.push({
+            id: d.id,
+            name: d.name,
+            type: d.type || 'Phone',
+            isHost: false
+          });
         }
       });
-    } catch (e) {
-      console.warn('Batch manifest negotiation warning:', e);
     }
+
+    container.innerHTML = '';
+
+    if (receivers.length === 0) {
+      if (emptyHint) emptyHint.style.display = 'flex';
+      return;
+    }
+
+    if (emptyHint) emptyHint.style.display = 'none';
+
+    // Position receiver nodes around the radar rings
+    const radarRadius = 105; // radius in px from center
+    const total = receivers.length;
+    receivers.forEach((rec, idx) => {
+      const angle = (2 * Math.PI / total) * idx - (Math.PI / 2);
+      const x = 140 + radarRadius * Math.cos(angle);
+      const y = 140 + radarRadius * Math.sin(angle);
+
+      const node = document.createElement('div');
+      node.className = 'web-radar-node';
+      node.style.left = `${x}px`;
+      node.style.top = `${y}px`;
+      node.onclick = () => connectToTarget(rec);
+
+      const iconSvg = rec.type === 'PC'
+        ? '<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><rect x=""2"" y=""3"" width=""20"" height=""14"" rx=""2"" ry=""2""/><line x1=""8"" y1=""21"" x2=""16"" y2=""21""/><line x1=""12"" y1=""17"" x2=""12"" y2=""21""/></svg>'
+        : '<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><rect x=""5"" y=""2"" width=""14"" height=""20"" rx=""2"" ry=""2""/><line x1=""12"" y1=""18"" x2=""12.01"" y2=""18""/></svg>';
+
+      node.innerHTML = `
+        <div class=""web-radar-node-disc"" title=""Tap to send files to ${rec.name}"">
+          ${iconSvg}
+        </div>
+        <span class=""web-radar-node-label"" title=""${rec.name}"">${rec.name}</span>
+      `;
+      container.appendChild(node);
+    });
+
+  } catch (err) {
+    console.warn('Failed to load discovered receivers:', err);
+  }
+}
+
+/* ------------------------------------------------------------- */
+/* BATCH DATA TRANSFER TO TARGET RECEIVER                        */
+/* ------------------------------------------------------------- */
+async function sendBatchToTarget(targetId, targetName) {
+  if (stagedFiles.length === 0 || isUploading) return;
+  isUploading = true;
+
+  if (radarScanInterval) {
+    clearInterval(radarScanInterval);
+    radarScanInterval = null;
   }
 
-  const total = filesToSend.length;
-  if (total === 0) {
-    showToast('No files were accepted by recipient');
-    isUploading = false;
-    isTransferActive = false;
-    document.getElementById('sendAllBtn').disabled = false;
-    return;
-  }
+  const clientId = getClientId();
+  const batchId = 'wb_' + Date.now();
+  const total = stagedFiles.length;
+  const totalBatchBytes = stagedFiles.reduce((acc, f) => acc + (f.size || 0), 0);
 
   isTransferActive = true;
-  activeTransferRole = 'Sender';
+  pairedHostName = targetName || 'Receiver';
   switchTab('transfer');
 
   // Populate viewTransfer
@@ -2687,32 +2436,24 @@ async function startBatchSend() {
   if (roleBadge) {
     roleBadge.textContent = 'UPLOADING';
     roleBadge.style.color = '#A855F7';
-    roleBadge.style.borderColor = '#7C3AED';
   }
   const peerLabel = document.getElementById('transferPagePeerName');
-  if (peerLabel) peerLabel.textContent = pairedHostName || 'Host PC';
+  if (peerLabel) peerLabel.textContent = pairedHostName;
 
   const queueCountEl = document.getElementById('transferPageQueueCount');
   if (queueCountEl) queueCountEl.textContent = `${total} file${total > 1 ? 's' : ''}`;
   const filesDoneEl = document.getElementById('transferPageFilesText');
   if (filesDoneEl) filesDoneEl.textContent = `0 / ${total}`;
-  const totalBatchBytes = filesToSend.reduce((acc, f) => acc + (f.size || 0), 0);
   const bytesDoneEl = document.getElementById('transferPageBytesText');
   if (bytesDoneEl) bytesDoneEl.textContent = `0 B / ${formatBytes(totalBatchBytes)}`;
 
   const queueList = document.getElementById('transferPageQueueList');
   if (queueList) {
     queueList.innerHTML = '';
-    filesToSend.forEach((f, idx) => {
+    stagedFiles.forEach((f, idx) => {
       const row = document.createElement('div');
       row.id = 'transferPageQueueItem_' + idx;
-      row.style.display = 'flex';
-      row.style.alignItems = 'center';
-      row.style.justifyContent = 'space-between';
-      row.style.padding = '10px 14px';
-      row.style.borderRadius = '8px';
-      row.style.background = 'rgba(255,255,255,0.03)';
-      row.style.border = '1px solid var(--border-subtle)';
+      row.className = 'transfer-queue-row';
       row.innerHTML = `
         <div style=""display:flex; align-items:center; gap:10px; overflow:hidden;"">
           <div style=""color:var(--text-muted);"">${getFileCategorySvg(f.name)}</div>
@@ -2727,18 +2468,14 @@ async function startBatchSend() {
     });
   }
 
-  const hud = document.getElementById('transferHud');
-  hud.classList.add('active');
-
   let successCount = 0;
   let totalBytesTransferred = 0;
   let failMessage = '';
 
-  for (let i = 0; i < filesToSend.length; i++) {
+  for (let i = 0; i < stagedFiles.length; i++) {
     if (!isUploading) break;
-    const file = filesToSend[i];
-    
-    // Highlight active queue item
+    const file = stagedFiles[i];
+
     const statusEl = document.getElementById('transferPageQueueStatus_' + i);
     if (statusEl) {
       statusEl.textContent = 'Transferring...';
@@ -2748,20 +2485,22 @@ async function startBatchSend() {
 
     const titleEl = document.getElementById('transferPageFileTitle');
     if (titleEl) titleEl.textContent = `[${i + 1}/${total}] ${file.name}`;
-    document.getElementById('hudFileName').textContent = `[${i + 1}/${total}] ${file.name}`;
-    updateHudProgress(0, file.size, 0, '--');
-    speedHistory = [];
-    drawSpeedGraph();
+    updateTransferStats(0, file.size, 0, '--');
 
     try {
-      if (isSessionPaired && targetId === 'pc') {
-        await streamFileUpload(file, '', clientId, batchId, file.customRelativePath || file.webkitRelativePath || '');
-      } else {
-        const askUrl = '/api/ask-receive?clientId=' + clientId + '&targetId=' + targetId + '&name=' + encodeURIComponent(file.name) + '&size=' + file.size;
-        const askRes = await fetch(askUrl, { method: 'POST' }).then(r => r.json());
-        if (!askRes.accepted) throw new Error(askRes.error || 'Transfer declined by recipient');
-        await streamFileUpload(file, askRes.id, clientId, batchId, file.customRelativePath || file.webkitRelativePath || '');
+      // 1. Send pre-transfer check to ensure receiver is ready
+      const askUrl = '/api/ask-receive?clientId=' + encodeURIComponent(clientId) +
+                     '&targetId=' + encodeURIComponent(targetId) +
+                     '&name=' + encodeURIComponent(file.name) +
+                     '&size=' + file.size;
+      const askRes = await fetch(askUrl, { method: 'POST' }).then(r => r.json());
+      if (!askRes || !askRes.accepted) {
+        throw new Error(askRes && askRes.error ? askRes.error : 'Recipient is not in Receive mode');
       }
+
+      // 2. Stream the raw file payload directly via HTTP upload
+      await streamFileUpload(file, askRes.id || '', clientId, batchId, file.customRelativePath || file.webkitRelativePath || '');
+
       successCount++;
       totalBytesTransferred += file.size;
 
@@ -2780,29 +2519,29 @@ async function startBatchSend() {
         statusEl.style.color = '#EF4444';
         statusEl.style.background = 'rgba(239,68,68,0.12)';
       }
-      if (failMessage.includes('declined') || failMessage.includes('aborted')) break;
+      break;
     }
   }
 
   isUploading = false;
-  document.getElementById('sendAllBtn').disabled = false;
-  hud.classList.remove('active');
+  isTransferActive = false;
 
   if (successCount > 0 && successCount === total) {
-    // Notify server of batch complete
     fetch(`/api/batch-complete?clientId=${encodeURIComponent(clientId)}&count=${successCount}&bytes=${totalBytesTransferred}`, { method: 'POST' }).catch(() => {});
     showTransferSuccessModal(true, pairedHostName, successCount, totalBytesTransferred);
     stagedFiles = [];
     renderStagingTray();
+    closeSenderRadar();
   } else {
-    showTransferFailureModal(failMessage || 'Transfer was cancelled or interrupted.', pairedHostName);
+    showTransferFailureModal(failMessage || 'Transfer interrupted.', pairedHostName);
   }
 
   loadHistory();
 }
 
-let currentUploadResolve = null;
-
+/* ------------------------------------------------------------- */
+/* STREAM FILE UPLOAD ENGINE (HTTP RAW POST)                     */
+/* ------------------------------------------------------------- */
 function streamFileUpload(file, uploadId, clientId, batchId, relativePath) {
   return new Promise((resolve, reject) => {
     let isFinished = false;
@@ -2811,8 +2550,7 @@ function streamFileUpload(file, uploadId, clientId, batchId, relativePath) {
       if (isFinished) return;
       isFinished = true;
       currentXhr = null;
-      currentUploadResolve = null;
-      updateHudProgress(100, file.size, file.size, rollingSpeed, 'Done');
+      updateTransferStats(100, file.size, file.size, 0, 'Done');
       resolve();
     };
 
@@ -2820,20 +2558,19 @@ function streamFileUpload(file, uploadId, clientId, batchId, relativePath) {
       if (isFinished) return;
       isFinished = true;
       currentXhr = null;
-      currentUploadResolve = null;
       reject(err);
     };
-
-    currentUploadResolve = safeResolve;
 
     const xhr = new XMLHttpRequest();
     currentXhr = xhr;
 
-    let uploadUrl = uploadId 
-      ? `/upload?id=${encodeURIComponent(uploadId)}&clientId=${encodeURIComponent(clientId)}`
+    let uploadUrl = uploadId
+      ? `/upload?id=${encodeURIComponent(uploadId)}&clientId=${encodeURIComponent(clientId)}&name=${encodeURIComponent(file.name)}`
       : `/upload?name=${encodeURIComponent(file.name)}&size=${file.size}&clientId=${encodeURIComponent(clientId)}&batchId=${encodeURIComponent(batchId)}&relPath=${encodeURIComponent(relativePath)}`;
 
     xhr.open('POST', uploadUrl, true);
+    xhr.setRequestHeader('X-File-Name', encodeURIComponent(file.name));
+    xhr.setRequestHeader('X-Relative-Path', encodeURIComponent(relativePath || ''));
 
     let lastLoaded = 0;
     let lastTime = Date.now();
@@ -2843,16 +2580,12 @@ function streamFileUpload(file, uploadId, clientId, batchId, relativePath) {
       if (e.lengthComputable && e.total > 0) {
         const now = Date.now();
         const dt = (now - lastTime) / 1000;
-        if (dt > 0.3) {
+        if (dt > 0.25) {
           const bytesDiff = e.loaded - lastLoaded;
           const currentSpeed = (bytesDiff / dt) / (1024 * 1024);
           rollingSpeed = rollingSpeed === 0 ? currentSpeed : (rollingSpeed * 0.6 + currentSpeed * 0.4);
           lastLoaded = e.loaded;
           lastTime = now;
-
-          speedHistory.push(rollingSpeed);
-          if (speedHistory.length > MAX_SPEED_POINTS) speedHistory.shift();
-          drawSpeedGraph();
         }
 
         const pct = Math.min(100, Math.round((e.loaded / e.total) * 100));
@@ -2865,37 +2598,24 @@ function streamFileUpload(file, uploadId, clientId, batchId, relativePath) {
           etaStr = `${m}m ${s < 10 ? '0' : ''}${s}s`;
         }
 
-        updateHudProgress(pct, e.total, e.loaded, rollingSpeed, etaStr);
+        updateTransferStats(pct, e.total, e.loaded, rollingSpeed, etaStr);
       }
-    };
-
-    xhr.upload.onload = () => {
-      updateHudProgress(100, file.size, file.size, rollingSpeed, 'Finalizing...');
-      // Fallback: If 100% of payload was accepted by socket, ensure we don't stall
-      setTimeout(() => {
-        if (!isFinished && isUploading) {
-          safeResolve();
-        }
-      }, 2500);
     };
 
     xhr.onload = () => {
       if (xhr.status >= 200 && xhr.status < 300) {
         safeResolve();
       } else {
-        safeReject(new Error(`Server response ${xhr.status}`));
+        safeReject(new Error(`Server error: ${xhr.status}`));
       }
     };
 
     xhr.onerror = () => {
-      // If socket teardown happened after bytes arrived, check if we can safely resolve
-      setTimeout(() => {
-        if (!isFinished) safeReject(new Error('Network connection error'));
-      }, 500);
+      safeReject(new Error('Network connection error during transfer'));
     };
 
     xhr.onabort = () => {
-      safeReject(new Error('Upload aborted by user'));
+      safeReject(new Error('Transfer cancelled'));
     };
 
     xhr.send(file);
@@ -2908,19 +2628,12 @@ function cancelActiveUpload() {
     currentXhr = null;
   }
   isUploading = false;
-  document.getElementById('transferHud').classList.remove('active');
-  document.getElementById('sendAllBtn').disabled = false;
-  showToast('Transfer canceled');
-  showTransferFailureModal('Transfer cancelled by user.', pairedHostName);
+  isTransferActive = false;
+  showToast('Transfer cancelled');
+  switchTab('send');
 }
 
-function updateHudProgress(percent, totalBytes, loadedBytes, speedMb, etaStr) {
-  document.getElementById('hudBarFill').style.width = percent + '%';
-  document.getElementById('hudSpeedText').textContent = (speedMb || 0).toFixed(1) + ' MB/s';
-  document.getElementById('hudBytesText').textContent = `${formatBytes(loadedBytes)} / ${formatBytes(totalBytes)} (${percent}%)`;
-  document.getElementById('hudEtaText').textContent = etaStr ? `ETA: ${etaStr}` : 'ETA: --';
-
-  // Also sync to viewTransfer dedicated panel
+function updateTransferStats(percent, totalBytes, loadedBytes, speedMb, etaStr) {
   const pgBar = document.getElementById('transferPageBarFill');
   if (pgBar) pgBar.style.width = percent + '%';
   const pgPct = document.getElementById('transferPagePercentText');
@@ -2929,148 +2642,13 @@ function updateHudProgress(percent, totalBytes, loadedBytes, speedMb, etaStr) {
   if (pgSpeed) pgSpeed.textContent = (speedMb || 0).toFixed(1) + ' MB/s';
   const pgEta = document.getElementById('transferPageEtaText');
   if (pgEta) pgEta.textContent = etaStr || '--:--';
-}
-
-function drawSpeedGraph() {
-  const canvas = document.getElementById('hudSpeedGraph');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const w = canvas.width = canvas.offsetWidth;
-  const h = canvas.height = canvas.offsetHeight;
-
-  ctx.clearRect(0, 0, w, h);
-  if (speedHistory.length < 2) return;
-
-  const maxVal = Math.max(...speedHistory, 1.0);
-  const step = w / (MAX_SPEED_POINTS - 1);
-
-  ctx.beginPath();
-  const startIdx = MAX_SPEED_POINTS - speedHistory.length;
-  for (let i = 0; i < speedHistory.length; i++) {
-    const x = (startIdx + i) * step;
-    const y = h - (speedHistory[i] / maxVal) * (h - 8) - 4;
-    if (i === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
-  }
-
-  ctx.strokeStyle = '#06B6D4';
-  ctx.lineWidth = 2;
-  ctx.stroke();
-
-  // Fill gradient
-  ctx.lineTo((startIdx + speedHistory.length - 1) * step, h);
-  ctx.lineTo(startIdx * step, h);
-  ctx.closePath();
-  const grad = ctx.createLinearGradient(0, 0, 0, h);
-  grad.addColorStop(0, 'rgba(6, 182, 212, 0.25)');
-  grad.addColorStop(1, 'rgba(6, 182, 212, 0.0)');
-  ctx.fillStyle = grad;
-  ctx.fill();
+  const pgBytes = document.getElementById('transferPageBytesText');
+  if (pgBytes) pgBytes.textContent = `${formatBytes(loadedBytes)} / ${formatBytes(totalBytes)}`;
 }
 
 /* ------------------------------------------------------------- */
-/* DRAG AND DROP HANDLERS                                        */
+/* AVAILABLE FILES & HISTORY                                     */
 /* ------------------------------------------------------------- */
-const dz = document.getElementById('dropZone');
-['dragenter', 'dragover'].forEach(name => {
-  dz.addEventListener(name, (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    dz.classList.add('dragover');
-  });
-});
-['dragleave', 'drop'].forEach(name => {
-  dz.addEventListener(name, (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    dz.classList.remove('dragover');
-  });
-});
-dz.addEventListener('drop', (e) => {
-  if (e.dataTransfer && e.dataTransfer.files) {
-    onFilesSelected(e.dataTransfer.files);
-  }
-});
-
-/* ------------------------------------------------------------- */
-/* SERVER API CALLS & SSE                                        */
-/* ------------------------------------------------------------- */
-async function loadHostInfo() {
-  try {
-    const res = await fetch('/api/me').then(r => r.json());
-    if (res && res.name) {
-      const isRecv = res.isReceiver || res.role === 'Receiver';
-      document.getElementById('hostStatusText').textContent = isRecv
-        ? 'READY TO RECEIVE: ' + res.name.toUpperCase()
-        : 'ONLINE: ' + res.name.toUpperCase();
-      const label = document.getElementById('targetNameLabel');
-      if (label && (!document.getElementById('targetDeviceSelect') || document.getElementById('targetDeviceSelect').value === 'pc')) {
-        label.textContent = res.name + (isRecv ? ' [Ready to Receive]' : ' [Not in Receive Mode]');
-      }
-    }
-  } catch(e) {
-    document.getElementById('hostStatusText').textContent = 'CONNECTING...';
-  }
-}
-
-async function loadDiscoveredDevices() {
-  try {
-    const devices = await fetch('/api/devices').then(r => r.json());
-    const sel = document.getElementById('targetDeviceSelect');
-    if (!sel) return;
-    const curVal = sel.value;
-    const myId = getClientId();
-    
-    // Check host PC info
-    const meRes = await fetch('/api/me').then(r => r.json()).catch(() => null);
-    const hostName = (meRes && meRes.name) ? meRes.name : 'Host PC';
-    const isHostRecv = meRes ? (meRes.isReceiver || meRes.role === 'Receiver') : false;
-
-    sel.innerHTML = `<option value=""pc"" data-is-receiver=""${isHostRecv}"">${hostName} ${isHostRecv ? '(Ready to Receive)' : '(Not in Receive Mode)'}</option>`;
-    
-    if (Array.isArray(devices)) {
-      devices.forEach(d => {
-        if (!d) return;
-        if (d.id === myId || d.id === 'wc_' + myId || (myId && d.id && d.id.includes(myId))) return;
-        const opt = document.createElement('option');
-        opt.value = d.id;
-        const isRecv = d.isReceiver || d.role === 'Receiver';
-        opt.dataset.isReceiver = isRecv ? 'true' : 'false';
-        opt.textContent = `${d.isFavorite ? '• ' : ''}${d.name} ${isRecv ? '(Ready to Receive)' : '(Not in Receive Mode)'}`;
-        sel.appendChild(opt);
-      });
-    }
-    sel.value = curVal || 'pc';
-    onTargetDeviceChanged();
-  } catch(e) {}
-}
-
-function onTargetDeviceChanged() {
-  const sel = document.getElementById('targetDeviceSelect');
-  if (!sel || !sel.options || sel.selectedIndex < 0) return;
-  const opt = sel.options[sel.selectedIndex];
-  const label = document.getElementById('targetNameLabel');
-  if (label) label.textContent = opt.text;
-  
-  const isRecv = opt.dataset.isReceiver === 'true';
-  const pill = document.getElementById('targetReceiverStatusPill');
-  const sendBtn = document.getElementById('sendAllBtn');
-  if (pill) {
-    pill.style.display = 'inline-flex';
-    if (isRecv) {
-      pill.style.background = 'rgba(16,185,129,0.12)';
-      pill.style.color = 'var(--emerald)';
-      pill.style.borderColor = 'rgba(16,185,129,0.25)';
-      pill.innerHTML = '<span style=""width:6px; height:6px; border-radius:50%; background:#10B981; display:inline-block; margin-right:6px;""></span>Target is Ready to Receive';
-    } else {
-      pill.style.background = 'rgba(239,68,68,0.12)';
-      pill.style.color = 'var(--rose)';
-      pill.style.borderColor = 'rgba(239,68,68,0.25)';
-      pill.innerHTML = '<span style=""width:6px; height:6px; border-radius:50%; background:#EF4444; display:inline-block; margin-right:6px;""></span>Target is not in Receive mode (Ask recipient to tap Receive)';
-    }
-  }
-}
-
 async function loadAvailableFiles() {
   try {
     const cid = getClientId();
@@ -3079,18 +2657,20 @@ async function loadAvailableFiles() {
     const badge = document.getElementById('downloadsBadge');
 
     if (!Array.isArray(files) || files.length === 0) {
-      badge.style.display = 'none';
+      if (badge) badge.style.display = 'none';
       list.innerHTML = `
         <div class=""empty-state-box"">
           <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""1.8"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z""/><polyline points=""13 2 13 9 20 9""/></svg>
           <div class=""empty-state-title"">No Files Available</div>
-          <div class=""empty-state-text"">Files shared from the desktop app will appear here for instant 1-click download.</div>
+          <div class=""empty-state-text"">Files shared from the PC will appear here for instant 1-click download.</div>
         </div>`;
       return;
     }
 
-    badge.style.display = 'inline-block';
-    badge.textContent = files.length;
+    if (badge) {
+      badge.style.display = 'inline-block';
+      badge.textContent = files.length;
+    }
     list.innerHTML = '';
 
     files.forEach(f => {
@@ -3125,7 +2705,7 @@ async function loadHistory() {
         <div class=""empty-state-box"">
           <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""1.8"" stroke-linecap=""round"" stroke-linejoin=""round""><polyline points=""22 12 18 12 15 21 9 3 6 12 2 12""/></svg>
           <div class=""empty-state-title"">No Transfers Yet</div>
-          <div class=""empty-state-text"">Completed uploads and downloads between this device and the host will be recorded here.</div>
+          <div class=""empty-state-text"">Completed transfers between this device and peers will be recorded here.</div>
         </div>`;
       return;
     }
@@ -3133,7 +2713,7 @@ async function loadHistory() {
     list.innerHTML = '';
     items.forEach(h => {
       const isRecv = (h.direction === 0 || h.direction === 'Received');
-      const isDone = (h.status === 2 || h.status === 'Completed');
+      const isDone = (h.status === 2 || h.status === 'Completed' || h.status === 'Done');
       const dateStr = h.timestamp ? new Date(h.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
 
       const item = document.createElement('div');
@@ -3150,54 +2730,25 @@ async function loadHistory() {
             <span class=""hi-sub"">${formatBytes(h.totalBytes)} • ${isRecv ? 'From PC' : 'Sent to PC'} • ${dateStr}</span>
           </div>
         </div>
-        <div class=""hi-right"" style=""display:flex; align-items:center; gap:8px;"">
-          <span class=""hi-status ${isDone ? 'completed' : 'failed'}"">${isDone ? 'COMPLETED' : 'FAILED'}</span>
-          <button onclick=""requestFileResend('${h.fileId || ''}', '${encodeURIComponent(h.fileName || '')}')"" style=""padding:4px 8px; border-radius:6px; background:rgba(6,182,212,0.12); border:1px solid rgba(6,182,212,0.3); color:var(--cyan); font-size:10px; font-weight:700; cursor:pointer;"">Resend</button>
-        </div>
+        <span class=""hi-status ${isDone ? 'completed' : 'failed'}"">${isDone ? 'COMPLETED' : 'FAILED'}</span>
       `;
       list.appendChild(item);
     });
   } catch(e) {}
 }
 
+/* ------------------------------------------------------------- */
+/* SSE LISTENER & INCOMING OFFERS                                */
+/* ------------------------------------------------------------- */
 function initSSE() {
   const cid = getClientId();
-  const sse = new EventSource('/api/events?clientId=' + cid);
-
-  sse.addEventListener('connect-request', (e) => {
-    try {
-      const data = JSON.parse(e.data);
-      pairedHostName = data.name || 'Host PC';
-      const desc = document.getElementById('incomingConnectDesc');
-      if (desc) desc.textContent = `${pairedHostName} (${data.type || 'PC'}) wants to connect with you to share files.`;
-      const modal = document.getElementById('incomingConnectModal');
-      if (modal) modal.classList.add('active');
-    } catch(err) {}
-  });
-
-  sse.addEventListener('connect-accepted', (e) => {
-    try {
-      const data = JSON.parse(e.data);
-      setConnectedState(true, data.name || 'Host PC');
-      showToast('Connected with ' + (data.name || 'Host PC') + '!');
-    } catch(err) {}
-  });
-
-  sse.addEventListener('connect-declined', () => {
-    setConnectedState(false);
-    showToast('Host PC declined connection.');
-  });
-
-  sse.addEventListener('disconnected', () => {
-    setConnectedState(false);
-    showToast('Disconnected from session.');
-  });
+  const cname = getSavedNickname();
+  const sse = new EventSource(`/api/events?clientId=${encodeURIComponent(cid)}&name=${encodeURIComponent(cname)}&role=Sender`);
 
   sse.addEventListener('offer', (e) => {
     try {
       pendingSingleOffer = JSON.parse(e.data);
-      const rawName = pendingSingleOffer.name || 'file';
-      const cleanName = decodeURIComponent(rawName);
+      const cleanName = decodeURIComponent(pendingSingleOffer.name || 'file');
       pendingSingleOffer.displayName = cleanName;
       document.getElementById('singleOfferDesc').textContent = `Incoming file from ${pendingSingleOffer.from || 'Host PC'}: ""${cleanName}"" (${formatBytes(pendingSingleOffer.size)})`;
       document.getElementById('singleOfferModal').classList.add('active');
@@ -3229,43 +2780,15 @@ function initSSE() {
     } catch(err) {}
   });
 
-  sse.addEventListener('resend-request', (e) => {
-    try {
-      const data = JSON.parse(e.data);
-      showResendRequestPrompt(data);
-    } catch(err) {}
-  });
-
-  sse.addEventListener('progress', (e) => {
-    try {
-      const p = JSON.parse(e.data);
-      if (isUploading && p.percent) {
-        // Server side progress sync
-      }
-    } catch(err) {}
-  });
-
-  sse.addEventListener('upload-complete', (e) => {
+  sse.addEventListener('upload-complete', () => {
     loadHistory();
     loadAvailableFiles();
-    if (typeof currentUploadResolve === 'function') {
-      currentUploadResolve();
-    }
   });
 
   sse.addEventListener('refresh', () => {
-    loadHostInfo();
     loadAvailableFiles();
-    loadDiscoveredDevices();
+    loadDiscoveredReceivers();
   });
-
-  sse.onerror = () => {
-    document.getElementById('hostStatusText').textContent = 'RECONNECTING...';
-  };
-
-  sse.onopen = () => {
-    loadHostInfo();
-  };
 }
 
 function acceptSingleOffer() {
@@ -3296,8 +2819,6 @@ function declineSingleOffer() {
   }
 }
 
-let pendingBatchManifest = null;
-
 function showIncomingBatchChecklist(manifest) {
   pendingBatchManifest = manifest;
   const modal = document.getElementById('batchOfferModal');
@@ -3308,25 +2829,23 @@ function showIncomingBatchChecklist(manifest) {
 
   const files = manifest.files || manifest.Files || [];
   title.textContent = `Incoming Batch (${files.length} Files)`;
-  desc.textContent = `From ${manifest.senderName || manifest.SenderName || 'Host PC'} • Total: ${formatBytes(manifest.totalSize || manifest.TotalSize || files.reduce((a, b) => a + (b.size || b.Size || 0), 0))}`;
+  desc.textContent = `From ${manifest.senderName || manifest.SenderName || 'Host PC'} • Total: ${formatBytes(manifest.totalSize || files.reduce((a, b) => a + (b.size || 0), 0))}`;
 
   allChk.checked = true;
   list.innerHTML = '';
 
   files.forEach((f, idx) => {
-    const fid = f.id || f.Id || f.fileId || f.FileId || ('f_' + idx);
-    const fname = f.fileName || f.FileName || f.name || f.Name || 'file';
-    const frel = f.relativePath || f.RelativePath || '';
-    const fsize = f.size || f.Size || 0;
+    const fid = f.id || f.fileId || ('f_' + idx);
+    const fname = f.fileName || f.name || 'file';
+    const fsize = f.size || 0;
 
     const row = document.createElement('label');
     row.className = 'batch-chk-item';
     row.innerHTML = `
       <input type=""checkbox"" class=""batch-file-chk"" data-file-id=""${fid}"" data-file-name=""${encodeURIComponent(fname)}"" data-size=""${fsize}"" checked onchange=""updateBatchChecklistStats()"">
-      <div class=""batch-chk-info"">
+      <div style=""flex:1; overflow:hidden;"">
         <span class=""batch-chk-name"" title=""${fname}"">${fname}</span>
-        ${frel && frel !== fname ? `<span style=""font-size:10px;color:var(--text-muted);"">${frel}</span>` : ''}
-        <span class=""batch-chk-meta"">${formatBytes(fsize)}</span>
+        <span style=""font-size:10px; color:var(--text-dim); display:block;"">${formatBytes(fsize)}</span>
       </div>
     `;
     list.appendChild(row);
@@ -3389,204 +2908,47 @@ async function acceptSelectedBatchOffer() {
   }).catch(() => {});
 
   if (acceptedFiles.length > 0) {
-    isTransferActive = true;
-    activeTransferRole = 'Receiver';
-    switchTab('transfer');
-
-    const roleBadge = document.getElementById('transferPageRoleBadge');
-    if (roleBadge) {
-      roleBadge.textContent = 'DOWNLOADING';
-      roleBadge.style.color = '#10B981';
-      roleBadge.style.borderColor = '#10B981';
-    }
-    const peerLabel = document.getElementById('transferPagePeerName');
-    if (peerLabel) peerLabel.textContent = (pendingBatchManifest.senderName || pendingBatchManifest.SenderName || pairedHostName || 'Host PC');
-
-    const queueCountEl = document.getElementById('transferPageQueueCount');
-    if (queueCountEl) queueCountEl.textContent = `${acceptedFiles.length} files`;
-    const filesDoneEl = document.getElementById('transferPageFilesText');
-    if (filesDoneEl) filesDoneEl.textContent = `0 / ${acceptedFiles.length}`;
-
-    const queueList = document.getElementById('transferPageQueueList');
-    if (queueList) {
-      queueList.innerHTML = '';
-      acceptedFiles.forEach((item, idx) => {
-        const row = document.createElement('div');
-        row.id = 'transferPageQueueItem_' + idx;
-        row.style.display = 'flex';
-        row.style.alignItems = 'center';
-        row.style.justifyContent = 'space-between';
-        row.style.padding = '10px 14px';
-        row.style.borderRadius = '8px';
-        row.style.background = 'rgba(255,255,255,0.03)';
-        row.style.border = '1px solid var(--border-subtle)';
-        row.innerHTML = `
-          <div style=""display:flex; align-items:center; gap:10px; overflow:hidden;"">
-            <div style=""color:var(--text-muted);"">${getFileCategorySvg(item.name)}</div>
-            <span style=""font-size:13px; font-weight:700; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"" title=""${item.name}"">${item.name}</span>
-          </div>
-          <span id=""transferPageQueueStatus_${idx}"" style=""font-size:11px; font-weight:700; color:var(--text-muted); padding:3px 8px; border-radius:6px; background:rgba(255,255,255,0.04);"">Waiting</span>
-        `;
-        queueList.appendChild(row);
-      });
-    }
-
     showToast(`Accepted ${acceptedFiles.length} files. Starting download...`);
     const cid = getClientId();
-    let completedDownloads = 0;
     acceptedFiles.forEach((item, idx) => {
       setTimeout(() => {
-        const statusEl = document.getElementById('transferPageQueueStatus_' + idx);
-        if (statusEl) {
-          statusEl.textContent = 'Downloading...';
-          statusEl.style.color = 'var(--cyan)';
-        }
         const a = document.createElement('a');
         a.href = `/download?id=${encodeURIComponent(item.id)}&file=${item.name}&clientId=${encodeURIComponent(cid)}`;
         a.download = decodeURIComponent(item.name) || 'download';
         document.body.appendChild(a);
         a.click();
-        setTimeout(() => {
-          a.remove();
-          completedDownloads++;
-          if (statusEl) {
-            statusEl.textContent = 'Downloaded';
-            statusEl.style.color = 'var(--emerald)';
-          }
-          if (filesDoneEl) filesDoneEl.textContent = `${completedDownloads} / ${acceptedFiles.length}`;
-          const pct = Math.round((completedDownloads / acceptedFiles.length) * 100);
-          const bar = document.getElementById('transferPageBarFill');
-          if (bar) bar.style.width = pct + '%';
-          const pctText = document.getElementById('transferPagePercentText');
-          if (pctText) pctText.textContent = pct + '%';
-        }, 800);
-      }, idx * 700);
+        setTimeout(() => a.remove(), 1000);
+      }, idx * 350);
     });
-  } else {
-    showToast('Batch transfer declined');
   }
 }
 
 function declineBatchOffer() {
   const modal = document.getElementById('batchOfferModal');
-  modal.classList.remove('active');
-  if (pendingBatchManifest) {
-    const batchId = pendingBatchManifest.batchId || pendingBatchManifest.BatchId || '';
-    fetch('/api/batch-response', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        batchId: batchId,
-        accepted: false,
-        acceptedFileIds: []
-      })
-    }).catch(() => {});
-    showToast('Batch transfer declined');
-  }
+  if (modal) modal.classList.remove('active');
+  showToast('Batch transfer declined');
 }
 
-function showTransferSuccessModal(isSender, peerName, fileCount, totalBytes) {
-  isTransferActive = false;
-  const modal = document.getElementById('transferSuccessModal');
-  const countEl = document.getElementById('successFileCount');
-  const sizeEl = document.getElementById('successTotalSize');
-  const peerEl = document.getElementById('successPeerName');
-  const descEl = document.getElementById('transferSuccessDesc');
-
-  if (countEl) countEl.textContent = `${fileCount} file${fileCount > 1 ? 's' : ''}`;
-  if (sizeEl) sizeEl.textContent = formatBytes(totalBytes);
-  if (peerEl) peerEl.textContent = peerName || 'Host PC';
-  if (descEl) descEl.textContent = isSender ? 'Your files were sent successfully!' : 'All files were received successfully!';
-
-  if (modal) modal.classList.add('active');
-  showToast('Transfer completed successfully!');
+function showTransferSuccessModal(isSender, peerName, count, bytes) {
+  document.getElementById('successFileCount').textContent = `${count} file${count > 1 ? 's' : ''}`;
+  document.getElementById('successTotalSize').textContent = formatBytes(bytes);
+  document.getElementById('successPeerName').textContent = peerName || 'Peer';
+  document.getElementById('transferSuccessModal').classList.add('active');
 }
 
 function closeSuccessModal() {
-  const modal = document.getElementById('transferSuccessModal');
-  if (modal) modal.classList.remove('active');
-  isTransferActive = false;
-  switchTab(activeTransferRole === 'Sender' ? 'send' : 'receive');
+  document.getElementById('transferSuccessModal').classList.remove('active');
+  switchTab('send');
 }
 
 function showTransferFailureModal(reason, peerName) {
-  isTransferActive = false;
-  const modal = document.getElementById('transferFailureModal');
-  const reasonEl = document.getElementById('failureReasonText');
-  const peerEl = document.getElementById('failurePeerName');
-  const descEl = document.getElementById('transferFailureDesc');
-
-  if (reasonEl) reasonEl.textContent = reason || 'Connection lost or cancelled';
-  if (peerEl) peerEl.textContent = peerName || 'Host PC';
-  if (descEl) descEl.textContent = 'The file transfer could not be completed.';
-
-  if (modal) modal.classList.add('active');
+  document.getElementById('transferFailureDesc').textContent = reason || 'The transfer was interrupted.';
+  document.getElementById('transferFailureModal').classList.add('active');
 }
 
 function closeFailureModal() {
-  const modal = document.getElementById('transferFailureModal');
-  if (modal) modal.classList.remove('active');
-  isTransferActive = false;
-  switchTab(activeTransferRole === 'Sender' ? 'send' : 'receive');
-}
-
-let pendingResendRequest = null;
-
-function showResendRequestPrompt(req) {
-  pendingResendRequest = req;
-  const modal = document.getElementById('resendRequestModal');
-  const desc = document.getElementById('resendRequestDesc');
-  if (desc) desc.textContent = `${req.requesterName || 'Recipient'} requested to resend ""${req.fileName}"".`;
-  if (modal) modal.classList.add('active');
-}
-
-async function respondResendRequest(accept) {
-  const modal = document.getElementById('resendRequestModal');
-  if (modal) modal.classList.remove('active');
-
-  if (pendingResendRequest) {
-    await fetch('/api/resend-response', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        fileId: pendingResendRequest.fileId || '',
-        fileName: pendingResendRequest.fileName || '',
-        accepted: accept
-      })
-    }).catch(() => {});
-
-    if (accept) {
-      showToast('Resend accepted. Starting upload...');
-      const match = stagedFiles.find(f => f.name === pendingResendRequest.fileName);
-      if (match) {
-        streamFileUpload(match, '', getClientId(), '', match.customRelativePath || '');
-      }
-    } else {
-      showToast('Resend request declined');
-    }
-  }
-}
-
-async function requestFileResend(fileId, fileName) {
-  try {
-    const unescapedName = decodeURIComponent(fileName);
-    showToast(`Requesting resend of ""${unescapedName}""...`);
-    const res = await fetch(`/api/resend-request?clientId=${encodeURIComponent(getClientId())}&fileId=${encodeURIComponent(fileId)}&fileName=${encodeURIComponent(unescapedName)}`, { method: 'POST' }).then(r => r.json());
-    if (res && res.accepted) {
-      showToast(`Sender accepted resend request for ""${unescapedName}""!`);
-    } else {
-      showToast('Sender declined or unavailable for resend.');
-    }
-  } catch (err) {
-    showToast('Failed to request resend: ' + err.message);
-  }
-}
-
-function authorizeWifi() {
-  fetch('/api/portal-login', { method: 'POST' }).then(() => {
-    showToast('Wi-Fi connection authorized!');
-    document.getElementById('captiveWarning').style.display = 'none';
-  }).catch(() => {});
+  document.getElementById('transferFailureModal').classList.remove('active');
+  switchTab('send');
 }
 
 function copyPortalUrl() {
@@ -3604,25 +2966,23 @@ function copyPortalUrl() {
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
   document.getElementById('nicknameDisplay').textContent = getSavedNickname();
-  document.getElementById('portalUrlDisplay').textContent = window.location.origin;
+  const devTitle = document.getElementById('receiveDeviceName');
+  if (devTitle) devTitle.textContent = getSavedNickname();
 
-  checkOnboarding();
-  loadHostInfo();
-  loadDiscoveredDevices();
+  const urlDisplay = document.getElementById('portalUrlDisplay');
+  if (urlDisplay) urlDisplay.textContent = window.location.origin;
+
   loadAvailableFiles();
   loadHistory();
   initSSE();
 
-  // Send initial role as Receiver (ready to receive from Host PC) and heartbeat with nickname
-  fetch('/api/client-role?clientId=' + getClientId() + '&role=Receiver&name=' + encodeURIComponent(getSavedNickname()), { method: 'POST' }).catch(() => {});
+  // Send initial role as Sender (matching initial active tab)
+  fetch('/api/client-role?clientId=' + getClientId() + '&role=Sender&name=' + encodeURIComponent(getSavedNickname()), { method: 'POST' }).catch(() => {});
   fetch('/api/heartbeat?clientId=' + getClientId() + '&name=' + encodeURIComponent(getSavedNickname()), { method: 'POST' }).catch(() => {});
 
-  // Recurring heartbeat & discovery refresh
   setInterval(() => {
     fetch('/api/heartbeat?clientId=' + getClientId() + '&name=' + encodeURIComponent(getSavedNickname()), { method: 'POST' }).catch(() => {});
-    loadDiscoveredDevices();
-    loadHostInfo();
-  }, 6000);
+  }, 8000);
 });
 </script>
 

@@ -670,7 +670,7 @@
                            </StackPanel>
 
                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                              <Button Content="← Back to Files" Click="NavSendFiles_Click" Classes="GhostBtn" Padding="12,6" FontSize="11"/>
+                              <Button Content="← Back to Files" Click="NavSendFilesStage_Click" Classes="GhostBtn" Padding="12,6" FontSize="11"/>
                               <Button Content="Refresh Radar" Click="RefreshDiscovery_Click" Classes="PrimaryBtn" Padding="14,6" FontSize="11"/>
                            </StackPanel>
                         </Grid>
@@ -1313,18 +1313,18 @@
                   <Grid Grid.Row="1">
                      
                      <!-- (A) DEVICE SESSION WORKSTATION (Shown when a device is selected) -->
-                     <Border x:Name="WebDeviceSessionView" Classes="GlassCard" Padding="20" IsVisible="True">
-                        <Grid RowDefinitions="Auto, 16, *">
+                     <Border x:Name="WebDeviceSessionView" Classes="GlassCard" Padding="24" IsVisible="True">
+                        <Grid RowDefinitions="Auto, 16, Auto, Auto">
                            
                            <!-- Selected Device Context Header -->
                            <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto">
-                              <Border Grid.Column="0" Width="40" Height="40" CornerRadius="20" Background="#1E2338" Margin="0,0,12,0" VerticalAlignment="Center">
-                                 <Path x:Name="SelectedWebClientIcon" Data="{StaticResource IconMobile}" Fill="#818CF8" Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                              <Border Grid.Column="0" Width="42" Height="42" CornerRadius="21" Background="#1E2338" Margin="0,0,14,0" VerticalAlignment="Center">
+                                 <Path x:Name="SelectedWebClientIcon" Data="{StaticResource IconMobile}" Fill="#818CF8" Width="20" Height="20" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                               </Border>
                               <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
                                  <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock Text="DEVICE WORKSPACE:" FontSize="10" FontWeight="Bold" Foreground="#818CF8" LetterSpacing="0.8"/>
-                                    <TextBlock x:Name="SelectedWebClientName" Text="Selected Device" FontSize="14" FontWeight="Bold" Foreground="#FFFFFF"/>
+                                    <TextBlock Text="SELECTED TARGET:" FontSize="10" FontWeight="Bold" Foreground="#818CF8" LetterSpacing="0.8"/>
+                                    <TextBlock x:Name="SelectedWebClientName" Text="Selected Device" FontSize="15" FontWeight="Bold" Foreground="#FFFFFF"/>
                                  </StackPanel>
                                  <TextBlock x:Name="SelectedWebClientDetails" Text="IP: 192.168.1.88 • Connected via Web Portal" FontSize="11" Foreground="#94A3B8"/>
                               </StackPanel>
@@ -1333,126 +1333,53 @@
                               </StackPanel>
                            </Grid>
 
-                           <!-- Dual Panes: Left = Send To Device, Right = Received From Device -->
-                           <Grid Grid.Row="2" ColumnDefinitions="*, 16, *">
-                              
-                              <!-- LEFT PANE: SEND TO THIS DEVICE -->
-                              <Border Grid.Column="0" Background="#121420" BorderBrush="#222638" BorderThickness="1" CornerRadius="10" Padding="16">
-                                 <Grid RowDefinitions="Auto, 12, Auto, 12, *, 14, Auto">
-                                    <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
-                                       <TextBlock Text="Send to this Device" FontSize="13" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
-                                       <TextBlock Grid.Column="1" x:Name="WebSendStagedCountText" Text="0 files ready" FontSize="11" Foreground="#64748B" VerticalAlignment="Center"/>
-                                    </Grid>
-
-                                    <!-- Action Buttons -->
-                                    <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8">
-                                       <Button Classes="PrimaryBtn" Content="+ Add Files" Click="WebAddFiles_Click" Padding="14,7" FontSize="11"/>
-                                       <Button Classes="GhostBtn" Content="+ Add Folder" Click="WebAddFolder_Click" Padding="12,7" FontSize="11"/>
-                                       <Button Classes="GhostBtn" Content="Clear" Click="WebClearSendQueue_Click" Padding="10,7" FontSize="11"/>
+                           <!-- Direct Send Actions Deck -->
+                           <Border Grid.Row="2" Background="#121420" BorderBrush="#222638" BorderThickness="1" CornerRadius="12" Padding="20">
+                              <Grid ColumnDefinitions="*, 20, *">
+                                 <!-- Left: One-Click Send to Web Portal -->
+                                 <StackPanel Grid.Column="0" Spacing="10">
+                                    <TextBlock Text="Direct Send to this Device" FontSize="14" FontWeight="Bold" Foreground="#FFFFFF"/>
+                                    <TextBlock Text="Choose files or an entire folder to immediately send to the web browser. The user will receive an instant acceptance prompt." FontSize="11" Foreground="#94A3B8" TextWrapping="Wrap"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,4,0,0">
+                                       <Button Classes="PrimaryBtn" Content="+ Select &amp; Send Files" Click="WebQuickSendFiles_Click" Padding="16,9" FontSize="12" FontWeight="SemiBold"/>
+                                       <Button Classes="GhostBtn" Content="+ Send Folder" Click="WebQuickSendFolder_Click" Padding="14,9" FontSize="12"/>
                                     </StackPanel>
+                                 </StackPanel>
 
-                                    <!-- Dropzone & Staged Items Queue -->
-                                    <Border Grid.Row="4" Background="#161824" BorderBrush="#323850" BorderThickness="1" CornerRadius="8" Padding="8">
-                                       <Grid>
-                                          <ScrollViewer>
-                                             <ItemsControl x:Name="WebClientSendQueueList">
-                                                <ItemsControl.ItemTemplate>
-                                                   <DataTemplate x:DataType="views:QueueItem">
-                                                      <Border Classes="TrackRow" Padding="10,7" Margin="0,2" Background="#1B1F30" CornerRadius="6">
-                                                         <Grid ColumnDefinitions="Auto, *, Auto">
-                                                            <Path Grid.Column="0" Data="{StaticResource IconFile}" Fill="#818CF8" Width="14" Height="14" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                               <TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold" Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
-                                                               <TextBlock Text="{Binding SizeDisplay}" FontSize="10" Foreground="#94A3B8"/>
-                                                            </StackPanel>
-                                                            <Button Grid.Column="2" Click="WebRemoveStagedItem_Click" Background="Transparent" Padding="6">
-                                                               <Path Data="{StaticResource IconClose}" Fill="#EF4444" Width="9" Height="9" Stretch="Uniform"/>
-                                                            </Button>
-                                                         </Grid>
-                                                      </Border>
-                                                   </DataTemplate>
-                                                </ItemsControl.ItemTemplate>
-                                             </ItemsControl>
-                                          </ScrollViewer>
+                                 <!-- Right: Storage & Received Files -->
+                                 <StackPanel Grid.Column="2" Spacing="10" VerticalAlignment="Center">
+                                    <TextBlock Text="Received Files Storage" FontSize="14" FontWeight="Bold" Foreground="#FFFFFF"/>
+                                    <TextBlock Text="Files uploaded from this device to your PC are saved directly in your downloads folder." FontSize="11" Foreground="#94A3B8" TextWrapping="Wrap"/>
+                                    <Button Content="Open Received Files Folder" Click="OpenDownloadFolder_Click" Classes="GhostBtn" HorizontalAlignment="Left" Padding="16,9" FontSize="12" Margin="0,4,0,0"/>
+                                 </StackPanel>
+                              </Grid>
+                           </Border>
 
-                                          <StackPanel x:Name="WebSendQueueEmptyLabel" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6">
-                                             <Path Data="{StaticResource IconSend}" Fill="#3E4562" Width="20" Height="20" Stretch="Uniform" HorizontalAlignment="Center"/>
-                                             <TextBlock Text="No files staged. Click Add Files" FontSize="12" Foreground="#64748B" HorizontalAlignment="Center"/>
-                                          </StackPanel>
-                                       </Grid>
-                                    </Border>
-
-                                    <!-- Send Action Button -->
-                                    <Button Grid.Row="6" x:Name="WebSendToDeviceBtn" Content="Send Files to Device" Click="WebSendToDevice_Click" Classes="PrimaryBtn" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="14,10" FontSize="13" FontWeight="Bold"/>
-                                 </Grid>
-                              </Border>
-
-                              <!-- RIGHT PANE: RECEIVED FROM THIS DEVICE -->
-                              <Border Grid.Column="2" Background="#121420" BorderBrush="#222638" BorderThickness="1" CornerRadius="10" Padding="16">
-                                 <Grid RowDefinitions="Auto, 12, *, 12, Auto">
-                                    <Grid Grid.Row="0" ColumnDefinitions="*, Auto, Auto">
-                                       <TextBlock Text="Received from this Device" FontSize="13" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
-                                       <TextBlock Grid.Column="1" x:Name="WebFilesCountText" Text="0 files" FontSize="11" Foreground="#64748B" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                                       <Button Grid.Column="2" x:Name="WebAcceptAllBtn" Content="Accept All" Click="WebAcceptAllFiles_Click" Classes="PrimaryBtn" Padding="10,5" FontSize="11"/>
-                                    </Grid>
-
-                                    <!-- Staged Incoming Files List -->
-                                    <Border Grid.Row="2" Background="#161824" BorderBrush="#323850" BorderThickness="1" CornerRadius="8" Padding="8">
-                                       <Grid>
-                                          <ScrollViewer>
-                                             <ItemsControl x:Name="WebSharedFilesList">
-                                                <ItemsControl.ItemTemplate>
-                                                   <DataTemplate x:DataType="views:StagedWebFile">
-                                                      <Border Classes="TrackRow" Padding="10,8" Margin="0,2" Background="#1B1F30" CornerRadius="6">
-                                                         <Grid ColumnDefinitions="*, Auto, Auto">
-                                                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                                               <TextBlock Text="{Binding FileName}" FontSize="12" FontWeight="SemiBold" Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
-                                                               <TextBlock Text="{Binding SizeDisplay}" FontSize="10" Foreground="#94A3B8"/>
-                                                            </StackPanel>
-                                                            <Button Grid.Column="1" Content="Accept" Tag="{Binding}" Click="AcceptWebSharedFile_Click" Classes="PrimaryBtn" Padding="10,5" FontSize="10" Margin="0,0,6,0"/>
-                                                            <Button Grid.Column="2" Content="Reject" Tag="{Binding}" Click="RejectWebSharedFile_Click" Classes="GhostBtn" Padding="8,5" FontSize="10"/>
-                                                         </Grid>
-                                                      </Border>
-                                                   </DataTemplate>
-                                                </ItemsControl.ItemTemplate>
-                                             </ItemsControl>
-                                          </ScrollViewer>
-
-                                          <TextBlock x:Name="WebFilesEmptyLabel" Text="Waiting for incoming uploads..." FontSize="12" Foreground="#64748B" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                       </Grid>
-                                    </Border>
-
-                                    <!-- Storage Footer -->
-                                    <Button Grid.Row="4" Content="Open Downloads Folder" Click="OpenDownloadFolder_Click" Classes="GhostBtn" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="12,8" FontSize="11"/>
-                                 </Grid>
-                              </Border>
-
-                           </Grid>
+                           <!-- Hidden Legacy Anchors for Code-Behind Compatibility -->
+                           <StackPanel Grid.Row="3" IsVisible="False">
+                              <TextBlock x:Name="WebSendStagedCountText" Text="0 files ready"/>
+                              <ItemsControl x:Name="WebClientSendQueueList"/>
+                              <TextBlock x:Name="WebSendQueueEmptyLabel"/>
+                              <Button x:Name="WebSendToDeviceBtn" Click="WebSendToDevice_Click"/>
+                              <TextBlock x:Name="WebFilesCountText" Text="0 files"/>
+                              <Button x:Name="WebAcceptAllBtn" Click="WebAcceptAllFiles_Click"/>
+                              <ItemsControl x:Name="WebSharedFilesList"/>
+                              <TextBlock x:Name="WebFilesEmptyLabel"/>
+                           </StackPanel>
 
                         </Grid>
                      </Border>
 
                      <!-- (B) NO DEVICES CONNECTED WELCOME STATE (Shown when 0 web clients) -->
                      <Border x:Name="NoWebClientsCard" Classes="GlassCard" Padding="36" IsVisible="False">
-                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="20" MaxWidth="520">
-                           <Border Width="64" Height="64" CornerRadius="32" Background="#207C3AED" HorizontalAlignment="Center">
-                              <Path Data="{StaticResource IconGlobe}" Fill="#A855F7" Width="28" Height="28" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16" MaxWidth="520">
+                           <Border Width="60" Height="60" CornerRadius="30" Background="#207C3AED" HorizontalAlignment="Center">
+                              <Path Data="{StaticResource IconGlobe}" Fill="#A855F7" Width="26" Height="26" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                            </Border>
                            <StackPanel Spacing="6" HorizontalAlignment="Center">
-                              <TextBlock Text="Connect Any Device in 3 Seconds" FontSize="18" FontWeight="Bold" Foreground="#FFFFFF" HorizontalAlignment="Center"/>
-                              <TextBlock Text="No app installation needed. Transfer files directly between iPhone, Android, Mac, and PC via your local browser." FontSize="13" Foreground="#94A3B8" TextAlignment="Center" TextWrapping="Wrap"/>
+                              <TextBlock Text="Waiting for Devices to Connect" FontSize="16" FontWeight="Bold" Foreground="#FFFFFF" HorizontalAlignment="Center"/>
+                              <TextBlock Text="Open the URL displayed at the top or scan the QR Code on any phone or browser. Connected devices will appear here automatically." FontSize="12" Foreground="#94A3B8" TextAlignment="Center" TextWrapping="Wrap"/>
                            </StackPanel>
-
-                           <Border Background="#161824" BorderBrush="#222638" BorderThickness="1" CornerRadius="10" Padding="18">
-                              <StackPanel Spacing="10">
-                                 <TextBlock Text="HOW TO CONNECT:" FontSize="11" FontWeight="Bold" Foreground="#7C3AED" LetterSpacing="0.8"/>
-                                 <TextBlock Text="1. Make sure both devices are on the same Wi-Fi (or click Start Hotspot)." FontSize="12" Foreground="#E2E8F0"/>
-                                 <TextBlock Text="2. Scan the QR code or visit the URL shown at the top in your browser." FontSize="12" Foreground="#E2E8F0"/>
-                                 <TextBlock Text="3. Your device will automatically appear in the Active Devices rail above!" FontSize="12" Foreground="#E2E8F0"/>
-                              </StackPanel>
-                           </Border>
-
-                           <Button Content="Show QR Code" Click="ToggleQrCode_Click" Classes="PrimaryBtn" HorizontalAlignment="Center" Padding="20,10" FontSize="13"/>
                         </StackPanel>
                      </Border>
 
