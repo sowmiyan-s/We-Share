@@ -6,9 +6,37 @@ namespace WeShare.UI
 {
     class Program
     {
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        private const int SW_RESTORE = 9;
+
         [STAThread]
         public static void Main(string[] args)
         {
+            using var mutex = new System.Threading.Mutex(true, "Local\\WeShare_SingleInstance_App_Mutex", out bool isNewInstance);
+            if (!isNewInstance)
+            {
+                try
+                {
+                    var current = System.Diagnostics.Process.GetCurrentProcess();
+                    foreach (var p in System.Diagnostics.Process.GetProcessesByName(current.ProcessName))
+                    {
+                        if (p.Id != current.Id && p.MainWindowHandle != IntPtr.Zero)
+                        {
+                            ShowWindow(p.MainWindowHandle, SW_RESTORE);
+                            SetForegroundWindow(p.MainWindowHandle);
+                            break;
+                        }
+                    }
+                }
+                catch { }
+                return;
+            }
+
             string folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "WeShare");
             try
             {

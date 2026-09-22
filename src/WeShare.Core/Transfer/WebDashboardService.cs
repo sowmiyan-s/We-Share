@@ -37,6 +37,7 @@ namespace WeShare.Core.Transfer
         public byte[]? LogoBytes { get; set; }
         public byte[]? SendIconBytes { get; set; }
         public byte[]? ReceiveIconBytes { get; set; }
+        public byte[]? FindIconBytes { get; set; }
         
         public event Action<string, string>? WebClientConnected;
         public event Action<WebClientInfo>? WebClientConnectedEx;
@@ -485,12 +486,11 @@ namespace WeShare.Core.Transfer
                     {
                         string remoteIp = client.Client.RemoteEndPoint is System.Net.IPEndPoint rep ? rep.Address.ToString() : "unknown";
                         WebClientConnected?.Invoke("Web Portal", remoteIp);
-                        bool isRecv = string.Equals(_localDevice.Role, "Receiver", StringComparison.OrdinalIgnoreCase) || _localDevice.IsReceiver;
                         await SendJson(stream, new { 
                             name = _localDevice.DisplayName, 
                             ip = _localDevice.IpAddress,
                             role = _localDevice.Role,
-                            isReceiver = isRecv
+                            isReceiver = _localDevice.IsReceiver
                         });
                     }
 
@@ -679,6 +679,28 @@ namespace WeShare.Core.Transfer
                                          "\r\n";
                             await stream.WriteAsync(Encoding.ASCII.GetBytes(header));
                             await stream.WriteAsync(ReceiveIconBytes);
+                            await stream.FlushAsync();
+                        }
+                        else
+                        {
+                            var header = "HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n";
+                            await stream.WriteAsync(Encoding.ASCII.GetBytes(header));
+                            await stream.FlushAsync();
+                        }
+                    }
+
+                    else if (method == "GET" && (path == "/api/assets/find.png" || path == "/assets/find.png"))
+                    {
+                        if (FindIconBytes != null)
+                        {
+                            var header = $"HTTP/1.1 200 OK\r\n" +
+                                         $"Content-Type: image/png\r\n" +
+                                         $"Content-Length: {FindIconBytes.Length}\r\n" +
+                                         "Connection: close\r\n" +
+                                         "Access-Control-Allow-Origin: *\r\n" +
+                                         "\r\n";
+                            await stream.WriteAsync(Encoding.ASCII.GetBytes(header));
+                            await stream.WriteAsync(FindIconBytes);
                             await stream.FlushAsync();
                         }
                         else
@@ -985,25 +1007,40 @@ namespace WeShare.Core.Transfer
 
                         if (!string.IsNullOrEmpty(targetId) && targetId != "pc")
                         {
+                            bool isTargetReceiver = false;
+                            await _webClientsLock.WaitAsync();
+                            try
+                            {
+                                if (_activeWebClients.TryGetValue(targetId, out var twinfo))
+                                {
+                                    isTargetReceiver = string.Equals(twinfo.Role, "Receiver", StringComparison.OrdinalIgnoreCase);
+                                }
+                            }
+                            finally { _webClientsLock.Release(); }
+
+                            if (!isTargetReceiver)
+                            {
+                                await SendJson(stream, new { accepted = false, error = "Recipient is not in Receive mode." });
+                                return;
+                            }
+
                             transferState.ErrorMessage = "TARGET:" + targetId;
                             _approvedUploads[transferState.FileId] = transferState;
                             await SendJson(stream, new { accepted = true, id = transferState.FileId });
                         }
                         else
                         {
-                            bool isPcInReceiverMode = _localDevice.IsReceiver || string.Equals(_localDevice.Role, "Receiver", StringComparison.OrdinalIgnoreCase);
-                            bool accepted = false;
-                            if (isPcInReceiverMode)
+                            bool isPcInReceiverMode = _localDevice.IsReceiver;
+                            if (!isPcInReceiverMode)
                             {
-                                accepted = true;
+                                await SendJson(stream, new { accepted = false, error = "This Computer is not in Receive mode. Please enter Receive mode on This Computer." });
+                                return;
                             }
-                            else if (WebFileSharedCallback != null)
+
+                            bool accepted = true;
+                            if (WebFileSharedCallback != null)
                             {
                                 accepted = await WebFileSharedCallback(transferState);
-                            }
-                            else
-                            {
-                                accepted = true;
                             }
 
                             if (accepted)
@@ -1013,7 +1050,7 @@ namespace WeShare.Core.Transfer
                             }
                             else
                             {
-                                await SendJson(stream, new { accepted = false, error = "Target is not in Receive mode" });
+                                await SendJson(stream, new { accepted = false, error = "Transfer declined by This Computer." });
                             }
                         }
                     }
@@ -1099,6 +1136,55 @@ namespace WeShare.Core.Transfer
                             {
                                 WebClientDisconnectedEx?.Invoke(clientId);
                             }
+                        }
+                    }
+                    else if (method == "GET" && (path == "/download-zip" || path == "/api/download-zip"))
+                    {
+                        string? clientId = queryParams.GetValueOrDefault("clientId");
+                        List<SharedFile> filesToZip = new();
+                        await _filesLock.WaitAsync();
+                        try
+                        {
+                            if (!string.IsNullOrEmpty(clientId) && _clientSpecificFiles.TryGetValue(clientId, out var list))
+                            {
+                                filesToZip.AddRange(list.Where(f => File.Exists(f.Path)));
+                            }
+                            else
+                            {
+                                filesToZip.AddRange(_sharedFiles.Where(f => File.Exists(f.Path)));
+                            }
+                        }
+                        finally { _filesLock.Release(); }
+
+                        if (filesToZip.Count > 0)
+                        {
+                            using var ms = new MemoryStream();
+                            using (var archive = new System.IO.Compression.ZipArchive(ms, System.IO.Compression.ZipArchiveMode.Create, true))
+                            {
+                                foreach (var f in filesToZip)
+                                {
+                                    var entry = archive.CreateEntry(f.Name, System.IO.Compression.CompressionLevel.Fastest);
+                                    using var entryStream = entry.Open();
+                                    using var fs = File.OpenRead(f.Path);
+                                    fs.CopyTo(entryStream);
+                                }
+                            }
+                            byte[] zipBytes = ms.ToArray();
+                            string zipName = $"WeShare_Batch_{DateTime.Now:yyyyMMdd_HHmmss}.zip";
+                            var header = $"HTTP/1.1 200 OK\r\n" +
+                                         $"Content-Type: application/zip\r\n" +
+                                         $"Content-Disposition: attachment; filename=\"{zipName}\"\r\n" +
+                                         $"Content-Length: {zipBytes.Length}\r\n" +
+                                         "Connection: close\r\n" +
+                                         "Access-Control-Allow-Origin: *\r\n" +
+                                         "\r\n";
+                            await stream.WriteAsync(Encoding.ASCII.GetBytes(header));
+                            await stream.WriteAsync(zipBytes);
+                            await stream.FlushAsync();
+                        }
+                        else
+                        {
+                            await SendResponse(stream, 404, "text/plain", "No files available for ZIP");
                         }
                     }
 

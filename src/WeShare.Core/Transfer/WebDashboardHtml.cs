@@ -25,7 +25,7 @@ namespace WeShare.Core.Transfer
   --primary: #4F46E5;
   --primary-light: #6366F1;
   --primary-gradient: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%);
-  --primary-glow: rgba(79, 70, 229, 0.25);
+  --primary-glow: rgba(0, 0, 0, 0.2);
   --cyan: #06B6D4;
   --emerald: #10B981;
   --amber: #F59E0B;
@@ -39,7 +39,7 @@ namespace WeShare.Core.Transfer
   --radius-md: 14px;
   --radius-lg: 20px;
   --radius-full: 9999px;
-  --shadow-glow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 2px 10px rgba(0, 0, 0, 0.25);
 }
 
 html[data-theme=""light""] {
@@ -54,12 +54,12 @@ html[data-theme=""light""] {
   --border-subtle: rgba(0, 0, 0, 0.08);
   --primary: #4F46E5;
   --primary-light: #6366F1;
-  --primary-glow: rgba(79, 70, 229, 0.2);
+  --primary-glow: rgba(0, 0, 0, 0.1);
   --text: #0F172A;
   --text-dim: #475569;
   --text-muted: #94A3B8;
   --input-bg: rgba(241, 245, 249, 0.95);
-  --shadow-glow: 0 10px 25px rgba(79, 70, 229, 0.12);
+  --shadow-glow: 0 2px 10px rgba(0, 0, 0, 0.08);
 }
 
 * {
@@ -79,19 +79,7 @@ body {
   position: relative;
 }
 
-body::before {
-  content: '';
-  position: fixed;
-  top: -120px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 650px;
-  height: 420px;
-  background: radial-gradient(circle, rgba(79, 70, 229, 0.18) 0%, rgba(6, 182, 212, 0.08) 50%, transparent 70%);
-  filter: blur(80px);
-  pointer-events: none;
-  z-index: 0;
-}
+
 
 .app-wrapper {
   max-width: 760px;
@@ -176,12 +164,9 @@ body::before {
   height: 7px;
   border-radius: 50%;
   background: var(--emerald);
-  box-shadow: 0 0 10px var(--emerald);
-  animation: pulse-dot 2s infinite;
 }
 
-@keyframes pulse-dot {
-  0% { transform: scale(0.95); opacity: 0.8; }
+
   50% { transform: scale(1.25); opacity: 1; }
   100% { transform: scale(0.95); opacity: 0.8; }
 }
@@ -233,27 +218,7 @@ body::before {
   height: 17px;
 }
 
-/* MARQUEE SIGNAL TICKER */
-.signal-ticker {
-  background: rgba(79, 70, 229, 0.08);
-  border: 1px solid rgba(79, 70, 229, 0.2);
-  border-radius: var(--radius-md);
-  padding: 7px 14px;
-  overflow: hidden;
-  white-space: nowrap;
-}
 
-.ticker-content {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.8px;
-  color: var(--primary-light);
-  animation: marquee 25s linear infinite;
-}
-
-@keyframes marquee {
-  0% { transform: translateX(100%); }
   100% { transform: translateX(-100%); }
 }
 
@@ -296,7 +261,7 @@ body::before {
 .tab-btn.active {
   background: var(--primary-gradient);
   color: #FFFFFF;
-  box-shadow: 0 4px 16px var(--primary-glow);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
 .tab-btn svg {
@@ -607,12 +572,12 @@ body::before {
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  box-shadow: 0 4px 16px var(--primary-glow);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
   transition: all 0.2s ease;
 }
 .send-all-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px var(--primary-glow);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 .send-all-btn:disabled {
   opacity: 0.5;
@@ -688,20 +653,20 @@ body::before {
 .radar-circle {
   position: absolute;
   border-radius: 50%;
-  border: 1px solid rgba(79, 70, 229, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   pointer-events: none;
 }
 .radar-circle.c1 { width: 80px; height: 80px; }
-.radar-circle.c2 { width: 150px; height: 150px; border-style: dashed; border-color: rgba(79, 70, 229, 0.2); }
+.radar-circle.c2 { width: 150px; height: 150px; border-style: dashed; border-color: rgba(255, 255, 255, 0.06); }
 .radar-circle.c3 { width: 220px; height: 220px; }
-.radar-circle.c4 { width: 280px; height: 280px; border-color: rgba(79, 70, 229, 0.15); }
+.radar-circle.c4 { width: 280px; height: 280px; border-color: rgba(255, 255, 255, 0.05); }
 
 .radar-sweep-beam {
   position: absolute;
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: conic-gradient(from 0deg at 50% 50%, rgba(79, 70, 229, 0.35) 0deg, transparent 65deg, transparent 360deg);
+  background: conic-gradient(from 0deg at 50% 50%, rgba(99, 102, 241, 0.14) 0deg, transparent 55deg, transparent 360deg);
   animation: radarRotate 3s linear infinite;
   pointer-events: none;
 }
@@ -716,13 +681,13 @@ body::before {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  border: 1.5px solid rgba(6, 182, 212, 0.6);
+  border: 1px solid rgba(99, 102, 241, 0.25);
   animation: radarPulseWave 2.6s ease-out infinite;
   pointer-events: none;
 }
 
 @keyframes radarPulseWave {
-  0% { transform: scale(0.25); opacity: 0.9; }
+  0% { transform: scale(0.25); opacity: 0.6; }
   80% { transform: scale(1.0); opacity: 0; }
   100% { transform: scale(1.0); opacity: 0; }
 }
@@ -734,12 +699,12 @@ body::before {
   height: 52px;
   border-radius: 50%;
   background: var(--card-solid);
-  border: 2px solid var(--primary);
+  border: 1.5px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--primary-light);
-  box-shadow: 0 0 20px var(--primary-glow);
+  color: var(--text);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 .radar-center-sender svg { width: 24px; height: 24px; }
 
@@ -756,20 +721,20 @@ body::before {
 }
 
 .web-radar-node:hover {
-  transform: translate(-50%, -50%) scale(1.12);
+  transform: translate(-50%, -50%) scale(1.08);
 }
 
 .web-radar-node-disc {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #10B981, #06B6D4);
-  border: 2.5px solid #FFFFFF;
+  background: #181B26;
+  border: 1.5px solid #10B981;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 16px rgba(16, 185, 129, 0.6);
-  color: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  color: #10B981;
 }
 .web-radar-node-disc svg { width: 22px; height: 22px; }
 
@@ -845,7 +810,7 @@ body::before {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  border: 2px solid rgba(16, 185, 129, 0.3);
+  border: 1px solid rgba(16, 185, 129, 0.2);
   animation: beaconPulse 2.4s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
 }
 
@@ -853,26 +818,27 @@ body::before {
   position: absolute;
   inset: 18px;
   border-radius: 50%;
-  border: 2px solid rgba(6, 182, 212, 0.35);
+  border: 1px solid rgba(16, 185, 129, 0.15);
   animation: beaconPulse 2.4s cubic-bezier(0.2, 0.6, 0.4, 1) infinite 0.7s;
 }
 
 @keyframes beaconPulse {
-  0% { transform: scale(0.6); opacity: 0.9; }
-  80% { transform: scale(1.15); opacity: 0; }
-  100% { transform: scale(1.15); opacity: 0; }
+  0% { transform: scale(0.6); opacity: 0.6; }
+  80% { transform: scale(1.1); opacity: 0; }
+  100% { transform: scale(1.1); opacity: 0; }
 }
 
 .beacon-center-disc {
   width: 86px;
   height: 86px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #10B981 0%, #06B6D4 100%);
+  background: var(--card-solid);
+  border: 2px solid #10B981;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #FFFFFF;
-  box-shadow: 0 0 30px rgba(16, 185, 129, 0.5);
+  color: #10B981;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
   z-index: 2;
 }
 .beacon-center-disc svg { width: 40px; height: 40px; }
@@ -1401,7 +1367,7 @@ body::before {
 .modal-btn-accept {
   background: var(--primary-gradient);
   color: #FFFFFF;
-  box-shadow: 0 4px 14px var(--primary-glow);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
 .batch-chk-item {
@@ -1458,9 +1424,161 @@ body::before {
 .toast-pill svg { width: 16px; height: 16px; }
 
 input[type=""file""] { display: none; }
+
+/* HERO ACTION BUTTONS (MATCHING APP HOME VIEW) */
+.hero-action-grid {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 32px;
+  margin: 18px 0 24px 0;
+  flex-wrap: wrap;
+}
+.hero-action-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0;
+  outline: none;
+  transition: transform 0.2s ease;
+}
+.hero-action-col:hover {
+  transform: translateY(-2px);
+}
+.hero-circle-btn {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.28s ease;
+  cursor: pointer;
+}
+@media (min-width: 600px) {
+  .hero-circle-btn {
+    width: 154px;
+    height: 154px;
+  }
+}
+.hero-circle-btn.send-disc {
+  background: var(--card-solid);
+  border: 1.5px solid rgba(124, 58, 237, 0.45);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+.hero-circle-btn.send-disc:hover, .hero-circle-btn.send-disc:active {
+  background: var(--card-hover);
+  border-color: #7C3AED;
+  transform: scale(1.04);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+.hero-circle-btn.receive-disc {
+  background: var(--card-solid);
+  border: 1.5px solid rgba(16, 185, 129, 0.45);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+.hero-circle-btn.receive-disc:hover, .hero-circle-btn.receive-disc:active {
+  background: var(--card-hover);
+  border-color: #10B981;
+  transform: scale(1.04);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+.hero-circle-img {
+  width: 78%;
+  height: 78%;
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.45));
+}
+.hero-title {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: #FFFFFF;
+}
+.hero-subtitle {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+.radar-center-img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  pointer-events: none;
+}
+.beacon-core-img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+
+
+
+/* SMART RADAR ASSISTANT CARD */
+.radar-smart-assistant {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+.rsa-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--amber);
+  letter-spacing: 0.6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.rsa-text {
+  font-size: 11px;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+
+/* SUGGESTION CHIPS */
+.name-chips-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  margin-bottom: 14px;
+}
+.name-chip {
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.name-chip:hover {
+  background: rgba(79, 70, 229, 0.2);
+  color: #FFFFFF;
+  border-color: var(--primary);
+}
+
 </style>
 </head>
 <body>
+
+
+
 
 <div class=""app-wrapper"">
 
@@ -1491,22 +1609,19 @@ input[type=""file""] { display: none; }
     </div>
   </header>
 
-  <!-- MARQUEE SIGNAL TICKER -->
-  <div class=""signal-ticker"">
-    <div class=""ticker-content"">
-      ULTRA-FAST LOCAL DIRECT TRANSFER • ZERO CLOUD STORAGE • P2P HIGH SPEED ACTIVE • WE SHARE PORTAL READY
-    </div>
-  </div>
+  
 
   <!-- NAVIGATION TAB BAR -->
   <nav class=""tab-bar"">
     <button class=""tab-btn active"" id=""tabBtnSend"" onclick=""switchTab('send')"">
-      <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M22 2L11 13""/><path d=""M22 2l-7 20-4-9-9-4 20-7z""/></svg>
+      <img src=""/assets/send.png"" style=""width:16px; height:16px; object-fit:contain;"" onerror=""this.style.display='none'; this.nextElementSibling.style.display='block';"" alt=""Send"">
+      <svg style=""display:none;"" xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M22 2L11 13""/><path d=""M22 2l-7 20-4-9-9-4 20-7z""/></svg>
       <span>Send</span>
       <span class=""tab-badge"" id=""stagingBadge"" style=""display:none;"">0</span>
     </button>
     <button class=""tab-btn"" id=""tabBtnReceive"" onclick=""switchTab('receive')"">
-      <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4""/><polyline points=""7 10 12 15 17 10""/><line x1=""12"" y1=""15"" x2=""12"" y2=""3""/></svg>
+      <img src=""/assets/receive.png"" style=""width:16px; height:16px; object-fit:contain;"" onerror=""this.style.display='none'; this.nextElementSibling.style.display='block';"" alt=""Receive"">
+      <svg style=""display:none;"" xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4""/><polyline points=""7 10 12 15 17 10""/><line x1=""12"" y1=""15"" x2=""12"" y2=""3""/></svg>
       <span>Receive</span>
     </button>
     <button class=""tab-btn"" id=""tabBtnDownloads"" onclick=""switchTab('downloads')"">
@@ -1529,6 +1644,30 @@ input[type=""file""] { display: none; }
   <!-- ========================================================= -->
   <div class=""tab-view active"" id=""viewSend"">
 
+    <!-- HERO BIG CIRCULAR ACTION BUTTONS (MATCHING DESKTOP APP) -->
+    <div class=""hero-action-grid"">
+      <!-- BIG CIRCULAR SEND BUTTON -->
+      <button type=""button"" class=""hero-action-col"" onclick=""startSenderRadar()"" title=""Search for receivers and send files"">
+        <div class=""hero-circle-btn send-disc"">
+          <img src=""/assets/send.png"" class=""hero-circle-img"" onerror=""this.style.display='none'; this.nextElementSibling.style.display='block';"" alt=""Send"">
+          <svg style=""display:none; width:60px; height:60px; color:#FFFFFF;"" xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M22 2L11 13""/><path d=""M22 2l-7 20-4-9-9-4 20-7z""/></svg>
+        </div>
+        <span class=""hero-title"">SEND</span>
+        <span class=""hero-subtitle"">Tap to scan &amp; send files</span>
+      </button>
+
+      <!-- BIG CIRCULAR RECEIVE BUTTON -->
+      <button type=""button"" class=""hero-action-col"" onclick=""switchTab('receive')"" title=""Enter receive mode to accept incoming files"">
+        <div class=""hero-circle-btn receive-disc"">
+          <img src=""/assets/receive.png"" class=""hero-circle-img"" onerror=""this.style.display='none'; this.nextElementSibling.style.display='block';"" alt=""Receive"">
+          <svg style=""display:none; width:60px; height:60px; color:#FFFFFF;"" xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4""/><polyline points=""7 10 12 15 17 10""/><line x1=""12"" y1=""15"" x2=""12"" y2=""3""/></svg>
+        </div>
+        <span class=""hero-title"">RECEIVE</span>
+        <span class=""hero-subtitle"">Ready to accept transfers</span>
+      </button>
+    </div>
+
+
     <!-- STAGE 1: RADAR RECEIVER DISCOVERY (SHOWN FIRST) -->
     <div id=""sendRadarStage"" style=""display:block;"">
       <div class=""radar-stage-card"">
@@ -1537,9 +1676,7 @@ input[type=""file""] { display: none; }
             <span class=""status-dot""></span>
             <span>RADAR SCANNING</span>
           </div>
-          <button class=""radar-back-btn"" onclick=""openSendPickerWithoutTarget()"">
-            Choose Files First →
-          </button>
+
         </div>
 
         <div style=""display:flex; flex-direction:column; align-items:center; gap:4px; margin-top:8px;"">
@@ -1556,14 +1693,18 @@ input[type=""file""] { display: none; }
           <div class=""radar-sweep-beam""></div>
           <div class=""radar-wave""></div>
 
-          <!-- Center Node: You (Sender) -->
+          <!-- Center Node: You (Sender) with find.png -->
           <div class=""radar-center-sender"" title=""You (Sender)"">
-            <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><rect x=""5"" y=""2"" width=""14"" height=""20"" rx=""2"" ry=""2""/><line x1=""12"" y1=""18"" x2=""12.01"" y2=""18""/></svg>
+            <img src=""/assets/find.png"" class=""radar-center-img"" onerror=""this.style.display='none'; this.nextElementSibling.style.display='block';"" alt=""Search"">
+            <svg style=""display:none;"" xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><rect x=""5"" y=""2"" width=""14"" height=""20"" rx=""2"" ry=""2""/><line x1=""12"" y1=""18"" x2=""12.01"" y2=""18""/></svg>
           </div>
 
           <!-- Dynamic Receiver Nodes Container -->
           <div id=""radarNodesContainer""></div>
         </div>
+
+        <!-- Available Receivers List -->
+        <div id=""radarReceiversList"" style=""width:100%; max-width:380px; display:flex; flex-direction:column; gap:8px; margin-top:8px;""></div>
 
         <!-- Empty Radar Status -->
         <div class=""radar-empty-hint"" id=""radarEmptyHint"">
@@ -1572,9 +1713,19 @@ input[type=""file""] { display: none; }
             <span>Scanning for Nearby Receivers...</span>
           </div>
           <div class=""radar-empty-text"">
-            Make sure the recipient device is in <b>Receive Mode</b>.<br>
-            • On PC: Click the <b>RECEIVE</b> tab.<br>
-            • On another phone: Open this portal and tap <b>Receive</b>.
+            Make sure the other device is in <b>Receive Mode</b> and connected to the same Wi-Fi network.
+          </div>
+        </div>
+
+        <!-- SMART RADAR TROUBLESHOOTING ASSISTANT -->
+        <div class=""radar-smart-assistant"" id=""radarSmartAssistant"">
+          <div class=""rsa-title"">
+            <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round"" width=""14"" height=""14""><circle cx=""12"" cy=""12"" r=""10""/><line x1=""12"" y1=""8"" x2=""12"" y2=""12""/><line x1=""12"" y1=""16"" x2=""12.01"" y2=""16""/></svg>
+            <span>Can't see each other?</span>
+          </div>
+          <div class=""rsa-text"">
+            Some college, office, or public Wi-Fi networks block devices from seeing each other.<br>
+            On your PC, click <b>Direct Hotspot</b> to connect directly without a router!
           </div>
         </div>
       </div>
@@ -1589,10 +1740,10 @@ input[type=""file""] { display: none; }
           <div style=""width:10px; height:10px; border-radius:5px; background:var(--emerald); box-shadow:0 0 10px var(--emerald);""></div>
           <div style=""display:flex; flex-direction:column;"">
             <div style=""font-size:10px; font-weight:800; color:var(--emerald); letter-spacing:0.8px;"">CONNECTED RECIPIENT</div>
-            <div id=""connectedTargetName"" style=""font-size:14px; font-weight:800; color:var(--text);"">Host PC</div>
+            <div id=""connectedTargetName"" style=""font-size:14px; font-weight:800; color:var(--text);"">This Computer</div>
           </div>
         </div>
-        <button type=""button"" class=""staging-clear-btn"" style=""padding:6px 12px; font-size:11px; background:rgba(255,255,255,0.08); border-radius:8px; border:1px solid var(--border);"" onclick=""openSenderRadar()"">
+        <button type=""button"" class=""staging-clear-btn"" style=""padding:6px 12px; font-size:11px; background:rgba(255,255,255,0.08); border-radius:8px; border:1px solid var(--border);"" onclick=""startSenderRadar()"">
           Change (Radar)
         </button>
       </div>
@@ -1669,12 +1820,13 @@ input[type=""file""] { display: none; }
         <div class=""beacon-ring-1""></div>
         <div class=""beacon-ring-2""></div>
         <div class=""beacon-center-disc"">
-          <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2.2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4""/><polyline points=""7 10 12 15 17 10""/><line x1=""12"" y1=""15"" x2=""12"" y2=""3""/></svg>
+          <img src=""/assets/receive.png"" class=""beacon-core-img"" onerror=""this.style.display='none'; this.nextElementSibling.style.display='block';"" alt=""Receive"">
+          <svg style=""display:none;"" xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2.2"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4""/><polyline points=""7 10 12 15 17 10""/><line x1=""12"" y1=""15"" x2=""12"" y2=""3""/></svg>
         </div>
       </div>
 
       <div class=""receive-device-title"" id=""receiveDeviceName"">Mobile Web</div>
-      <div class=""receive-device-sub"">Broadcasting presence to Host PC and nearby senders</div>
+      <div class=""receive-device-sub"">Broadcasting presence to This Computer and nearby senders</div>
 
       <div class=""receive-guide-box"">
         <div class=""rgb-row"">
@@ -1785,7 +1937,7 @@ input[type=""file""] { display: none; }
           </div>
           <div class=""tv-peer-text"">
             <span class=""tv-role-badge"" id=""transferPageRoleBadge"">DIRECT P2P TRANSFER</span>
-            <span class=""tv-peer-name"" id=""transferPagePeerName"">Host PC</span>
+            <span class=""tv-peer-name"" id=""transferPagePeerName"">This Computer</span>
           </div>
         </div>
         <button class=""tv-abort-btn"" onclick=""cancelActiveUpload()"">Cancel</button>
@@ -1876,8 +2028,9 @@ input[type=""file""] { display: none; }
 
     <div id=""batchOfferFileList"" style=""max-height:240px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; margin-bottom:12px; padding-right:4px;""></div>
 
-    <div class=""modal-actions"">
-      <button class=""modal-btn modal-btn-decline"" onclick=""declineBatchOffer()"">Decline All</button>
+    <div class=""modal-actions"" style=""flex-wrap:wrap;"">
+      <button class=""modal-btn modal-btn-decline"" onclick=""declineBatchOffer()"">Decline</button>
+      <a class=""modal-btn"" id=""batchZipDownloadLink"" href=""#"" style=""background:rgba(16,185,129,0.18); border:1px solid rgba(16,185,129,0.35); color:var(--emerald); text-decoration:none; display:inline-flex; align-items:center; justify-content:center;"">Download 1 ZIP</a>
       <button class=""modal-btn modal-btn-accept"" id=""batchAcceptBtn"" onclick=""acceptSelectedBatchOffer()"">Accept Selected</button>
     </div>
   </div>
@@ -1902,7 +2055,7 @@ input[type=""file""] { display: none; }
       </div>
       <div style=""display:flex; justify-content:space-between;"">
         <span style=""color:var(--text-dim);"">Peer:</span>
-        <span id=""successPeerName"" style=""font-weight:700; color:var(--primary-light);"">Host PC</span>
+        <span id=""successPeerName"" style=""font-weight:700; color:var(--primary-light);"">This Computer</span>
       </div>
     </div>
     <div class=""modal-actions"">
@@ -1935,12 +2088,16 @@ input[type=""file""] { display: none; }
       </div>
     </div>
     <div class=""modal-title"" style=""text-align:center; font-size:18px;"">Set Your Device Name</div>
-    <div class=""modal-desc"" style=""text-align:center; font-size:12px; margin-bottom:14px;"">Identify this device to the Host PC and nearby peers on the Radar:</div>
-    <div style=""position:relative; margin-bottom:16px;"">
-      <input type=""text"" id=""onboardingNameInput"" maxlength=""28"" style=""width:100%; box-sizing:border-box; padding:12px 44px 12px 14px; background:rgba(255,255,255,0.06); border:1.5px solid var(--primary); border-radius:10px; color:var(--text); font-size:14px; font-weight:700; outline:none;"">
-      <button type=""button"" onclick=""randomizeOnboardingName()"" title=""Randomize name"" style=""position:absolute; right:8px; top:50%; transform:translateY(-50%); background:transparent; border:none; color:var(--primary-light); cursor:pointer; padding:6px; display:flex; align-items:center;"">
-        <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2.2"" stroke-linecap=""round"" stroke-linejoin=""round"" width=""18"" height=""18""><polyline points=""23 4 23 10 17 10""/><polyline points=""1 20 1 14 7 14""/><path d=""M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15""/></svg>
-      </button>
+    <div class=""modal-desc"" style=""text-align:center; font-size:12px; margin-bottom:12px;"">Choose a friendly name so you can easily identify your device when sending or receiving files:</div>
+    <div style=""position:relative; margin-bottom:8px;"">
+      <input type=""text"" id=""onboardingNameInput"" maxlength=""28"" style=""width:100%; box-sizing:border-box; padding:12px 14px; background:rgba(255,255,255,0.06); border:1.5px solid var(--primary); border-radius:10px; color:var(--text); font-size:14px; font-weight:700; outline:none;"">
+    </div>
+    <div class=""name-chips-row"" id=""nameChipsRow"">
+      <span class=""name-chip"" onclick=""setNameChip(this)"">My iPhone</span>
+      <span class=""name-chip"" onclick=""setNameChip(this)"">Samsung Galaxy</span>
+      <span class=""name-chip"" onclick=""setNameChip(this)"">MacBook</span>
+      <span class=""name-chip"" onclick=""setNameChip(this)"">Work Laptop</span>
+      <span class=""name-chip"" onclick=""setNameChip(this)"">Personal</span>
     </div>
     <div class=""modal-actions"" style=""margin-top:0;"">
       <button class=""modal-btn modal-btn-accept"" style=""width:100%;"" onclick=""confirmOnboardingName()"">Confirm &amp; Continue</button>
@@ -2009,7 +2166,7 @@ function getSavedNickname() {
   try {
     let name = localStorage.getItem('weshare_nickname');
     if (!name) {
-      name = generateRandomDeviceName();
+      name = detectDeviceDefaultName();
       localStorage.setItem('weshare_nickname', name);
     }
     return name;
@@ -2149,23 +2306,35 @@ function switchTab(name) {
     document.getElementById('tabBtnSend').classList.add('active');
     document.getElementById('viewSend').classList.add('active');
     fetch('/api/client-role?clientId=' + getClientId() + '&role=Sender&name=' + encodeURIComponent(getSavedNickname()), { method: 'POST' }).catch(() => {});
-    // Reset to selection stage if returning
-    closeSenderRadar();
+    // When entering Send mode, immediately start radar to choose/get device!
+    if (!connectedTarget) {
+      startSenderRadar();
+    } else {
+      document.getElementById('sendRadarStage').style.display = 'none';
+      document.getElementById('sendSelectionStage').style.display = 'block';
+    }
   } else if (name === 'receive') {
     document.getElementById('tabBtnReceive').classList.add('active');
     document.getElementById('viewReceive').classList.add('active');
+    if (radarScanInterval) { clearInterval(radarScanInterval); radarScanInterval = null; }
     fetch('/api/client-role?clientId=' + getClientId() + '&role=Receiver&name=' + encodeURIComponent(getSavedNickname()), { method: 'POST' }).catch(() => {});
   } else if (name === 'downloads') {
     document.getElementById('tabBtnDownloads').classList.add('active');
     document.getElementById('viewDownloads').classList.add('active');
+    if (radarScanInterval) { clearInterval(radarScanInterval); radarScanInterval = null; }
+    fetch('/api/client-role?clientId=' + getClientId() + '&role=Idle&name=' + encodeURIComponent(getSavedNickname()), { method: 'POST' }).catch(() => {});
     loadAvailableFiles();
   } else if (name === 'activity') {
     document.getElementById('tabBtnActivity').classList.add('active');
     document.getElementById('viewActivity').classList.add('active');
+    if (radarScanInterval) { clearInterval(radarScanInterval); radarScanInterval = null; }
+    fetch('/api/client-role?clientId=' + getClientId() + '&role=Idle&name=' + encodeURIComponent(getSavedNickname()), { method: 'POST' }).catch(() => {});
     loadHistory();
   } else if (name === 'share') {
     document.getElementById('tabBtnShare').classList.add('active');
     document.getElementById('viewShare').classList.add('active');
+    if (radarScanInterval) { clearInterval(radarScanInterval); radarScanInterval = null; }
+    fetch('/api/client-role?clientId=' + getClientId() + '&role=Idle&name=' + encodeURIComponent(getSavedNickname()), { method: 'POST' }).catch(() => {});
   }
 }
 
@@ -2257,35 +2426,41 @@ function renderStagingTray() {
 let radarScanInterval = null;
 
 
+function startSenderRadar() {
+  document.getElementById('sendSelectionStage').style.display = 'none';
+  document.getElementById('sendRadarStage').style.display = 'block';
+  loadDiscoveredReceivers();
+  if (radarScanInterval) clearInterval(radarScanInterval);
+  radarScanInterval = setInterval(loadDiscoveredReceivers, 2500);
+}
+
 function connectToTarget(rec) {
+  if (radarScanInterval) {
+    clearInterval(radarScanInterval);
+    radarScanInterval = null;
+  }
   connectedTarget = rec;
   pairedHostName = rec.name;
   
   const nameEl = document.getElementById('connectedTargetName');
-  if (nameEl) nameEl.textContent = `${rec.name} (${rec.ip})`;
+  if (nameEl) nameEl.textContent = `${rec.name} (${rec.type || 'Device'})`;
   
   updateSendButtonText();
   
   document.getElementById('sendRadarStage').style.display = 'none';
   document.getElementById('sendSelectionStage').style.display = 'block';
   
-  showToast(`Connected to ${rec.name}! Choose files to send.`);
-}
-
-function openSendPickerWithoutTarget() {
-  document.getElementById('sendRadarStage').style.display = 'none';
-  document.getElementById('sendSelectionStage').style.display = 'block';
-  updateSendButtonText();
+  showToast(`Selected ${rec.name}! Now choose files to send.`);
 }
 
 function sendBatchToConnectedTarget() {
   if (!connectedTarget) {
-    showToast('Please select a target receiver from the Radar');
-    openSenderRadar();
+    showToast('Please select a recipient from the Radar first.');
+    startSenderRadar();
     return;
   }
   if (stagedFiles.length === 0) {
-    showToast('Please add some files to send first');
+    showToast('Please select at least one file to send.');
     return;
   }
   sendBatchToTarget(connectedTarget.id, connectedTarget.name);
@@ -2299,38 +2474,13 @@ function updateSendButtonText() {
   btnText.textContent = `Send ${count} File${count === 1 ? '' : 's'} to ${target}`;
 }
 
-function openSenderRadar() {
-  if (stagedFiles.length === 0) {
-    showToast('Please select files to send first.');
-    return;
-  }
-  document.getElementById('sendSelectionStage').style.display = 'none';
-  document.getElementById('sendRadarStage').style.display = 'block';
-
-  const totalBytes = stagedFiles.reduce((acc, f) => acc + (f.size || 0), 0);
-  document.getElementById('radarBatchSummary').textContent = `${stagedFiles.length} file${stagedFiles.length > 1 ? 's' : ''} (${formatBytes(totalBytes)})`;
-
-  loadDiscoveredReceivers();
-  if (radarScanInterval) clearInterval(radarScanInterval);
-  radarScanInterval = setInterval(loadDiscoveredReceivers, 2500);
-}
-
-function closeSenderRadar() {
-  if (radarScanInterval) {
-    clearInterval(radarScanInterval);
-    radarScanInterval = null;
-  }
-  document.getElementById('sendRadarStage').style.display = 'none';
-  document.getElementById('sendSelectionStage').style.display = 'block';
-}
-
 async function loadDiscoveredReceivers() {
   const container = document.getElementById('radarNodesContainer');
   const emptyHint = document.getElementById('radarEmptyHint');
   if (!container) return;
 
   try {
-    // 1. Check Host PC info
+    // 1. Check This Computer info
     const meRes = await fetch('/api/me').then(r => r.json()).catch(() => null);
     // 2. Check other discovered devices
     const peers = await fetch('/api/devices?role=Receiver').then(r => r.json()).catch(() => []);
@@ -2338,7 +2488,7 @@ async function loadDiscoveredReceivers() {
     const myId = getClientId();
     const receivers = [];
 
-    // Check if Host PC is in Receive Mode
+    // Check if This Computer is in Receive Mode
     if (meRes && meRes.name) {
       const isHostRecv = meRes.isReceiver || meRes.role === 'Receiver';
       if (isHostRecv) {
@@ -2371,15 +2521,32 @@ async function loadDiscoveredReceivers() {
 
     container.innerHTML = '';
 
+
     if (receivers.length === 0) {
       if (emptyHint) emptyHint.style.display = 'flex';
+      if (!window.radarAssistantTimer) {
+        window.radarAssistantTimer = setTimeout(() => {
+          const rsa = document.getElementById('radarSmartAssistant');
+          if (rsa) rsa.style.display = 'flex';
+        }, 6000);
+      }
       return;
     }
 
     if (emptyHint) emptyHint.style.display = 'none';
+    const rsa = document.getElementById('radarSmartAssistant');
+    if (rsa) rsa.style.display = 'none';
+    if (window.radarAssistantTimer) {
+      clearTimeout(window.radarAssistantTimer);
+      window.radarAssistantTimer = null;
+    }
 
-    // Position receiver nodes around the radar rings
-    const radarRadius = 105; // radius in px from center
+
+    // Render both on radar rings and in clean selection list below
+    const listContainer = document.getElementById('radarReceiversList');
+    if (listContainer) listContainer.innerHTML = '';
+
+    const radarRadius = 105;
     const total = receivers.length;
     receivers.forEach((rec, idx) => {
       const angle = (2 * Math.PI / total) * idx - (Math.PI / 2);
@@ -2397,12 +2564,31 @@ async function loadDiscoveredReceivers() {
         : '<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""><rect x=""5"" y=""2"" width=""14"" height=""20"" rx=""2"" ry=""2""/><line x1=""12"" y1=""18"" x2=""12.01"" y2=""18""/></svg>';
 
       node.innerHTML = `
-        <div class=""web-radar-node-disc"" title=""Tap to send files to ${rec.name}"">
+        <div class=""web-radar-node-disc"" title=""Tap to choose ${rec.name}"">
           ${iconSvg}
         </div>
         <span class=""web-radar-node-label"" title=""${rec.name}"">${rec.name}</span>
       `;
       container.appendChild(node);
+
+      if (listContainer) {
+        const row = document.createElement('div');
+        row.style.cssText = 'background:var(--card-solid); border:1px solid var(--border); border-radius:12px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;';
+        row.onclick = () => connectToTarget(rec);
+        row.innerHTML = `
+          <div style=""display:flex; align-items:center; gap:10px;"">
+            <div style=""width:34px; height:34px; border-radius:8px; background:rgba(16,185,129,0.12); color:var(--emerald); display:flex; align-items:center; justify-content:center;"">
+              ${iconSvg}
+            </div>
+            <div style=""display:flex; flex-direction:column;"">
+              <span style=""font-size:13px; font-weight:800; color:var(--text);"">${rec.name}</span>
+              <span style=""font-size:11px; color:var(--emerald); font-weight:600;"">Ready to Receive</span>
+            </div>
+          </div>
+          <button type=""button"" style=""background:var(--primary); color:#FFFFFF; border:none; border-radius:8px; padding:6px 14px; font-size:11px; font-weight:700; cursor:pointer;"">Select</button>
+        `;
+        listContainer.appendChild(row);
+      }
     });
 
   } catch (err) {
@@ -2414,6 +2600,7 @@ async function loadDiscoveredReceivers() {
 /* BATCH DATA TRANSFER TO TARGET RECEIVER                        */
 /* ------------------------------------------------------------- */
 async function sendBatchToTarget(targetId, targetName) {
+  acquireWakeLock();
   if (stagedFiles.length === 0 || isUploading) return;
   isUploading = true;
 
@@ -2528,11 +2715,13 @@ async function sendBatchToTarget(targetId, targetName) {
 
   if (successCount > 0 && successCount === total) {
     fetch(`/api/batch-complete?clientId=${encodeURIComponent(clientId)}&count=${successCount}&bytes=${totalBytesTransferred}`, { method: 'POST' }).catch(() => {});
+    releaseWakeLock();
     showTransferSuccessModal(true, pairedHostName, successCount, totalBytesTransferred);
     stagedFiles = [];
     renderStagingTray();
     closeSenderRadar();
   } else {
+    releaseWakeLock();
     showTransferFailureModal(failMessage || 'Transfer interrupted.', pairedHostName);
   }
 
@@ -2685,10 +2874,15 @@ async function loadAvailableFiles() {
             <span class=""fci-meta"">${formatBytes(f.size)}</span>
           </div>
         </div>
-        <a class=""fci-dl-btn"" href=""/download?id=${encodeURIComponent(fileId)}&file=${encodeURIComponent(f.name)}&clientId=${encodeURIComponent(cid)}"" download=""${f.name}"">
-          <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2.5"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4""/><polyline points=""7 10 12 15 17 10""/><line x1=""12"" y1=""15"" x2=""12"" y2=""3""/></svg>
-          Download
-        </a>
+        <div style=""display:flex; gap:6px; align-items:center;"">
+          ${(/\.(jpg|jpeg|png|webp|heic|mp4|mov)$/i.test(f.name))
+            ? `<button class=""fci-dl-btn"" style=""background:rgba(16,185,129,0.18); color:var(--emerald); border:1px solid rgba(16,185,129,0.3);"" onclick=""saveMediaToPhotos('${encodeURIComponent(fileId)}', '${encodeURIComponent(f.name)}')"">Photos</button>`
+            : ''}
+          <a class=""fci-dl-btn"" href=""/download?id=${encodeURIComponent(fileId)}&file=${encodeURIComponent(f.name)}&clientId=${encodeURIComponent(cid)}"" download=""${f.name}"">
+            <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2.5"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4""/><polyline points=""7 10 12 15 17 10""/><line x1=""12"" y1=""15"" x2=""12"" y2=""3""/></svg>
+            Download
+          </a>
+        </div>
       `;
       list.appendChild(item);
     });
@@ -2737,6 +2931,149 @@ async function loadHistory() {
   } catch(e) {}
 }
 
+
+/* ------------------------------------------------------------- */
+/* SMART DEVICE AUTO-DETECTION                                   */
+/* ------------------------------------------------------------- */
+function detectDeviceDefaultName() {
+  const ua = navigator.userAgent || '';
+  if (/iPad/i.test(ua)) return 'My iPad';
+  if (/iPhone/i.test(ua)) return 'My iPhone';
+  if (/Macintosh|Mac OS X/i.test(ua)) return 'My MacBook';
+  if (/Android/i.test(ua)) {
+    if (/Samsung/i.test(ua)) return 'Samsung Galaxy';
+    if (/Pixel/i.test(ua)) return 'Google Pixel';
+    return 'Android Phone';
+  }
+  if (/Windows/i.test(ua)) return 'Windows PC';
+  return 'Personal Device';
+}
+
+function setNameChip(el) {
+  const input = document.getElementById('onboardingNameInput');
+  if (input) input.value = el.textContent.trim();
+}
+
+/* ------------------------------------------------------------- */
+/* SCREEN WAKE LOCK API (STOPS MOBILE PHONE SLEEP IN TRANSFERS) */
+/* ------------------------------------------------------------- */
+let activeWakeLock = null;
+async function acquireWakeLock() {
+  try {
+    if ('wakeLock' in navigator && !activeWakeLock) {
+      activeWakeLock = await navigator.wakeLock.request('screen');
+      activeWakeLock.addEventListener('release', () => { activeWakeLock = null; });
+    }
+  } catch(e) {}
+}
+
+function releaseWakeLock() {
+  try {
+    if (activeWakeLock) {
+      activeWakeLock.release();
+      activeWakeLock = null;
+    }
+  } catch(e) {}
+}
+
+/* ------------------------------------------------------------- */
+/* WEB SHARE API (SAVE DIRECTLY TO PHOTOS / CAMERA ROLL)         */
+/* ------------------------------------------------------------- */
+async function saveMediaToPhotos(fileId, fileName) {
+  try {
+    showToast('Preparing photo/video for Photos app...');
+    const cid = getClientId();
+    const resp = await fetch(`/download?id=${encodeURIComponent(fileId)}&file=${encodeURIComponent(fileName)}&clientId=${encodeURIComponent(cid)}`);
+    const blob = await resp.blob();
+    const ext = (fileName.split('.').pop() || '').toLowerCase();
+    let mime = 'image/jpeg';
+    if (['png', 'webp', 'gif'].includes(ext)) mime = `image/${ext}`;
+    else if (['mp4', 'mov', 'webm'].includes(ext)) mime = `video/${ext === 'mov' ? 'quicktime' : ext}`;
+    
+    const file = new File([blob], fileName, { type: mime });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        title: fileName
+      });
+      showToast('Saved to Photos / Camera Roll!');
+    } else {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = fileName;
+      a.click();
+      showToast('Download started');
+    }
+  } catch (err) {
+    showToast('Download started');
+  }
+}
+
+/* ------------------------------------------------------------- */
+/* GLOBAL INCOMING TRANSFER ALERT BANNER                         */
+/* ------------------------------------------------------------- */
+let globalIncomingData = null;
+
+function  {
+  globalIncomingData = { data, isBatch };
+  const banner = document.getElementById('globalIncomingBanner');
+  const title = document.getElementById('gibSenderTitle');
+  const info = document.getElementById('gibInfoText');
+  const zipBtn = document.getElementById('gibZipBtn');
+  const acceptBtn = document.getElementById('gibAcceptBtn');
+
+  if (!banner || !title || !info) return;
+
+  const sender = data.senderName || data.from || 'This Computer';
+  title.textContent = `Incoming from ${sender}`;
+
+  if (isBatch) {
+    const files = data.files || [];
+    const totalBytes = data.totalSize || files.reduce((acc, f) => acc + (f.size || 0), 0);
+    info.textContent = `${files.length} file${files.length > 1 ? 's' : ''} • Total: ${formatBytes(totalBytes)}`;
+    if (zipBtn) {
+      zipBtn.style.display = 'inline-flex';
+      zipBtn.href = `/download-zip?clientId=${encodeURIComponent(getClientId())}`;
+      zipBtn.onclick = () => { dismissGlobalIncoming(); showToast('Downloading ZIP archive...'); };
+    }
+    acceptBtn.textContent = 'Accept & Download';
+  } else {
+    const cleanName = data.displayName || data.name || 'file';
+    info.textContent = `""${cleanName}"" • ${formatBytes(data.size || 0)}`;
+    if (zipBtn) zipBtn.style.display = 'none';
+    acceptBtn.textContent = 'Accept & Download';
+  }
+
+  banner.classList.add('active');
+  acquireWakeLock();
+}
+
+function dismissGlobalIncoming() {
+  const banner = document.getElementById('globalIncomingBanner');
+  if (banner) banner.classList.remove('active');
+  releaseWakeLock();
+}
+
+function acceptGlobalIncoming() {
+  dismissGlobalIncoming();
+  if (!globalIncomingData) return;
+  if (globalIncomingData.isBatch) {
+    acceptBatchManifest();
+  } else {
+    acceptSingleOffer();
+  }
+}
+
+function declineGlobalIncoming() {
+  dismissGlobalIncoming();
+  if (!globalIncomingData) return;
+  if (globalIncomingData.isBatch) {
+    declineBatchManifest();
+  } else {
+    declineSingleOffer();
+  }
+}
+
 /* ------------------------------------------------------------- */
 /* SSE LISTENER & INCOMING OFFERS                                */
 /* ------------------------------------------------------------- */
@@ -2750,8 +3087,9 @@ function initSSE() {
       pendingSingleOffer = JSON.parse(e.data);
       const cleanName = decodeURIComponent(pendingSingleOffer.name || 'file');
       pendingSingleOffer.displayName = cleanName;
-      document.getElementById('singleOfferDesc').textContent = `Incoming file from ${pendingSingleOffer.from || 'Host PC'}: ""${cleanName}"" (${formatBytes(pendingSingleOffer.size)})`;
+      document.getElementById('singleOfferDesc').textContent = `Incoming file from ${pendingSingleOffer.from || 'This Computer'}: ""${cleanName}"" (${formatBytes(pendingSingleOffer.size)})`;
       document.getElementById('singleOfferModal').classList.add('active');
+      
     } catch(err) {}
   });
 
@@ -2759,6 +3097,7 @@ function initSSE() {
     try {
       const manifest = JSON.parse(e.data);
       showIncomingBatchChecklist(manifest);
+      
     } catch(err) {}
   });
 
@@ -2769,7 +3108,8 @@ function initSSE() {
       filesArr.forEach(f => {
         f.fileName = decodeURIComponent(f.name || f.fileName || 'file');
       });
-      showIncomingBatchChecklist({ files: filesArr, senderName: 'Host PC' });
+      showIncomingBatchChecklist({ files: filesArr, senderName: 'This Computer' });
+      
     } catch(err) {}
   });
 
@@ -2829,7 +3169,7 @@ function showIncomingBatchChecklist(manifest) {
 
   const files = manifest.files || manifest.Files || [];
   title.textContent = `Incoming Batch (${files.length} Files)`;
-  desc.textContent = `From ${manifest.senderName || manifest.SenderName || 'Host PC'} • Total: ${formatBytes(manifest.totalSize || files.reduce((a, b) => a + (b.size || 0), 0))}`;
+  desc.textContent = `From ${manifest.senderName || manifest.SenderName || 'This Computer'} • Total: ${formatBytes(manifest.totalSize || files.reduce((a, b) => a + (b.size || 0), 0))}`;
 
   allChk.checked = true;
   list.innerHTML = '';
