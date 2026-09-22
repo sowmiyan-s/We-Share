@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="src/WeShare.UI/Assets/app_logo.png" width="96" height="96" alt="We Share Logo" />
+<img src="src/WeShare.UI/Assets/app_logo.png" width="104" height="104" alt="We Share Logo" />
 
 # We Share
 
@@ -13,7 +13,7 @@ Fast, private, and cable-free data transfers across your local network &mdash; n
 [![Platform: Windows](https://img.shields.io/badge/Platform-Windows%2010%20%2F%2011-06B6D4.svg)](https://sowmiyan-s.github.io/We-Share/)
 [![Runtime: .NET 8](https://img.shields.io/badge/.NET-8.0-512BD4.svg)](https://dotnet.microsoft.com/download/dotnet/8.0)
 [![UI: Avalonia 11](https://img.shields.io/badge/Avalonia%20UI-11.0-purple.svg)](https://avaloniaui.net/)
-[![Version](https://img.shields.io/badge/Release-v1.1.0-10B981.svg)](https://github.com/sowmiyan-s/We-Share/releases)
+[![Release: v1.1.0](https://img.shields.io/badge/Release-v1.1.0-10B981.svg)](https://github.com/sowmiyan-s/We-Share/releases)
 
 <br />
 
@@ -28,22 +28,38 @@ Fast, private, and cable-free data transfers across your local network &mdash; n
 
 ---
 
+## Technical Documentation Suite
+
+For comprehensive engineering specifications, architecture diagrams, wire protocols, and security models, consult the dedicated documentation guides:
+
+| Document | Description |
+| :--- | :--- |
+| 🏛️ [**System Architecture**](docs/ARCHITECTURE.md) | Component diagrams, layered design, discovery pipeline, direct transfer state machine, captive portal subsystem, and threading model. |
+| ⚡ [**Tech Stack & Specifications**](docs/TECH_STACK.md) | In-depth breakdown of .NET 8, Avalonia 11, WinRT APIs, Win32 `wlanapi.dll` P/Invoke, SQLite WAL mode, and Architectural Decision Records (ADRs). |
+| 📡 [**Network Protocol Specification**](docs/PROTOCOL_SPEC.md) | Formal wire protocol: UDP beacon formats (Port 45678), TCP framed binary streaming (`WESH`), Web REST endpoints, and Server-Sent Events (SSE). |
+| 🔒 [**Security & Privacy Model**](docs/SECURITY.md) | Threat modeling, pre-transfer consent handshakes, path traversal defense, network boundary isolation, and zero-telemetry architecture. |
+| 🤝 [**Contributing Guide**](CONTRIBUTING.md) | Contributor setup, build instructions, code conventions, packaging with Inno Setup, and PR workflows. |
+
+---
+
 ## Overview
 
-**We Share** is an open-source desktop application engineered for instantaneous local network file sharing. Built with **C# / .NET 8** and **Avalonia UI 11**, it bypasses the internet entirely, utilizing raw multi-threaded TCP sockets and local UDP broadcast discovery to achieve wire-speed transfers between computers and mobile devices.
+**We Share** is an open-source desktop application and mobile web hub engineered for instantaneous local network file sharing. Built with **C# / .NET 8** and **Avalonia UI 11**, it bypasses the internet entirely, utilizing raw multi-threaded TCP sockets and local UDP broadcast discovery to achieve wire-speed transfers between computers and mobile devices.
 
 Whether sending 50 GB 4K video reels across an office, moving vacation photos from an iPhone without cloud compression, or transferring files between laptops in an airplane with no Wi-Fi router, We Share provides seamless, zero-configuration local networking.
 
 ### Core Capabilities
 
-- **Turbo Multi-Threaded TCP Sockets**: Maximizes physical network bandwidth (Gigabit Ethernet and Wi-Fi 6) with chunked binary streaming and live transfer telemetry.
+- **Turbo Multi-Threaded TCP Sockets**: Maximizes physical network bandwidth (Gigabit Ethernet and Wi-Fi 6) with an enterprise 1 MB streaming buffer and live transfer telemetry.
 - **AirDrop-Grade Radar Discovery**: Zero-configuration UDP broadcast detection on port 45678. Devices orbit an interactive radar scanner with instant tap-to-send dispatch.
 - **Apple-Style Radar Receive Station**: Full-screen radar listening station with pulsing concentric rings and live status indicator.
-- **Universal Web Transfer (Zero Client Apps)**: Bidirectional transfer with iOS, Android, macOS, and Linux devices via an embedded HTTP 1.1 / SSE server and instant camera QR code pairing.
-- **Desert Mode (Off-Grid Hotspot)**: Automatically provisions an ad-hoc Wi-Fi network and silently handshakes peer laptops when no router is available.
+- **Universal Web Transfer (Zero Client Apps)**: Bidirectional transfer with iOS, Android, macOS, and Linux devices via an embedded raw-TCP HTTP 1.1 / Server-Sent Events (SSE) server and instant camera QR code pairing.
+- **Desert Mode (Off-Grid Hotspot)**: Automatically provisions an ad-hoc Wi-Fi network with WinRT Tethering Manager and silently handshakes peer laptops via native `wlanapi.dll` P/Invoke when no router is available.
+- **Integrated Captive Portal**: Built-in DNS (port 53) and HTTP (port 80) redirection triggers native mobile captive network sheets, opening the Web Portal automatically.
 - **Pre-Upload Authorization & Consent**: Explicit receiver prompts display sender identity, filename, and byte metrics before any file payload is transferred.
 - **Single-Session Concurrency Lock**: Prevents connection collisions and protects socket buffers by enforcing dedicated one-to-one transfer channels.
 - **Obsidian Violet Signature Aesthetics**: Custom dark glassmorphism interface with fluent button micro-animations and zero command prompt windows.
+- **Reliable Local Persistence**: Embedded SQLite engine with Write-Ahead Logging (WAL mode) and async write serialization for instant history and settings access.
 
 ---
 
@@ -67,7 +83,7 @@ Whether sending 50 GB 4K video reels across an office, moving vacation photos fr
 
 ---
 
-## Technical Architecture & How It Works
+## System Architecture
 
 ```mermaid
 flowchart TD
@@ -77,53 +93,58 @@ flowchart TD
         C --> D[Active Device Registry\nPC, Mac, iOS, Android]
     end
 
-    subgraph TransferEngine ["2. Direct Transfer Engine (TCP Sockets)"]
+    subgraph TransferEngine ["2. Direct Transfer Engine (TCP 45679)"]
         E[Sender File Queue] --> F[Pre-Transfer Metadata Handshake]
         F -->|Prompt Receiver| G{Accept / Reject}
         G -->|Reject| H[Instant Rejection Signal]
-        G -->|Accept| I[Multi-Threaded Binary Chunk Streaming]
-        I --> J[CRC64 Stream Integrity Verification]
+        G -->|Accept| I[1 MB Chunked Binary Streaming\nMagic Header WESH]
+        I --> J[Path Sanitization & Stream Integrity]
         J --> K[Disk Write to Downloads Folder]
     end
 
     subgraph WebPortal ["3. Universal Web Transfer (HTTP 1.1 + SSE)"]
-        L[Embedded HTTP Server\nPorts 8080-8099] --> M[QR Code Generation]
+        L[Embedded Raw-TCP HTTP Server\nPorts 8080-8099] --> M[QR Code Generation]
         M --> N[Mobile Browser Safari / Chrome]
-        N -->|Server-Sent Events| O[Bidirectional Session Hub]
+        N -->|Server-Sent Events /api/events| O[Bidirectional Session Hub]
         O -->|Push / Pull| E
     end
 
     subgraph Desert ["4. Off-Grid Hotspot (Desert Mode)"]
         P[Zero Network Detected] --> Q[WinRT Tethering Manager\nSSID: WeShare]
         Q --> R[Native wlanapi.dll P/Invoke\nSilent Client Auto-Connect]
+        Q --> S[Captive Portal Engine\nUDP 53 DNS + TCP 80 Redirect]
         R --> A
+        S --> N
     end
 ```
 
-### 1. Peer Discovery Protocol (UDP Broadcast)
-- Emits periodic JSON-encoded beacons over UDP port `45678` across local broadcast addresses.
-- Built-in NIC filter identifies and excludes non-physical network adapters (WSL, Hyper-V, Docker, VMware, and VPN tunnels), preventing discovery dropouts.
-- Maintains an active peer list with timestamp tracking; devices absent for >15 seconds are cleanly removed.
+For full details, see the [Architecture Deep Dive](docs/ARCHITECTURE.md).
 
-### 2. Multi-Threaded TCP Transfer Engine
-- Dedicated TCP server listens for incoming binary transfer requests.
-- Framed protocol header:
-  ```text
-  [Magic: 4B][ProtocolVer: 2B][SessionId: 16B][FileCount: 4B][TotalBytes: 8B][Manifest JSON]
-  ```
-- File streaming uses 64 KB memory chunks with real-time rolling average speed and completion calculations.
-- Dedicated receiver confirmation dialog displays file name, count, and size prior to socket data ingestion.
+---
 
-### 3. Web Transfer Subsystem
-- Lightweight HTTP 1.1 server running locally without external web server dependencies (IIS or Kestrel).
-- Automatic port scanning fallback (`8080` &ndash; `8099`) if the primary port is occupied.
-- Uses Server-Sent Events (`/api/events`) for real-time mobile push notifications, transfer progress bars, and batch dispatch.
-- Uploads from mobile devices require desktop host approval via `/api/request-upload`.
+## Repository Structure
 
-### 4. Desert Mode Hotspot Subsystem
-- Uses Windows Runtime (`WinRT`) APIs (`NetworkOperatorTetheringManager`) to provision a Wi-Fi hotspot on demand.
-- Client devices running We Share detect the specific SSID and invoke Windows Native Wi-Fi API (`wlanapi.dll`) P/Invoke calls to join silently without password prompts.
-- When the application closes, the Wi-Fi adapter is returned to its previous configuration.
+```text
+We-Share/
+├── assets/brand/           # Vector badges, app logos, and branding artwork
+├── docs/                   # Documentation suite, architectural specs & website
+│   ├── ARCHITECTURE.md     # System architecture & component design
+│   ├── TECH_STACK.md       # Engineering stack & architectural decision records
+│   ├── PROTOCOL_SPEC.md    # Formal wire protocol specification
+│   ├── SECURITY.md         # Threat model & privacy safeguards
+│   └── screenshot/         # High-resolution application screenshots
+├── setup/                  # Compiled release installers and portable packages
+├── src/
+│   ├── WeShare.Core/       # Engine, TCP/UDP sockets, web server, crypto & SQLite
+│   ├── WeShare.UI/         # Avalonia 11 XAML views, radar canvas & Obsidian theme
+│   └── WeShare.Desktop/    # Windows runtime executable entry point
+├── tools/                  # Diagnostic utilities & helper scripts
+├── CONTRIBUTING.md         # Open-source developer & contribution guidelines
+├── LICENSE                 # MIT License
+├── publish.ps1             # Release build automation script
+├── installer.iss           # Inno Setup 6 installer script
+└── WeShare.sln             # Visual Studio .NET 8 solution
+```
 
 ---
 
@@ -131,7 +152,7 @@ flowchart TD
 
 ### Scenario A: Computer to Computer (Same Network)
 1. Launch **We Share** on both Windows computers.
-2. Discovered computers appear on the **Radar Scan** and **Your Network** sidebar roster.
+2. Discovered computers appear on the **Radar Scan** and **Your Network** roster.
 3. Click **Select & Send** or drag files directly into the window.
 4. Tap the destination computer on the radar to initiate transmission.
 5. The receiving PC displays an **Accept / Reject** prompt. Upon acceptance, the transfer streams at wire speed.
@@ -151,8 +172,9 @@ flowchart TD
 
 ### Scenario D: Off-Grid (Airplane, Vehicle, Outdoors)
 1. When no Wi-Fi router is present, click **Start Desert Hotspot** on Laptop A.
-2. Open We Share on Laptop B &mdash; the client auto-connects to the ad-hoc network within seconds.
+2. Open We Share on Laptop B &mdash; the client auto-connects to the ad-hoc network within seconds via native Wi-Fi P/Invoke.
 3. Both computers appear on each other's radar and transfer files without cellular or internet data.
+4. Connected mobile phones automatically launch the We Share Web Portal via the built-in captive portal.
 
 ---
 
@@ -194,7 +216,7 @@ cd We-Share
 # Restore dependencies
 dotnet restore
 
-# Build solution
+# Build solution in Release mode
 dotnet build WeShare.sln -c Release
 
 # Run desktop application
@@ -216,16 +238,19 @@ Output binaries are generated in the `setup/` directory:
 
 - **Local Network Isolation**: All data packets flow strictly over local layer-2/layer-3 network paths. No external servers or cloud services are involved.
 - **Pre-Upload Verification**: Transfers require explicit destination acceptance before payload bytes are sent over the wire.
+- **Path Traversal Protection**: All incoming file names and relative paths are sanitized and confined to the downloads sandbox.
 - **Single-Session Lock**: Transfer sessions are locked to one peer at a time, eliminating connection interference or rogue injections.
-- **Encrypted Local Storage**: Transfer logs, device preferences, and file metadata are maintained in a local SQLite database (`weshare.db`) that never leaves the machine.
+- **Encrypted Local Storage**: Transfer logs, device preferences, and file metadata are maintained in a local SQLite database (`WeShare.db`) that never leaves the machine.
 - **Zero Analytics & Telemetry**: We Share collects zero diagnostics, telemetry, or user analytics.
+
+For comprehensive details, see the [Security Architecture](docs/SECURITY.md).
 
 ---
 
 ## Brand Assets & Media Kit
 
 Official high-resolution logos, application icons, banners, and typography guides are maintained in the repository:
-- **Directory**: [`assets/brand/`](https://github.com/sowmiyan-s/We-Share/tree/main/assets/brand)
+- **Directory**: [`assets/brand/`](assets/brand/)
 - **Included Assets**:
   - High-resolution application logos (`APP LOGO.png`, `full png.png`)
   - Vector action glyphs (`send.png`, `receive.png`, `find.png`, `profile.png`)
@@ -235,13 +260,7 @@ Official high-resolution logos, application icons, banners, and typography guide
 
 ## Contributing
 
-Contributions are welcomed. To contribute:
-
-1. Fork the repository: `https://github.com/sowmiyan-s/We-Share`
-2. Create a feature branch: `git checkout -b feature/NewFeature`
-3. Commit your changes: `git commit -m 'feat: implement NewFeature'`
-4. Push to the branch: `git push origin feature/NewFeature`
-5. Open a Pull Request for review.
+Contributions are welcomed. Please review our [Contributing Guide](CONTRIBUTING.md) for details on code style, branch workflows, and submitting pull requests.
 
 ---
 
