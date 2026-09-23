@@ -315,7 +315,8 @@ namespace WeShare.UI.Views
                 HomeWifiPasswordText.Text = password;
                 
                 string hostIp = isHotspotRunning ? _hotspotService!.HotspotIp : ip;
-                string webUrl = $"http://{hostIp}:8080";
+                int webPort = _webDashboardService?.Port ?? 8080;
+                string webUrl = $"http://{hostIp}:{webPort}";
                 HomeWebPortalText.Text   = webUrl;
                 GenerateQrBitmap(webUrl);
 
@@ -328,12 +329,12 @@ namespace WeShare.UI.Views
                 {
                     WebPortalNetworkInfo.Text = isHotspotRunning 
                         ? "• Direct Hotspot Active (192.168.137.1)" 
-                        : (hasRealIp ? $"• {ssid} ({ip})" : "• Offline Standalone Mode");
+                        : (hasRealIp ? $"• {ssid} ({ip}:{webPort})" : "• Offline Standalone Mode");
                 }
 
                 if (isHotspotRunning && hasRealIp && ip != _hotspotService!.HotspotIp)
                 {
-                    string wifiWebUrl = $"http://{ip}:8080";
+                    string wifiWebUrl = $"http://{ip}:{webPort}";
                     if (HomeWifiWebPortalText != null) HomeWifiWebPortalText.Text = wifiWebUrl;
                     if (HomeWifiWebPortalPanel != null) HomeWifiWebPortalPanel.IsVisible = true;
                     if (WebPortalLabel != null) WebPortalLabel.Text = "Web Portal (Hotspot Gateway)";
@@ -346,6 +347,7 @@ namespace WeShare.UI.Views
             });
 
             string hostIpStr = isHotspotRunning ? _hotspotService!.HotspotIp : ip;
+            int activeWebPort = _webDashboardService?.Port ?? 8080;
             _ = Task.Run(() =>
             {
                 if (_captivePortalService != null)
@@ -354,9 +356,10 @@ namespace WeShare.UI.Views
                     _captivePortalService = null;
                 }
 
-                if (System.Net.IPAddress.TryParse(hostIpStr, out var parsedIp) && !System.Net.IPAddress.IsLoopback(parsedIp) && parsedIp.ToString() != "127.0.0.1")
+                // Captive portal (ports 80 & 53) should only run when actively hosting a Wi-Fi Hotspot
+                if (isHotspotRunning && System.Net.IPAddress.TryParse(hostIpStr, out var parsedIp) && !System.Net.IPAddress.IsLoopback(parsedIp) && parsedIp.ToString() != "127.0.0.1")
                 {
-                    _captivePortalService = new CaptivePortalService(parsedIp);
+                    _captivePortalService = new CaptivePortalService(parsedIp, activeWebPort);
                     _captivePortalService.Start();
                 }
             });

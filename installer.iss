@@ -24,8 +24,9 @@ AllowNoIcons=yes
 OutputDir=setup
 OutputBaseFilename=WeShare_Setup_{#AppVersion}
 SetupIconFile={#AppIcon}
-PrivilegesRequired=lowest
-PrivilegesRequiredOverridesAllowed=dialog
+ArchitecturesAllowed=x64compatible
+ArchitecturesInstallIn64BitMode=x64compatible
+PrivilegesRequired=admin
 ; Installer banner (164 × 314 px BMP) and small logo (55 × 58 px BMP)
 WizardImageFile=src\WeShare.UI\Assets\Design\installer_banner.bmp
 WizardSmallImageFile=src\WeShare.UI\Assets\logo_light.bmp
@@ -65,12 +66,20 @@ Filename: "{app}\{#AppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(
 ; Firewall — allow inbound + outbound so peer discovery and TCP transfer work
 Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall add rule name=""{#AppName}"" dir=in  action=allow program=""{app}\{#AppExeName}"" enable=yes profile=any"; Flags: runhidden
 Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall add rule name=""{#AppName}"" dir=out action=allow program=""{app}\{#AppExeName}"" enable=yes profile=any"; Flags: runhidden
+Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall add rule name=""{#AppName} Discovery (UDP 45678)"" dir=in action=allow protocol=UDP localport=45678 profile=any"; Flags: runhidden
+Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall add rule name=""{#AppName} mDNS (UDP 5353)"" dir=in action=allow protocol=UDP localport=5353 profile=any"; Flags: runhidden
+Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall add rule name=""{#AppName} Transfer (TCP 45679)"" dir=in action=allow protocol=TCP localport=45679 profile=any"; Flags: runhidden
+Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall add rule name=""{#AppName} Web Portal (TCP 8080)"" dir=in action=allow protocol=TCP localport=8080 profile=any"; Flags: runhidden
 
 [UninstallRun]
 ; Kill running process before deleting files
 Filename: "taskkill.exe"; Parameters: "/f /im WeShare.Desktop.exe"; RunOnceId: "KillApp"; Flags: runhidden
 ; Remove firewall rules on uninstall
 Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall delete rule name=""{#AppName}"""; RunOnceId: "RemoveFirewallRule"; Flags: runhidden
+Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall delete rule name=""{#AppName} Discovery (UDP 45678)"""; RunOnceId: "RemoveRuleUDP"; Flags: runhidden
+Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall delete rule name=""{#AppName} mDNS (UDP 5353)"""; RunOnceId: "RemoveRuleMDNS"; Flags: runhidden
+Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall delete rule name=""{#AppName} Transfer (TCP 45679)"""; RunOnceId: "RemoveRuleTCP"; Flags: runhidden
+Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall delete rule name=""{#AppName} Web Portal (TCP 8080)"""; RunOnceId: "RemoveRuleWeb"; Flags: runhidden
 
 [Code]
 var

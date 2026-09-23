@@ -204,6 +204,18 @@ namespace WeShare.Core.Discovery
                                 await sender.SendAsync(bytes, bytes.Length, hostEp);
                             }
                         }
+
+                        // Direct unicast ping to active network neighbors (bypasses Wi-Fi router AP Isolation / broadcast drops)
+                        var neighbors = GetActiveNeighbors();
+                        foreach (var neighborIp in neighbors)
+                        {
+                            try
+                            {
+                                var nEp = new IPEndPoint(neighborIp, DiscoveryPort);
+                                await sender.SendAsync(bytes, bytes.Length, nEp);
+                            }
+                            catch { }
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -226,6 +238,42 @@ namespace WeShare.Core.Discovery
             {
                 Console.WriteLine($"[Discovery] BroadcastPresenceAsync error: {ex.Message}");
             }
+        }
+
+        private static List<IPAddress> GetActiveNeighbors()
+        {
+            var neighbors = new List<IPAddress>();
+            try
+            {
+                var psi = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "arp",
+                    Arguments = "-a",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+                using var proc = System.Diagnostics.Process.Start(psi);
+                if (proc != null)
+                {
+                    string output = proc.StandardOutput.ReadToEnd();
+                    proc.WaitForExit(1000);
+                    var lines = output.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (var line in lines)
+                    {
+                        var parts = line.Trim().Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+                        if (parts.Length >= 2 && IPAddress.TryParse(parts[0], out var ip))
+                        {
+                            if (IsValidIpv4(ip) && !IsOwnAddress(ip) && !parts[0].EndsWith(".255") && !parts[0].StartsWith("224.") && !parts[0].StartsWith("239."))
+                            {
+                                neighbors.Add(ip);
+                            }
+                        }
+                    }
+                }
+            }
+            catch { }
+            return neighbors;
         }
 
         public static bool IsNoisyVirtual(NetworkInterface ni) =>

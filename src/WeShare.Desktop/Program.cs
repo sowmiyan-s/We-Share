@@ -20,21 +20,41 @@ namespace WeShare.UI
             using var mutex = new System.Threading.Mutex(true, "Local\\WeShare_SingleInstance_App_Mutex", out bool isNewInstance);
             if (!isNewInstance)
             {
+                bool restoredWindow = false;
                 try
                 {
                     var current = System.Diagnostics.Process.GetCurrentProcess();
                     foreach (var p in System.Diagnostics.Process.GetProcessesByName(current.ProcessName))
                     {
-                        if (p.Id != current.Id && p.MainWindowHandle != IntPtr.Zero)
+                        if (p.Id != current.Id)
                         {
-                            ShowWindow(p.MainWindowHandle, SW_RESTORE);
-                            SetForegroundWindow(p.MainWindowHandle);
-                            break;
+                            if (p.MainWindowHandle != IntPtr.Zero)
+                            {
+                                ShowWindow(p.MainWindowHandle, SW_RESTORE);
+                                SetForegroundWindow(p.MainWindowHandle);
+                                restoredWindow = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    // If an existing instance was detected but had NO visible window (headless/zombie),
+                    // terminate the zombie process so this interactive launch can proceed
+                    if (!restoredWindow)
+                    {
+                        foreach (var p in System.Diagnostics.Process.GetProcessesByName(current.ProcessName))
+                        {
+                            if (p.Id != current.Id)
+                            {
+                                try { p.Kill(); } catch { }
+                            }
                         }
                     }
                 }
                 catch { }
-                return;
+
+                if (restoredWindow)
+                    return;
             }
 
             string folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "WeShare");
@@ -63,8 +83,8 @@ namespace WeShare.UI
                 .WithInterFont()
                 .With(new Win32PlatformOptions
                 {
-                    // More compatible rendering on older machines
-                    RenderingMode = new[] { Win32RenderingMode.AngleEgl, Win32RenderingMode.Wgl, Win32RenderingMode.Software }
+                    RenderingMode = new[] { Win32RenderingMode.AngleEgl, Win32RenderingMode.Wgl, Win32RenderingMode.Software },
+                    CompositionMode = new[] { Win32CompositionMode.WinUIComposition, Win32CompositionMode.LowLatencyDxgiSwapChain }
                 })
                 .LogToTrace();
     }

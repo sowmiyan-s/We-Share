@@ -331,7 +331,23 @@ namespace WeShare.Core.Transfer
         public void Stop()
         {
             _cts?.Cancel();
-            _listener?.Stop();
+            try { _listener?.Stop(); } catch { }
+            try
+            {
+                if (_webClientsLock.Wait(150))
+                {
+                    try
+                    {
+                        foreach (var client in _activeWebClients.Values)
+                        {
+                            try { client.EventWriter?.Dispose(); } catch { }
+                        }
+                        _activeWebClients.Clear();
+                    }
+                    finally { _webClientsLock.Release(); }
+                }
+            }
+            catch { }
         }
 
         private async Task AcceptLoop(CancellationToken token)
@@ -363,20 +379,33 @@ namespace WeShare.Core.Transfer
 
                     while (totalHeaderRead < headerBuffer.Length)
                     {
-                        int n = await stream.ReadAsync(headerBuffer.AsMemory(totalHeaderRead, 1));
-                        if (n == 0) return;
-                        totalHeaderRead++;
+                        int n = await stream.ReadAsync(headerBuffer.AsMemory(totalHeaderRead, Math.Min(4096, headerBuffer.Length - totalHeaderRead)));
+                        if (n <= 0) return;
+                        int prevRead = totalHeaderRead;
+                        totalHeaderRead += n;
 
-                        if (totalHeaderRead >= 4 &&
-                            headerBuffer[totalHeaderRead - 4] == '\r' && headerBuffer[totalHeaderRead - 3] == '\n' &&
-                            headerBuffer[totalHeaderRead - 2] == '\r' && headerBuffer[totalHeaderRead - 1] == '\n')
+                        int searchStart = Math.Max(0, prevRead - 3);
+                        for (int i = searchStart; i <= totalHeaderRead - 4; i++)
                         {
-                            headerEndIndex = totalHeaderRead;
-                            break;
+                            if (headerBuffer[i] == '\r' && headerBuffer[i + 1] == '\n' &&
+                                headerBuffer[i + 2] == '\r' && headerBuffer[i + 3] == '\n')
+                            {
+                                headerEndIndex = i + 4;
+                                break;
+                            }
                         }
+                        if (headerEndIndex != -1) break;
                     }
 
                     if (headerEndIndex == -1) return;
+
+                    int excessBytes = totalHeaderRead - headerEndIndex;
+                    byte[]? excessBuffer = null;
+                    if (excessBytes > 0)
+                    {
+                        excessBuffer = new byte[excessBytes];
+                        Array.Copy(headerBuffer, headerEndIndex, excessBuffer, 0, excessBytes);
+                    }
 
                     string headerText = Encoding.ASCII.GetString(headerBuffer, 0, headerEndIndex);
                     var headerLines = headerText.Split(new[] { "\r\n" }, StringSplitOptions.None);
@@ -424,6 +453,13 @@ namespace WeShare.Core.Transfer
                     {
                         byte[] bodyBuf = new byte[contentLen];
                         int totalReadBody = 0;
+                        if (excessBuffer != null && excessBuffer.Length > 0)
+                        {
+                            int copyLen = Math.Min(contentLen, excessBuffer.Length);
+                            Array.Copy(excessBuffer, 0, bodyBuf, 0, copyLen);
+                            totalReadBody = copyLen;
+                        }
+
                         while (totalReadBody < contentLen)
                         {
                             int r = await stream.ReadAsync(bodyBuf.AsMemory(totalReadBody, contentLen - totalReadBody));
@@ -623,13 +659,15 @@ namespace WeShare.Core.Transfer
                         await stream.FlushAsync();
                     }
 
-                    else if (method == "GET" && path == "/api/logo")
+                    else if (method == "GET" && (path == "/api/logo" || path == "/logo.png" || path == "/assets/logo.png" || path == "/favicon.ico"))
                     {
                         if (LogoBytes != null)
                         {
+                            string mime = path.EndsWith(".ico", StringComparison.OrdinalIgnoreCase) ? "image/x-icon" : "image/png";
                             var header = $"HTTP/1.1 200 OK\r\n" +
-                                         $"Content-Type: image/png\r\n" +
+                                         $"Content-Type: {mime}\r\n" +
                                          $"Content-Length: {LogoBytes.Length}\r\n" +
+                                         "Cache-Control: public, max-age=86400\r\n" +
                                          "Connection: close\r\n" +
                                          "Access-Control-Allow-Origin: *\r\n" +
                                          "\r\n";
@@ -639,7 +677,7 @@ namespace WeShare.Core.Transfer
                         }
                         else
                         {
-                            var header = "HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n";
+                            var header = "HTTP/1.1 204 No Content\r\nConnection: close\r\n\r\n";
                             await stream.WriteAsync(Encoding.ASCII.GetBytes(header));
                             await stream.FlushAsync();
                         }
@@ -1030,13 +1068,6 @@ namespace WeShare.Core.Transfer
                         }
                         else
                         {
-                            bool isPcInReceiverMode = _localDevice.IsReceiver;
-                            if (!isPcInReceiverMode)
-                            {
-                                await SendJson(stream, new { accepted = false, error = "This Computer is not in Receive mode. Please enter Receive mode on This Computer." });
-                                return;
-                            }
-
                             bool accepted = true;
                             if (WebFileSharedCallback != null)
                             {
@@ -1110,11 +1141,11 @@ namespace WeShare.Core.Transfer
 
                         try
                         {
-                            while (client.Connected && clientInfo.EventWriter != null)
+                            while (client.Connected && clientInfo.EventWriter != null && _cts?.IsCancellationRequested == false)
                             {
                                 await writer.WriteAsync(": keepalive\n\n");
                                 WebClientHeartbeat?.Invoke(clientId);
-                                await Task.Delay(10000);
+                                await Task.Delay(10000, _cts?.Token ?? CancellationToken.None);
                             }
                         }
                         catch { }
@@ -1262,8 +1293,8 @@ namespace WeShare.Core.Transfer
                             };
                             WebTransferStarted?.Invoke(state);
 
-                            using var fs = new FileStream(file.Path, FileMode.Open, FileAccess.Read, FileShare.Read);
-                            byte[] buf = new byte[65536];
+                            using var fs = new FileStream(file.Path, FileMode.Open, FileAccess.Read, FileShare.Read, 262144, true);
+                            byte[] buf = new byte[262144];
                             int r;
                             long sent = 0;
                             long lastReported = 0;
@@ -1404,18 +1435,26 @@ namespace WeShare.Core.Transfer
 
                         try
                         {
-                            using (var fs = new FileStream(dest, FileMode.Create, FileAccess.Write, FileShare.None, 65536, true))
+                            using (var fs = new FileStream(dest, FileMode.Create, FileAccess.Write, FileShare.None, 262144, true))
                             {
-                                byte[] buf = new byte[65536];
+                                byte[] buf = new byte[262144];
                                 long written = 0;
                                 long lastReportedBytes = 0;
                                 DateTime lastReportTime = DateTime.UtcNow;
 
+                                if (excessBuffer != null && excessBuffer.Length > 0)
+                                {
+                                    int initialWrite = (int)Math.Min((long)excessBuffer.Length, contentLength);
+                                    await fs.WriteAsync(excessBuffer.AsMemory(0, initialWrite));
+                                    written += initialWrite;
+                                    transferState.TransferredBytes = written;
+                                }
+
                                 while (written < contentLength)
                                 {
-                                    int toRead = (int)Math.Min(buf.Length, contentLength - written);
+                                    int toRead = (int)Math.Min((long)buf.Length, contentLength - written);
                                     int n = await stream.ReadAsync(buf.AsMemory(0, toRead));
-                                    if (n == 0) break;
+                                    if (n <= 0) break;
                                     await fs.WriteAsync(buf.AsMemory(0, n));
                                     written += n;
 

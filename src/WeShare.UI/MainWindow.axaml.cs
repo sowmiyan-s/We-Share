@@ -22,8 +22,13 @@ namespace WeShare.UI
 
         protected override void OnClosed(EventArgs e)
         {
-            MainContent.Shutdown();
+            try
+            {
+                MainContent.Shutdown();
+            }
+            catch { }
             base.OnClosed(e);
+            Environment.Exit(0);
         }
     }
 }

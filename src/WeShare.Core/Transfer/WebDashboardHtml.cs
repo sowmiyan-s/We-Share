@@ -1573,12 +1573,129 @@ input[type=""file""] { display: none; }
   border-color: var(--primary);
 }
 
+/* GLOBAL INCOMING BANNER */
+.global-incoming-banner {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-120%);
+  width: calc(100% - 32px);
+  max-width: 500px;
+  background: rgba(17, 20, 34, 0.95);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1.5px solid var(--primary);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), 0 0 24px rgba(79, 70, 229, 0.35);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+.global-incoming-banner.active {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+.gib-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+}
+.gib-icon-pulse {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--primary-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  flex-shrink: 0;
+}
+.gib-icon-pulse svg { width: 18px; height: 18px; }
+.gib-details {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.gib-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gib-sub {
+  font-size: 11px;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gib-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.gib-btn {
+  padding: 7px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.gib-btn-accept {
+  background: var(--primary-gradient);
+  color: #FFFFFF;
+}
+.gib-btn-decline {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-dim);
+}
+.gib-btn-decline:hover {
+  background: rgba(244, 63, 94, 0.2);
+  color: var(--rose);
+}
+.gib-btn-zip {
+  background: rgba(6, 182, 212, 0.2);
+  color: var(--cyan);
+  border: 1px solid rgba(6, 182, 212, 0.4);
+}
 </style>
 </head>
 <body>
 
-
-
+  <!-- GLOBAL INCOMING TRANSFER ALERT BANNER -->
+  <div class=""global-incoming-banner"" id=""globalIncomingBanner"">
+    <div class=""gib-content"">
+      <div class=""gib-icon-pulse"">
+        <svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2.5"" stroke-linecap=""round"" stroke-linejoin=""round""><path d=""M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4""/><polyline points=""7 10 12 15 17 10""/><line x1=""12"" y1=""15"" x2=""12"" y2=""3""/></svg>
+      </div>
+      <div class=""gib-details"">
+        <div class=""gib-title"" id=""gibSenderTitle"">Incoming File Transfer</div>
+        <div class=""gib-sub"" id=""gibInfoText"">Ready to download</div>
+      </div>
+    </div>
+    <div class=""gib-actions"">
+      <a id=""gibZipBtn"" class=""gib-btn gib-btn-zip"" style=""display:none;"" title=""Download as ZIP"">ZIP Archive</a>
+      <button class=""gib-btn gib-btn-decline"" onclick=""declineGlobalIncoming()"">Decline</button>
+      <button class=""gib-btn gib-btn-accept"" id=""gibAcceptBtn"" onclick=""acceptGlobalIncoming()"">Accept</button>
+    </div>
+  </div>
 
 <div class=""app-wrapper"">
 
@@ -3014,7 +3131,7 @@ async function saveMediaToPhotos(fileId, fileName) {
 /* ------------------------------------------------------------- */
 let globalIncomingData = null;
 
-function  {
+function showGlobalIncoming(data, isBatch) {
   globalIncomingData = { data, isBatch };
   const banner = document.getElementById('globalIncomingBanner');
   const title = document.getElementById('gibSenderTitle');

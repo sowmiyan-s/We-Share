@@ -35,6 +35,8 @@ namespace WeShare.UI.Views
         private HotspotService? _hotspotService;
         private WifiConnectorService? _wifiConnector;
         private CaptivePortalService? _captivePortalService;
+        private MdnsService? _mdnsService;
+        private readonly CancellationTokenSource _viewCts = new();
 
         private string _saveDirectory;
         private DeviceModel? _sendTarget;
@@ -267,6 +269,13 @@ namespace WeShare.UI.Views
                 _webDashboardService.IsSessionActiveFilter = null;
                 _webDashboardService.IsSessionActiveFilterEx = null;
                 _webDashboardService.Start();
+
+                try
+                {
+                    _mdnsService = new MdnsService();
+                    _mdnsService.Start("weshare", _webDashboardService.Port);
+                }
+                catch { }
             }
             catch (Exception ex)
             {
@@ -276,18 +285,23 @@ namespace WeShare.UI.Views
             // Broadcast our presence so receivers can see us
             _ = Task.Run(async () =>
             {
-                for (int i = 0; i < 3; i++)
+                try
                 {
-                    await _discoveryService.BroadcastPresenceAsync();
-                    await Task.Delay(1000);
-                }
+                    for (int i = 0; i < 3 && !_viewCts.IsCancellationRequested; i++)
+                    {
+                        await _discoveryService.BroadcastPresenceAsync();
+                        await Task.Delay(1000, _viewCts.Token);
+                    }
 
-                while (true)
-                {
-                    await _discoveryService.BroadcastPresenceAsync();
-                    await Task.Delay(5000);
+                    while (!_viewCts.IsCancellationRequested)
+                    {
+                        await _discoveryService.BroadcastPresenceAsync();
+                        await Task.Delay(5000, _viewCts.Token);
+                    }
                 }
-            });
+                catch (OperationCanceledException) { }
+                catch { }
+            }, _viewCts.Token);
 
             // Mobile layout adjustments
             if (_platformService.GetDeviceType() == "Phone")

@@ -527,22 +527,28 @@ namespace WeShare.UI.Views
 
         public void Shutdown()
         {
+            try { _viewCts.Cancel(); } catch { }
+            try { _mdnsService?.Dispose(); } catch { }
             try { _captivePortalService?.Stop(); } catch { }
-            _discoveryService?.StopListening();
-            _transferManager?.StopListening();
-            _webDashboardService?.Stop();
+            try { _discoveryService?.StopListening(); } catch { }
+            try { _transferManager?.StopListening(); } catch { }
+            try { _webDashboardService?.Stop(); } catch { }
 
             if (_hotspotService != null)
             {
-                try { _hotspotService.StopAsync().GetAwaiter().GetResult(); }
+                try
+                {
+                    var stopTask = _hotspotService.StopAsync();
+                    stopTask.Wait(TimeSpan.FromSeconds(2));
+                }
                 catch { }
             }
 
-            _wifiConnector?.Cleanup();
-            _wifiConnector?.Dispose();
+            try { _wifiConnector?.Cleanup(); } catch { }
+            try { _wifiConnector?.Dispose(); } catch { }
  
-            CleanWebSharedDirectory();
-            CleanTempZipDirectory();
+            try { CleanWebSharedDirectory(); } catch { }
+            try { CleanTempZipDirectory(); } catch { }
         }
 
         // ── Screenshots & Documentation ───────────────────────────────────────
